@@ -66,50 +66,39 @@ jobs:
   build-release-binary:
     name: Build Release Binary
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - name: Install cross-compilation tools
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
 
       - name: Install protoc
         run: |
           sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
+          sudo apt-get install -y protobuf-compiler libssl-dev pkg-config
 
       - name: Cache Cargo dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run tests
+        run: cargo test --all-features --workspace
 
       - name: Build release binary
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release
 
       - name: Package binary
         run: |
           mkdir -p dist
-          cp target/${{ matrix.target }}/release/md-server dist/md-server-${{ matrix.target }}
-          tar -czf md-server-${{ matrix.target }}.tar.gz -C dist md-server-${{ matrix.target }}
+          cp target/release/md-server dist/md-server-linux-amd64
+          tar -czf md-server-linux-amd64.tar.gz -C dist md-server-linux-amd64
 
       - name: Upload release asset
         uses: actions/upload-artifact@v4
         with:
-          name: md-server-${{ matrix.target }}
-          path: md-server-${{ matrix.target }}.tar.gz
+          name: md-server-linux-amd64
+          path: md-server-linux-amd64.tar.gz
 
   create-release:
     name: Create GitHub Release
@@ -124,7 +113,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          pattern: md-server-*
+          pattern: md-server-linux-amd64
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

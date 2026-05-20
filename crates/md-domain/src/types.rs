@@ -85,6 +85,7 @@ pub struct Tick {
 /// ```
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
+#[derive(Default)]
 pub struct Kline {
     #[serde(skip_serializing_if = "serde_helpers::is_empty_string")]
     pub exchange: String,
@@ -172,28 +173,6 @@ impl Default for Tick {
             best_bid_quantity: String::new(),
             best_ask_price: String::new(),
             best_ask_quantity: String::new(),
-            exchange_event_ts: 0,
-            connector_receive_ts: 0,
-        }
-    }
-}
-
-impl Default for Kline {
-    fn default() -> Self {
-        Self {
-            exchange: String::new(),
-            symbol: String::new(),
-            interval: String::new(),
-            open_time: 0,
-            open: String::new(),
-            high: String::new(),
-            low: String::new(),
-            close: String::new(),
-            volume: String::new(),
-            close_time: 0,
-            quote_asset_volume: String::new(),
-            number_of_trades: 0,
-            is_closed: false,
             exchange_event_ts: 0,
             connector_receive_ts: 0,
         }

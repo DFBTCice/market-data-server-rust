@@ -197,7 +197,7 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
                 while let Some(cmd) = ws_write_rx.recv().await {
                     match cmd {
                         WsCommand::Text(msg) => {
-                            if write.send(Message::Text(msg.into())).await.is_err() {
+                            if write.send(Message::Text(msg)).await.is_err() {
                                 warn!("[{}] write failed", write_name);
                                 break;
                             }

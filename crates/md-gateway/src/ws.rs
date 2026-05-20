@@ -133,7 +133,7 @@ async fn handle_gateway_ws(
                                                     status: "success".into(),
                                                     stream: stream.clone(),
                                                 };
-                                                let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+                                                let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
                                             }
                                         }
                                     }
@@ -145,18 +145,18 @@ async fn handle_gateway_ws(
                                                 status: "success".into(),
                                                 stream: stream.clone(),
                                             };
-                                            let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+                                            let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
                                         }
                                     }
                                     _ => {
                                         let err = WsError { error: format!("unknown action: {}", req.action) };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
                                     }
                                 }
                             }
                             Err(e) => {
                                 let err = WsError { error: format!("invalid request: {}", e) };
-                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
                             }
                         }
                     }
@@ -172,7 +172,7 @@ async fn handle_gateway_ws(
                         let kind = broadcast_event.kind();
                         let emit_at = broadcast_event.emit_instant();
                         let json = build_gateway_message(&topic_str, &broadcast_event);
-                        if sender.send(Message::Text(json.into())).await.is_err() {
+                        if sender.send(Message::Text(json)).await.is_err() {
                             break;
                         }
                         metrics.ws_message_sent(kind);
@@ -340,7 +340,7 @@ async fn handle_legacy_ws(
                                             status: "success".into(),
                                             topics: topics.clone(),
                                         };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
                                     }
                                     "unsubscribe" => {
                                         subscriptions.clear();
@@ -350,17 +350,17 @@ async fn handle_legacy_ws(
                                             status: "success".into(),
                                             topics_unsubscribed: "all".into(),
                                         };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
                                     }
                                     _ => {
                                         let err = WsError { error: format!("unknown op: {}", req.op) };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
                                     }
                                 }
                             }
                             Err(e) => {
                                 let err = WsError { error: format!("invalid request: {}", e) };
-                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
                             }
                         }
                     }
@@ -376,7 +376,7 @@ async fn handle_legacy_ws(
                         let kind = broadcast_event.kind();
                         let emit_at = broadcast_event.emit_instant();
                         let json = build_legacy_message(&topic_str, &broadcast_event);
-                        if sender.send(Message::Text(json.into())).await.is_err() {
+                        if sender.send(Message::Text(json)).await.is_err() {
                             break;
                         }
                         metrics.ws_message_sent(kind);

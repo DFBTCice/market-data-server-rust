@@ -5,7 +5,6 @@
 /// - int64: `0` 跳过
 /// - bool: `false` 跳过
 /// - slice: nil 或空 slice 跳过
-
 pub fn is_empty_string(s: &str) -> bool {
     s.is_empty()
 }
@@ -18,6 +17,6 @@ pub fn is_false(b: &bool) -> bool {
     !*b
 }
 
-pub fn is_empty_vec<T>(v: &Vec<T>) -> bool {
+pub fn is_empty_vec<T>(v: &[T]) -> bool {
     v.is_empty()
 }

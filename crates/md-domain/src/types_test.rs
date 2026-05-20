@@ -4,6 +4,7 @@ mod tick_json_compat {
     use serde_json::Value;
 
     /// 比较两个 JSON 字符串，忽略字段顺序
+    #[allow(dead_code)]
     fn assert_json_eq(rust_json: &str, expected_json: &str) {
         let rust_val: Value = serde_json::from_str(rust_json).unwrap();
         let expected_val: Value = serde_json::from_str(expected_json).unwrap();
@@ -126,6 +127,7 @@ mod kline_json_compat {
     use crate::types::Kline;
     use serde_json::Value;
 
+    #[allow(dead_code)]
     fn assert_json_eq(rust_json: &str, expected_json: &str) {
         let rust_val: Value = serde_json::from_str(rust_json).unwrap();
         let expected_val: Value = serde_json::from_str(expected_json).unwrap();
