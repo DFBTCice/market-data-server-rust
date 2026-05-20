@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package marketdata;
+
+option go_package = "market-data-module/pkg/marketdata";
+
+// 服务定义
+service MarketDataService {
+  // 订阅实时 Tick
+  rpc SubscribeTicks (SubscriptionRequest) returns (stream Tick);
+  // 订阅实时 K 线
+  rpc SubscribeKlines (SubscriptionRequest) returns (stream Kline);
+  // 获取最新 Tick
+  rpc GetLatestTick (SingleTickDataRequest) returns (Tick);
+  // 获取最新 K 线
+  rpc GetLatestKline (SingleKlineDataRequest) returns (Kline);
+  // 获取历史 K 线 (Placeholder for future implementation)
+  rpc GetHistoricalKlines (HistoricalKlinesRequest) returns (HistoricalKlinesResponse);
+}
+
+// 通用订阅请求
+message SubscriptionRequest {
+  string exchange = 1; // e.g., "binance"
+  repeated string symbols = 2; // e.g., ["BTCUSDT", "ETHUSDT"]
+  string kline_interval = 3; // e.g., "1m", "5m", "1h". Required for SubscribeKlines and GetLatestKline
+}
+
+// 获取最新 Tick 数据请求
+message SingleTickDataRequest {
+  string exchange = 1;
+  string symbol = 2;
+}
+
+// 获取最新 K 线数据请求
+message SingleKlineDataRequest {
+  string exchange = 1;
+  string symbol = 2;
+  string interval = 3; // 获取 K 线需要周期 - Required
+}
+
+// Tick 数据结构
+message Tick {
+  string exchange = 1;
+  string symbol = 2;
+  int64 timestamp = 3;        // 交易所原始时间戳 (如果主要事件时间是这个)
+  string price = 4;
+  string quantity = 5;
+  int64 trade_id = 6;
+  bool is_buyer_maker = 7;
+  string best_bid_price = 8;
+  string best_bid_quantity = 9;
+  string best_ask_price = 10;
+  string best_ask_quantity = 11;
+  int64 exchange_event_ts = 12;     // 交易所事件 Unix 毫秒时间戳 <<< 新增 (可能是 trade time T)
+  int64 connector_receive_ts = 13;  // 连接器接收 Unix 毫秒时间戳 <<< 新增
+}
+
+// K 线数据结构
+message Kline {
+  string exchange = 1;
+  string symbol = 2;
+  string interval = 3;
+  int64 open_time = 4;          // K 线开始时间 (Unix Millisecond)
+  string open = 5;
+  string high = 6;
+  string low = 7;
+  string close = 8;
+  string volume = 9;
+  int64 close_time = 10;
+  string quote_asset_volume = 11;
+  int64 number_of_trades = 12;
+  bool is_closed = 13;
+  int64 exchange_event_ts = 14;     // K线开盘/事件 Unix 毫秒时间戳 <<< 新增 (通常等于 open_time)
+  int64 connector_receive_ts = 15;  // 连接器接收 Unix 毫秒时间戳 <<< 新增
+}
+
+// 历史 K 线请求
+message HistoricalKlinesRequest {
+  string exchange = 1;
+  string symbol = 2;
+  string interval = 3;
+  int64 start_time = 4; // Optional, Unix Millisecond
+  int64 end_time = 5;   // Optional, Unix Millisecond
+  int32 limit = 6;      // Optional, max number of klines (default e.g. 500, max e.g. 1000)
+}
+
+// 历史 K 线响应
+message HistoricalKlinesResponse {
+  repeated Kline klines = 1;
+} 

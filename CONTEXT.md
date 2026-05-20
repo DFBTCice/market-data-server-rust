@@ -1,0 +1,24 @@
+# 领域术语表
+
+- **Exchange（交易所）**: Binance、OKX 等提供市场数据的平台
+- **Connector（连接器）**: 与单个交易所的 WebSocket 连接管理器
+- **Adapter（适配器）**: 实现 `ExchangeAdapter` trait 的交易所特定逻辑（消息解析、stream 映射）
+- **BaseConnector**: 封装公共 WebSocket 管理逻辑的基类（连接、重连、心跳、订阅同步）
+- **Tick**: 逐笔成交数据（aggTrade），包含价格、数量、买卖方向
+- **Kline（K线）**: 聚合的 OHLCV 数据，按时间周期（1m, 5m, 1h 等）
+- **Topic（主题）**: 数据订阅标识，格式为 `tick.<exchange>.<symbol>` 或 `kline.<interval>.<exchange>.<symbol>`
+- **SubscriptionTarget（订阅目标）**: 交易所 + 数据类型 + 交易对的组合
+- **DataType（数据类型）**: TICK 或 KLINE，用于区分订阅的数据种类
+- **PubSub（发布订阅）**: 消息分发机制，支持多消费者订阅同一 topic
+- **Cache（缓存）**: 最新 Tick/Kline 的快照存储
+- **Processor（处理器）**: 中央数据处理模块，组合 Cache + PubSub + Metrics
+- **API Gateway**: HTTP/WebSocket 入口层，对外暴露 REST 和 WS 接口
+- **Hot Reload（热重载）**: 通过 SIGHUP 信号重新加载配置，不停机更新连接器
+- **Seam（接缝）**: 行为可以被替换的位置（如 Connector trait）
+- **Depth（深度）**: 接口背后的杠杆率——小接口承载大行为
+- **Snapshot（快照）**: 从 Go 版抓取的 JSON 输出样本，用于字节级兼容性回归测试
+- **omitempty**: Go JSON 序列化标签，零值字段不输出——Rust 侧必须用 `#[serde(skip_serializing_if)]` 对齐
+- **PendingSubOps（待处理订阅操作）**: 连接断开期间缓存的订阅/取消订阅请求，重连后补发
+- **Dual Connection（双连接）**: OKX 特有，public 和 business 两个独立 WebSocket 连接
+- **WS Gateway format**: API Gateway WebSocket 推送格式，包含 `type`、`topic`、`data` 三个字段
+- **WS Legacy format**: 旧版 WebSocket 推送格式，仅包含 `topic`、`data`（无 `type`）-- 标记为 deprecated

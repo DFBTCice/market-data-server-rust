@@ -1,0 +1,15 @@
+[package]
+name = "md-grpc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+md-domain = { path = "../md-domain" }
+md-proto = { path = "../md-proto" }
+md-processor = { path = "../md-processor" }
+md-connector = { path = "../md-connector" }
+tokio = { version = "1", features = ["sync", "rt", "macros"] }
+tokio-stream = "0.1"
+tonic = "0.12"
+async-trait = "0.1"
+tracing = "0.1"

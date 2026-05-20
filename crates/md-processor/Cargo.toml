@@ -1,0 +1,11 @@
+[package]
+name = "md-processor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+md-domain = { path = "../md-domain" }
+tokio = { version = "1", features = ["sync", "time", "rt", "macros"] }
+dashmap = "6"
+uuid = { version = "1", features = ["v4"] }
+tracing = "0.1"

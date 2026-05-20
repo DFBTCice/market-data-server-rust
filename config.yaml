@@ -1,0 +1,64 @@
+# 日志级别: "debug", "info", "warn", "error"
+log_level: "info"
+
+# gRPC 服务器配置
+grpc_server:
+  enabled: true
+  listen_address: ":50051"
+
+# 数据处理器配置
+processor:
+  tick_channel_buffer: 1000
+  kline_channel_buffer: 1000
+  broadcast_capacity: 4096
+
+# 连接器配置
+connectors:
+  binance:
+    enabled: true
+    # U本位合约 Market 类
+    stream_base_url: "wss://fstream.binance.com/market/stream"
+    rest_base_url: "https://fapi.binance.com"
+
+    # 只订阅 BTC 和 ETH 合约
+    subscribe_ticks:
+      - "BTCUSDT"
+      - "ETHUSDT"
+
+    subscribe_klines:
+      "5m":
+        - "BTCUSDT"
+        - "ETHUSDT"
+
+    reconnect_delay: "5s"
+    ping_interval: "3m"
+
+  okx:
+    enabled: true
+    # OKX 公共频道
+    stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public"
+    stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business"
+    rest_base_url: "https://www.okx.com"
+
+    # 只订阅 BTC 和 ETH 永续合约
+    subscribe_ticks:
+      - "BTC-USDT-SWAP"
+      - "ETH-USDT-SWAP"
+
+    subscribe_klines:
+      "5m":
+        - "BTC-USDT-SWAP"
+        - "ETH-USDT-SWAP"
+
+    reconnect_delay: "10s"
+    ping_interval: "25s"
+
+# API 网关配置
+api_gateway:
+  enabled: true
+  listen_address: ":8081"
+  market_data_grpc_target: "localhost:50051"
+  admin_grpc_target: "localhost:50052"
+  ws_ping_period: "30s"
+  ws_write_wait: "10s"
+  ws_max_message_size: 1024

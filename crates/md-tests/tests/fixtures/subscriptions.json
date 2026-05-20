@@ -1,0 +1,145 @@
+[
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "XRPUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "DOGEUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 1,
+        "symbol": "BTCUSDT"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "BTCUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "ETHUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "SOLUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "POLUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "TRUMPUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "ADAUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "SUIUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "LTCUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 1,
+        "symbol": "ETHUSDT"
+    },
+    {
+        "exchange": "binance",
+        "data_type": 2,
+        "symbol": "BNBUSDT",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 2,
+        "symbol": "BTC-USDT-SWAP",
+        "kline_interval": "1m"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 2,
+        "symbol": "ETH-USDT-SWAP",
+        "kline_interval": "5m"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "ETH-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "BNB-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "SOL-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "XRP-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "DOGE-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "SUI-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "ETH-USD-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "POL-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "BTC-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "ADA-USDT-SWAP"
+    },
+    {
+        "exchange": "okx",
+        "data_type": 1,
+        "symbol": "TRUMP-USDT-SWAP"
+    }
+]

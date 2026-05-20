@@ -1,0 +1,10 @@
+{
+    "exchange": "okx",
+    "symbol": "BTC-USDT-SWAP",
+    "timestamp": 1777966262338,
+    "price": "80992",
+    "quantity": "0.01",
+    "trade_id": 2573412162,
+    "exchange_event_ts": 1777966262338,
+    "connector_receive_ts": 1777966262232
+}

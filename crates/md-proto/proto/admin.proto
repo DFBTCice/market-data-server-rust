@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package admin;
+
+// 使用你的 Go 模块路径
+option go_package = "market-data-module/pkg/admin";
+
+// --- Enums ---
+
+enum DataType {
+  UNKNOWN = 0;
+  TICK = 1;
+  KLINE = 2;
+}
+
+// --- Messages ---
+
+// 用于添加或删除订阅的请求
+message SubscriptionChangeRequest {
+  string exchange = 1;        // 目标交易所 (e.g., "binance", "okx")
+  DataType data_type = 2;   // 数据类型: TICK 或 KLINE
+  repeated string symbols = 3;  // 要操作的交易对列表 (e.g., ["BTCUSDT", "ETH-USDT"])
+  string kline_interval = 4; // 如果 data_type 是 KLINE，则必须提供 (e.g., "1m", "5m", "1H")
+}
+
+// 添加或删除订阅的响应
+message SubscriptionChangeResponse {
+  bool success = 1;
+  string message = 2; // 成功或失败信息
+}
+
+// 获取当前动态订阅的请求
+message GetSubscriptionsRequest {
+   string exchange = 1; // 可选，如果提供，则只返回指定交易所的订阅
+}
+
+// 单个订阅的信息
+ message SubscriptionInfo {
+    string exchange = 1;
+    DataType data_type = 2;
+    string symbol = 3;       // e.g., "BTCUSDT", "ETH-USDT"
+    string kline_interval = 4; // KLINE 的周期，TICK 则为空
+ }
+
+// 获取当前动态订阅的响应
+message GetSubscriptionsResponse {
+    repeated SubscriptionInfo subscriptions = 1;
+}
+
+// --- Service ---
+
+// Admin 服务定义
+service AdminService {
+  // 动态添加订阅
+  // (注意：会尝试添加到已运行的连接器，如果连接器不支持或交易对无效，可能失败)
+  rpc AddSubscription (SubscriptionChangeRequest) returns (SubscriptionChangeResponse);
+
+  // 动态移除订阅
+  rpc RemoveSubscription (SubscriptionChangeRequest) returns (SubscriptionChangeResponse);
+
+  // 获取当前所有动态管理的订阅列表
+  rpc GetSubscriptions (GetSubscriptionsRequest) returns (GetSubscriptionsResponse);
+} 

@@ -1,0 +1,9 @@
+{
+    "exchange": "binance",
+    "symbol": "BTCUSDT",
+    "timestamp": 1777966262409,
+    "price": "80987.30",
+    "quantity": "0.182",
+    "exchange_event_ts": 1777966262255,
+    "connector_receive_ts": 1777966262312
+}

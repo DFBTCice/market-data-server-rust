@@ -1,0 +1,16 @@
+{
+    "exchange": "binance",
+    "symbol": "BTCUSDT",
+    "interval": "1m",
+    "open_time": 1777966260000,
+    "open": "80987.40",
+    "high": "80987.40",
+    "low": "80987.30",
+    "close": "80987.30",
+    "volume": "0.630",
+    "close_time": 1777966319999,
+    "quote_asset_volume": "51022.00760",
+    "number_of_trades": 34,
+    "exchange_event_ts": 1777966260000,
+    "connector_receive_ts": 1777966262471
+}

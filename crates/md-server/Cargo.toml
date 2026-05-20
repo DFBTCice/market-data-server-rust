@@ -1,0 +1,24 @@
+[package]
+name = "md-server"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "md-server"
+path = "src/main.rs"
+
+[dependencies]
+md-domain = { path = "../md-domain" }
+md-config = { path = "../md-config" }
+md-connector = { path = "../md-connector" }
+md-proto = { path = "../md-proto" }
+md-processor = { path = "../md-processor" }
+md-grpc = { path = "../md-grpc" }
+md-gateway = { path = "../md-gateway" }
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+tonic = "0.12"
+axum = "0.7"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde_json = "1"

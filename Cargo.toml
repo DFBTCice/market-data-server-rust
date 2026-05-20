@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/md-domain",
+    "crates/md-proto",
+    "crates/md-config",
+    "crates/md-connector",
+    "crates/md-processor",
+    "crates/md-grpc",
+    "crates/md-gateway",
+    "crates/md-server",
+    "crates/md-tests",
+]

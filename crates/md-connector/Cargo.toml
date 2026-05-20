@@ -1,0 +1,19 @@
+[package]
+name = "md-connector"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+md-domain = { path = "../md-domain" }
+md-config = { path = "../md-config" }
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.24", features = ["native-tls"] }
+futures-util = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+async-trait = "0.1"
+url = "2"
+socket2 = "0.5"
+
+[dev-dependencies]
