@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  md-server:
+    image: ghcr.io/dfbtcice/market-data-server-rust:latest
+    container_name: md-server
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+      - "50051:50051"
+    volumes:
+      - ./config.yaml:/etc/md-server/config.yaml:ro
+      - md-logs:/var/log/md-server
+    environment:
+      - RUST_LOG=warn
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 512M
+        reservations:
+          cpus: "1"
+          memory: 256M
+    networks:
+      - md-network
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: md-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    networks:
+      - md-network
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: md-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./deploy/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - md-network
+
+volumes:
+  md-logs:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  md-network:
+    driver: bridge
