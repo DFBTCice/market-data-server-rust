@@ -106,8 +106,8 @@ pub fn load_config(path: &str) -> Result<Config, ConfigError> {
 
 /// 从 YAML 字符串加载配置（带默认值填充）
 pub fn load_config_from_str(yaml: &str) -> Result<Config, ConfigError> {
-    let raw: serde_yaml::Value = serde_yaml::from_str(yaml)
-        .map_err(|e| ConfigError::ParseError(e.to_string()))?;
+    let raw: serde_yaml::Value =
+        serde_yaml::from_str(yaml).map_err(|e| ConfigError::ParseError(e.to_string()))?;
 
     let with_defaults = merge_defaults(raw);
 
@@ -210,8 +210,16 @@ fn merge_defaults(raw: serde_yaml::Value) -> serde_yaml::Value {
     let gw = ensure_mapping(&mut map, "api_gateway");
     set_default(gw, "enabled", Value::Bool(true));
     set_default(gw, "listen_address", Value::String(":8081".into()));
-    set_default(gw, "market_data_grpc_target", Value::String("localhost:50051".into()));
-    set_default(gw, "admin_grpc_target", Value::String("localhost:50052".into()));
+    set_default(
+        gw,
+        "market_data_grpc_target",
+        Value::String("localhost:50051".into()),
+    );
+    set_default(
+        gw,
+        "admin_grpc_target",
+        Value::String("localhost:50052".into()),
+    );
     set_default(gw, "ws_ping_period", Value::String("30s".into()));
     set_default(gw, "ws_write_wait", Value::String("10s".into()));
     set_default(gw, "ws_max_message_size", Value::Number(1024.into()));
@@ -231,9 +239,9 @@ fn ensure_mapping<'a>(
     key: &str,
 ) -> &'a mut serde_yaml::Mapping {
     let k = serde_yaml::Value::String(key.to_string());
-    let entry = parent.entry(k).or_insert_with(|| {
-        serde_yaml::Value::Mapping(serde_yaml::Mapping::new())
-    });
+    let entry = parent
+        .entry(k)
+        .or_insert_with(|| serde_yaml::Value::Mapping(serde_yaml::Mapping::new()));
     if !matches!(entry, serde_yaml::Value::Mapping(_)) {
         *entry = serde_yaml::Value::Mapping(serde_yaml::Mapping::new());
     }
@@ -262,7 +270,13 @@ fn validate(cfg: &Config) -> Result<(), ConfigError> {
                 "okx 连接器已启用但未配置 stream_base_url_public".into(),
             ));
         }
-        if cfg.connectors.okx.stream_base_url_business.trim().is_empty() {
+        if cfg
+            .connectors
+            .okx
+            .stream_base_url_business
+            .trim()
+            .is_empty()
+        {
             return Err(ConfigError::ValidationError(
                 "okx 连接器已启用但未配置 stream_base_url_business".into(),
             ));
@@ -287,7 +301,10 @@ mod tests {
         assert_eq!(cfg.grpc_server.listen_address, ":50051");
         assert!(cfg.grpc_server.enabled);
         assert!(cfg.connectors.binance.enabled);
-        assert_eq!(cfg.connectors.binance.stream_base_url, "wss://fstream.binance.com/market/stream");
+        assert_eq!(
+            cfg.connectors.binance.stream_base_url,
+            "wss://fstream.binance.com/market/stream"
+        );
         assert_eq!(cfg.api_gateway.listen_address, ":8081");
         assert_eq!(cfg.admin_server.listen_address, ":50052");
     }

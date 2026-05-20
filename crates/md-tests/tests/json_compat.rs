@@ -6,8 +6,7 @@
 /// 前置条件：
 ///   1. 运行 scripts/capture-snapshots.sh 抓取 Go 版快照
 ///   2. 快照文件在 tests/compatibility/fixtures/ 下
-
-use md_domain::types::{Tick, Kline};
+use md_domain::types::{Kline, Tick};
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
@@ -54,7 +53,9 @@ fn tick_snapshot_binance_btcusdt() {
     let go_json = match load_fixture("tick_binance_btcusdt.json") {
         Some(j) => j,
         None => {
-            eprintln!("SKIP: tick_binance_btcusdt.json not found. Run scripts/capture-snapshots.sh");
+            eprintln!(
+                "SKIP: tick_binance_btcusdt.json not found. Run scripts/capture-snapshots.sh"
+            );
             return;
         }
     };
@@ -95,9 +96,18 @@ fn ws_gateway_message_format() {
 
     // 验证 Gateway WS 格式：{"type": "tick", "topic": "...", "data": {...}}
     let val: Value = serde_json::from_str(&go_json).unwrap();
-    assert!(val.get("type").is_some(), "Gateway WS must have 'type' field");
-    assert!(val.get("topic").is_some(), "Gateway WS must have 'topic' field");
-    assert!(val.get("data").is_some(), "Gateway WS must have 'data' field");
+    assert!(
+        val.get("type").is_some(),
+        "Gateway WS must have 'type' field"
+    );
+    assert!(
+        val.get("topic").is_some(),
+        "Gateway WS must have 'topic' field"
+    );
+    assert!(
+        val.get("data").is_some(),
+        "Gateway WS must have 'data' field"
+    );
 
     // 验证 data 内容可以反序列化为 Tick
     let data = val.get("data").unwrap().to_string();
@@ -116,6 +126,12 @@ fn error_response_format() {
 
     // 验证错误格式：{"error": "message"}
     let val: Value = serde_json::from_str(&go_json).unwrap();
-    assert!(val.get("error").is_some(), "Error response must have 'error' field");
-    assert!(val.get("error").unwrap().is_string(), "'error' must be a string");
+    assert!(
+        val.get("error").is_some(),
+        "Error response must have 'error' field"
+    );
+    assert!(
+        val.get("error").unwrap().is_string(),
+        "'error' must be a string"
+    );
 }

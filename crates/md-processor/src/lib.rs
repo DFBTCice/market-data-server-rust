@@ -69,7 +69,11 @@ impl Histogram {
     pub fn snapshot(&self) -> HistogramSnapshot {
         HistogramSnapshot {
             boundaries: self.boundaries.clone(),
-            buckets: self.buckets.iter().map(|b| b.load(Ordering::Relaxed)).collect(),
+            buckets: self
+                .buckets
+                .iter()
+                .map(|b| b.load(Ordering::Relaxed))
+                .collect(),
             sum: self.sum.load(Ordering::Relaxed),
             count: self.count.load(Ordering::Relaxed),
         }
@@ -260,8 +264,12 @@ impl ProcessorMetrics {
     /// 记录 broadcast lagged
     pub fn record_broadcast_lagged(&self, kind: &str) {
         match kind {
-            "tick" => { self.broadcast_lagged_tick.fetch_add(1, Ordering::Relaxed); }
-            "kline" => { self.broadcast_lagged_kline.fetch_add(1, Ordering::Relaxed); }
+            "tick" => {
+                self.broadcast_lagged_tick.fetch_add(1, Ordering::Relaxed);
+            }
+            "kline" => {
+                self.broadcast_lagged_kline.fetch_add(1, Ordering::Relaxed);
+            }
             _ => {}
         }
     }
@@ -274,9 +282,15 @@ impl ProcessorMetrics {
     /// WS 连接离开（包括正常关闭 + 踢出）
     pub fn ws_client_disconnected(&self) {
         // 防止下溢（如果只调一次 disconnected 没对应 connected）
-        let _ = self.ws_active_clients.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
-            if v == 0 { None } else { Some(v - 1) }
-        });
+        let _ = self
+            .ws_active_clients
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
+                if v == 0 {
+                    None
+                } else {
+                    Some(v - 1)
+                }
+            });
     }
 
     /// 因 broadcast 持续 lagged 主动踢出客户端
@@ -287,8 +301,12 @@ impl ProcessorMetrics {
     /// 网关成功推送一条消息
     pub fn ws_message_sent(&self, kind: &str) {
         match kind {
-            "tick" => { self.ws_messages_sent_tick.fetch_add(1, Ordering::Relaxed); }
-            "kline" => { self.ws_messages_sent_kline.fetch_add(1, Ordering::Relaxed); }
+            "tick" => {
+                self.ws_messages_sent_tick.fetch_add(1, Ordering::Relaxed);
+            }
+            "kline" => {
+                self.ws_messages_sent_kline.fetch_add(1, Ordering::Relaxed);
+            }
             _ => {}
         }
     }
@@ -399,7 +417,11 @@ impl Processor {
         Self::new_with_broadcast_capacity(tick_buffer, kline_buffer, 4096)
     }
 
-    pub fn new_with_broadcast_capacity(tick_buffer: usize, kline_buffer: usize, broadcast_capacity: usize) -> Self {
+    pub fn new_with_broadcast_capacity(
+        tick_buffer: usize,
+        kline_buffer: usize,
+        broadcast_capacity: usize,
+    ) -> Self {
         let (tick_tx, tick_rx) = mpsc::channel(tick_buffer);
         let (kline_tx, kline_rx) = mpsc::channel(kline_buffer);
         let (shutdown_tx, _) = broadcast::channel(1);
@@ -533,7 +555,9 @@ impl Processor {
     }
 
     pub fn handle_kline(&self, kline: Kline) {
-        self.metrics.klines_processed.fetch_add(1, Ordering::Relaxed);
+        self.metrics
+            .klines_processed
+            .fetch_add(1, Ordering::Relaxed);
 
         // 记录入库延迟（按交易所）
         if kline.connector_receive_ts > 0 && kline.exchange_event_ts > 0 {
@@ -574,7 +598,6 @@ impl Processor {
 mod tests {
     use super::*;
     use std::time::Duration;
-
 
     fn make_tick(exchange: &str, symbol: &str, price: &str) -> Tick {
         Tick {
@@ -660,9 +683,7 @@ mod tests {
     async fn cache_returns_none_for_missing() {
         let proc = Processor::new(100, 100);
         assert!(proc.get_latest_tick("binance", "NONEXIST").is_none());
-        assert!(proc
-            .get_latest_kline("binance", "NONEXIST", "1m")
-            .is_none());
+        assert!(proc.get_latest_kline("binance", "NONEXIST", "1m").is_none());
     }
 
     #[tokio::test]
@@ -795,9 +816,9 @@ mod tests {
         let hist = Histogram::new(BUCKETS_MS);
 
         // 记录几个延迟值
-        hist.observe(3);    // 落入 le=5 桶
-        hist.observe(50);   // 落入 le=50 桶
-        hist.observe(200);  // 落入 le=250 桶
+        hist.observe(3); // 落入 le=5 桶
+        hist.observe(50); // 落入 le=50 桶
+        hist.observe(200); // 落入 le=250 桶
         hist.observe(8000); // 超出所有桶，落入 +Inf
 
         let snap = hist.snapshot();
@@ -812,7 +833,7 @@ mod tests {
         assert_eq!(snap.buckets[4], 1); // le=50: 50
         assert_eq!(snap.buckets[5], 0); // le=100: 无
         assert_eq!(snap.buckets[6], 1); // le=250: 200
-        // +Inf 桶
+                                        // +Inf 桶
         assert_eq!(snap.buckets[BUCKETS_MS.len()], 1); // 8000
     }
 

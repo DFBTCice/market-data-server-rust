@@ -35,10 +35,9 @@ impl AdminService for AdminServiceImpl {
             return Err(Status::invalid_argument("at least one symbol is required"));
         }
 
-        let data_type = data_type_from_proto(
-            DataType::try_from(req.data_type).unwrap_or(DataType::Unknown),
-        )
-        .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
+        let data_type =
+            data_type_from_proto(DataType::try_from(req.data_type).unwrap_or(DataType::Unknown))
+                .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
 
         let connectors = self.connectors.read().await;
         let exchange_key = req.exchange.to_lowercase();
@@ -48,11 +47,10 @@ impl AdminService for AdminServiceImpl {
         } else {
             exchange_key.clone()
         };
-        let connector = connectors.get(&connector_key)
+        let connector = connectors
+            .get(&connector_key)
             .or_else(|| connectors.get(&exchange_key))
-            .ok_or_else(|| {
-                Status::not_found(format!("connector not found: {}", req.exchange))
-            })?;
+            .ok_or_else(|| Status::not_found(format!("connector not found: {}", req.exchange)))?;
 
         let targets: Vec<md_connector::SubscriptionTarget> = req
             .symbols
@@ -71,7 +69,11 @@ impl AdminService for AdminServiceImpl {
 
         match connector.add_subscriptions(targets).await {
             Ok(()) => {
-                info!("Added {} subscriptions for {}", req.symbols.len(), exchange_key);
+                info!(
+                    "Added {} subscriptions for {}",
+                    req.symbols.len(),
+                    exchange_key
+                );
                 Ok(Response::new(SubscriptionChangeResponse {
                     success: true,
                     message: format!(
@@ -107,10 +109,9 @@ impl AdminService for AdminServiceImpl {
             return Err(Status::invalid_argument("at least one symbol is required"));
         }
 
-        let data_type = data_type_from_proto(
-            DataType::try_from(req.data_type).unwrap_or(DataType::Unknown),
-        )
-        .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
+        let data_type =
+            data_type_from_proto(DataType::try_from(req.data_type).unwrap_or(DataType::Unknown))
+                .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
 
         let connectors = self.connectors.read().await;
         let exchange_key = req.exchange.to_lowercase();
@@ -119,11 +120,10 @@ impl AdminService for AdminServiceImpl {
         } else {
             exchange_key.clone()
         };
-        let connector = connectors.get(&connector_key)
+        let connector = connectors
+            .get(&connector_key)
             .or_else(|| connectors.get(&exchange_key))
-            .ok_or_else(|| {
-                Status::not_found(format!("connector not found: {}", req.exchange))
-            })?;
+            .ok_or_else(|| Status::not_found(format!("connector not found: {}", req.exchange)))?;
 
         let targets: Vec<md_connector::SubscriptionTarget> = req
             .symbols
@@ -142,7 +142,11 @@ impl AdminService for AdminServiceImpl {
 
         match connector.remove_subscriptions(targets).await {
             Ok(()) => {
-                info!("Removed {} subscriptions for {}", req.symbols.len(), req.exchange);
+                info!(
+                    "Removed {} subscriptions for {}",
+                    req.symbols.len(),
+                    req.exchange
+                );
                 Ok(Response::new(SubscriptionChangeResponse {
                     success: true,
                     message: format!(
@@ -291,10 +295,7 @@ mod tests {
             kline_interval: "".into(),
         });
         let result = svc.add_subscription(req).await;
-        assert_eq!(
-            result.unwrap_err().code(),
-            tonic::Code::InvalidArgument
-        );
+        assert_eq!(result.unwrap_err().code(), tonic::Code::InvalidArgument);
     }
 
     #[tokio::test]

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use md_domain::topic::normalize_symbol;
-use md_domain::types::{Tick, Kline};
+use md_domain::types::{Kline, Tick};
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -99,8 +99,8 @@ struct KlineWrapper {
 
 /// 解析 Binance aggTrade 消息为 Tick
 pub fn parse_aggtrade(json: &serde_json::Value) -> Result<Tick, ParseError> {
-    let data: AggTradeData = serde_json::from_value(json.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let data: AggTradeData =
+        serde_json::from_value(json.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     let now_ms = chrono_now_ms();
 
@@ -123,8 +123,8 @@ pub fn parse_aggtrade(json: &serde_json::Value) -> Result<Tick, ParseError> {
 
 /// 解析 Binance kline 消息为 Kline
 pub fn parse_kline(json: &serde_json::Value) -> Result<Kline, ParseError> {
-    let wrapper: KlineWrapper = serde_json::from_value(json.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let wrapper: KlineWrapper =
+        serde_json::from_value(json.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     let now_ms = chrono_now_ms();
     let k = wrapper.kline;

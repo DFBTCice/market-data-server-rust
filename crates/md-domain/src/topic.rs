@@ -24,8 +24,15 @@ impl std::error::Error for TopicError {}
 /// - `kline.<interval>.<exchange>.<symbol>`
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Topic {
-    Tick { exchange: String, symbol: String },
-    Kline { interval: String, exchange: String, symbol: String },
+    Tick {
+        exchange: String,
+        symbol: String,
+    },
+    Kline {
+        interval: String,
+        exchange: String,
+        symbol: String,
+    },
 }
 
 impl Topic {
@@ -66,8 +73,17 @@ impl Topic {
             Topic::Tick { exchange, symbol } => {
                 format!("tick.{}.{}", exchange, normalize_symbol(symbol))
             }
-            Topic::Kline { interval, exchange, symbol } => {
-                format!("kline.{}.{}.{}", interval, exchange, normalize_symbol(symbol))
+            Topic::Kline {
+                interval,
+                exchange,
+                symbol,
+            } => {
+                format!(
+                    "kline.{}.{}.{}",
+                    interval,
+                    exchange,
+                    normalize_symbol(symbol)
+                )
             }
         }
     }
@@ -92,7 +108,12 @@ pub fn tick_topic(exchange: &str, symbol: &str) -> String {
 
 /// 构建 kline topic 字符串
 pub fn kline_topic(exchange: &str, symbol: &str, interval: &str) -> String {
-    format!("kline.{}.{}.{}", interval, exchange, normalize_symbol(symbol))
+    format!(
+        "kline.{}.{}.{}",
+        interval,
+        exchange,
+        normalize_symbol(symbol)
+    )
 }
 
 /// Tick cache key -- 对标 Go 版 `getTickCacheKey`
@@ -102,14 +123,21 @@ pub fn tick_cache_key(exchange: &str, symbol: &str) -> String {
 
 /// Kline cache key -- 对标 Go 版 `getKlineCacheKey`
 pub fn kline_cache_key(exchange: &str, symbol: &str, interval: &str) -> String {
-    format!("{}:{}:{}", exchange.to_uppercase(), symbol.to_uppercase(), interval)
+    format!(
+        "{}:{}:{}",
+        exchange.to_uppercase(),
+        symbol.to_uppercase(),
+        interval
+    )
 }
 
 /// 解析 topic 字符串并返回 exchange + symbol（用于 REST handler 从 topic 提取信息）
 pub fn extract_exchange_symbol(topic_str: &str) -> Option<(String, String)> {
     match Topic::parse(topic_str) {
         Ok(Topic::Tick { exchange, symbol }) => Some((exchange, symbol)),
-        Ok(Topic::Kline { exchange, symbol, .. }) => Some((exchange, symbol)),
+        Ok(Topic::Kline {
+            exchange, symbol, ..
+        }) => Some((exchange, symbol)),
         Err(_) => None,
     }
 }
@@ -123,20 +151,26 @@ mod tests {
     #[test]
     fn parse_tick_topic() {
         let t = Topic::parse("tick.binance.BTCUSDT").unwrap();
-        assert_eq!(t, Topic::Tick {
-            exchange: "binance".into(),
-            symbol: "BTCUSDT".into(),
-        });
+        assert_eq!(
+            t,
+            Topic::Tick {
+                exchange: "binance".into(),
+                symbol: "BTCUSDT".into(),
+            }
+        );
     }
 
     #[test]
     fn parse_kline_topic() {
         let t = Topic::parse("kline.1m.binance.BTCUSDT").unwrap();
-        assert_eq!(t, Topic::Kline {
-            interval: "1m".into(),
-            exchange: "binance".into(),
-            symbol: "BTCUSDT".into(),
-        });
+        assert_eq!(
+            t,
+            Topic::Kline {
+                interval: "1m".into(),
+                exchange: "binance".into(),
+                symbol: "BTCUSDT".into(),
+            }
+        );
     }
 
     #[test]
@@ -157,7 +191,7 @@ mod tests {
     fn format_tick() {
         let t = Topic::Tick {
             exchange: "binance".into(),
-            symbol: "btcusdt".into(),  // 小写 -> 格式化时归一化为大写
+            symbol: "btcusdt".into(), // 小写 -> 格式化时归一化为大写
         };
         assert_eq!(t.format(), "tick.binance.BTCUSDT");
     }
@@ -199,8 +233,14 @@ mod tests {
 
     #[test]
     fn kline_topic_builder() {
-        assert_eq!(kline_topic("binance", "BTCUSDT", "1m"), "kline.1m.binance.BTCUSDT");
-        assert_eq!(kline_topic("okx", "ETH-USDT-SWAP", "5m"), "kline.5m.okx.ETH-USDT-SWAP");
+        assert_eq!(
+            kline_topic("binance", "BTCUSDT", "1m"),
+            "kline.1m.binance.BTCUSDT"
+        );
+        assert_eq!(
+            kline_topic("okx", "ETH-USDT-SWAP", "5m"),
+            "kline.5m.okx.ETH-USDT-SWAP"
+        );
     }
 
     // ---- cache key ----
@@ -213,7 +253,10 @@ mod tests {
 
     #[test]
     fn kline_cache_key_format() {
-        assert_eq!(kline_cache_key("binance", "BTCUSDT", "1m"), "BINANCE:BTCUSDT:1m");
+        assert_eq!(
+            kline_cache_key("binance", "BTCUSDT", "1m"),
+            "BINANCE:BTCUSDT:1m"
+        );
     }
 
     // ---- roundtrip ----

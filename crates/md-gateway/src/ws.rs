@@ -96,14 +96,23 @@ async fn legacy_ws_handler(
 }
 
 /// Gateway WebSocket 处理
-async fn handle_gateway_ws(socket: WebSocket, processor: Arc<Processor>, metrics: Arc<md_processor::ProcessorMetrics>) {
+async fn handle_gateway_ws(
+    socket: WebSocket,
+    processor: Arc<Processor>,
+    metrics: Arc<md_processor::ProcessorMetrics>,
+) {
     let (mut sender, mut receiver) = socket.split();
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: HashSet<String> = HashSet::new();
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
-    info!("Gateway WebSocket client connected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Gateway WebSocket client connected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 
     loop {
         tokio::select! {
@@ -185,7 +194,12 @@ async fn handle_gateway_ws(socket: WebSocket, processor: Arc<Processor>, metrics
     }
 
     metrics.ws_client_disconnected();
-    info!("Gateway WebSocket client disconnected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Gateway WebSocket client disconnected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 }
 
 /// 接收结果分类（用于上层判断是否需要踢出客户端）
@@ -227,7 +241,10 @@ async fn recv_from_subscriptions(
             // 记录 lagged 事件（按 topic 类型分类）
             let kind = detect_topic_kind_from_subscriptions(topics);
             metrics.record_broadcast_lagged(kind);
-            warn!("broadcast lagged ({} messages dropped), topic_kind={}", n, kind);
+            warn!(
+                "broadcast lagged ({} messages dropped), topic_kind={}",
+                n, kind
+            );
             RecvOutcome::Lagged
         }
         Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,
@@ -244,9 +261,14 @@ fn event_matches_topic(event: &BroadcastEvent, topic_str: &str) -> bool {
         (BroadcastEvent::Tick(tick, _), md_domain::topic::Topic::Tick { exchange, symbol }) => {
             tick.exchange == exchange && tick.symbol == symbol
         }
-        (BroadcastEvent::Kline(kline, _), md_domain::topic::Topic::Kline { interval, exchange, symbol }) => {
-            kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol
-        }
+        (
+            BroadcastEvent::Kline(kline, _),
+            md_domain::topic::Topic::Kline {
+                interval,
+                exchange,
+                symbol,
+            },
+        ) => kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol,
         _ => false,
     }
 }
@@ -278,14 +300,23 @@ fn detect_topic_kind_from_topics(topics: &[String]) -> &str {
 }
 
 /// Legacy WebSocket 处理
-async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics: Arc<md_processor::ProcessorMetrics>) {
+async fn handle_legacy_ws(
+    socket: WebSocket,
+    processor: Arc<Processor>,
+    metrics: Arc<md_processor::ProcessorMetrics>,
+) {
     let (mut sender, mut receiver) = socket.split();
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: Vec<String> = Vec::new();
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
-    info!("Legacy WebSocket client connected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Legacy WebSocket client connected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 
     loop {
         tokio::select! {
@@ -367,7 +398,12 @@ async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics:
     }
 
     metrics.ws_client_disconnected();
-    info!("Legacy WebSocket client disconnected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Legacy WebSocket client disconnected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 }
 
 /// 从所有 subscription 中接收下一个事件（Legacy 模式，返回第一个匹配的 topic）
@@ -397,7 +433,10 @@ async fn recv_from_subscriptions_legacy(
         Err(broadcast::error::RecvError::Lagged(n)) => {
             let kind = detect_topic_kind_from_topics(topics);
             metrics.record_broadcast_lagged(kind);
-            warn!("broadcast lagged ({} messages dropped), topic_kind={}", n, kind);
+            warn!(
+                "broadcast lagged ({} messages dropped), topic_kind={}",
+                n, kind
+            );
             RecvOutcome::Lagged
         }
         Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,

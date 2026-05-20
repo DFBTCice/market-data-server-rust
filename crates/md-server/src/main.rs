@@ -8,10 +8,10 @@ use md_connector::okx::{OkxAdapter, OkxConnectorConfig};
 use md_connector::{Connector, DataType, SubscriptionTarget};
 use md_processor::{ConnectorMetrics, Processor};
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::sync::atomic::Ordering;
+use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::{RwLock, watch};
+use tokio::sync::{watch, RwLock};
 use tracing::{info, warn};
 
 #[derive(Parser)]
@@ -29,7 +29,10 @@ struct Cli {
 async fn start_connectors(
     cfg: &md_config::Config,
     processor: &Arc<Processor>,
-) -> (Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>, HashMap<String, Arc<ConnectorMetrics>>) {
+) -> (
+    Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
+    HashMap<String, Arc<ConnectorMetrics>>,
+) {
     let connectors: Arc<RwLock<HashMap<String, Arc<dyn Connector>>>> =
         Arc::new(RwLock::new(HashMap::new()));
     let mut connector_metrics_map: HashMap<String, Arc<ConnectorMetrics>> = HashMap::new();
@@ -49,18 +52,21 @@ async fn start_connectors(
         let adapter = BinanceAdapter::new(binance_cfg);
         let binance_metrics = ConnectorMetrics::new();
         connector_metrics_map.insert("binance".into(), binance_metrics.clone());
-        let connector = Arc::new(BaseConnector::new(
-            adapter,
-            processor.tick_tx(),
-            processor.kline_tx(),
-            cfg.connectors.binance.reconnect_delay,
-        ).with_full_metrics(
-            processor.metrics.ticks_dropped.clone(),
-            processor.metrics.klines_dropped.clone(),
-            binance_metrics.connected.clone(),
-            binance_metrics.reconnect_total.clone(),
-            binance_metrics.subscribe_failed_total.clone(),
-        ));
+        let connector = Arc::new(
+            BaseConnector::new(
+                adapter,
+                processor.tick_tx(),
+                processor.kline_tx(),
+                cfg.connectors.binance.reconnect_delay,
+            )
+            .with_full_metrics(
+                processor.metrics.ticks_dropped.clone(),
+                processor.metrics.klines_dropped.clone(),
+                binance_metrics.connected.clone(),
+                binance_metrics.reconnect_total.clone(),
+                binance_metrics.subscribe_failed_total.clone(),
+            ),
+        );
 
         let mut targets = Vec::new();
         for symbol in &cfg.connectors.binance.subscribe_ticks {
@@ -86,7 +92,10 @@ async fn start_connectors(
             warn!("failed to add Binance subscriptions: {}", e);
         }
 
-        connectors.write().await.insert("binance".into(), connector.clone());
+        connectors
+            .write()
+            .await
+            .insert("binance".into(), connector.clone());
 
         tokio::spawn(async move {
             connector.run_connection_loop().await;
@@ -107,21 +116,27 @@ async fn start_connectors(
         // ---- OKX Public: trades (tick 数据) ----
         if !cfg.connectors.okx.subscribe_ticks.is_empty() {
             info!("starting OKX Public connector (trades)");
-            let adapter = OkxAdapter::with_mode(okx_cfg_base.clone(), md_connector::okx::OkxStreamMode::Public);
+            let adapter = OkxAdapter::with_mode(
+                okx_cfg_base.clone(),
+                md_connector::okx::OkxStreamMode::Public,
+            );
             let okx_metrics = ConnectorMetrics::new();
             connector_metrics_map.insert("okx".into(), okx_metrics.clone());
-            let connector = Arc::new(BaseConnector::new(
-                adapter,
-                processor.tick_tx(),
-                processor.kline_tx(),
-                cfg.connectors.okx.reconnect_delay,
-            ).with_full_metrics(
-                processor.metrics.ticks_dropped.clone(),
-                processor.metrics.klines_dropped.clone(),
-                okx_metrics.connected.clone(),
-                okx_metrics.reconnect_total.clone(),
-                okx_metrics.subscribe_failed_total.clone(),
-            ));
+            let connector = Arc::new(
+                BaseConnector::new(
+                    adapter,
+                    processor.tick_tx(),
+                    processor.kline_tx(),
+                    cfg.connectors.okx.reconnect_delay,
+                )
+                .with_full_metrics(
+                    processor.metrics.ticks_dropped.clone(),
+                    processor.metrics.klines_dropped.clone(),
+                    okx_metrics.connected.clone(),
+                    okx_metrics.reconnect_total.clone(),
+                    okx_metrics.subscribe_failed_total.clone(),
+                ),
+            );
 
             let mut targets = Vec::new();
             for symbol in &cfg.connectors.okx.subscribe_ticks {
@@ -137,7 +152,10 @@ async fn start_connectors(
                 warn!("failed to add OKX Public subscriptions: {}", e);
             }
 
-            connectors.write().await.insert("okx".into(), connector.clone());
+            connectors
+                .write()
+                .await
+                .insert("okx".into(), connector.clone());
 
             tokio::spawn(async move {
                 connector.run_connection_loop().await;
@@ -147,21 +165,27 @@ async fn start_connectors(
         // ---- OKX Business: candles (kline 数据) ----
         if !cfg.connectors.okx.subscribe_klines.is_empty() {
             info!("starting OKX Business connector (candles)");
-            let adapter = OkxAdapter::with_mode(okx_cfg_base.clone(), md_connector::okx::OkxStreamMode::Business);
+            let adapter = OkxAdapter::with_mode(
+                okx_cfg_base.clone(),
+                md_connector::okx::OkxStreamMode::Business,
+            );
             let okx_kline_metrics = ConnectorMetrics::new();
             connector_metrics_map.insert("okx-kline".into(), okx_kline_metrics.clone());
-            let connector = Arc::new(BaseConnector::new(
-                adapter,
-                processor.tick_tx(),
-                processor.kline_tx(),
-                cfg.connectors.okx.reconnect_delay,
-            ).with_full_metrics(
-                processor.metrics.ticks_dropped.clone(),
-                processor.metrics.klines_dropped.clone(),
-                okx_kline_metrics.connected.clone(),
-                okx_kline_metrics.reconnect_total.clone(),
-                okx_kline_metrics.subscribe_failed_total.clone(),
-            ));
+            let connector = Arc::new(
+                BaseConnector::new(
+                    adapter,
+                    processor.tick_tx(),
+                    processor.kline_tx(),
+                    cfg.connectors.okx.reconnect_delay,
+                )
+                .with_full_metrics(
+                    processor.metrics.ticks_dropped.clone(),
+                    processor.metrics.klines_dropped.clone(),
+                    okx_kline_metrics.connected.clone(),
+                    okx_kline_metrics.reconnect_total.clone(),
+                    okx_kline_metrics.subscribe_failed_total.clone(),
+                ),
+            );
 
             let mut targets = Vec::new();
             for (interval, symbols) in &cfg.connectors.okx.subscribe_klines {
@@ -179,7 +203,10 @@ async fn start_connectors(
                 warn!("failed to add OKX Business subscriptions: {}", e);
             }
 
-            connectors.write().await.insert("okx-kline".into(), connector.clone());
+            connectors
+                .write()
+                .await
+                .insert("okx-kline".into(), connector.clone());
 
             tokio::spawn(async move {
                 connector.run_connection_loop().await;
@@ -247,9 +274,12 @@ async fn main() {
 
     // 应用端口偏移
     if cli.port_offset > 0 {
-        cfg.grpc_server.listen_address = offset_port(&cfg.grpc_server.listen_address, cli.port_offset);
-        cfg.api_gateway.listen_address = offset_port(&cfg.api_gateway.listen_address, cli.port_offset);
-        cfg.admin_server.listen_address = offset_port(&cfg.admin_server.listen_address, cli.port_offset);
+        cfg.grpc_server.listen_address =
+            offset_port(&cfg.grpc_server.listen_address, cli.port_offset);
+        cfg.api_gateway.listen_address =
+            offset_port(&cfg.api_gateway.listen_address, cli.port_offset);
+        cfg.admin_server.listen_address =
+            offset_port(&cfg.admin_server.listen_address, cli.port_offset);
         info!("port offset: +{}", cli.port_offset);
     }
 
@@ -285,10 +315,8 @@ async fn main() {
         let market_data_svc = md_grpc::MarketDataServiceImpl::new(processor_for_grpc);
         let admin_svc = md_grpc::AdminServiceImpl::new(connectors_for_grpc);
 
-        let market_data_server =
-            md_proto::MarketDataServiceServer::new(market_data_svc);
-        let admin_server =
-            md_proto::AdminServiceServer::new(admin_svc);
+        let market_data_server = md_proto::MarketDataServiceServer::new(market_data_svc);
+        let admin_server = md_proto::AdminServiceServer::new(admin_svc);
 
         info!("gRPC server listening on {}", grpc_addr);
         tonic::transport::Server::builder()
@@ -312,7 +340,12 @@ async fn main() {
         .route("/health", axum::routing::get(health_handler))
         .route(
             "/metrics",
-            axum::routing::get(move || metrics_handler(processor_metrics.clone(), connector_metrics_for_handler.clone())),
+            axum::routing::get(move || {
+                metrics_handler(
+                    processor_metrics.clone(),
+                    connector_metrics_for_handler.clone(),
+                )
+            }),
         );
 
     let gateway_shutdown_rx = shutdown_tx.subscribe();
@@ -362,7 +395,8 @@ async fn wait_for_signal(
     #[cfg(unix)]
     {
         use tokio::signal::unix::{signal, SignalKind};
-        let mut sigterm = signal(SignalKind::terminate()).expect("failed to register SIGTERM handler");
+        let mut sigterm =
+            signal(SignalKind::terminate()).expect("failed to register SIGTERM handler");
         let mut sighup = signal(SignalKind::hangup()).expect("failed to register SIGHUP handler");
 
         // 可变副本，用于热重载后更新当前配置
@@ -455,7 +489,9 @@ async fn wait_for_signal(
 
     #[cfg(not(unix))]
     {
-        tokio::signal::ctrl_c().await.expect("failed to listen for Ctrl+C");
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to listen for Ctrl+C");
         info!("received Ctrl+C");
     }
 
@@ -501,7 +537,8 @@ async fn apply_subscription_changes(
 
     // Binance 订阅变更
     if new_cfg.connectors.binance.subscribe_ticks != old_cfg.connectors.binance.subscribe_ticks
-        || new_cfg.connectors.binance.subscribe_klines != old_cfg.connectors.binance.subscribe_klines
+        || new_cfg.connectors.binance.subscribe_klines
+            != old_cfg.connectors.binance.subscribe_klines
     {
         if let Some(connector) = conns.get("binance") {
             let old_subs = build_subs(
@@ -514,12 +551,20 @@ async fn apply_subscription_changes(
             );
 
             // 需要新增的
-            let to_add: Vec<SubscriptionTarget> = new_subs.difference(&old_subs)
-                .map(|t| SubscriptionTarget { exchange: "binance".into(), ..t.clone() })
+            let to_add: Vec<SubscriptionTarget> = new_subs
+                .difference(&old_subs)
+                .map(|t| SubscriptionTarget {
+                    exchange: "binance".into(),
+                    ..t.clone()
+                })
                 .collect();
             // 需要移除的
-            let to_remove: Vec<SubscriptionTarget> = old_subs.difference(&new_subs)
-                .map(|t| SubscriptionTarget { exchange: "binance".into(), ..t.clone() })
+            let to_remove: Vec<SubscriptionTarget> = old_subs
+                .difference(&new_subs)
+                .map(|t| SubscriptionTarget {
+                    exchange: "binance".into(),
+                    ..t.clone()
+                })
                 .collect();
 
             if !to_add.is_empty() {
@@ -540,10 +585,23 @@ async fn apply_subscription_changes(
     // OKX Public (trades) 订阅变更
     if new_cfg.connectors.okx.subscribe_ticks != old_cfg.connectors.okx.subscribe_ticks {
         if let Some(connector) = conns.get("okx") {
-            let old_ticks: HashSet<String> = old_cfg.connectors.okx.subscribe_ticks.iter().cloned().collect();
-            let new_ticks: HashSet<String> = new_cfg.connectors.okx.subscribe_ticks.iter().cloned().collect();
+            let old_ticks: HashSet<String> = old_cfg
+                .connectors
+                .okx
+                .subscribe_ticks
+                .iter()
+                .cloned()
+                .collect();
+            let new_ticks: HashSet<String> = new_cfg
+                .connectors
+                .okx
+                .subscribe_ticks
+                .iter()
+                .cloned()
+                .collect();
 
-            let to_add: Vec<SubscriptionTarget> = new_ticks.difference(&old_ticks)
+            let to_add: Vec<SubscriptionTarget> = new_ticks
+                .difference(&old_ticks)
                 .map(|sym| SubscriptionTarget {
                     exchange: "okx".into(),
                     data_type: DataType::Tick,
@@ -551,7 +609,8 @@ async fn apply_subscription_changes(
                     kline_interval: None,
                 })
                 .collect();
-            let to_remove: Vec<SubscriptionTarget> = old_ticks.difference(&new_ticks)
+            let to_remove: Vec<SubscriptionTarget> = old_ticks
+                .difference(&new_ticks)
                 .map(|sym| SubscriptionTarget {
                     exchange: "okx".into(),
                     data_type: DataType::Tick,
@@ -581,11 +640,19 @@ async fn apply_subscription_changes(
             let old_klines = build_subs(&[], &old_cfg.connectors.okx.subscribe_klines);
             let new_klines = build_subs(&[], &new_cfg.connectors.okx.subscribe_klines);
 
-            let to_add: Vec<SubscriptionTarget> = new_klines.difference(&old_klines)
-                .map(|t| SubscriptionTarget { exchange: "okx".into(), ..t.clone() })
+            let to_add: Vec<SubscriptionTarget> = new_klines
+                .difference(&old_klines)
+                .map(|t| SubscriptionTarget {
+                    exchange: "okx".into(),
+                    ..t.clone()
+                })
                 .collect();
-            let to_remove: Vec<SubscriptionTarget> = old_klines.difference(&new_klines)
-                .map(|t| SubscriptionTarget { exchange: "okx".into(), ..t.clone() })
+            let to_remove: Vec<SubscriptionTarget> = old_klines
+                .difference(&new_klines)
+                .map(|t| SubscriptionTarget {
+                    exchange: "okx".into(),
+                    ..t.clone()
+                })
                 .collect();
 
             if !to_add.is_empty() {
@@ -595,7 +662,10 @@ async fn apply_subscription_changes(
                 }
             }
             if !to_remove.is_empty() {
-                info!("  okx-kline: removing {} kline subscriptions", to_remove.len());
+                info!(
+                    "  okx-kline: removing {} kline subscriptions",
+                    to_remove.len()
+                );
                 if let Err(e) = connector.remove_subscriptions(to_remove).await {
                     warn!("  okx-kline: failed to remove kline subscriptions: {}", e);
                 }
@@ -633,8 +703,16 @@ fn render_histogram(
     out.push_str(&format!("# TYPE {} histogram\n", metric_name));
 
     // 标签后缀拼装：bucket 多一个 le=... 的标签
-    let bucket_label_prefix = if labels.is_empty() { String::new() } else { format!("{},", labels) };
-    let plain_label = if labels.is_empty() { String::new() } else { format!("{{{}}}", labels) };
+    let bucket_label_prefix = if labels.is_empty() {
+        String::new()
+    } else {
+        format!("{},", labels)
+    };
+    let plain_label = if labels.is_empty() {
+        String::new()
+    } else {
+        format!("{{{}}}", labels)
+    };
 
     let mut cumulative = 0u64;
     for (i, &boundary) in snap.boundaries.iter().enumerate() {
@@ -649,8 +727,14 @@ fn render_histogram(
         "{}_bucket{{{}le=\"+Inf\"}} {}\n",
         metric_name, bucket_label_prefix, cumulative
     ));
-    out.push_str(&format!("{}_sum{} {}\n", metric_name, plain_label, snap.sum));
-    out.push_str(&format!("{}_count{} {}\n", metric_name, plain_label, snap.count));
+    out.push_str(&format!(
+        "{}_sum{} {}\n",
+        metric_name, plain_label, snap.sum
+    ));
+    out.push_str(&format!(
+        "{}_count{} {}\n",
+        metric_name, plain_label, snap.count
+    ));
 }
 
 /// Prometheus metrics 端点
@@ -778,13 +862,21 @@ async fn metrics_handler(
     }
 
     // ---- 网关 / WebSocket 指标 ----
-    out.push_str("# HELP md_ws_active_clients Currently active WebSocket clients (gateway + legacy)\n");
+    out.push_str(
+        "# HELP md_ws_active_clients Currently active WebSocket clients (gateway + legacy)\n",
+    );
     out.push_str("# TYPE md_ws_active_clients gauge\n");
-    out.push_str(&format!("md_ws_active_clients {}\n", snap.ws_active_clients));
+    out.push_str(&format!(
+        "md_ws_active_clients {}\n",
+        snap.ws_active_clients
+    ));
 
     out.push_str("# HELP md_ws_kicked_lagged_total Total WebSocket clients kicked due to consecutive broadcast lagged\n");
     out.push_str("# TYPE md_ws_kicked_lagged_total counter\n");
-    out.push_str(&format!("md_ws_kicked_lagged_total {}\n", snap.ws_kicked_lagged_total));
+    out.push_str(&format!(
+        "md_ws_kicked_lagged_total {}\n",
+        snap.ws_kicked_lagged_total
+    ));
 
     out.push_str("# HELP md_ws_messages_sent_total Total WebSocket / gRPC messages successfully delivered to clients\n");
     out.push_str("# TYPE md_ws_messages_sent_total counter\n");
@@ -797,7 +889,9 @@ async fn metrics_handler(
         snap.ws_messages_sent_kline
     ));
 
-    out.push_str("# HELP md_broadcast_lagged_total Total broadcast lagged events (subscriber fell behind)\n");
+    out.push_str(
+        "# HELP md_broadcast_lagged_total Total broadcast lagged events (subscriber fell behind)\n",
+    );
     out.push_str("# TYPE md_broadcast_lagged_total counter\n");
     out.push_str(&format!(
         "md_broadcast_lagged_total{{topic_kind=\"tick\"}} {}\n",
@@ -872,8 +966,14 @@ mod tests {
         let out = metrics_handler(processor, conn_metrics).await;
 
         // ---- 全局吞吐 ----
-        assert!(out.contains("md_ticks_processed 1"), "missing md_ticks_processed");
-        assert!(out.contains("md_klines_processed 1"), "missing md_klines_processed");
+        assert!(
+            out.contains("md_ticks_processed 1"),
+            "missing md_ticks_processed"
+        );
+        assert!(
+            out.contains("md_klines_processed 1"),
+            "missing md_klines_processed"
+        );
         // ---- 按 exchange + kind 的吞吐（Go dashboard"数据采集吞吐量"）----
         assert!(
             out.contains("md_data_ingested_total{exchange=\"binance\",kind=\"tick\"}"),
@@ -885,11 +985,15 @@ mod tests {
         );
         // ---- 按 exchange + kind 的延迟 histogram（Go dashboard"采集延迟 P50/P99"）----
         assert!(
-            out.contains("md_ingestion_latency_per_exchange_ms_bucket{exchange=\"binance\",kind=\"tick\""),
+            out.contains(
+                "md_ingestion_latency_per_exchange_ms_bucket{exchange=\"binance\",kind=\"tick\""
+            ),
             "missing per-exchange latency histogram (binance/tick)"
         );
         assert!(
-            out.contains("md_ingestion_latency_per_exchange_ms_bucket{exchange=\"okx\",kind=\"kline\""),
+            out.contains(
+                "md_ingestion_latency_per_exchange_ms_bucket{exchange=\"okx\",kind=\"kline\""
+            ),
             "missing per-exchange latency histogram (okx/kline)"
         );
         // ---- 网关内部转发延迟（Go dashboard"网关内部延迟"）----
@@ -898,22 +1002,52 @@ mod tests {
             "missing gateway_forward_latency histogram"
         );
         // ---- WebSocket 健康（Go dashboard"活跃连接 / 慢客户端踢出 / 推送吞吐"）----
-        assert!(out.contains("md_ws_active_clients 1"), "missing ws_active_clients");
-        assert!(out.contains("md_ws_kicked_lagged_total 1"), "missing ws_kicked_lagged_total");
-        assert!(out.contains("md_ws_messages_sent_total{kind=\"tick\"}"), "missing ws_messages_sent_total tick");
-        assert!(out.contains("md_ws_messages_sent_total{kind=\"kline\"}"), "missing ws_messages_sent_total kline");
+        assert!(
+            out.contains("md_ws_active_clients 1"),
+            "missing ws_active_clients"
+        );
+        assert!(
+            out.contains("md_ws_kicked_lagged_total 1"),
+            "missing ws_kicked_lagged_total"
+        );
+        assert!(
+            out.contains("md_ws_messages_sent_total{kind=\"tick\"}"),
+            "missing ws_messages_sent_total tick"
+        );
+        assert!(
+            out.contains("md_ws_messages_sent_total{kind=\"kline\"}"),
+            "missing ws_messages_sent_total kline"
+        );
         // ---- broadcast lagged ----
-        assert!(out.contains("md_broadcast_lagged_total{topic_kind=\"tick\"} 1"), "missing broadcast_lagged_total");
+        assert!(
+            out.contains("md_broadcast_lagged_total{topic_kind=\"tick\"} 1"),
+            "missing broadcast_lagged_total"
+        );
         // ---- 连接器指标 ----
         assert!(out.contains("md_connector_connected{exchange=\"binance\"} 1"));
         assert!(out.contains("md_connector_reconnect_total{exchange=\"binance\"} 3"));
         // ---- 进程级标准指标（Go process_exporter 对应）----
-        assert!(out.contains("process_resident_memory_bytes"), "missing process_resident_memory_bytes");
-        assert!(out.contains("process_virtual_memory_bytes"), "missing process_virtual_memory_bytes");
-        assert!(out.contains("process_cpu_seconds_total"), "missing process_cpu_seconds_total");
+        assert!(
+            out.contains("process_resident_memory_bytes"),
+            "missing process_resident_memory_bytes"
+        );
+        assert!(
+            out.contains("process_virtual_memory_bytes"),
+            "missing process_virtual_memory_bytes"
+        );
+        assert!(
+            out.contains("process_cpu_seconds_total"),
+            "missing process_cpu_seconds_total"
+        );
         assert!(out.contains("process_open_fds"), "missing process_open_fds");
         assert!(out.contains("process_max_fds"), "missing process_max_fds");
-        assert!(out.contains("process_start_time_seconds"), "missing process_start_time_seconds");
-        assert!(out.contains("process_uptime_seconds"), "missing process_uptime_seconds");
+        assert!(
+            out.contains("process_start_time_seconds"),
+            "missing process_start_time_seconds"
+        );
+        assert!(
+            out.contains("process_uptime_seconds"),
+            "missing process_uptime_seconds"
+        );
     }
 }

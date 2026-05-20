@@ -66,7 +66,8 @@ mod tick_json_compat {
         let json = serde_json::to_string(&tick).unwrap();
 
         // 应该只包含非零值字段
-        let expected = r#"{"exchange":"binance","symbol":"BTCUSDT","timestamp":1234567890,"price":"100.0"}"#;
+        let expected =
+            r#"{"exchange":"binance","symbol":"BTCUSDT","timestamp":1234567890,"price":"100.0"}"#;
         assert_json_eq(&json, expected);
     }
 

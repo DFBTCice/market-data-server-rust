@@ -10,15 +10,15 @@ pub mod admin {
 }
 
 // 便捷 re-export
-pub use marketdata::market_data_service_server::{MarketDataService, MarketDataServiceServer};
 pub use marketdata::market_data_service_client::MarketDataServiceClient;
+pub use marketdata::market_data_service_server::{MarketDataService, MarketDataServiceServer};
 pub use marketdata::{
     HistoricalKlinesRequest, HistoricalKlinesResponse, Kline, SingleKlineDataRequest,
     SingleTickDataRequest, SubscriptionRequest, Tick,
 };
 
-pub use admin::admin_service_server::{AdminService, AdminServiceServer};
 pub use admin::admin_service_client::AdminServiceClient;
+pub use admin::admin_service_server::{AdminService, AdminServiceServer};
 pub use admin::{
     DataType, GetSubscriptionsRequest, GetSubscriptionsResponse, SubscriptionChangeRequest,
     SubscriptionChangeResponse, SubscriptionInfo,

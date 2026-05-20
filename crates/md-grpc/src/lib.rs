@@ -1,5 +1,5 @@
-pub mod market_data;
 pub mod admin_service;
+pub mod market_data;
 
 pub use admin_service::AdminServiceImpl;
 pub use market_data::MarketDataServiceImpl;
@@ -176,9 +176,6 @@ mod tests {
             data_type_from_proto(md_proto::DataType::Tick),
             Some(md_connector::DataType::Tick)
         );
-        assert_eq!(
-            data_type_from_proto(md_proto::DataType::Unknown),
-            None
-        );
+        assert_eq!(data_type_from_proto(md_proto::DataType::Unknown), None);
     }
 }
