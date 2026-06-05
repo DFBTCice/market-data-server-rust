@@ -3,7 +3,7 @@
   "uid": "md-server-rust",
   "tags": ["rust", "market-data", "production"],
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "time": { "from": "now-1h", "to": "now" },
   "editable": true,
@@ -30,12 +30,23 @@
         "name": "exchange",
         "type": "query",
         "datasource": "${datasource}",
-        "query": "label_values(md_data_ingested_total{job=\"$job\"}, exchange)",
+        "query": "label_values(md_ingestion_latency_ms_count{job=\"$job\"}, exchange)",
         "refresh": 2,
         "multi": true,
         "includeAll": true,
         "current": { "text": "All", "value": "$__all" },
         "label": "交易所"
+      },
+      {
+        "name": "symbol",
+        "type": "query",
+        "datasource": "${datasource}",
+        "query": "label_values(md_ingestion_latency_ms_count{job=\"$job\",exchange=~\"$exchange\"}, symbol)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" },
+        "label": "交易对（标的）"
       }
     ]
   },
@@ -45,12 +56,13 @@
       "id": 101, "type": "stat", "title": "数据流状态", "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
       "datasource": "${datasource}",
       "targets": [{
-        "expr": "(sum(rate(md_ticks_processed{job=\"$job\"}[1m])) + sum(rate(md_klines_processed{job=\"$job\"}[1m]))) > 0",
+        "expr": "(sum(rate(md_ingestion_latency_ms_count{job=\"$job\"}[1m]))) > 0",
         "instant": true, "refId": "A"
       }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
       "fieldConfig": {
         "defaults": {
+          "noValue": "已中断",
           "mappings": [
             { "type": "value", "options": { "0": { "text": "异常", "color": "red" }, "1": { "text": "正常", "color": "green" } } }
           ]
@@ -86,7 +98,7 @@
     {
       "id": 106, "type": "timeseries", "title": "数据吞吐量（msg/s）", "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
       "datasource": "${datasource}",
-      "targets": [{ "expr": "sum(rate(md_ticks_processed{job=\"$job\"}[1m])) + sum(rate(md_klines_processed{job=\"$job\"}[1m]))", "refId": "A", "legendFormat": "总吞吐" }],
+      "targets": [{ "expr": "sum(rate(md_ingestion_latency_ms_count{job=\"$job\"}[1m]))", "refId": "A", "legendFormat": "总吞吐" }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
 
@@ -95,8 +107,8 @@
       "id": 201, "type": "timeseries", "title": "Tick 采集延迟（P50 / P99，按交易所）", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
       "datasource": "${datasource}",
       "targets": [
-        { "expr": "histogram_quantile(0.50, sum by (exchange,le) (rate(md_ingestion_latency_per_exchange_ms_bucket{job=\"$job\",kind=\"tick\",exchange=~\"$exchange\"}[5m])))", "refId": "A", "legendFormat": "{{exchange}} P50" },
-        { "expr": "histogram_quantile(0.99, sum by (exchange,le) (rate(md_ingestion_latency_per_exchange_ms_bucket{job=\"$job\",kind=\"tick\",exchange=~\"$exchange\"}[5m])))", "refId": "B", "legendFormat": "{{exchange}} P99" }
+        { "expr": "histogram_quantile(0.50, sum by (exchange,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"tick\",exchange=~\"$exchange\"}[5m])))", "refId": "A", "legendFormat": "{{exchange}} P50" },
+        { "expr": "histogram_quantile(0.99, sum by (exchange,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"tick\",exchange=~\"$exchange\"}[5m])))", "refId": "B", "legendFormat": "{{exchange}} P99" }
       ],
       "fieldConfig": { "defaults": { "unit": "ms" } }
     },
@@ -104,44 +116,73 @@
       "id": 202, "type": "timeseries", "title": "Kline 报到延迟（P50 / P99，按交易所）", "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
       "datasource": "${datasource}",
       "targets": [
-        { "expr": "histogram_quantile(0.50, sum by (exchange,le) (rate(md_ingestion_latency_per_exchange_ms_bucket{job=\"$job\",kind=\"kline\",exchange=~\"$exchange\"}[5m])))", "refId": "A", "legendFormat": "{{exchange}} P50" },
-        { "expr": "histogram_quantile(0.99, sum by (exchange,le) (rate(md_ingestion_latency_per_exchange_ms_bucket{job=\"$job\",kind=\"kline\",exchange=~\"$exchange\"}[5m])))", "refId": "B", "legendFormat": "{{exchange}} P99" }
+        { "expr": "histogram_quantile(0.50, sum by (exchange,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"kline\",exchange=~\"$exchange\"}[5m])))", "refId": "A", "legendFormat": "{{exchange}} P50" },
+        { "expr": "histogram_quantile(0.99, sum by (exchange,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"kline\",exchange=~\"$exchange\"}[5m])))", "refId": "B", "legendFormat": "{{exchange}} P99" }
       ],
       "fieldConfig": { "defaults": { "unit": "ms" } }
     },
     {
-      "id": 203, "type": "timeseries", "title": "网关内部延迟（P50 / P99）", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "id": 203, "type": "timeseries", "title": "网关内部延迟（P50 / P99，总体）", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
       "datasource": "${datasource}",
       "targets": [
-        { "expr": "histogram_quantile(0.50, sum by (le) (rate(md_gateway_forward_latency_ms_bucket{job=\"$job\"}[5m])))", "refId": "A", "legendFormat": "P50" },
-        { "expr": "histogram_quantile(0.99, sum by (le) (rate(md_gateway_forward_latency_ms_bucket{job=\"$job\"}[5m])))", "refId": "B", "legendFormat": "P99" }
+        { "expr": "histogram_quantile(0.50, sum by (le) (rate(md_gateway_internal_latency_ms_bucket{job=\"$job\"}[5m])))", "refId": "A", "legendFormat": "总体 P50" },
+        { "expr": "histogram_quantile(0.99, sum by (le) (rate(md_gateway_internal_latency_ms_bucket{job=\"$job\"}[5m])))", "refId": "B", "legendFormat": "总体 P99" }
       ],
       "fieldConfig": { "defaults": { "unit": "ms" } }
     },
 
-    { "id": 300, "type": "row", "title": "📈 吞吐量分析", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 } },
+    { "id": 250, "type": "row", "title": "🔍 延迟分位数明细（按交易对 / 标的）", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 } },
     {
-      "id": 301, "type": "timeseries", "title": "数据采集吞吐量（按交易所 + 类型）", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "id": 251, "type": "timeseries", "title": "Tick 采集延迟 — 按交易对（P50 / P99）", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "datasource": "${datasource}",
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum by (exchange,symbol,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"tick\",exchange=~\"$exchange\",symbol=~\"$symbol\"}[5m])))", "refId": "A", "legendFormat": "{{exchange}} {{symbol}} P50" },
+        { "expr": "histogram_quantile(0.99, sum by (exchange,symbol,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"tick\",exchange=~\"$exchange\",symbol=~\"$symbol\"}[5m])))", "refId": "B", "legendFormat": "{{exchange}} {{symbol}} P99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 252, "type": "timeseries", "title": "Kline 采集延迟 — 按交易对 + 周期（P50 / P99）", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "datasource": "${datasource}",
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum by (exchange,symbol,interval,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"kline\",exchange=~\"$exchange\",symbol=~\"$symbol\"}[5m])))", "refId": "A", "legendFormat": "{{exchange}} {{symbol}} {{interval}} P50" },
+        { "expr": "histogram_quantile(0.99, sum by (exchange,symbol,interval,le) (rate(md_ingestion_latency_ms_bucket{job=\"$job\",type=\"kline\",exchange=~\"$exchange\",symbol=~\"$symbol\"}[5m])))", "refId": "B", "legendFormat": "{{exchange}} {{symbol}} {{interval}} P99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+
+    { "id": 300, "type": "row", "title": "📈 吞吐量分析", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 } },
+    {
+      "id": 301, "type": "timeseries", "title": "数据采集吞吐量（按交易所 + 类型）", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
       "datasource": "${datasource}",
       "targets": [{
-        "expr": "sum by (exchange, kind) (rate(md_data_ingested_total{job=\"$job\",exchange=~\"$exchange\"}[1m]))",
-        "refId": "A", "legendFormat": "{{exchange}} {{kind}}"
+        "expr": "sum by (exchange, type) (rate(md_ingestion_latency_ms_count{job=\"$job\",exchange=~\"$exchange\"}[1m]))",
+        "refId": "A", "legendFormat": "{{exchange}} {{type}}"
       }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 302, "type": "timeseries", "title": "网关推送吞吐量（按 kind）", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "id": 302, "type": "timeseries", "title": "数据采集吞吐量 — 按交易对 TOP10（标的）", "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
       "datasource": "${datasource}",
       "targets": [{
-        "expr": "sum by (kind) (rate(md_ws_messages_sent_total{job=\"$job\"}[1m]))",
-        "refId": "A", "legendFormat": "{{kind}}"
+        "expr": "topk(10, sum by (exchange, symbol, type) (rate(md_ingestion_latency_ms_count{job=\"$job\",exchange=~\"$exchange\",symbol=~\"$symbol\"}[1m])))",
+        "refId": "A", "legendFormat": "{{exchange}} {{symbol}} {{type}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 303, "type": "timeseries", "title": "网关推送吞吐量 TOP10（按 Topic）", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "datasource": "${datasource}",
+      "targets": [{
+        "expr": "topk(10, sum by (topic) (rate(md_gateway_internal_latency_ms_count{job=\"$job\"}[1m])))",
+        "refId": "A", "legendFormat": "{{topic}}"
       }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
 
-    { "id": 400, "type": "row", "title": "🚨 异常事件监控", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 } },
+    { "id": 400, "type": "row", "title": "🚨 异常事件监控", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 } },
     {
-      "id": 401, "type": "timeseries", "title": "消息丢弃率（mpsc 满）", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "id": 401, "type": "timeseries", "title": "消息丢弃率（mpsc 满）", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 33 },
       "datasource": "${datasource}",
       "targets": [
         { "expr": "rate(md_ticks_dropped{job=\"$job\"}[1m])", "refId": "A", "legendFormat": "tick" },
@@ -150,7 +191,7 @@
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 402, "type": "timeseries", "title": "广播 Lagged 速率（订阅者缓冲满）", "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "id": 402, "type": "timeseries", "title": "广播 Lagged 速率（订阅者缓冲满）", "gridPos": { "h": 8, "w": 8, "x": 8, "y": 33 },
       "datasource": "${datasource}",
       "targets": [{
         "expr": "sum by (topic_kind) (rate(md_broadcast_lagged_total{job=\"$job\"}[1m]))",
@@ -159,39 +200,39 @@
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 403, "type": "timeseries", "title": "慢客户端踢出速率", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "id": 403, "type": "timeseries", "title": "慢客户端踢出速率", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 33 },
       "datasource": "${datasource}",
       "targets": [{ "expr": "rate(md_ws_kicked_lagged_total{job=\"$job\"}[5m])", "refId": "A", "legendFormat": "kicked/s" }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
 
-    { "id": 500, "type": "row", "title": "🔌 连接器健康", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 } },
+    { "id": 500, "type": "row", "title": "🔌 连接器健康", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 } },
     {
-      "id": 501, "type": "timeseries", "title": "连接状态（0=断开 / 1=连接）", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
+      "id": 501, "type": "timeseries", "title": "连接状态（0=断开 / 1=连接）", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
       "datasource": "${datasource}",
       "targets": [{ "expr": "md_connector_connected{job=\"$job\"}", "refId": "A", "legendFormat": "{{exchange}}" }],
       "fieldConfig": { "defaults": { "min": 0, "max": 1 } }
     },
     {
-      "id": 502, "type": "timeseries", "title": "重连次数（累计）", "gridPos": { "h": 8, "w": 6, "x": 12, "y": 33 },
+      "id": 502, "type": "timeseries", "title": "重连次数（累计）", "gridPos": { "h": 8, "w": 6, "x": 12, "y": 42 },
       "datasource": "${datasource}",
       "targets": [{ "expr": "md_connector_reconnect_total{job=\"$job\"}", "refId": "A", "legendFormat": "{{exchange}}" }]
     },
     {
-      "id": 503, "type": "timeseries", "title": "订阅失败次数（累计）", "gridPos": { "h": 8, "w": 6, "x": 18, "y": 33 },
+      "id": 503, "type": "timeseries", "title": "订阅失败次数（累计）", "gridPos": { "h": 8, "w": 6, "x": 18, "y": 42 },
       "datasource": "${datasource}",
       "targets": [{ "expr": "md_connector_subscribe_failed_total{job=\"$job\"}", "refId": "A", "legendFormat": "{{exchange}}" }]
     },
 
-    { "id": 600, "type": "row", "title": "🦀 Rust 进程指标（CPU / 内存 / FD）", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 } },
+    { "id": 600, "type": "row", "title": "🦀 Rust 进程指标（CPU / 内存 / FD）", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 } },
     {
-      "id": 601, "type": "timeseries", "title": "CPU 使用率（核数）", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 42 },
+      "id": 601, "type": "timeseries", "title": "CPU 使用率（核数）", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 51 },
       "datasource": "${datasource}",
       "targets": [{ "expr": "rate(process_cpu_seconds_total{job=\"$job\"}[1m])", "refId": "A", "legendFormat": "{{instance}}" }],
       "fieldConfig": { "defaults": { "unit": "none", "decimals": 3 } }
     },
     {
-      "id": 602, "type": "timeseries", "title": "进程内存", "gridPos": { "h": 8, "w": 8, "x": 8, "y": 42 },
+      "id": 602, "type": "timeseries", "title": "进程内存", "gridPos": { "h": 8, "w": 8, "x": 8, "y": 51 },
       "datasource": "${datasource}",
       "targets": [
         { "expr": "process_resident_memory_bytes{job=\"$job\"}", "refId": "A", "legendFormat": "RSS" },
@@ -200,7 +241,7 @@
       "fieldConfig": { "defaults": { "unit": "bytes" } }
     },
     {
-      "id": 603, "type": "timeseries", "title": "文件描述符", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 42 },
+      "id": 603, "type": "timeseries", "title": "文件描述符", "gridPos": { "h": 8, "w": 8, "x": 16, "y": 51 },
       "datasource": "${datasource}",
       "targets": [
         { "expr": "process_open_fds{job=\"$job\"}", "refId": "A", "legendFormat": "open" },
@@ -209,7 +250,7 @@
       "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "steps": [{ "color": "green" }, { "color": "yellow", "value": 800 }, { "color": "red", "value": 950 }] } } }
     },
     {
-      "id": 604, "type": "stat", "title": "Uptime", "gridPos": { "h": 4, "w": 4, "x": 0, "y": 50 },
+      "id": 604, "type": "stat", "title": "Uptime", "gridPos": { "h": 4, "w": 4, "x": 0, "y": 59 },
       "datasource": "${datasource}",
       "targets": [{ "expr": "process_uptime_seconds{job=\"$job\"}", "instant": true, "refId": "A" }],
       "fieldConfig": { "defaults": { "unit": "s" } }

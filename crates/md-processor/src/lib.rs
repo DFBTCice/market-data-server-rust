@@ -69,11 +69,7 @@ impl Histogram {
     pub fn snapshot(&self) -> HistogramSnapshot {
         HistogramSnapshot {
             boundaries: self.boundaries.clone(),
-            buckets: self
-                .buckets
-                .iter()
-                .map(|b| b.load(Ordering::Relaxed))
-                .collect(),
+            buckets: self.buckets.iter().map(|b| b.load(Ordering::Relaxed)).collect(),
             sum: self.sum.load(Ordering::Relaxed),
             count: self.count.load(Ordering::Relaxed),
         }
@@ -109,58 +105,42 @@ impl ConnectorMetrics {
     }
 }
 
-/// 单个交易所 + 数据类型的入库指标
+/// 入库指标的序列维度 key
 ///
-/// 对标 Go 版按 (exchange, kind) 维度分组的吞吐和延迟监控：
-/// - 数据采集吞吐量（按交易所 + 类型）
-/// - Tick / Kline 采集延迟 P50/P99（按交易所）
-#[derive(Debug)]
-pub struct ExchangeMetrics {
-    /// Tick 入库总数
-    pub ticks_processed: AtomicU64,
-    /// Kline 入库总数
-    pub klines_processed: AtomicU64,
-    /// Tick 入库延迟（exchange_event_ts → connector_receive_ts，毫秒）
-    pub ingestion_latency_tick: Histogram,
-    /// Kline 入库延迟（毫秒）
-    pub ingestion_latency_kline: Histogram,
+/// 完全对标 Go 版 `marketdata_processor_ingestion_latency_ms` 的标签集
+/// `{exchange, type, symbol, interval}`。一个 histogram 即可同时支撑：
+/// - 按交易所聚合：`by (exchange)`
+/// - 按交易对（标的）聚合：`by (exchange, symbol)`
+/// - 按交易对 + 周期聚合：`by (exchange, symbol, interval)`（Kline）
+/// - 吞吐量：用 histogram 的 `_count`
+///
+/// 说明：本系统只订阅自有策略所需的少量标的，基数可控（交易所 × 标的 × 周期 = 数十条）。
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SeriesKey {
+    pub exchange: String,
+    /// "tick" 或 "kline"
+    pub kind: &'static str,
+    pub symbol: String,
+    /// Kline 周期（如 "1m"）；Tick 恒为空字符串
+    pub interval: String,
 }
 
-impl ExchangeMetrics {
-    pub fn new() -> Self {
-        Self {
-            ticks_processed: AtomicU64::new(0),
-            klines_processed: AtomicU64::new(0),
-            ingestion_latency_tick: Histogram::new(BUCKETS_MS),
-            ingestion_latency_kline: Histogram::new(BUCKETS_MS),
-        }
-    }
-}
-
-impl Default for ExchangeMetrics {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-/// 全局 Processor 指标（无锁原子计数器 + per-exchange map）
+/// 全局 Processor 指标（无锁原子计数器 + 多维 series map）
 #[derive(Debug)]
 pub struct ProcessorMetrics {
-    // ---- 全局聚合（兼容老 dashboard） ----
+    // ---- 全局聚合（顶部 stat + 兼容老查询） ----
     pub ticks_processed: AtomicU64,
     pub klines_processed: AtomicU64,
     pub ticks_dropped: Arc<AtomicU64>,
     pub klines_dropped: Arc<AtomicU64>,
-    /// 全局入库延迟 histogram（与 per-exchange 同步记录，方便单查询总览）
-    pub ingestion_latency: Histogram,
     /// broadcast lagged 计数 (tick)
     pub broadcast_lagged_tick: AtomicU64,
     /// broadcast lagged 计数 (kline)
     pub broadcast_lagged_kline: AtomicU64,
 
-    // ---- 按交易所分维度（对应 Go dashboard 的 binance/okx 分图） ----
-    /// key: "binance" / "okx" / "okx-kline" 等
-    pub per_exchange: DashMap<String, Arc<ExchangeMetrics>>,
+    // ---- 入库延迟/吞吐：按 (exchange, type, symbol, interval) 维度 ----
+    /// 对标 Go 版 marketdata_processor_ingestion_latency_ms，dashboard 由此聚合出交易所/标的/周期视图
+    pub ingestion_latency: DashMap<SeriesKey, Arc<Histogram>>,
 
     // ---- 网关 / WebSocket 指标 ----
     /// 当前活跃 WebSocket 连接数（gateway + legacy 合计）
@@ -170,8 +150,10 @@ pub struct ProcessorMetrics {
     /// 网关推送总条数（每条 WS 消息 +1，按 topic_kind 区分）
     pub ws_messages_sent_tick: AtomicU64,
     pub ws_messages_sent_kline: AtomicU64,
-    /// 网关内部转发延迟（处理器 publish → 客户端 send 完成，毫秒）
-    pub gateway_forward_latency: Histogram,
+    /// 网关内部转发延迟（处理器 publish → 客户端 send 完成，毫秒），按 topic 维度
+    /// 对标 Go 版 marketdata_gateway_internal_latency_ms{topic}，dashboard 由此聚合出
+    /// 总体延迟（by le）与按 topic 的推送吞吐 TOP10（_count by topic）
+    pub gateway_forward_latency: DashMap<String, Arc<Histogram>>,
 }
 
 impl Default for ProcessorMetrics {
@@ -181,41 +163,60 @@ impl Default for ProcessorMetrics {
             klines_processed: AtomicU64::new(0),
             ticks_dropped: Arc::new(AtomicU64::new(0)),
             klines_dropped: Arc::new(AtomicU64::new(0)),
-            ingestion_latency: Histogram::new(BUCKETS_MS),
             broadcast_lagged_tick: AtomicU64::new(0),
             broadcast_lagged_kline: AtomicU64::new(0),
-            per_exchange: DashMap::new(),
+            ingestion_latency: DashMap::new(),
             ws_active_clients: AtomicU64::new(0),
             ws_kicked_lagged_total: AtomicU64::new(0),
             ws_messages_sent_tick: AtomicU64::new(0),
             ws_messages_sent_kline: AtomicU64::new(0),
-            gateway_forward_latency: Histogram::new(GATEWAY_LATENCY_BUCKETS_MS),
+            gateway_forward_latency: DashMap::new(),
         }
     }
 }
 
 impl ProcessorMetrics {
-    /// 获取（或惰性创建）某交易所的指标
-    pub fn exchange(&self, name: &str) -> Arc<ExchangeMetrics> {
-        if let Some(m) = self.per_exchange.get(name) {
-            return m.clone();
+    /// 获取（或惰性创建）某 series 的入库延迟 histogram
+    fn ingestion_hist(&self, key: SeriesKey) -> Arc<Histogram> {
+        if let Some(h) = self.ingestion_latency.get(&key) {
+            return h.clone();
         }
-        self.per_exchange
-            .entry(name.to_string())
-            .or_insert_with(|| Arc::new(ExchangeMetrics::new()))
+        self.ingestion_latency
+            .entry(key)
+            .or_insert_with(|| Arc::new(Histogram::new(BUCKETS_MS)))
+            .clone()
+    }
+
+    /// 获取（或惰性创建）某 topic 的网关转发延迟 histogram
+    fn gateway_hist(&self, topic: &str) -> Arc<Histogram> {
+        if let Some(h) = self.gateway_forward_latency.get(topic) {
+            return h.clone();
+        }
+        self.gateway_forward_latency
+            .entry(topic.to_string())
+            .or_insert_with(|| Arc::new(Histogram::new(GATEWAY_LATENCY_BUCKETS_MS)))
             .clone()
     }
 
     pub fn snapshot(&self) -> MetricsSnapshot {
-        let per_exchange: Vec<ExchangeMetricsSnapshot> = self
-            .per_exchange
+        let ingestion_series: Vec<SeriesSnapshot> = self
+            .ingestion_latency
             .iter()
-            .map(|entry| ExchangeMetricsSnapshot {
-                exchange: entry.key().clone(),
-                ticks_processed: entry.value().ticks_processed.load(Ordering::Relaxed),
-                klines_processed: entry.value().klines_processed.load(Ordering::Relaxed),
-                ingestion_latency_tick: entry.value().ingestion_latency_tick.snapshot(),
-                ingestion_latency_kline: entry.value().ingestion_latency_kline.snapshot(),
+            .map(|entry| SeriesSnapshot {
+                exchange: entry.key().exchange.clone(),
+                kind: entry.key().kind,
+                symbol: entry.key().symbol.clone(),
+                interval: entry.key().interval.clone(),
+                latency: entry.value().snapshot(),
+            })
+            .collect();
+
+        let gateway_series: Vec<GatewaySeriesSnapshot> = self
+            .gateway_forward_latency
+            .iter()
+            .map(|entry| GatewaySeriesSnapshot {
+                topic: entry.key().clone(),
+                latency: entry.value().snapshot(),
             })
             .collect();
 
@@ -224,52 +225,46 @@ impl ProcessorMetrics {
             klines_processed: self.klines_processed.load(Ordering::Relaxed),
             ticks_dropped: (*self.ticks_dropped).load(Ordering::Relaxed),
             klines_dropped: (*self.klines_dropped).load(Ordering::Relaxed),
-            ingestion_latency: self.ingestion_latency.snapshot(),
             broadcast_lagged_tick: self.broadcast_lagged_tick.load(Ordering::Relaxed),
             broadcast_lagged_kline: self.broadcast_lagged_kline.load(Ordering::Relaxed),
-            per_exchange,
+            ingestion_series,
             ws_active_clients: self.ws_active_clients.load(Ordering::Relaxed),
             ws_kicked_lagged_total: self.ws_kicked_lagged_total.load(Ordering::Relaxed),
             ws_messages_sent_tick: self.ws_messages_sent_tick.load(Ordering::Relaxed),
             ws_messages_sent_kline: self.ws_messages_sent_kline.load(Ordering::Relaxed),
-            gateway_forward_latency: self.gateway_forward_latency.snapshot(),
+            gateway_series,
         }
     }
 
-    /// 记录某交易所的 Tick 入库延迟（毫秒），并同步全局
-    pub fn record_tick_ingestion(&self, exchange: &str, latency_ms: i64) {
+    /// 记录 Tick 入库延迟（毫秒）-- 维度 (exchange, tick, symbol)
+    pub fn record_tick_ingestion(&self, exchange: &str, symbol: &str, latency_ms: i64) {
         let clamped = latency_ms.max(0) as u64;
-        self.ingestion_latency.observe(clamped);
-        let m = self.exchange(exchange);
-        m.ticks_processed.fetch_add(1, Ordering::Relaxed);
-        m.ingestion_latency_tick.observe(clamped);
+        let key = SeriesKey {
+            exchange: exchange.to_string(),
+            kind: "tick",
+            symbol: symbol.to_string(),
+            interval: String::new(),
+        };
+        self.ingestion_hist(key).observe(clamped);
     }
 
-    /// 记录某交易所的 Kline 入库延迟（毫秒），并同步全局
-    pub fn record_kline_ingestion(&self, exchange: &str, latency_ms: i64) {
+    /// 记录 Kline 入库延迟（毫秒）-- 维度 (exchange, kline, symbol, interval)
+    pub fn record_kline_ingestion(&self, exchange: &str, symbol: &str, interval: &str, latency_ms: i64) {
         let clamped = latency_ms.max(0) as u64;
-        self.ingestion_latency.observe(clamped);
-        let m = self.exchange(exchange);
-        m.klines_processed.fetch_add(1, Ordering::Relaxed);
-        m.ingestion_latency_kline.observe(clamped);
-    }
-
-    /// 记录入库延迟（毫秒），防负值 -- 仅全局直方图
-    /// 兼容旧调用点；新代码请使用 record_tick_ingestion / record_kline_ingestion
-    pub fn record_ingestion_latency(&self, latency_ms: i64) {
-        let clamped = latency_ms.max(0) as u64;
-        self.ingestion_latency.observe(clamped);
+        let key = SeriesKey {
+            exchange: exchange.to_string(),
+            kind: "kline",
+            symbol: symbol.to_string(),
+            interval: interval.to_string(),
+        };
+        self.ingestion_hist(key).observe(clamped);
     }
 
     /// 记录 broadcast lagged
     pub fn record_broadcast_lagged(&self, kind: &str) {
         match kind {
-            "tick" => {
-                self.broadcast_lagged_tick.fetch_add(1, Ordering::Relaxed);
-            }
-            "kline" => {
-                self.broadcast_lagged_kline.fetch_add(1, Ordering::Relaxed);
-            }
+            "tick" => { self.broadcast_lagged_tick.fetch_add(1, Ordering::Relaxed); }
+            "kline" => { self.broadcast_lagged_kline.fetch_add(1, Ordering::Relaxed); }
             _ => {}
         }
     }
@@ -282,15 +277,9 @@ impl ProcessorMetrics {
     /// WS 连接离开（包括正常关闭 + 踢出）
     pub fn ws_client_disconnected(&self) {
         // 防止下溢（如果只调一次 disconnected 没对应 connected）
-        let _ = self
-            .ws_active_clients
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
-                if v == 0 {
-                    None
-                } else {
-                    Some(v - 1)
-                }
-            });
+        let _ = self.ws_active_clients.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
+            if v == 0 { None } else { Some(v - 1) }
+        });
     }
 
     /// 因 broadcast 持续 lagged 主动踢出客户端
@@ -301,29 +290,33 @@ impl ProcessorMetrics {
     /// 网关成功推送一条消息
     pub fn ws_message_sent(&self, kind: &str) {
         match kind {
-            "tick" => {
-                self.ws_messages_sent_tick.fetch_add(1, Ordering::Relaxed);
-            }
-            "kline" => {
-                self.ws_messages_sent_kline.fetch_add(1, Ordering::Relaxed);
-            }
+            "tick" => { self.ws_messages_sent_tick.fetch_add(1, Ordering::Relaxed); }
+            "kline" => { self.ws_messages_sent_kline.fetch_add(1, Ordering::Relaxed); }
             _ => {}
         }
     }
 
-    /// 记录网关内部转发延迟（毫秒）
-    pub fn record_gateway_forward_latency_ms(&self, latency_ms: u64) {
-        self.gateway_forward_latency.observe(latency_ms);
+    /// 记录网关内部转发延迟（毫秒），按 topic 维度
+    pub fn record_gateway_forward_latency_ms(&self, topic: &str, latency_ms: u64) {
+        self.gateway_hist(topic).observe(latency_ms);
     }
 }
 
+/// 单条入库延迟序列的快照（exchange/type/symbol/interval）
 #[derive(Debug, Clone)]
-pub struct ExchangeMetricsSnapshot {
+pub struct SeriesSnapshot {
     pub exchange: String,
-    pub ticks_processed: u64,
-    pub klines_processed: u64,
-    pub ingestion_latency_tick: HistogramSnapshot,
-    pub ingestion_latency_kline: HistogramSnapshot,
+    pub kind: &'static str,
+    pub symbol: String,
+    pub interval: String,
+    pub latency: HistogramSnapshot,
+}
+
+/// 单个 topic 的网关转发延迟快照
+#[derive(Debug, Clone)]
+pub struct GatewaySeriesSnapshot {
+    pub topic: String,
+    pub latency: HistogramSnapshot,
 }
 
 #[derive(Debug, Clone)]
@@ -332,15 +325,14 @@ pub struct MetricsSnapshot {
     pub klines_processed: u64,
     pub ticks_dropped: u64,
     pub klines_dropped: u64,
-    pub ingestion_latency: HistogramSnapshot,
     pub broadcast_lagged_tick: u64,
     pub broadcast_lagged_kline: u64,
-    pub per_exchange: Vec<ExchangeMetricsSnapshot>,
+    pub ingestion_series: Vec<SeriesSnapshot>,
     pub ws_active_clients: u64,
     pub ws_kicked_lagged_total: u64,
     pub ws_messages_sent_tick: u64,
     pub ws_messages_sent_kline: u64,
-    pub gateway_forward_latency: HistogramSnapshot,
+    pub gateway_series: Vec<GatewaySeriesSnapshot>,
 }
 
 // ---- Subscriber ----
@@ -417,11 +409,7 @@ impl Processor {
         Self::new_with_broadcast_capacity(tick_buffer, kline_buffer, 4096)
     }
 
-    pub fn new_with_broadcast_capacity(
-        tick_buffer: usize,
-        kline_buffer: usize,
-        broadcast_capacity: usize,
-    ) -> Self {
+    pub fn new_with_broadcast_capacity(tick_buffer: usize, kline_buffer: usize, broadcast_capacity: usize) -> Self {
         let (tick_tx, tick_rx) = mpsc::channel(tick_buffer);
         let (kline_tx, kline_rx) = mpsc::channel(kline_buffer);
         let (shutdown_tx, _) = broadcast::channel(1);
@@ -531,18 +519,15 @@ impl Processor {
     pub fn handle_tick(&self, tick: Tick) {
         self.metrics.ticks_processed.fetch_add(1, Ordering::Relaxed);
 
-        // 记录入库延迟（saturating_sub 防 NTP 回拨导致负值），按交易所分维度
-        if tick.connector_receive_ts > 0 && tick.exchange_event_ts > 0 {
-            let latency_ms = tick
-                .connector_receive_ts
-                .saturating_sub(tick.exchange_event_ts);
-            self.metrics
-                .record_tick_ingestion(&tick.exchange, latency_ms);
+        // 记录入库延迟（saturating_sub 防 NTP 回拨导致负值），维度 (exchange, tick, symbol)
+        // 时间戳缺失时记 0，保证 histogram _count 仍反映真实吞吐（对标 Go 用 _count 算吞吐）
+        let latency_ms = if tick.connector_receive_ts > 0 && tick.exchange_event_ts > 0 {
+            tick.connector_receive_ts.saturating_sub(tick.exchange_event_ts)
         } else {
-            // 即使时间戳缺失也要计入交易所吞吐
-            let m = self.metrics.exchange(&tick.exchange);
-            m.ticks_processed.fetch_add(1, Ordering::Relaxed);
-        }
+            0
+        };
+        self.metrics
+            .record_tick_ingestion(&tick.exchange, &tick.symbol, latency_ms);
 
         // 缓存（使用统一的 cache key 归一化）
         let key = topic::tick_cache_key(&tick.exchange, &tick.symbol);
@@ -555,21 +540,16 @@ impl Processor {
     }
 
     pub fn handle_kline(&self, kline: Kline) {
-        self.metrics
-            .klines_processed
-            .fetch_add(1, Ordering::Relaxed);
+        self.metrics.klines_processed.fetch_add(1, Ordering::Relaxed);
 
-        // 记录入库延迟（按交易所）
-        if kline.connector_receive_ts > 0 && kline.exchange_event_ts > 0 {
-            let latency_ms = kline
-                .connector_receive_ts
-                .saturating_sub(kline.exchange_event_ts);
-            self.metrics
-                .record_kline_ingestion(&kline.exchange, latency_ms);
+        // 记录入库延迟，维度 (exchange, kline, symbol, interval)
+        let latency_ms = if kline.connector_receive_ts > 0 && kline.exchange_event_ts > 0 {
+            kline.connector_receive_ts.saturating_sub(kline.exchange_event_ts)
         } else {
-            let m = self.metrics.exchange(&kline.exchange);
-            m.klines_processed.fetch_add(1, Ordering::Relaxed);
-        }
+            0
+        };
+        self.metrics
+            .record_kline_ingestion(&kline.exchange, &kline.symbol, &kline.interval, latency_ms);
 
         // 缓存（使用统一的 cache key 归一化）
         let key = topic::kline_cache_key(&kline.exchange, &kline.symbol, &kline.interval);
@@ -598,6 +578,7 @@ impl Processor {
 mod tests {
     use super::*;
     use std::time::Duration;
+
 
     fn make_tick(exchange: &str, symbol: &str, price: &str) -> Tick {
         Tick {
@@ -683,7 +664,9 @@ mod tests {
     async fn cache_returns_none_for_missing() {
         let proc = Processor::new(100, 100);
         assert!(proc.get_latest_tick("binance", "NONEXIST").is_none());
-        assert!(proc.get_latest_kline("binance", "NONEXIST", "1m").is_none());
+        assert!(proc
+            .get_latest_kline("binance", "NONEXIST", "1m")
+            .is_none());
     }
 
     #[tokio::test]
@@ -816,9 +799,9 @@ mod tests {
         let hist = Histogram::new(BUCKETS_MS);
 
         // 记录几个延迟值
-        hist.observe(3); // 落入 le=5 桶
-        hist.observe(50); // 落入 le=50 桶
-        hist.observe(200); // 落入 le=250 桶
+        hist.observe(3);    // 落入 le=5 桶
+        hist.observe(50);   // 落入 le=50 桶
+        hist.observe(200);  // 落入 le=250 桶
         hist.observe(8000); // 超出所有桶，落入 +Inf
 
         let snap = hist.snapshot();
@@ -833,7 +816,7 @@ mod tests {
         assert_eq!(snap.buckets[4], 1); // le=50: 50
         assert_eq!(snap.buckets[5], 0); // le=100: 无
         assert_eq!(snap.buckets[6], 1); // le=250: 200
-                                        // +Inf 桶
+        // +Inf 桶
         assert_eq!(snap.buckets[BUCKETS_MS.len()], 1); // 8000
     }
 
@@ -841,10 +824,55 @@ mod tests {
     fn metrics_record_ingestion_latency_clamps_negative() {
         let metrics = ProcessorMetrics::default();
         // 模拟 NTP 回拨导致负延迟
-        metrics.record_ingestion_latency(-100);
-        let snap = metrics.ingestion_latency.snapshot();
+        metrics.record_tick_ingestion("binance", "BTCUSDT", -100);
+        let snap = metrics.snapshot();
+        let series = snap
+            .ingestion_series
+            .iter()
+            .find(|s| s.exchange == "binance" && s.kind == "tick" && s.symbol == "BTCUSDT")
+            .expect("series should exist");
         // 负值被 clamp 到 0，落入 le=1 桶
-        assert_eq!(snap.count, 1);
-        assert_eq!(snap.sum, 0);
+        assert_eq!(series.latency.count, 1);
+        assert_eq!(series.latency.sum, 0);
+    }
+
+    #[test]
+    fn metrics_per_symbol_dimension_separated() {
+        // 验证按标的分维度：BTCUSDT 与 ETHUSDT 各自独立统计
+        let metrics = ProcessorMetrics::default();
+        metrics.record_tick_ingestion("binance", "BTCUSDT", 10);
+        metrics.record_tick_ingestion("binance", "BTCUSDT", 20);
+        metrics.record_tick_ingestion("binance", "ETHUSDT", 30);
+        metrics.record_kline_ingestion("okx", "BTC-USDT", "1m", 100);
+
+        let snap = metrics.snapshot();
+        let btc = snap.ingestion_series.iter()
+            .find(|s| s.symbol == "BTCUSDT" && s.kind == "tick").unwrap();
+        let eth = snap.ingestion_series.iter()
+            .find(|s| s.symbol == "ETHUSDT" && s.kind == "tick").unwrap();
+        let kline = snap.ingestion_series.iter()
+            .find(|s| s.symbol == "BTC-USDT" && s.kind == "kline").unwrap();
+
+        assert_eq!(btc.latency.count, 2);
+        assert_eq!(btc.latency.sum, 30);
+        assert_eq!(eth.latency.count, 1);
+        assert_eq!(eth.latency.sum, 30);
+        assert_eq!(kline.interval, "1m");
+        assert_eq!(kline.latency.count, 1);
+    }
+
+    #[test]
+    fn metrics_gateway_latency_by_topic() {
+        let metrics = ProcessorMetrics::default();
+        metrics.record_gateway_forward_latency_ms("tick.binance.BTCUSDT", 2);
+        metrics.record_gateway_forward_latency_ms("tick.binance.BTCUSDT", 4);
+        metrics.record_gateway_forward_latency_ms("kline.1m.okx.BTC-USDT", 1);
+
+        let snap = metrics.snapshot();
+        let t = snap.gateway_series.iter()
+            .find(|s| s.topic == "tick.binance.BTCUSDT").unwrap();
+        assert_eq!(t.latency.count, 2);
+        assert_eq!(t.latency.sum, 6);
+        assert_eq!(snap.gateway_series.len(), 2);
     }
 }

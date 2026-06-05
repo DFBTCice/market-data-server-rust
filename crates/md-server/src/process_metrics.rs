@@ -107,24 +107,15 @@ pub fn render(snap: &ProcessSnapshot, out: &mut String) {
 
     out.push_str("# HELP process_resident_memory_bytes Resident memory size (RSS) in bytes\n");
     out.push_str("# TYPE process_resident_memory_bytes gauge\n");
-    out.push_str(&format!(
-        "process_resident_memory_bytes {}\n",
-        snap.rss_bytes
-    ));
+    out.push_str(&format!("process_resident_memory_bytes {}\n", snap.rss_bytes));
 
     out.push_str("# HELP process_virtual_memory_bytes Virtual memory size in bytes\n");
     out.push_str("# TYPE process_virtual_memory_bytes gauge\n");
-    out.push_str(&format!(
-        "process_virtual_memory_bytes {}\n",
-        snap.vms_bytes
-    ));
+    out.push_str(&format!("process_virtual_memory_bytes {}\n", snap.vms_bytes));
 
     out.push_str("# HELP process_cpu_seconds_total Total user + system CPU time spent (seconds)\n");
     out.push_str("# TYPE process_cpu_seconds_total counter\n");
-    out.push_str(&format!(
-        "process_cpu_seconds_total {}\n",
-        snap.cpu_seconds_total
-    ));
+    out.push_str(&format!("process_cpu_seconds_total {}\n", snap.cpu_seconds_total));
 
     out.push_str("# HELP process_open_fds Number of open file descriptors\n");
     out.push_str("# TYPE process_open_fds gauge\n");
@@ -134,14 +125,9 @@ pub fn render(snap: &ProcessSnapshot, out: &mut String) {
     out.push_str("# TYPE process_max_fds gauge\n");
     out.push_str(&format!("process_max_fds {}\n", snap.max_fds));
 
-    out.push_str(
-        "# HELP process_start_time_seconds Start time of the process since unix epoch (seconds)\n",
-    );
+    out.push_str("# HELP process_start_time_seconds Start time of the process since unix epoch (seconds)\n");
     out.push_str("# TYPE process_start_time_seconds gauge\n");
-    out.push_str(&format!(
-        "process_start_time_seconds {}\n",
-        snap.start_time_seconds
-    ));
+    out.push_str(&format!("process_start_time_seconds {}\n", snap.start_time_seconds));
 
     out.push_str("# HELP process_uptime_seconds Uptime of the process (seconds)\n");
     out.push_str("# TYPE process_uptime_seconds gauge\n");

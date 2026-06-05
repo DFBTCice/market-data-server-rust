@@ -3,7 +3,7 @@ pub mod binance;
 pub mod okx;
 
 use async_trait::async_trait;
-use md_domain::types::{Kline, Tick};
+use md_domain::types::{Tick, Kline};
 use std::fmt;
 use std::time::Duration;
 
@@ -65,14 +65,8 @@ pub trait Connector: Send + Sync {
     fn name(&self) -> &str;
     async fn start(&self) -> Result<(), ConnectorError>;
     async fn stop(&self) -> Result<(), ConnectorError>;
-    async fn add_subscriptions(
-        &self,
-        targets: Vec<SubscriptionTarget>,
-    ) -> Result<(), ConnectorError>;
-    async fn remove_subscriptions(
-        &self,
-        targets: Vec<SubscriptionTarget>,
-    ) -> Result<(), ConnectorError>;
+    async fn add_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError>;
+    async fn remove_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError>;
     fn current_subscriptions(&self) -> Vec<SubscriptionTarget>;
 }
 

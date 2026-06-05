@@ -32,7 +32,9 @@ impl MarketDataService for MarketDataServiceImpl {
             return Err(Status::invalid_argument("exchange is required"));
         }
         if req.symbols.is_empty() {
-            return Err(Status::invalid_argument("at least one symbol is required"));
+            return Err(Status::invalid_argument(
+                "at least one symbol is required",
+            ));
         }
 
         let processor = self.processor.clone();
@@ -48,6 +50,7 @@ impl MarketDataService for MarketDataServiceImpl {
             let tx = tx.clone();
 
             let metrics = processor.metrics.clone();
+            let topic_for_metric = topic.clone();
             tokio::spawn(async move {
                 loop {
                     match sub.rx.recv().await {
@@ -57,9 +60,7 @@ impl MarketDataService for MarketDataServiceImpl {
                                 break; // 客户端断开
                             }
                             metrics.ws_message_sent("tick");
-                            metrics.record_gateway_forward_latency_ms(
-                                emit_at.elapsed().as_millis() as u64,
-                            );
+                            metrics.record_gateway_forward_latency_ms(&topic_for_metric, emit_at.elapsed().as_millis() as u64);
                         }
                         Ok(_) => {} // 忽略非 Tick 事件
                         Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
@@ -97,7 +98,9 @@ impl MarketDataService for MarketDataServiceImpl {
             return Err(Status::invalid_argument("exchange is required"));
         }
         if req.symbols.is_empty() {
-            return Err(Status::invalid_argument("at least one symbol is required"));
+            return Err(Status::invalid_argument(
+                "at least one symbol is required",
+            ));
         }
         if req.kline_interval.is_empty() {
             return Err(Status::invalid_argument(
@@ -118,6 +121,7 @@ impl MarketDataService for MarketDataServiceImpl {
             let tx = tx.clone();
 
             let metrics = processor.metrics.clone();
+            let topic_for_metric = topic.clone();
             tokio::spawn(async move {
                 loop {
                     match sub.rx.recv().await {
@@ -127,9 +131,7 @@ impl MarketDataService for MarketDataServiceImpl {
                                 break;
                             }
                             metrics.ws_message_sent("kline");
-                            metrics.record_gateway_forward_latency_ms(
-                                emit_at.elapsed().as_millis() as u64,
-                            );
+                            metrics.record_gateway_forward_latency_ms(&topic_for_metric, emit_at.elapsed().as_millis() as u64);
                         }
                         Ok(_) => {}
                         Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
@@ -406,6 +408,9 @@ mod tests {
             limit: 100,
         });
         let result = svc.get_historical_klines(req).await;
-        assert_eq!(result.unwrap_err().code(), tonic::Code::Unimplemented);
+        assert_eq!(
+            result.unwrap_err().code(),
+            tonic::Code::Unimplemented
+        );
     }
 }

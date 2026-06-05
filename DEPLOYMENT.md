@@ -58,6 +58,29 @@ cargo build --release
 ls -lh target/release/md-server
 ```
 
+#### 2.1.1 交叉编译静态二进制（macOS → x86_64 Linux，无需在 Linux 上编译）
+
+适用于"开发机是 macOS、目标是 x86_64 Linux 服务器，且不想用 Docker 编译"的场景。
+产物为**全静态（musl）、零运行期依赖**的 ELF，可直接拷到任意 x86_64 Linux 运行：
+
+```bash
+# 一次性准备工具链
+brew install zig                       # 提供跨平台 C 链接器
+cargo install cargo-zigbuild
+rustup target add x86_64-unknown-linux-musl
+
+# 编译；vendored-tls 让 OpenSSL 随源码静态编译（md-connector 的可选 feature，默认关闭）
+cargo zigbuild -p md-server --release \
+  --target x86_64-unknown-linux-musl \
+  --features md-connector/vendored-tls
+
+# 产物：target/x86_64-unknown-linux-musl/release/md-server
+file target/x86_64-unknown-linux-musl/release/md-server
+#   ELF 64-bit LSB executable, x86-64, statically linked, stripped
+```
+
+> 拷到服务器后即可按 §2.2 / §3 部署，目标机**无需安装** Rust、glibc 版本、libssl 等任何依赖。
+
 ### 2.2 部署到服务器
 
 ```bash
@@ -310,6 +333,69 @@ docker-compose logs -f md-server
 docker-compose down
 ```
 
+### 4.5 国内/内网镜像加速构建（Dockerfile.cn）
+
+当 Docker 守护进程所在主机**无法稳定访问 Docker Hub / crates.io**（如国内服务器）时，
+直接用标准 `Dockerfile` 会在 `FROM rust:...` 或下载 crates 时超时。仓库内附带等价的
+`Dockerfile.cn`，仅把外部源替换为国内镜像，逻辑与 `Dockerfile` 完全一致：
+
+| 资源 | 标准 Dockerfile | Dockerfile.cn |
+|------|-----------------|---------------|
+| 基础镜像 | `rust` / `debian`（Docker Hub） | `docker.m.daocloud.io/library/...` |
+| apt 源 | `deb.debian.org` | `mirrors.aliyun.com` |
+| crates 源 | `crates.io` | `rsproxy.cn` 稀疏索引 |
+
+```bash
+docker build -t md-server:latest -f Dockerfile.cn .
+```
+
+### 4.6 通过 Portainer API 远程一键替换部署
+
+无法直接登录目标主机、但有 Portainer 时，可用其代理的 Docker API 远程构建并替换容器。
+以下为本项目实际使用、可复制的"零停机回滚友好"流程（`EP` 为端点 ID，本机部署一般为 `local`）：
+
+```bash
+PORTAINER=http://<portainer-host>:9000
+EP=3   # GET /api/endpoints 查询目标端点 ID
+
+# 1. 认证拿 JWT
+JWT=$(curl -s -X POST "$PORTAINER/api/auth" \
+  -H 'Content-Type: application/json' \
+  -d '{"Username":"admin","Password":"<password>"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['jwt'])")
+B="$PORTAINER/api/endpoints/$EP/docker"
+
+# 2. 打包构建上下文（macOS 必须去掉扩展属性，否则远端解包报 xattr 错误）
+COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata \
+  --exclude='./target' --exclude='./.git' --exclude='./.DS_Store' -cf /tmp/ctx.tar .
+
+# 3. 在远端原生构建镜像（架构与目标主机一致，避免跨架构）
+curl -s -X POST "$B/build?t=md-server:latest&dockerfile=Dockerfile.cn" \
+  -H "Authorization: Bearer $JWT" -H 'Content-Type: application/x-tar' \
+  --data-binary @/tmp/ctx.tar
+
+# 4. 旧容器改名+停止（保留作回滚），再用新镜像创建同名容器
+curl -s -X POST "$B/containers/md-server/rename?name=md-server-bak" -H "Authorization: Bearer $JWT"
+curl -s -X POST "$B/containers/md-server-bak/stop"                  -H "Authorization: Bearer $JWT"
+curl -s -X POST "$B/containers/create?name=md-server" -H "Authorization: Bearer $JWT" \
+  -H 'Content-Type: application/json' -d '{
+    "Image":"md-server:latest",
+    "Env":["RUST_LOG=warn","TZ=Asia/Shanghai"],
+    "ExposedPorts":{"8081/tcp":{},"50051/tcp":{}},
+    "HostConfig":{
+      "PortBindings":{"8081/tcp":[{"HostPort":"8081"}],"50051/tcp":[{"HostPort":"50051"}]},
+      "RestartPolicy":{"Name":"unless-stopped"},
+      "Memory":536870912,"NanoCpus":2000000000,"NetworkMode":"bridge"
+    }}'
+# 取返回的 Id 后启动
+curl -s -X POST "$B/containers/<new-id>/start" -H "Authorization: Bearer $JWT"
+
+# 5. 验证 healthy 后删除回滚备份
+curl -s http://<portainer-host>:8081/health        # {"status":"ok"}
+curl -s -X DELETE "$B/containers/md-server-bak?force=true" -H "Authorization: Bearer $JWT"
+```
+
+> 配置 `config.yaml` 已在镜像构建阶段 `COPY` 进 `/etc/md-server/`，无需额外挂载卷。
+
 ---
 
 ## 5. 日志管理
@@ -555,23 +641,56 @@ curl http://localhost:8081/metrics
 
 | 指标名 | 类型 | 标签 | 含义 | 对应 Go 面板 |
 |---|---|---|---|---|
-| `md_ticks_processed` | counter | — | 入库 Tick 累计（全局） | 数据吞吐量 |
-| `md_klines_processed` | counter | — | 入库 Kline 累计（全局） | 数据吞吐量 |
-| `md_data_ingested_total` | counter | `exchange,kind` | 入库累计（按交易所+类型） | 数据采集吞吐量（按交易所+类型） |
+| `md_ticks_processed` | counter | — | 入库 Tick 累计（全局，顶部 stat 备用） | 数据吞吐量 |
+| `md_klines_processed` | counter | — | 入库 Kline 累计（全局，顶部 stat 备用） | 数据吞吐量 |
 | `md_ticks_dropped` | counter | — | mpsc 满丢弃的 Tick | 消息丢弃率 |
 | `md_klines_dropped` | counter | — | mpsc 满丢弃的 Kline | 消息丢弃率 |
 
-#### 7.2.2 延迟（histogram）
+> 吞吐量推荐直接用核心多维指标的 `_count`（见 7.2.2），可任意按交易所/标的/周期聚合。
 
-| 指标名 | 标签 | 含义 | 对应 Go 面板 |
-|---|---|---|---|
-| `md_ingestion_latency_milliseconds_*` | — | 全局入库延迟（exchange_event_ts → connector_receive_ts） | — |
-| `md_ingestion_latency_per_exchange_ms_*` | `exchange,kind` | 按交易所+类型的入库延迟 | Tick/Kline 采集延迟 P50/P99 |
-| `md_gateway_forward_latency_ms_*` | — | 网关内部转发延迟（publish→ws_send 完成） | 网关内部延迟 P50/P99 |
+#### 7.2.2 入库延迟 / 吞吐（核心多维 histogram）
+
+**一个指标，多维聚合**，完全对标 Go 版 `marketdata_processor_ingestion_latency_ms`：
+
+| 指标名 | 标签 | 含义 |
+|---|---|---|
+| `md_ingestion_latency_ms_*` | `exchange, type, symbol, interval` | 入库延迟（exchange_event_ts → connector_receive_ts）。`type`=tick/kline；Tick 的 `interval` 为空 |
+
+由它聚合出 Go 版所有延迟/吞吐面板：
+
+```promql
+# 按交易所（面板：Tick/Kline 采集延迟）
+histogram_quantile(0.99, sum by (exchange,le) (rate(md_ingestion_latency_ms_bucket{type="tick"}[5m])))
+
+# 按交易对（标的）（面板：Tick 采集延迟 — 按交易对）
+histogram_quantile(0.99, sum by (exchange,symbol,le) (rate(md_ingestion_latency_ms_bucket{type="tick"}[5m])))
+
+# 按交易对 + 周期（面板：Kline 采集延迟 — 按交易对 + 周期）
+histogram_quantile(0.99, sum by (exchange,symbol,interval,le) (rate(md_ingestion_latency_ms_bucket{type="kline"}[5m])))
+
+# 吞吐量（用 _count）：按交易所+类型 / 按标的
+sum by (exchange,type) (rate(md_ingestion_latency_ms_count[1m]))
+topk(10, sum by (exchange,symbol,type) (rate(md_ingestion_latency_ms_count[1m])))
+```
+
+#### 7.2.3 网关内部延迟（按 topic）
+
+| 指标名 | 标签 | 含义 |
+|---|---|---|
+| `md_gateway_internal_latency_ms_*` | `topic` | 网关内部转发延迟（publish→client send 完成），对标 Go `marketdata_gateway_internal_latency_ms` |
+
+```promql
+# 总体延迟（面板：网关内部延迟）
+histogram_quantile(0.99, sum by (le) (rate(md_gateway_internal_latency_ms_bucket[5m])))
+# 按 topic 推送吞吐 TOP10（面板：网关推送吞吐量 TOP10）
+topk(10, sum by (topic) (rate(md_gateway_internal_latency_ms_count[1m])))
+```
 
 桶边界：入库延迟 1ms~5s（11 桶），网关延迟 1ms~500ms（9 桶）。
 
-#### 7.2.3 连接器健康
+> 基数说明：本系统只订阅自有策略所需的少量标的，`md_ingestion_latency_ms` 与 `md_gateway_internal_latency_ms` 的序列数 = 交易所 × 标的 × 周期，通常数十条，基数完全可控。
+
+#### 7.2.4 连接器健康
 
 | 指标名 | 类型 | 标签 | 含义 |
 |---|---|---|---|
@@ -579,7 +698,7 @@ curl http://localhost:8081/metrics
 | `md_connector_reconnect_total` | counter | `exchange` | 累计重连次数 |
 | `md_connector_subscribe_failed_total` | counter | `exchange` | 累计订阅失败次数 |
 
-#### 7.2.4 网关 / WebSocket
+#### 7.2.5 网关 / WebSocket
 
 | 指标名 | 类型 | 标签 | 含义 | 对应 Go 面板 |
 |---|---|---|---|---|
@@ -590,7 +709,7 @@ curl http://localhost:8081/metrics
 
 > 说明：当某个 WS 客户端连续 3 次出现 broadcast lagged，会被自动踢出（`md_ws_kicked_lagged_total +1`），防止僵尸客户端拖累 broadcast channel。
 
-#### 7.2.5 进程级（标准 Prometheus，与 Go process_exporter 等价）
+#### 7.2.6 进程级（标准 Prometheus，与 Go process_exporter 等价）
 
 | 指标名 | 类型 | 含义 |
 |---|---|---|
@@ -632,14 +751,17 @@ rest重构/dashboards/md-server-rust.json
 # 3. 选择 Prometheus 数据源
 ```
 
-dashboard 包含以下分组（对照 Go 原 dashboard）：
+dashboard 包含以下分组（对照 Go 原 dashboard，含交易所 + 标的多维度）：
 
 1. **🩺 系统健康总览** — 数据流状态 / 活跃 WS 连接数 / 慢客户端踢出 / 消息丢弃 / 广播 lagged / 数据吞吐量
 2. **⏱ 延迟分析** — Tick / Kline / 网关 三视图，按交易所 P50/P99
-3. **📈 吞吐量分析** — 数据采集吞吐（按交易所+类型）、网关推送吞吐
-4. **🚨 异常事件监控** — 消息丢弃率 / 广播 lagged 速率 / 慢客户端踢出速率
-5. **🔌 连接器健康** — 连接状态 / 重连次数 / 订阅失败
-6. **🦀 Rust 进程指标** — CPU 使用率 / RSS+VMS / fd 数量 / Uptime
+3. **🔍 延迟分位数明细（按交易对 / 标的）** — Tick 按交易对、Kline 按交易对+周期 P50/P99
+4. **📈 吞吐量分析** — 按交易所+类型、按交易对 TOP10、网关推送 TOP10（按 topic）
+5. **🚨 异常事件监控** — 消息丢弃率 / 广播 lagged 速率 / 慢客户端踢出速率
+6. **🔌 连接器健康** — 连接状态 / 重连次数 / 订阅失败
+7. **🦀 Rust 进程指标** — CPU 使用率 / RSS+VMS / fd 数量 / Uptime
+
+dashboard 顶部提供 `交易所` 和 `交易对（标的）` 两个下拉变量，可按标的过滤所有延迟/吞吐面板。
 
 ### 7.5 告警规则（生产建议）
 
@@ -679,11 +801,11 @@ groups:
 
       # ---- P1 警告（性能下降） ----
       - alert: HighIngestionLatency
-        expr: histogram_quantile(0.99, sum by (exchange,kind,le) (rate(md_ingestion_latency_per_exchange_ms_bucket[5m]))) > 500
+        expr: histogram_quantile(0.99, sum by (exchange,type,le) (rate(md_ingestion_latency_ms_bucket[5m]))) > 500
         for: 5m
         labels: { severity: warning }
         annotations:
-          summary: "{{ $labels.exchange }} {{ $labels.kind }} P99 延迟 > 500ms"
+          summary: "{{ $labels.exchange }} {{ $labels.type }} P99 延迟 > 500ms"
 
       - alert: BroadcastLagged
         expr: rate(md_broadcast_lagged_total{job="md-server"}[5m]) > 0.1
@@ -722,7 +844,7 @@ groups:
           summary: "fd 使用率 > 80%"
 
       - alert: GatewayForwardLatencyHigh
-        expr: histogram_quantile(0.99, sum by (le) (rate(md_gateway_forward_latency_ms_bucket[5m]))) > 50
+        expr: histogram_quantile(0.99, sum by (le) (rate(md_gateway_internal_latency_ms_bucket[5m]))) > 50
         for: 5m
         labels: { severity: warning }
         annotations:

@@ -96,23 +96,14 @@ async fn legacy_ws_handler(
 }
 
 /// Gateway WebSocket 处理
-async fn handle_gateway_ws(
-    socket: WebSocket,
-    processor: Arc<Processor>,
-    metrics: Arc<md_processor::ProcessorMetrics>,
-) {
+async fn handle_gateway_ws(socket: WebSocket, processor: Arc<Processor>, metrics: Arc<md_processor::ProcessorMetrics>) {
     let (mut sender, mut receiver) = socket.split();
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: HashSet<String> = HashSet::new();
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
-    info!(
-        "Gateway WebSocket client connected (active={})",
-        metrics
-            .ws_active_clients
-            .load(std::sync::atomic::Ordering::Relaxed)
-    );
+    info!("Gateway WebSocket client connected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
 
     loop {
         tokio::select! {
@@ -133,7 +124,7 @@ async fn handle_gateway_ws(
                                                     status: "success".into(),
                                                     stream: stream.clone(),
                                                 };
-                                                let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
+                                                let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
                                             }
                                         }
                                     }
@@ -145,18 +136,18 @@ async fn handle_gateway_ws(
                                                 status: "success".into(),
                                                 stream: stream.clone(),
                                             };
-                                            let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
+                                            let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
                                         }
                                     }
                                     _ => {
                                         let err = WsError { error: format!("unknown action: {}", req.action) };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
                                     }
                                 }
                             }
                             Err(e) => {
                                 let err = WsError { error: format!("invalid request: {}", e) };
-                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
+                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
                             }
                         }
                     }
@@ -172,12 +163,12 @@ async fn handle_gateway_ws(
                         let kind = broadcast_event.kind();
                         let emit_at = broadcast_event.emit_instant();
                         let json = build_gateway_message(&topic_str, &broadcast_event);
-                        if sender.send(Message::Text(json)).await.is_err() {
+                        if sender.send(Message::Text(json.into())).await.is_err() {
                             break;
                         }
                         metrics.ws_message_sent(kind);
                         let elapsed_ms = emit_at.elapsed().as_millis() as u64;
-                        metrics.record_gateway_forward_latency_ms(elapsed_ms);
+                        metrics.record_gateway_forward_latency_ms(&topic_str, elapsed_ms);
                     }
                     RecvOutcome::Lagged => {
                         lagged_count = lagged_count.saturating_add(1);
@@ -194,12 +185,7 @@ async fn handle_gateway_ws(
     }
 
     metrics.ws_client_disconnected();
-    info!(
-        "Gateway WebSocket client disconnected (active={})",
-        metrics
-            .ws_active_clients
-            .load(std::sync::atomic::Ordering::Relaxed)
-    );
+    info!("Gateway WebSocket client disconnected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
 }
 
 /// 接收结果分类（用于上层判断是否需要踢出客户端）
@@ -241,10 +227,7 @@ async fn recv_from_subscriptions(
             // 记录 lagged 事件（按 topic 类型分类）
             let kind = detect_topic_kind_from_subscriptions(topics);
             metrics.record_broadcast_lagged(kind);
-            warn!(
-                "broadcast lagged ({} messages dropped), topic_kind={}",
-                n, kind
-            );
+            warn!("broadcast lagged ({} messages dropped), topic_kind={}", n, kind);
             RecvOutcome::Lagged
         }
         Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,
@@ -261,14 +244,9 @@ fn event_matches_topic(event: &BroadcastEvent, topic_str: &str) -> bool {
         (BroadcastEvent::Tick(tick, _), md_domain::topic::Topic::Tick { exchange, symbol }) => {
             tick.exchange == exchange && tick.symbol == symbol
         }
-        (
-            BroadcastEvent::Kline(kline, _),
-            md_domain::topic::Topic::Kline {
-                interval,
-                exchange,
-                symbol,
-            },
-        ) => kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol,
+        (BroadcastEvent::Kline(kline, _), md_domain::topic::Topic::Kline { interval, exchange, symbol }) => {
+            kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol
+        }
         _ => false,
     }
 }
@@ -300,23 +278,14 @@ fn detect_topic_kind_from_topics(topics: &[String]) -> &str {
 }
 
 /// Legacy WebSocket 处理
-async fn handle_legacy_ws(
-    socket: WebSocket,
-    processor: Arc<Processor>,
-    metrics: Arc<md_processor::ProcessorMetrics>,
-) {
+async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics: Arc<md_processor::ProcessorMetrics>) {
     let (mut sender, mut receiver) = socket.split();
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: Vec<String> = Vec::new();
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
-    info!(
-        "Legacy WebSocket client connected (active={})",
-        metrics
-            .ws_active_clients
-            .load(std::sync::atomic::Ordering::Relaxed)
-    );
+    info!("Legacy WebSocket client connected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
 
     loop {
         tokio::select! {
@@ -340,7 +309,7 @@ async fn handle_legacy_ws(
                                             status: "success".into(),
                                             topics: topics.clone(),
                                         };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
                                     }
                                     "unsubscribe" => {
                                         subscriptions.clear();
@@ -350,17 +319,17 @@ async fn handle_legacy_ws(
                                             status: "success".into(),
                                             topics_unsubscribed: "all".into(),
                                         };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
                                     }
                                     _ => {
                                         let err = WsError { error: format!("unknown op: {}", req.op) };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
+                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
                                     }
                                 }
                             }
                             Err(e) => {
                                 let err = WsError { error: format!("invalid request: {}", e) };
-                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
+                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
                             }
                         }
                     }
@@ -376,12 +345,12 @@ async fn handle_legacy_ws(
                         let kind = broadcast_event.kind();
                         let emit_at = broadcast_event.emit_instant();
                         let json = build_legacy_message(&topic_str, &broadcast_event);
-                        if sender.send(Message::Text(json)).await.is_err() {
+                        if sender.send(Message::Text(json.into())).await.is_err() {
                             break;
                         }
                         metrics.ws_message_sent(kind);
                         let elapsed_ms = emit_at.elapsed().as_millis() as u64;
-                        metrics.record_gateway_forward_latency_ms(elapsed_ms);
+                        metrics.record_gateway_forward_latency_ms(&topic_str, elapsed_ms);
                     }
                     RecvOutcome::Lagged => {
                         lagged_count = lagged_count.saturating_add(1);
@@ -398,12 +367,7 @@ async fn handle_legacy_ws(
     }
 
     metrics.ws_client_disconnected();
-    info!(
-        "Legacy WebSocket client disconnected (active={})",
-        metrics
-            .ws_active_clients
-            .load(std::sync::atomic::Ordering::Relaxed)
-    );
+    info!("Legacy WebSocket client disconnected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
 }
 
 /// 从所有 subscription 中接收下一个事件（Legacy 模式，返回第一个匹配的 topic）
@@ -433,10 +397,7 @@ async fn recv_from_subscriptions_legacy(
         Err(broadcast::error::RecvError::Lagged(n)) => {
             let kind = detect_topic_kind_from_topics(topics);
             metrics.record_broadcast_lagged(kind);
-            warn!(
-                "broadcast lagged ({} messages dropped), topic_kind={}",
-                n, kind
-            );
+            warn!("broadcast lagged ({} messages dropped), topic_kind={}", n, kind);
             RecvOutcome::Lagged
         }
         Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,

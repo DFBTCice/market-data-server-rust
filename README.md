@@ -47,6 +47,38 @@ Go 版 `market-data-server` 的 Rust 1:1 重写。聚合 Binance、OKX 实时行
 cargo build --release
 ```
 
+#### 交叉编译静态 Linux 二进制（macOS → x86_64 Linux，非 Docker）
+
+在 macOS（Apple Silicon）上直接产出**全静态、零依赖**的 x86_64 Linux 可执行文件，
+可拷到任意 x86_64 Linux 上 `./md-server --config config.yaml` 直接运行（无需 glibc/openssl）：
+
+```bash
+# 一次性准备工具链
+brew install zig
+cargo install cargo-zigbuild
+rustup target add x86_64-unknown-linux-musl
+
+# 编译（vendored-tls 让 OpenSSL 随源码静态编译，仅交叉编译时启用）
+cargo zigbuild -p md-server --release \
+  --target x86_64-unknown-linux-musl \
+  --features md-connector/vendored-tls
+
+# 产物：target/x86_64-unknown-linux-musl/release/md-server
+#   ELF 64-bit x86-64, statically linked, stripped
+```
+
+### Docker 部署
+
+```bash
+# 标准构建（可直连 Docker Hub / crates.io 的环境）
+docker build -t md-server:latest .
+
+# 国内/内网环境：基础镜像走 daocloud、apt 走阿里云、crates 走 rsproxy
+docker build -t md-server:latest -f Dockerfile.cn .
+```
+
+详见 [DEPLOYMENT.md §4](DEPLOYMENT.md#4-docker-部署)（含 Portainer API 一键替换部署流程）。
+
 ### 运行
 
 ```bash
@@ -236,11 +268,13 @@ scrape_configs:
     metrics_path: '/metrics'
 ```
 
-暴露的指标：
-- `md_ticks_processed` — 已处理 Tick 总数
-- `md_klines_processed` — 已处理 Kline 总数
-- `md_ticks_dropped` — Tick 丢弃数（channel 满）
-- `md_klines_dropped` — Kline 丢弃数（channel 满）
+主要指标（完整列表见 [DEPLOYMENT.md §7.2](DEPLOYMENT.md#72-prometheus-指标全集)）：
+- `md_ticks_processed` / `md_klines_processed` — 已处理 Tick/Kline 总数
+- `md_ticks_dropped` / `md_klines_dropped` — 丢弃数（channel 满）
+- `md_ingestion_latency_ms{exchange,type,symbol,interval}` — 多维入库延迟直方图
+- `md_gateway_internal_latency_ms{topic}` — 网关内部转发延迟直方图
+- `md_ws_active_clients` / `md_ws_kicked_lagged_total` — WebSocket 活跃连接 / 慢客户端踢出
+- `process_resident_memory_bytes` / `process_cpu_seconds_total` / `process_open_fds` … — 标准进程指标
 
 ## 已知差异
 

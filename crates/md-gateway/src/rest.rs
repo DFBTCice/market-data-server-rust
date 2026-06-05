@@ -74,7 +74,9 @@ pub fn routes(
 }
 
 /// GET /api/v1/subscriptions
-async fn get_subscriptions(State(state): State<AppState>) -> impl IntoResponse {
+async fn get_subscriptions(
+    State(state): State<AppState>,
+) -> impl IntoResponse {
     let connectors = state.connectors.read().await;
     let mut subs = Vec::new();
 
@@ -101,46 +103,20 @@ async fn add_subscription(
     Json(req): Json<SubscriptionRequest>,
 ) -> impl IntoResponse {
     if req.exchange.is_empty() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "exchange is required".into(),
-            }),
-        )
-            .into_response();
+        return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "exchange is required".into() })).into_response();
     }
     if req.symbols.is_empty() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "at least one symbol is required".into(),
-            }),
-        )
-            .into_response();
+        return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "at least one symbol is required".into() })).into_response();
     }
 
     let data_type = match req.data_type.to_uppercase().as_str() {
         "TICK" => md_connector::DataType::Tick,
         "KLINE" => md_connector::DataType::Kline,
-        _ => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(ErrorResponse {
-                    error: "type must be TICK or KLINE".into(),
-                }),
-            )
-                .into_response()
-        }
+        _ => return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "type must be TICK or KLINE".into() })).into_response(),
     };
 
     if data_type == md_connector::DataType::Kline && req.interval.is_empty() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "interval is required for KLINE".into(),
-            }),
-        )
-            .into_response();
+        return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "interval is required for KLINE".into() })).into_response();
     }
 
     let connectors = state.connectors.read().await;
@@ -151,26 +127,13 @@ async fn add_subscription(
     } else {
         exchange_key.clone()
     };
-    let connector = match connectors
-        .get(&connector_key)
-        .or_else(|| connectors.get(&exchange_key))
-    {
+    let connector = match connectors.get(&connector_key).or_else(|| connectors.get(&exchange_key)) {
         Some(c) => c,
-        None => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    error: format!("connector not found: {}", req.exchange),
-                }),
-            )
-                .into_response()
-        }
+        None => return (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("connector not found: {}", req.exchange) })).into_response(),
     };
 
-    let targets: Vec<md_connector::SubscriptionTarget> = req
-        .symbols
-        .iter()
-        .map(|sym| md_connector::SubscriptionTarget {
+    let targets: Vec<md_connector::SubscriptionTarget> = req.symbols.iter().map(|sym| {
+        md_connector::SubscriptionTarget {
             exchange: exchange_key.clone(),
             data_type,
             symbol: sym.clone(),
@@ -179,18 +142,12 @@ async fn add_subscription(
             } else {
                 None
             },
-        })
-        .collect();
+        }
+    }).collect();
 
     match connector.add_subscriptions(targets).await {
         Ok(()) => (StatusCode::OK, Json(serde_json::json!({"success": true}))).into_response(),
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                error: e.to_string(),
-            }),
-        )
-            .into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse { error: e.to_string() })).into_response(),
     }
 }
 
@@ -200,27 +157,13 @@ async fn remove_subscription(
     Json(req): Json<SubscriptionRequest>,
 ) -> impl IntoResponse {
     if req.exchange.is_empty() || req.symbols.is_empty() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "exchange and symbols are required".into(),
-            }),
-        )
-            .into_response();
+        return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "exchange and symbols are required".into() })).into_response();
     }
 
     let data_type = match req.data_type.to_uppercase().as_str() {
         "TICK" => md_connector::DataType::Tick,
         "KLINE" => md_connector::DataType::Kline,
-        _ => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(ErrorResponse {
-                    error: "type must be TICK or KLINE".into(),
-                }),
-            )
-                .into_response()
-        }
+        _ => return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "type must be TICK or KLINE".into() })).into_response(),
     };
 
     let connectors = state.connectors.read().await;
@@ -230,26 +173,13 @@ async fn remove_subscription(
     } else {
         exchange_key.clone()
     };
-    let connector = match connectors
-        .get(&connector_key)
-        .or_else(|| connectors.get(&exchange_key))
-    {
+    let connector = match connectors.get(&connector_key).or_else(|| connectors.get(&exchange_key)) {
         Some(c) => c,
-        None => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    error: format!("connector not found: {}", req.exchange),
-                }),
-            )
-                .into_response()
-        }
+        None => return (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("connector not found: {}", req.exchange) })).into_response(),
     };
 
-    let targets: Vec<md_connector::SubscriptionTarget> = req
-        .symbols
-        .iter()
-        .map(|sym| md_connector::SubscriptionTarget {
+    let targets: Vec<md_connector::SubscriptionTarget> = req.symbols.iter().map(|sym| {
+        md_connector::SubscriptionTarget {
             exchange: exchange_key.clone(),
             data_type,
             symbol: sym.clone(),
@@ -258,18 +188,12 @@ async fn remove_subscription(
             } else {
                 None
             },
-        })
-        .collect();
+        }
+    }).collect();
 
     match connector.remove_subscriptions(targets).await {
         Ok(()) => (StatusCode::OK, Json(serde_json::json!({"success": true}))).into_response(),
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                error: e.to_string(),
-            }),
-        )
-            .into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse { error: e.to_string() })).into_response(),
     }
 }
 
@@ -280,13 +204,7 @@ async fn get_latest_tick(
 ) -> impl IntoResponse {
     match state.processor.get_latest_tick(&exchange, &symbol) {
         Some(tick) => (StatusCode::OK, Json(tick.as_ref().clone())).into_response(),
-        None => (
-            StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                error: format!("no tick data for {}:{}", exchange, symbol),
-            }),
-        )
-            .into_response(),
+        None => (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("no tick data for {}:{}", exchange, symbol) })).into_response(),
     }
 }
 
@@ -295,17 +213,8 @@ async fn get_latest_kline(
     State(state): State<AppState>,
     Path((exchange, symbol, interval)): Path<(String, String, String)>,
 ) -> impl IntoResponse {
-    match state
-        .processor
-        .get_latest_kline(&exchange, &symbol, &interval)
-    {
+    match state.processor.get_latest_kline(&exchange, &symbol, &interval) {
         Some(kline) => (StatusCode::OK, Json(kline.as_ref().clone())).into_response(),
-        None => (
-            StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                error: format!("no kline data for {}:{}:{}", exchange, symbol, interval),
-            }),
-        )
-            .into_response(),
+        None => (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("no kline data for {}:{}:{}", exchange, symbol, interval) })).into_response(),
     }
 }

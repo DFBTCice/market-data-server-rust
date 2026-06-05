@@ -1,0 +1,43 @@
+# 多阶段构建（国内镜像加速版，用于 192.168.x 内网 Debian 服务器部署）
+# 与 Dockerfile 等价，仅把基础镜像/apt/crates 源换成国内镜像，避免 Docker Hub / crates.io 拉取超时
+FROM docker.m.daocloud.io/library/rust:1.86-slim AS builder
+
+# apt 换阿里云源（兼容 bookworm 的 deb822 与传统 sources.list 两种格式）
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources 2>/dev/null || true
+
+# crates 换 rsproxy.cn 稀疏索引，加速依赖下载
+RUN mkdir -p "$CARGO_HOME" && printf '[source.crates-io]\nreplace-with = "rsproxy-sparse"\n[source.rsproxy-sparse]\nregistry = "sparse+https://rsproxy.cn/index/"\n' > "$CARGO_HOME/config.toml"
+
+RUN apt-get update && apt-get install -y pkg-config libssl-dev protobuf-compiler && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+# 运行阶段
+FROM docker.m.daocloud.io/library/debian:bookworm-slim
+
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources 2>/dev/null || true
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -r -s /bin/false md-user
+
+COPY --from=builder /app/target/release/md-server /usr/local/bin/
+
+RUN mkdir -p /etc/md-server /var/log/md-server \
+    && chown -R md-user:md-user /var/log/md-server
+
+COPY config.yaml /etc/md-server/
+
+USER md-user
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8081/health || exit 1
+
+EXPOSE 8081 50051
+
+CMD ["md-server", "--config", "/etc/md-server/config.yaml"]

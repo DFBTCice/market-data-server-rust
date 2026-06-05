@@ -16,4 +16,9 @@ async-trait = "0.1"
 url = "2"
 socket2 = "0.5"
 
+[features]
+# 默认不启用；仅在交叉编译（如本机 macOS -> x86_64 Linux）时启用，
+# 让 OpenSSL 随源码一起静态编译，避免依赖目标平台的 libssl。
+vendored-tls = ["tokio-tungstenite/native-tls-vendored"]
+
 [dev-dependencies]
