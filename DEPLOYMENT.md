@@ -1083,6 +1083,52 @@ sudo cp /opt/md-server/bin/md-server.bak /opt/md-server/bin/md-server
 sudo systemctl start md-server
 ```
 
+### 12.1 升级到 1.1.0 并启用 quote（分阶段，可回滚）
+
+1.1.0 新增 `quote.*` 报价主题（说明见 [README「Quote 报价主题」](README.md#quote-报价主题110-新增)），
+默认关闭，**只增不改**：不改配置升级，行为与 1.0.0 一致。建议分三步，每步都可回滚。
+
+**阶段 0：留基线（升级前）**
+
+```bash
+# 记录当前版本/配置、保留 1.0.0 的二进制或镜像（回滚用）
+cp /opt/md-server/bin/md-server /opt/md-server/bin/md-server.1.0.0        # systemd 方式
+cp /opt/md-server/config.yaml    /opt/md-server/config.yaml.1.0.0.bak
+# Docker 方式：记下当前镜像 tag / digest，不要删旧镜像
+
+# 抓 60 秒推送基线 + 订阅列表 + /metrics（升级后对比用）
+node scripts/compat/capture_ws.mjs gateway ws://HOST:8081/ws/v1/data 60 baseline/ws-gateway tick.binance.BNBUSDT tick.okx.BNB-USDT-SWAP
+node scripts/compat/capture_ws.mjs legacy  ws://HOST:8081/ws         60 baseline/ws-legacy  tick.binance.BNBUSDT
+curl -s http://HOST:8081/api/v1/subscriptions > baseline/subscriptions.json
+curl -s http://HOST:8081/metrics               > baseline/metrics.txt
+```
+
+**阶段 1：只升级、不改配置**
+
+1. 部署 1.1.0（二进制或镜像），**沿用现有 `config.yaml`，不加任何新键**；
+2. `curl http://HOST:8081/health`；
+3. 对比：`/api/v1/subscriptions` 与基线一致（注意：通过 REST/gRPC 动态加的订阅不会写回配置，**重启后丢失**，以 `config.yaml` 为准）；
+   再抓 60 秒推送，用 `node scripts/compat/compare.mjs push|subs|metrics|noquote` 对比，要求：
+   tick/kline 去掉 `connector_receive_ts` 后逐字节一致、`/metrics` 只增不减；
+4. 观察 10 分钟 `process_resident_memory_bytes` / `process_cpu_seconds_total` / `process_open_fds` 与升级前同量级；
+5. 任何不一致：立即回滚到阶段 0 保留的 1.0.0。
+
+**阶段 2：小范围启用 quote**
+
+```yaml
+connectors:
+  binance: { quotes_enabled: true, subscribe_quotes: ["BNBUSDT"] }
+  okx:     { quotes_enabled: true, subscribe_quotes: ["BNB-USDT-SWAP"] }
+```
+
+`quotes_enabled` 从 false→true 必须**重启**才能创建 quote 连接器（SIGHUP 只会提示需重启）。
+验证：订阅 `quote.okx.BNB-USDT-SWAP` 抓 60 秒，相邻推送间隔应 ≤2 秒、`bid/ask` 非空；
+同时再次对比 tick/kline（逐字节一致）、旧 `/ws` 抓 30 秒无 `"type":"quote"`。
+
+**阶段 3：扩展品种**——只改 `subscribe_quotes` 后 `kill -HUP` 即可热更（前提：quote 连接器已运行）。
+
+**回滚**：恢复阶段 0 保留的 1.0.0 二进制/镜像与原 `config.yaml`，重启后重复阶段 0 的 60 秒对比确认回到基线。
+
 ---
 
 ## 附录
@@ -1104,6 +1150,8 @@ sudo systemctl start md-server
 | `/api/v1/subscriptions` | GET | 获取订阅列表 |
 | `/api/v1/data/latest/tick/{exchange}/{symbol}` | GET | 获取最新 Tick |
 | `/api/v1/data/latest/kline/{exchange}/{symbol}/{interval}` | GET | 获取最新 Kline |
+| `/api/v1/data/latest/quote/{exchange}/{symbol}` | GET | 获取最新 Quote（1.1.0 新增，需开启 quote 开关） |
+| `/api/v1/subscriptions` | POST / DELETE | 动态增删订阅，`type` = `TICK` / `KLINE` / `QUOTE`（`QUOTE` 为 1.1.0 新增） |
 | `/ws/v1/data` | WebSocket | 实时数据推送（Gateway 模式） |
 | `/ws` | WebSocket | 实时数据推送（Legacy 模式） |
 
@@ -1117,6 +1165,6 @@ sudo systemctl start md-server
 
 ---
 
-**文档版本**: 1.0.0
-**最后更新**: 2026-05-05
+**文档版本**: 1.1.0
+**最后更新**: 2026-10-09
 **维护者**: DevOps Team

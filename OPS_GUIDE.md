@@ -13,6 +13,7 @@
 | 配置项 | 是否热更 | 说明 |
 |--------|---------|------|
 | **订阅列表** | ✅ | `subscribe_ticks`、`subscribe_klines` 的增删会调用 `add_subscriptions` / `remove_subscriptions`，实时生效 |
+| **quote 订阅列表**（1.1.0） | ✅（有前提） | `connectors.{binance,okx}.subscribe_quotes` 的增删实时生效，**前提**是对应 quote 连接器已在运行（启动时 `quotes_enabled=true` 且列表非空）；否则日志提示"quote connector is not running ... requires restart" |
 | `log_level` | ⚠️ **只能检测，无法真正生效** | tracing 不支持运行时改 level，代码里只记录了 `"log_level: info -> debug (applied)"` 日志，实际日志级别不会变 |
 
 ### ❌ 不支持热更（修改后提示需要重启）
@@ -24,6 +25,8 @@
 | `connectors.{binance,okx}.enabled` | 连接器启停需要重建 |
 | `connectors.{binance,okx}.stream_base_url` | URL 变更需要重建连接 |
 | `connectors.{binance,okx}.stream_base_url_public` | 同上 |
+| `connectors.{binance,okx}.quotes_enabled`（1.1.0） | quote 连接器启停需要重建；变更时日志会提示 `quotes_enabled changed ... (requires restart)` |
+| `processor.quote_channel_buffer`（1.1.0） | 同 tick/kline 的通道 buffer，无法 resize |
 | `processor.tick_channel_buffer` | 通道 buffer 已创建，无法 resize |
 | `processor.kline_channel_buffer` | 同上 |
 | `processor.broadcast_capacity` | broadcast channel 已创建，无法 resize |
