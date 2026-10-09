@@ -343,6 +343,9 @@ node scripts/compat/compare.mjs noquote out/new-legacy                       # �
 node scripts/compat/compare.mjs subs old.json new.json [--allow-data-type=3]
 node scripts/compat/compare.mjs metrics old.txt new.txt                      # 只允许新增
 node scripts/compat/compare.mjs selftest                                     # 正对照：证明工具真的能发现差异
+node scripts/compat/analyze_quote.mjs out/new quote.okx.BNB-USDT-SWAP --control tick.okx.BNB-USDT-SWAP   # quote 验收（间隔/节流/非空/字段序/正对照）
+node scripts/compat/restore_subs.mjs before-subscriptions.json http://HOST:8081 [--apply]                # 重启后补回丢失的动态订阅（默认 dry-run）
+scripts/compat/sample_process.sh http://HOST:8081 600 30 out/process.tsv                                  # 10 分钟进程指标采样
 ```
 
 测试验证：
@@ -413,7 +416,7 @@ rest重构/
 ├── TDD-PHASE1.md / TDD-PHASE2.md
 ├── REWRITE-PLAN.md
 ├── scripts/capture-snapshots.sh
-├── scripts/compat/            # 新旧版本兼容性对比工具（capture_ws.mjs / compare.mjs）
+├── scripts/compat/            # 兼容性对比与验收工具（capture_ws / compare / analyze_quote / restore_subs / sample_process）
 └── crates/
     ├── md-domain/        # 领域类型
     ├── md-config/        # 配置加载

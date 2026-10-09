@@ -28,6 +28,8 @@
 - **gRPC**：**无新增 RPC**；`admin.proto` 的 `DataType` 仅追加 `QUOTE = 3`（既有取值与字段号不变）。
 - **兼容性对比工具**：`scripts/compat/capture_ws.mjs`（抓 WS 推送原文）、`scripts/compat/compare.mjs`
   （push 逐字节对比 / subs / metrics 只增不减 / noquote / selftest 正对照）。
+- **部署/验收辅助脚本**：`scripts/compat/analyze_quote.mjs`（quote 间隔、节流、非空、字段顺序，带正对照）、
+  `scripts/compat/sample_process.sh`（进程指标采样）、`scripts/compat/restore_subs.mjs`（升级重启后补回丢失的动态订阅）。
 
 ### 兼容性说明
 
