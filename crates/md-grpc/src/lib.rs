@@ -93,6 +93,7 @@ pub fn data_type_to_proto(dt: md_connector::DataType) -> md_proto::DataType {
     match dt {
         md_connector::DataType::Tick => md_proto::DataType::Tick,
         md_connector::DataType::Kline => md_proto::DataType::Kline,
+        md_connector::DataType::Quote => md_proto::DataType::Quote,
     }
 }
 
@@ -101,6 +102,7 @@ pub fn data_type_from_proto(dt: md_proto::DataType) -> Option<md_connector::Data
     match dt {
         md_proto::DataType::Tick => Some(md_connector::DataType::Tick),
         md_proto::DataType::Kline => Some(md_connector::DataType::Kline),
+        md_proto::DataType::Quote => Some(md_connector::DataType::Quote),
         _ => None,
     }
 }
@@ -181,5 +183,22 @@ mod tests {
             Some(md_connector::DataType::Tick)
         );
         assert_eq!(data_type_from_proto(md_proto::DataType::Unknown), None);
+    }
+
+    /// 既有枚举数值不变（TICK=1、KLINE=2），QUOTE 只能是新值 3（任务书 §三-2、§三-4）
+    #[test]
+    fn data_type_numeric_values_stable_and_quote_is_new() {
+        assert_eq!(md_proto::DataType::Unknown as i32, 0);
+        assert_eq!(md_proto::DataType::Tick as i32, 1);
+        assert_eq!(md_proto::DataType::Kline as i32, 2);
+        assert_eq!(md_proto::DataType::Quote as i32, 3);
+        assert_eq!(
+            data_type_to_proto(md_connector::DataType::Quote),
+            md_proto::DataType::Quote
+        );
+        assert_eq!(
+            data_type_from_proto(md_proto::DataType::Quote),
+            Some(md_connector::DataType::Quote)
+        );
     }
 }
