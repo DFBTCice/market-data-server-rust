@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use md_domain::topic::normalize_symbol;
-use md_domain::types::{Tick, Kline};
+use md_domain::types::{Kline, Quote, Tick};
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -19,11 +19,24 @@ pub struct BinanceConnectorConfig {
 /// Binance 适配器
 pub struct BinanceAdapter {
     config: BinanceConnectorConfig,
+    /// quote 专用适配器标志（1.1.0 新增）。仅为 true 时才把 bookTicker 解析成 Quote；
+    /// 既有 tick/kline 适配器（false）对 bookTicker 的处理与 1.0.0 完全一致（忽略）。
+    quote_mode: bool,
 }
 
 impl BinanceAdapter {
     pub fn new(config: BinanceConnectorConfig) -> Self {
-        Self { config }
+        Self { config, quote_mode: false }
+    }
+
+    /// quote 专用适配器（1.1.0 新增）。
+    ///
+    /// bookTicker 属币安 U 本位合约 **Public 类**流：在 `/market/stream` 上订阅虽返回成功
+    /// （`{"result":null}`）但不会推送任何数据（2026-10-09 实测 8 秒 0 条，而 `/public/stream`
+    /// 同期 216 条），所以必须独立连接 Public 地址。调用方应把 `config.stream_base_url`
+    /// 设为 Public 流地址（`connectors.binance.stream_base_url_public`）。
+    pub fn new_quote(config: BinanceConnectorConfig) -> Self {
+        Self { config, quote_mode: true }
     }
 }
 
@@ -59,6 +72,29 @@ struct AggTradeData {
     trade_id: i64,
     #[serde(rename = "m")]
     is_buyer_maker: bool,
+}
+
+/// Binance U 本位合约 bookTicker 载荷：
+/// `{"e":"bookTicker","u":..,"s":"BNBUSDT","b":"743.940","B":"47.76","a":"743.950","A":"25.01","T":..,"E":..}`
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+struct BookTickerData {
+    #[serde(rename = "s")]
+    symbol: String,
+    #[serde(rename = "b")]
+    bid_price: String,
+    #[serde(rename = "B")]
+    bid_qty: String,
+    #[serde(rename = "a")]
+    ask_price: String,
+    #[serde(rename = "A")]
+    ask_qty: String,
+    /// 事件推送时间（毫秒）
+    #[serde(rename = "E", default)]
+    event_time: i64,
+    /// 撮合时间（毫秒），E 缺失时的回退
+    #[serde(rename = "T", default)]
+    transaction_time: i64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -160,9 +196,40 @@ pub fn parse_kline(json: &serde_json::Value) -> Result<Kline, ParseError> {
     })
 }
 
+/// 解析 Binance bookTicker 消息为 Quote
+///
+/// - `timestamp` 取事件时间 E（缺失时回退 T，再缺失回退本机时间），与 tick 口径一致；
+/// - 币安 bookTicker 不含最新成交价，`last_price` 为空串。
+pub fn parse_book_ticker(json: &serde_json::Value) -> Result<Quote, ParseError> {
+    let data: BookTickerData = serde_json::from_value(json.clone())
+        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+
+    let now_ms = chrono_now_ms();
+    let timestamp = if data.event_time > 0 {
+        data.event_time
+    } else if data.transaction_time > 0 {
+        data.transaction_time
+    } else {
+        now_ms
+    };
+
+    Ok(Quote {
+        exchange: "binance".to_string(),
+        symbol: normalize_symbol(&data.symbol),
+        bid_price: data.bid_price,
+        bid_qty: data.bid_qty,
+        ask_price: data.ask_price,
+        ask_qty: data.ask_qty,
+        last_price: String::new(),
+        timestamp,
+        connector_receive_ts: now_ms,
+    })
+}
+
 /// 将 SubscriptionTarget 映射为 Binance stream key
 /// TICK -> ["<symbol>@aggTrade"]
 /// KLINE -> ["<symbol>@kline_<interval>"]
+/// QUOTE -> ["<symbol>@bookTicker"]（需 Public 流连接）
 pub fn target_to_streams(target: &SubscriptionTarget) -> Vec<String> {
     let sym = target.symbol.to_lowercase();
     match target.data_type {
@@ -171,6 +238,7 @@ pub fn target_to_streams(target: &SubscriptionTarget) -> Vec<String> {
             let interval = target.kline_interval.as_deref().unwrap_or("1m");
             vec![format!("{}@kline_{}", sym, interval)]
         }
+        DataType::Quote => vec![format!("{}@bookTicker", sym)],
     }
 }
 
@@ -204,7 +272,11 @@ fn chrono_now_ms() -> i64 {
 #[async_trait]
 impl ExchangeAdapter for BinanceAdapter {
     fn name(&self) -> &str {
-        "binance"
+        if self.quote_mode {
+            "binance-quote"
+        } else {
+            "binance"
+        }
     }
 
     fn ws_url(&self) -> &str {
@@ -237,8 +309,14 @@ impl ExchangeAdapter for BinanceAdapter {
         } else if msg.stream.contains("@kline_") {
             let kline = parse_kline(&msg.data)?;
             events.push(DataEvent::Kline(kline));
-        } else if msg.stream.ends_with("@bookTicker") || msg.stream.ends_with("@ticker") {
-            // bookTicker / ticker -- 暂不处理，跳过
+        } else if msg.stream.ends_with("@bookTicker") {
+            // bookTicker：quote 专用适配器解析为 Quote；既有适配器保持 1.0.0 行为（暂不处理，跳过）
+            if self.quote_mode {
+                let quote = parse_book_ticker(&msg.data)?;
+                events.push(DataEvent::Quote(quote));
+            }
+        } else if msg.stream.ends_with("@ticker") {
+            // ticker -- 暂不处理，跳过
         } else {
             // 订阅确认等消息，忽略
         }
@@ -526,5 +604,123 @@ mod tests {
         });
         let result = parse_aggtrade(&json);
         assert!(result.is_err());
+    }
+
+    // ---- quote / bookTicker（1.1.0 新增）----
+
+    fn quote_adapter() -> BinanceAdapter {
+        BinanceAdapter::new_quote(BinanceConnectorConfig {
+            stream_base_url: "wss://fstream.binance.com/public/stream".into(),
+            subscribe_ticks: vec![],
+            subscribe_klines: Default::default(),
+            reconnect_delay: Duration::from_secs(5),
+            ping_interval: Duration::from_secs(180),
+        })
+    }
+
+    fn make_quote_target(symbol: &str) -> SubscriptionTarget {
+        SubscriptionTarget {
+            exchange: "binance".into(),
+            data_type: DataType::Quote,
+            symbol: symbol.into(),
+            kline_interval: None,
+        }
+    }
+
+    /// 实测样本（2026-10-09 从 wss://fstream.binance.com/public/stream 抓取）
+    fn real_book_ticker_message() -> String {
+        r#"{"stream":"bnbusdt@bookTicker","data":{"e":"bookTicker","u":11773346480294,"s":"BNBUSDT","ps":"BNBUSDT","b":"743.940","B":"47.76","a":"743.950","A":"25.01","T":1791532395514,"E":1791532395514,"st":1}}"#.to_string()
+    }
+
+    #[test]
+    fn target_to_streams_quote() {
+        let streams = target_to_streams(&make_quote_target("BNBUSDT"));
+        assert_eq!(streams, vec!["bnbusdt@bookTicker"]);
+    }
+
+    #[test]
+    fn parse_book_ticker_real_sample() {
+        let v: serde_json::Value = serde_json::from_str(&real_book_ticker_message()).unwrap();
+        let q = parse_book_ticker(&v["data"]).unwrap();
+        assert_eq!(q.exchange, "binance");
+        assert_eq!(q.symbol, "BNBUSDT");
+        assert_eq!(q.bid_price, "743.940");
+        assert_eq!(q.bid_qty, "47.76");
+        assert_eq!(q.ask_price, "743.950");
+        assert_eq!(q.ask_qty, "25.01");
+        // bookTicker 无 last
+        assert_eq!(q.last_price, "");
+        assert_eq!(q.timestamp, 1791532395514);
+        assert!(q.connector_receive_ts > 0);
+    }
+
+    #[test]
+    fn parse_book_ticker_falls_back_to_transaction_time() {
+        let json = serde_json::json!({
+            "s": "bnbusdt", "b": "1", "B": "2", "a": "3", "A": "4", "T": 1234567890123i64
+        });
+        let q = parse_book_ticker(&json).unwrap();
+        assert_eq!(q.symbol, "BNBUSDT");
+        assert_eq!(q.timestamp, 1234567890123);
+    }
+
+    #[test]
+    fn parse_book_ticker_missing_price_is_error() {
+        let json = serde_json::json!({ "s": "BNBUSDT", "u": 1 });
+        assert!(parse_book_ticker(&json).is_err());
+    }
+
+    #[test]
+    fn quote_adapter_emits_quote_event() {
+        let adapter = quote_adapter();
+        assert_eq!(adapter.name(), "binance-quote");
+        let events = adapter
+            .parse_message(real_book_ticker_message().as_bytes())
+            .unwrap();
+        assert_eq!(events.len(), 1);
+        match &events[0] {
+            DataEvent::Quote(q) => {
+                assert_eq!(q.symbol, "BNBUSDT");
+                assert_eq!(q.bid_price, "743.940");
+            }
+            other => panic!("expected Quote, got {:?}", other),
+        }
+    }
+
+    /// 阳性对照：既有适配器（非 quote 模式）面对同一条 bookTicker 仍保持 1.0.0 行为——忽略
+    #[test]
+    fn legacy_adapter_still_ignores_real_book_ticker() {
+        let adapter = BinanceAdapter::new(BinanceConnectorConfig {
+            stream_base_url: "wss://test".into(),
+            subscribe_ticks: vec![],
+            subscribe_klines: Default::default(),
+            reconnect_delay: Duration::from_secs(5),
+            ping_interval: Duration::from_secs(180),
+        });
+        assert_eq!(adapter.name(), "binance");
+        let events = adapter
+            .parse_message(real_book_ticker_message().as_bytes())
+            .unwrap();
+        assert!(events.is_empty());
+    }
+
+    /// 订阅确认 {"result":null,"id":1} 不应产生事件也不应报错
+    #[test]
+    fn quote_adapter_ignores_subscribe_ack() {
+        let events = quote_adapter()
+            .parse_message(br#"{"result":null,"id":1}"#)
+            .unwrap();
+        assert!(events.is_empty());
+    }
+
+    #[test]
+    fn quote_adapter_builds_book_ticker_subscribe_msg() {
+        let adapter = quote_adapter();
+        let streams = adapter.target_to_streams(&make_quote_target("BNBUSDT"));
+        let msg = adapter.build_subscribe_msg(&streams);
+        let v: serde_json::Value = serde_json::from_str(&msg).unwrap();
+        assert_eq!(v["method"], "SUBSCRIBE");
+        assert_eq!(v["params"][0], "bnbusdt@bookTicker");
+        assert_eq!(adapter.ws_url(), "wss://fstream.binance.com/public/stream");
     }
 }

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use md_domain::types::{Kline, Tick};
+use md_domain::types::{Kline, Quote, Tick};
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -29,16 +29,25 @@ pub enum OkxStreamMode {
 pub struct OkxAdapter {
     config: OkxConnectorConfig,
     mode: OkxStreamMode,
+    /// quote 专用适配器标志（1.1.0 新增）。仅为 true 时才把 tickers 频道解析成 Quote；
+    /// 既有 tick/kline 适配器（false）对 tickers 的处理与 1.0.0 完全一致（忽略）。
+    quote_mode: bool,
 }
 
 impl OkxAdapter {
     pub fn new(config: OkxConnectorConfig) -> Self {
-        Self { config, mode: OkxStreamMode::Public }
+        Self { config, mode: OkxStreamMode::Public, quote_mode: false }
     }
 
     /// 创建指定模式的 OKX 适配器
     pub fn with_mode(config: OkxConnectorConfig, mode: OkxStreamMode) -> Self {
-        Self { config, mode }
+        Self { config, mode, quote_mode: false }
+    }
+
+    /// quote 专用适配器（1.1.0 新增）：走 Public WebSocket 的 `tickers` 频道，
+    /// 与既有 trades 连接隔离（独立连接，互不影响重连/退避）。
+    pub fn new_quote(config: OkxConnectorConfig) -> Self {
+        Self { config, mode: OkxStreamMode::Public, quote_mode: true }
     }
 }
 
@@ -78,6 +87,23 @@ struct OkxTrade {
     trade_id: String,
     #[serde(rename = "side")]
     side: String,
+}
+
+// OKX tickers 数据（只取 quote 需要的字段；其余字段忽略）
+#[derive(Debug, Deserialize)]
+struct OkxTicker {
+    #[serde(rename = "last", default)]
+    last: String,
+    #[serde(rename = "askPx", default)]
+    ask_px: String,
+    #[serde(rename = "askSz", default)]
+    ask_sz: String,
+    #[serde(rename = "bidPx", default)]
+    bid_px: String,
+    #[serde(rename = "bidSz", default)]
+    bid_sz: String,
+    #[serde(rename = "ts", default)]
+    ts: String,
 }
 
 /// 将 OKX symbol 归一化（统一使用 md_domain::topic::normalize_symbol）
@@ -120,6 +146,44 @@ pub fn parse_trade(data: &serde_json::Value, inst_id: &str) -> Result<Tick, Pars
         // OKX trades 只有一个时间戳 ts（成交时间），无独立推送时间；
         // 端到端延迟与到达延迟一致，置为相同值。
         exchange_trade_ts: ts,
+    })
+}
+
+/// 解析 OKX tickers 消息为 Quote
+///
+/// tickers 数据字段：`last` 最新成交价、`bidPx/bidSz` 买一、`askPx/askSz` 卖一、`ts` 毫秒时间戳。
+/// 买一或卖一价缺失（空串）视为无效报价，返回错误（不向下游发半截报价）。
+pub fn parse_ticker(data: &serde_json::Value, inst_id: &str) -> Result<Quote, ParseError> {
+    let t: OkxTicker = serde_json::from_value(data.clone())
+        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+
+    if t.bid_px.is_empty() || t.ask_px.is_empty() {
+        return Err(ParseError::MissingField(format!(
+            "tickers bidPx/askPx empty for {}",
+            inst_id
+        )));
+    }
+
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0);
+
+    let ts: i64 = t.ts.parse().unwrap_or_else(|e| {
+        tracing::warn!("OKX ticker timestamp parse failed: '{}', using now_ms. error={}", t.ts, e);
+        now_ms
+    });
+
+    Ok(Quote {
+        exchange: "okx".to_string(),
+        symbol: normalize_okx_symbol(inst_id),
+        bid_price: t.bid_px,
+        bid_qty: t.bid_sz,
+        ask_price: t.ask_px,
+        ask_qty: t.ask_sz,
+        last_price: t.last,
+        timestamp: ts,
+        connector_receive_ts: now_ms,
     })
 }
 
@@ -197,6 +261,7 @@ pub fn parse_candle(data: &serde_json::Value, inst_id: &str, channel: &str) -> R
 /// 将 SubscriptionTarget 映射为 OKX channel + instId
 /// TICK -> channel: "trades", instId: "BTC-USDT-SWAP"
 /// KLINE -> channel: "candle1m", instId: "BTC-USDT-SWAP"
+/// QUOTE -> channel: "tickers", instId: "BNB-USDT-SWAP"（1.1.0 新增）
 pub fn target_to_streams(target: &SubscriptionTarget) -> Vec<String> {
     let sym = &target.symbol; // OKX symbol 保持原样（大小写敏感）
     match target.data_type {
@@ -205,6 +270,7 @@ pub fn target_to_streams(target: &SubscriptionTarget) -> Vec<String> {
             let interval = target.kline_interval.as_deref().unwrap_or("1m");
             vec![format!("candle{}:{}", interval, sym)]
         }
+        DataType::Quote => vec![format!("tickers:{}", sym)],
     }
 }
 
@@ -265,7 +331,11 @@ pub fn build_unsubscribe_msg(channels: &[String]) -> String {
 #[async_trait]
 impl ExchangeAdapter for OkxAdapter {
     fn name(&self) -> &str {
-        "okx"
+        if self.quote_mode {
+            "okx-quote"
+        } else {
+            "okx"
+        }
     }
 
     fn ws_url(&self) -> &str {
@@ -346,6 +416,20 @@ impl ExchangeAdapter for OkxAdapter {
                         Ok(tick) => events.push(DataEvent::Tick(tick)),
                         Err(e) => {
                             tracing::warn!("failed to parse OKX trade: {}", e);
+                        }
+                    }
+                }
+            }
+        } else if arg.channel == "tickers" {
+            // tickers 仅 quote 专用适配器处理；既有适配器保持 1.0.0 行为（忽略）
+            if self.quote_mode {
+                if let Some(arr) = data.as_array() {
+                    for item in arr {
+                        match parse_ticker(item, &arg.inst_id) {
+                            Ok(quote) => events.push(DataEvent::Quote(quote)),
+                            Err(e) => {
+                                tracing::warn!("failed to parse OKX ticker: {}", e);
+                            }
                         }
                     }
                 }
@@ -610,5 +694,111 @@ mod tests {
         });
 
         assert_eq!(adapter.heartbeat_message(), Some("ping".to_string()));
+    }
+
+    // ---- quote / tickers（1.1.0 新增）----
+
+    fn okx_cfg() -> OkxConnectorConfig {
+        OkxConnectorConfig {
+            stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public".into(),
+            stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business".into(),
+            subscribe_ticks: vec![],
+            subscribe_klines: Default::default(),
+            reconnect_delay: Duration::from_secs(10),
+            ping_interval: Duration::from_secs(25),
+        }
+    }
+
+    fn make_quote_target(symbol: &str) -> SubscriptionTarget {
+        SubscriptionTarget {
+            exchange: "okx".into(),
+            data_type: DataType::Quote,
+            symbol: symbol.into(),
+            kline_interval: None,
+        }
+    }
+
+    /// 实测样本（2026-10-09 从 wss://ws.okx.com:8443/ws/v5/public 抓取）
+    fn real_ticker_message() -> String {
+        r#"{"arg":{"channel":"tickers","instId":"BNB-USDT-SWAP"},"data":[{"instType":"SWAP","instId":"BNB-USDT-SWAP","last":"744","lastSz":"2","askPx":"744.1","askSz":"6142","bidPx":"744","bidSz":"4726","open24h":"768.8","high24h":"769.8","low24h":"716.3","sodUtc0":"735.4","sodUtc8":"730.8","volCcy24h":"124428.13","vol24h":"12442813","ts":"1791532579370"}]}"#.to_string()
+    }
+
+    #[test]
+    fn target_to_streams_quote() {
+        let streams = target_to_streams(&make_quote_target("BNB-USDT-SWAP"));
+        assert_eq!(streams, vec!["tickers:BNB-USDT-SWAP"]);
+    }
+
+    #[test]
+    fn build_subscribe_message_for_tickers() {
+        let msg = build_subscribe_msg(&["tickers:BNB-USDT-SWAP".into()]);
+        let val: serde_json::Value = serde_json::from_str(&msg).unwrap();
+        assert_eq!(val["args"][0]["channel"], "tickers");
+        assert_eq!(val["args"][0]["instId"], "BNB-USDT-SWAP");
+    }
+
+    #[test]
+    fn parse_ticker_real_sample() {
+        let v: serde_json::Value = serde_json::from_str(&real_ticker_message()).unwrap();
+        let q = parse_ticker(&v["data"][0], "BNB-USDT-SWAP").unwrap();
+        assert_eq!(q.exchange, "okx");
+        assert_eq!(q.symbol, "BNB-USDT-SWAP");
+        assert_eq!(q.bid_price, "744");
+        assert_eq!(q.bid_qty, "4726");
+        assert_eq!(q.ask_price, "744.1");
+        assert_eq!(q.ask_qty, "6142");
+        // OKX 取 tickers.last
+        assert_eq!(q.last_price, "744");
+        assert_eq!(q.timestamp, 1791532579370);
+        assert!(q.connector_receive_ts > 0);
+    }
+
+    #[test]
+    fn parse_ticker_empty_bid_or_ask_is_error() {
+        let json = serde_json::json!({
+            "instId": "BNB-USDT-SWAP", "last": "744", "askPx": "", "askSz": "", "bidPx": "744", "bidSz": "1", "ts": "1"
+        });
+        assert!(parse_ticker(&json, "BNB-USDT-SWAP").is_err());
+    }
+
+    #[test]
+    fn quote_adapter_emits_quote_event() {
+        let adapter = OkxAdapter::new_quote(okx_cfg());
+        assert_eq!(adapter.name(), "okx-quote");
+        assert_eq!(adapter.ws_url(), "wss://ws.okx.com:8443/ws/v5/public");
+        let events = adapter
+            .parse_message(real_ticker_message().as_bytes())
+            .unwrap();
+        assert_eq!(events.len(), 1);
+        match &events[0] {
+            DataEvent::Quote(q) => assert_eq!(q.symbol, "BNB-USDT-SWAP"),
+            other => panic!("expected Quote, got {:?}", other),
+        }
+    }
+
+    /// 阳性对照：既有适配器（非 quote 模式）面对同一条 tickers 仍保持 1.0.0 行为——忽略
+    #[test]
+    fn legacy_adapter_still_ignores_real_ticker() {
+        for adapter in [
+            OkxAdapter::new(okx_cfg()),
+            OkxAdapter::with_mode(okx_cfg(), OkxStreamMode::Public),
+            OkxAdapter::with_mode(okx_cfg(), OkxStreamMode::Business),
+        ] {
+            assert_eq!(adapter.name(), "okx");
+            let events = adapter
+                .parse_message(real_ticker_message().as_bytes())
+                .unwrap();
+            assert!(events.is_empty());
+        }
+    }
+
+    /// tickers 订阅确认事件不产生数据、不报错
+    #[test]
+    fn quote_adapter_ignores_subscribe_event() {
+        let raw = r#"{"event":"subscribe","arg":{"channel":"tickers","instId":"BNB-USDT-SWAP"},"connId":"cca21896"}"#;
+        let events = OkxAdapter::new_quote(okx_cfg())
+            .parse_message(raw.as_bytes())
+            .unwrap();
+        assert!(events.is_empty());
     }
 }

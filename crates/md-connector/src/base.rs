@@ -1,7 +1,7 @@
 use crate::{Connector, ConnectorError, DataEvent, ExchangeAdapter, SubscriptionTarget, WsCommand};
 use async_trait::async_trait;
 use futures_util::{SinkExt, StreamExt};
-use md_domain::types::{Kline, Tick};
+use md_domain::types::{Kline, Quote, Tick};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -26,11 +26,14 @@ pub struct BaseConnector<A: ExchangeAdapter> {
     adapter: A,
     tick_tx: mpsc::Sender<Tick>,
     kline_tx: mpsc::Sender<Kline>,
+    /// quote 通道（1.1.0 新增，仅 quote 专用连接器通过 `with_quote` 设置；既有连接器恒为 None）
+    quote_tx: Option<mpsc::Sender<Quote>>,
     state: Arc<ConnectorState>,
     reconnect_delay: Duration,
     /// 可选的 metrics 计数器（与 Processor 共享）
     ticks_dropped: Option<Arc<AtomicU64>>,
     klines_dropped: Option<Arc<AtomicU64>>,
+    quotes_dropped: Option<Arc<AtomicU64>>,
     /// 连接器级别指标（与 Processor 共享）
     connected: Option<Arc<AtomicU64>>,
     reconnect_total: Option<Arc<AtomicU64>>,
@@ -70,6 +73,7 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             adapter,
             tick_tx,
             kline_tx,
+            quote_tx: None,
             state: Arc::new(ConnectorState {
                 desired_subs: RwLock::new(HashSet::new()),
                 active_streams: RwLock::new(HashSet::new()),
@@ -81,6 +85,7 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             reconnect_delay,
             ticks_dropped: None,
             klines_dropped: None,
+            quotes_dropped: None,
             connected: None,
             reconnect_total: None,
             subscribe_failed_total: None,
@@ -91,6 +96,14 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
     pub fn with_metrics(mut self, ticks_dropped: Arc<AtomicU64>, klines_dropped: Arc<AtomicU64>) -> Self {
         self.ticks_dropped = Some(ticks_dropped);
         self.klines_dropped = Some(klines_dropped);
+        self
+    }
+
+    /// 设置 quote 通道与丢弃计数器（1.1.0 新增）。仅 quote 专用连接器调用；
+    /// 不调用则 Quote 事件被丢弃（既有连接器不会产生 Quote 事件）。
+    pub fn with_quote(mut self, quote_tx: mpsc::Sender<Quote>, quotes_dropped: Arc<AtomicU64>) -> Self {
+        self.quote_tx = Some(quote_tx);
+        self.quotes_dropped = Some(quotes_dropped);
         self
     }
 
@@ -432,6 +445,21 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
                     Ok(false) => {}
                     Err(_) => {
                         error!("[{}] panic in dispatch_event (kline)", adapter_name);
+                    }
+                }
+            }
+            DataEvent::Quote(quote) => {
+                match self.quote_tx.as_ref() {
+                    Some(tx) => {
+                        if tx.try_send(quote).is_err() {
+                            warn!("[{}] quote channel full, dropping", adapter_name);
+                            if let Some(ref counter) = self.quotes_dropped {
+                                counter.fetch_add(1, Ordering::Relaxed);
+                            }
+                        }
+                    }
+                    None => {
+                        debug!("[{}] quote event without quote channel, ignored", adapter_name);
                     }
                 }
             }
