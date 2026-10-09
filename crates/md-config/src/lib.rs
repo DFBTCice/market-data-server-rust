@@ -302,7 +302,12 @@ fn validate(cfg: &Config) -> Result<(), ConfigError> {
     }
     if cfg.connectors.binance.enabled
         && cfg.connectors.binance.quotes_enabled
-        && cfg.connectors.binance.stream_base_url_public.trim().is_empty()
+        && cfg
+            .connectors
+            .binance
+            .stream_base_url_public
+            .trim()
+            .is_empty()
     {
         return Err(ConfigError::ValidationError(
             "binance quotes_enabled=true 但 stream_base_url_public 为空".into(),
@@ -619,14 +624,20 @@ api_gateway:
     fn legacy_config_without_quote_keys_defaults_off() {
         // config.yaml 为 1.0.0 时代的原样配置，不含任何新键
         let raw = std::fs::read_to_string("../../config.yaml").unwrap();
-        assert!(!raw.contains("quotes_enabled"), "config.yaml 必须保持旧格式作为兼容样本");
+        assert!(
+            !raw.contains("quotes_enabled"),
+            "config.yaml 必须保持旧格式作为兼容样本"
+        );
         assert!(!raw.contains("quote_channel_buffer"));
         let cfg = load_config("../../config.yaml").unwrap();
         assert!(!cfg.connectors.binance.quotes_enabled);
         assert!(cfg.connectors.binance.subscribe_quotes.is_empty());
         assert!(!cfg.connectors.okx.quotes_enabled);
         assert!(cfg.connectors.okx.subscribe_quotes.is_empty());
-        assert_eq!(cfg.processor.quote_channel_buffer, DEFAULT_QUOTE_CHANNEL_BUFFER);
+        assert_eq!(
+            cfg.processor.quote_channel_buffer,
+            DEFAULT_QUOTE_CHANNEL_BUFFER
+        );
         assert_eq!(
             cfg.connectors.binance.stream_base_url_public,
             DEFAULT_BINANCE_STREAM_BASE_URL_PUBLIC

@@ -26,7 +26,10 @@ pub struct BinanceAdapter {
 
 impl BinanceAdapter {
     pub fn new(config: BinanceConnectorConfig) -> Self {
-        Self { config, quote_mode: false }
+        Self {
+            config,
+            quote_mode: false,
+        }
     }
 
     /// quote 专用适配器（1.1.0 新增）。
@@ -36,7 +39,10 @@ impl BinanceAdapter {
     /// 同期 216 条），所以必须独立连接 Public 地址。调用方应把 `config.stream_base_url`
     /// 设为 Public 流地址（`connectors.binance.stream_base_url_public`）。
     pub fn new_quote(config: BinanceConnectorConfig) -> Self {
-        Self { config, quote_mode: true }
+        Self {
+            config,
+            quote_mode: true,
+        }
     }
 }
 
@@ -142,8 +148,8 @@ struct KlineWrapper {
 
 /// 解析 Binance aggTrade 消息为 Tick
 pub fn parse_aggtrade(json: &serde_json::Value) -> Result<Tick, ParseError> {
-    let data: AggTradeData = serde_json::from_value(json.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let data: AggTradeData =
+        serde_json::from_value(json.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     let now_ms = chrono_now_ms();
 
@@ -171,8 +177,8 @@ pub fn parse_aggtrade(json: &serde_json::Value) -> Result<Tick, ParseError> {
 
 /// 解析 Binance kline 消息为 Kline
 pub fn parse_kline(json: &serde_json::Value) -> Result<Kline, ParseError> {
-    let wrapper: KlineWrapper = serde_json::from_value(json.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let wrapper: KlineWrapper =
+        serde_json::from_value(json.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     let now_ms = chrono_now_ms();
     let k = wrapper.kline;
@@ -201,8 +207,8 @@ pub fn parse_kline(json: &serde_json::Value) -> Result<Kline, ParseError> {
 /// - `timestamp` 取事件时间 E（缺失时回退 T，再缺失回退本机时间），与 tick 口径一致；
 /// - 币安 bookTicker 不含最新成交价，`last_price` 为空串。
 pub fn parse_book_ticker(json: &serde_json::Value) -> Result<Quote, ParseError> {
-    let data: BookTickerData = serde_json::from_value(json.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let data: BookTickerData =
+        serde_json::from_value(json.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     let now_ms = chrono_now_ms();
     let timestamp = if data.event_time > 0 {

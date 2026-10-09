@@ -18,13 +18,27 @@ use std::time::Duration;
 use tokio::sync::RwLock;
 use tokio_tungstenite::tungstenite::Message;
 
-type Ws = tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
+type Ws =
+    tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 
 fn fixture_lines(name: &str) -> Vec<String> {
-    let path = format!("{}/tests/fixtures/baseline-1.0.0/{}", env!("CARGO_MANIFEST_DIR"), name);
-    let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("缺少基线文件 {}: {}", path, e));
-    let lines: Vec<String> = text.lines().filter(|l| !l.trim().is_empty()).map(String::from).collect();
-    assert!(!lines.is_empty(), "基线文件 {} 为空（空回放 = 没有验证任何东西）", name);
+    let path = format!(
+        "{}/tests/fixtures/baseline-1.0.0/{}",
+        env!("CARGO_MANIFEST_DIR"),
+        name
+    );
+    let text =
+        std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("缺少基线文件 {}: {}", path, e));
+    let lines: Vec<String> = text
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(String::from)
+        .collect();
+    assert!(
+        !lines.is_empty(),
+        "基线文件 {} 为空（空回放 = 没有验证任何东西）",
+        name
+    );
     lines
 }
 
@@ -50,7 +64,12 @@ fn first_diff(a: &str, b: &str) -> Option<usize> {
     if a == b {
         return None;
     }
-    Some(a.bytes().zip(b.bytes()).position(|(x, y)| x != y).unwrap_or(a.len().min(b.len())))
+    Some(
+        a.bytes()
+            .zip(b.bytes())
+            .position(|(x, y)| x != y)
+            .unwrap_or(a.len().min(b.len())),
+    )
 }
 
 #[derive(Clone, Copy)]
@@ -62,12 +81,21 @@ enum Kind {
 fn publish(processor: &Processor, kind: Kind, data: &serde_json::Value) {
     match kind {
         Kind::Tick => processor.handle_tick(serde_json::from_value::<Tick>(data.clone()).unwrap()),
-        Kind::Kline => processor.handle_kline(serde_json::from_value::<Kline>(data.clone()).unwrap()),
+        Kind::Kline => {
+            processor.handle_kline(serde_json::from_value::<Kline>(data.clone()).unwrap())
+        }
     }
 }
 
 /// 回放一个基线文件：返回回放行数
-async fn replay(ws_path: &str, sub_msg: String, ack_expect: &str, topic: &str, kind: Kind, file: &str) -> usize {
+async fn replay(
+    ws_path: &str,
+    sub_msg: String,
+    ack_expect: &str,
+    topic: &str,
+    kind: Kind,
+    file: &str,
+) -> usize {
     let (addr, processor) = start().await;
     let (mut ws, _) = tokio_tungstenite::connect_async(format!("ws://{}{}", addr, ws_path))
         .await
@@ -101,13 +129,24 @@ fn gateway_sub(topic: &str) -> String {
     format!(r#"{{"action":"subscribe","streams":["{}"]}}"#, topic)
 }
 fn gateway_ack(topic: &str) -> String {
-    format!(r#"{{"action":"subscribe","status":"success","stream":"{}"}}"#, topic)
+    format!(
+        r#"{{"action":"subscribe","status":"success","stream":"{}"}}"#,
+        topic
+    )
 }
 
 #[tokio::test]
 async fn gateway_tick_binance_matches_1_0_0_byte_for_byte() {
     let t = "tick.binance.BNBUSDT";
-    let n = replay("/ws/v1/data", gateway_sub(t), &gateway_ack(t), t, Kind::Tick, "gateway.tick.binance.BNBUSDT.jsonl").await;
+    let n = replay(
+        "/ws/v1/data",
+        gateway_sub(t),
+        &gateway_ack(t),
+        t,
+        Kind::Tick,
+        "gateway.tick.binance.BNBUSDT.jsonl",
+    )
+    .await;
     assert!(n >= 50, "回放行数过少: {}", n);
     println!("gateway tick.binance.BNBUSDT 逐字节一致: {} 行", n);
 }
@@ -115,7 +154,15 @@ async fn gateway_tick_binance_matches_1_0_0_byte_for_byte() {
 #[tokio::test]
 async fn gateway_tick_okx_matches_1_0_0_byte_for_byte() {
     let t = "tick.okx.BNB-USDT-SWAP";
-    let n = replay("/ws/v1/data", gateway_sub(t), &gateway_ack(t), t, Kind::Tick, "gateway.tick.okx.BNB-USDT-SWAP.jsonl").await;
+    let n = replay(
+        "/ws/v1/data",
+        gateway_sub(t),
+        &gateway_ack(t),
+        t,
+        Kind::Tick,
+        "gateway.tick.okx.BNB-USDT-SWAP.jsonl",
+    )
+    .await;
     assert!(n >= 5, "回放行数过少: {}", n);
     println!("gateway tick.okx.BNB-USDT-SWAP 逐字节一致: {} 行", n);
 }
@@ -123,7 +170,15 @@ async fn gateway_tick_okx_matches_1_0_0_byte_for_byte() {
 #[tokio::test]
 async fn gateway_kline_matches_1_0_0_byte_for_byte() {
     let t = "kline.1m.binance.BNBUSDT";
-    let n = replay("/ws/v1/data", gateway_sub(t), &gateway_ack(t), t, Kind::Kline, "gateway.kline.1m.binance.BNBUSDT.jsonl").await;
+    let n = replay(
+        "/ws/v1/data",
+        gateway_sub(t),
+        &gateway_ack(t),
+        t,
+        Kind::Kline,
+        "gateway.kline.1m.binance.BNBUSDT.jsonl",
+    )
+    .await;
     assert!(n >= 50, "回放行数过少: {}", n);
     println!("gateway kline.1m.binance.BNBUSDT 逐字节一致: {} 行", n);
 }
@@ -132,10 +187,16 @@ async fn gateway_kline_matches_1_0_0_byte_for_byte() {
 async fn legacy_ws_tick_matches_1_0_0_byte_for_byte() {
     for (t, file) in [
         ("tick.binance.BNBUSDT", "legacy.tick.binance.BNBUSDT.jsonl"),
-        ("tick.okx.BNB-USDT-SWAP", "legacy.tick.okx.BNB-USDT-SWAP.jsonl"),
+        (
+            "tick.okx.BNB-USDT-SWAP",
+            "legacy.tick.okx.BNB-USDT-SWAP.jsonl",
+        ),
     ] {
         let sub = format!(r#"{{"op":"subscribe","args":["{}"]}}"#, t);
-        let ack = format!(r#"{{"event":"subscribe","status":"success","topics":["{}"]}}"#, t);
+        let ack = format!(
+            r#"{{"event":"subscribe","status":"success","topics":["{}"]}}"#,
+            t
+        );
         let n = replay("/ws", sub, &ack, t, Kind::Tick, file).await;
         assert!(n >= 5, "回放行数过少: {}", n);
         println!("legacy /ws {} 逐字节一致: {} 行", t, n);
@@ -154,13 +215,25 @@ fn positive_control_comparison_detects_field_reorder_and_format_change() {
     let qty = v["data"]["quantity"].as_str().unwrap();
     let from = format!(r#""price":"{}","quantity":"{}""#, price, qty);
     let to = format!(r#""quantity":"{}","price":"{}""#, qty, price);
-    assert!(line.contains(&from), "基线行里 price/quantity 不相邻，无法构造对照");
+    assert!(
+        line.contains(&from),
+        "基线行里 price/quantity 不相邻，无法构造对照"
+    );
     let reordered = line.replace(&from, &to);
-    assert!(first_diff(&reordered, &line).is_some(), "字段顺序变化必须被发现");
+    assert!(
+        first_diff(&reordered, &line).is_some(),
+        "字段顺序变化必须被发现"
+    );
 
     // 数值格式变化："744.870" -> "744.87"
-    let reformatted = line.replace(&format!(r#""price":"{}""#, price), &format!(r#""price":"{}""#, price.trim_end_matches('0')));
-    assert!(first_diff(&reformatted, &line).is_some(), "数值格式变化必须被发现");
+    let reformatted = line.replace(
+        &format!(r#""price":"{}""#, price),
+        &format!(r#""price":"{}""#, price.trim_end_matches('0')),
+    );
+    assert!(
+        first_diff(&reformatted, &line).is_some(),
+        "数值格式变化必须被发现"
+    );
 
     // 多一个字段
     let extra = line.replacen(r#""data":{"#, r#""data":{"bid_price":"1","#, 1);

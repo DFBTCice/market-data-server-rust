@@ -3,7 +3,9 @@ use md_domain::types::{Kline, Quote, Tick};
 use serde::Deserialize;
 use std::time::Duration;
 
-use crate::{DataEvent, DataType, ExchangeAdapter, ParseError, SubscribeErrorInfo, SubscriptionTarget};
+use crate::{
+    DataEvent, DataType, ExchangeAdapter, ParseError, SubscribeErrorInfo, SubscriptionTarget,
+};
 
 /// OKX 连接器配置
 #[derive(Debug, Clone)]
@@ -36,18 +38,30 @@ pub struct OkxAdapter {
 
 impl OkxAdapter {
     pub fn new(config: OkxConnectorConfig) -> Self {
-        Self { config, mode: OkxStreamMode::Public, quote_mode: false }
+        Self {
+            config,
+            mode: OkxStreamMode::Public,
+            quote_mode: false,
+        }
     }
 
     /// 创建指定模式的 OKX 适配器
     pub fn with_mode(config: OkxConnectorConfig, mode: OkxStreamMode) -> Self {
-        Self { config, mode, quote_mode: false }
+        Self {
+            config,
+            mode,
+            quote_mode: false,
+        }
     }
 
     /// quote 专用适配器（1.1.0 新增）：走 Public WebSocket 的 `tickers` 频道，
     /// 与既有 trades 连接隔离（独立连接，互不影响重连/退避）。
     pub fn new_quote(config: OkxConnectorConfig) -> Self {
-        Self { config, mode: OkxStreamMode::Public, quote_mode: true }
+        Self {
+            config,
+            mode: OkxStreamMode::Public,
+            quote_mode: true,
+        }
     }
 }
 
@@ -113,8 +127,8 @@ fn normalize_okx_symbol(symbol: &str) -> String {
 
 /// 解析 OKX trades 消息为 Tick
 pub fn parse_trade(data: &serde_json::Value, inst_id: &str) -> Result<Tick, ParseError> {
-    let trade: OkxTrade = serde_json::from_value(data.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let trade: OkxTrade =
+        serde_json::from_value(data.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     let now_ms = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -122,7 +136,11 @@ pub fn parse_trade(data: &serde_json::Value, inst_id: &str) -> Result<Tick, Pars
         .as_millis() as i64;
 
     let ts: i64 = trade.timestamp.parse().unwrap_or_else(|e| {
-        tracing::warn!("OKX trade timestamp parse failed: '{}', using now_ms. error={}", trade.timestamp, e);
+        tracing::warn!(
+            "OKX trade timestamp parse failed: '{}', using now_ms. error={}",
+            trade.timestamp,
+            e
+        );
         now_ms
     });
 
@@ -154,8 +172,8 @@ pub fn parse_trade(data: &serde_json::Value, inst_id: &str) -> Result<Tick, Pars
 /// tickers 数据字段：`last` 最新成交价、`bidPx/bidSz` 买一、`askPx/askSz` 卖一、`ts` 毫秒时间戳。
 /// 买一或卖一价缺失（空串）视为无效报价，返回错误（不向下游发半截报价）。
 pub fn parse_ticker(data: &serde_json::Value, inst_id: &str) -> Result<Quote, ParseError> {
-    let t: OkxTicker = serde_json::from_value(data.clone())
-        .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+    let t: OkxTicker =
+        serde_json::from_value(data.clone()).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
     if t.bid_px.is_empty() || t.ask_px.is_empty() {
         return Err(ParseError::MissingField(format!(
@@ -170,7 +188,11 @@ pub fn parse_ticker(data: &serde_json::Value, inst_id: &str) -> Result<Quote, Pa
         .unwrap_or(0);
 
     let ts: i64 = t.ts.parse().unwrap_or_else(|e| {
-        tracing::warn!("OKX ticker timestamp parse failed: '{}', using now_ms. error={}", t.ts, e);
+        tracing::warn!(
+            "OKX ticker timestamp parse failed: '{}', using now_ms. error={}",
+            t.ts,
+            e
+        );
         now_ms
     });
 
@@ -209,12 +231,20 @@ fn interval_to_ms(interval: &str) -> i64 {
 
 /// 解析 OKX candle 消息为 Kline
 /// candle 数据格式: [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
-pub fn parse_candle(data: &serde_json::Value, inst_id: &str, channel: &str) -> Result<Kline, ParseError> {
-    let arr = data.as_array()
+pub fn parse_candle(
+    data: &serde_json::Value,
+    inst_id: &str,
+    channel: &str,
+) -> Result<Kline, ParseError> {
+    let arr = data
+        .as_array()
         .ok_or_else(|| ParseError::InvalidJson("candle data is not an array".into()))?;
 
     if arr.len() < 9 {
-        return Err(ParseError::InvalidJson(format!("candle array too short: {}", arr.len())));
+        return Err(ParseError::InvalidJson(format!(
+            "candle array too short: {}",
+            arr.len()
+        )));
     }
 
     let ts_str = arr[0].as_str().unwrap_or("0");
@@ -227,7 +257,11 @@ pub fn parse_candle(data: &serde_json::Value, inst_id: &str, channel: &str) -> R
     let confirm = arr[8].as_str().unwrap_or("0");
 
     let ts: i64 = ts_str.parse().unwrap_or_else(|e| {
-        tracing::warn!("OKX candle timestamp parse failed: '{}', defaulting to 0. error={}", ts_str, e);
+        tracing::warn!(
+            "OKX candle timestamp parse failed: '{}', defaulting to 0. error={}",
+            ts_str,
+            e
+        );
         0
     });
 
@@ -354,8 +388,8 @@ impl ExchangeAdapter for OkxAdapter {
     }
 
     fn parse_message(&self, raw: &[u8]) -> Result<Vec<DataEvent>, ParseError> {
-        let msg: OkxWsMessage = serde_json::from_slice(raw)
-            .map_err(|e| ParseError::InvalidJson(e.to_string()))?;
+        let msg: OkxWsMessage =
+            serde_json::from_slice(raw).map_err(|e| ParseError::InvalidJson(e.to_string()))?;
 
         // 处理事件消息（subscribe/unsubscribe 确认、error 等）
         if let Some(ref event) = msg.event {
@@ -369,7 +403,12 @@ impl ExchangeAdapter for OkxAdapter {
                     } else {
                         String::new()
                     };
-                    tracing::warn!("OKX subscribe error: code={}, msg={}, stream={}", code, message, stream);
+                    tracing::warn!(
+                        "OKX subscribe error: code={}, msg={}, stream={}",
+                        code,
+                        message,
+                        stream
+                    );
                     // 只有特定错误码需要移除 stream（60018=channel not found, 60012=instId not found）
                     if code == "60018" || code == "60012" {
                         return Ok(vec![DataEvent::SubscribeError(SubscribeErrorInfo {
@@ -579,7 +618,17 @@ mod tests {
 
     #[test]
     fn parse_candle_to_kline() {
-        let json = serde_json::json!(["1711929600000", "67000.00", "67100.00", "66900.00", "67050.00", "100.5", "6730000.0", "6730000.0", "1"]);
+        let json = serde_json::json!([
+            "1711929600000",
+            "67000.00",
+            "67100.00",
+            "66900.00",
+            "67050.00",
+            "100.5",
+            "6730000.0",
+            "6730000.0",
+            "1"
+        ]);
 
         let kline = parse_candle(&json, "BTC-USDT-SWAP", "candle1m").unwrap();
         assert_eq!(kline.exchange, "okx");
@@ -592,7 +641,17 @@ mod tests {
 
     #[test]
     fn parse_candle_not_closed() {
-        let json = serde_json::json!(["1711929600000", "67000.00", "67100.00", "66900.00", "67050.00", "100.5", "6730000.0", "6730000.0", "0"]);
+        let json = serde_json::json!([
+            "1711929600000",
+            "67000.00",
+            "67100.00",
+            "66900.00",
+            "67050.00",
+            "100.5",
+            "6730000.0",
+            "6730000.0",
+            "0"
+        ]);
 
         let kline = parse_candle(&json, "BTC-USDT-SWAP", "candle5m").unwrap();
         assert_eq!(kline.interval, "5m");

@@ -76,7 +76,11 @@ impl Histogram {
     pub fn snapshot(&self) -> HistogramSnapshot {
         HistogramSnapshot {
             boundaries: self.boundaries.clone(),
-            buckets: self.buckets.iter().map(|b| b.load(Ordering::Relaxed)).collect(),
+            buckets: self
+                .buckets
+                .iter()
+                .map(|b| b.load(Ordering::Relaxed))
+                .collect(),
             sum: self.sum.load(Ordering::Relaxed),
             count: self.count.load(Ordering::Relaxed),
         }
@@ -290,19 +294,32 @@ impl ProcessorMetrics {
     ///
     /// - `arrival_ms` = recv − E：到达延迟（我们这条链路）
     /// - `e2e_ms`     = recv − T：端到端延迟（含交易所内部聚合，OKX 与 arrival 相等）
-    pub fn record_tick_ingestion(&self, exchange: &str, symbol: &str, arrival_ms: i64, e2e_ms: i64) {
+    pub fn record_tick_ingestion(
+        &self,
+        exchange: &str,
+        symbol: &str,
+        arrival_ms: i64,
+        e2e_ms: i64,
+    ) {
         let key = SeriesKey {
             exchange: exchange.to_string(),
             kind: "tick",
             symbol: symbol.to_string(),
             interval: String::new(),
         };
-        self.ingestion_hist(key.clone()).observe(arrival_ms.max(0) as u64);
+        self.ingestion_hist(key.clone())
+            .observe(arrival_ms.max(0) as u64);
         self.ingestion_e2e_hist(key).observe(e2e_ms.max(0) as u64);
     }
 
     /// 记录 Kline 入库延迟（毫秒）-- 维度 (exchange, kline, symbol, interval)
-    pub fn record_kline_ingestion(&self, exchange: &str, symbol: &str, interval: &str, latency_ms: i64) {
+    pub fn record_kline_ingestion(
+        &self,
+        exchange: &str,
+        symbol: &str,
+        interval: &str,
+        latency_ms: i64,
+    ) {
         let clamped = latency_ms.max(0) as u64;
         let key = SeriesKey {
             exchange: exchange.to_string(),
@@ -329,9 +346,15 @@ impl ProcessorMetrics {
     /// 记录 broadcast lagged
     pub fn record_broadcast_lagged(&self, kind: &str) {
         match kind {
-            "tick" => { self.broadcast_lagged_tick.fetch_add(1, Ordering::Relaxed); }
-            "kline" => { self.broadcast_lagged_kline.fetch_add(1, Ordering::Relaxed); }
-            "quote" => { self.broadcast_lagged_quote.fetch_add(1, Ordering::Relaxed); }
+            "tick" => {
+                self.broadcast_lagged_tick.fetch_add(1, Ordering::Relaxed);
+            }
+            "kline" => {
+                self.broadcast_lagged_kline.fetch_add(1, Ordering::Relaxed);
+            }
+            "quote" => {
+                self.broadcast_lagged_quote.fetch_add(1, Ordering::Relaxed);
+            }
             _ => {}
         }
     }
@@ -344,9 +367,15 @@ impl ProcessorMetrics {
     /// WS 连接离开（包括正常关闭 + 踢出）
     pub fn ws_client_disconnected(&self) {
         // 防止下溢（如果只调一次 disconnected 没对应 connected）
-        let _ = self.ws_active_clients.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
-            if v == 0 { None } else { Some(v - 1) }
-        });
+        let _ = self
+            .ws_active_clients
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
+                if v == 0 {
+                    None
+                } else {
+                    Some(v - 1)
+                }
+            });
     }
 
     /// 因 broadcast 持续 lagged 主动踢出客户端
@@ -357,9 +386,15 @@ impl ProcessorMetrics {
     /// 网关成功推送一条消息
     pub fn ws_message_sent(&self, kind: &str) {
         match kind {
-            "tick" => { self.ws_messages_sent_tick.fetch_add(1, Ordering::Relaxed); }
-            "kline" => { self.ws_messages_sent_kline.fetch_add(1, Ordering::Relaxed); }
-            "quote" => { self.ws_messages_sent_quote.fetch_add(1, Ordering::Relaxed); }
+            "tick" => {
+                self.ws_messages_sent_tick.fetch_add(1, Ordering::Relaxed);
+            }
+            "kline" => {
+                self.ws_messages_sent_kline.fetch_add(1, Ordering::Relaxed);
+            }
+            "quote" => {
+                self.ws_messages_sent_quote.fetch_add(1, Ordering::Relaxed);
+            }
             _ => {}
         }
     }
@@ -516,8 +551,17 @@ impl Processor {
         Self::new_with_broadcast_capacity(tick_buffer, kline_buffer, 4096)
     }
 
-    pub fn new_with_broadcast_capacity(tick_buffer: usize, kline_buffer: usize, broadcast_capacity: usize) -> Self {
-        Self::new_full(tick_buffer, kline_buffer, broadcast_capacity, DEFAULT_QUOTE_BUFFER)
+    pub fn new_with_broadcast_capacity(
+        tick_buffer: usize,
+        kline_buffer: usize,
+        broadcast_capacity: usize,
+    ) -> Self {
+        Self::new_full(
+            tick_buffer,
+            kline_buffer,
+            broadcast_capacity,
+            DEFAULT_QUOTE_BUFFER,
+        )
     }
 
     /// 完整构造：额外指定 quote 入口 channel 容量（`processor.quote_channel_buffer`）
@@ -675,14 +719,16 @@ impl Processor {
         // 时间戳缺失时记 0，保证 histogram _count 仍反映真实吞吐（对标 Go 用 _count 算吞吐）
         // 到达延迟 = recv − E（事件推送时间），即"交易所推送 → 本机接收"的真实链路延迟
         let arrival_ms = if tick.connector_receive_ts > 0 && tick.exchange_event_ts > 0 {
-            tick.connector_receive_ts.saturating_sub(tick.exchange_event_ts)
+            tick.connector_receive_ts
+                .saturating_sub(tick.exchange_event_ts)
         } else {
             0
         };
         // 端到端延迟 = recv − T（成交时间）。币安 T 早于 E，差值即币安内部聚合延迟；
         // 缺 T 时回退为到达延迟（OKX 的 T 即 ts，与 E 相等）
         let e2e_ms = if tick.connector_receive_ts > 0 && tick.exchange_trade_ts > 0 {
-            tick.connector_receive_ts.saturating_sub(tick.exchange_trade_ts)
+            tick.connector_receive_ts
+                .saturating_sub(tick.exchange_trade_ts)
         } else {
             arrival_ms
         };
@@ -700,16 +746,24 @@ impl Processor {
     }
 
     pub fn handle_kline(&self, kline: Kline) {
-        self.metrics.klines_processed.fetch_add(1, Ordering::Relaxed);
+        self.metrics
+            .klines_processed
+            .fetch_add(1, Ordering::Relaxed);
 
         // 记录入库延迟，维度 (exchange, kline, symbol, interval)
         let latency_ms = if kline.connector_receive_ts > 0 && kline.exchange_event_ts > 0 {
-            kline.connector_receive_ts.saturating_sub(kline.exchange_event_ts)
+            kline
+                .connector_receive_ts
+                .saturating_sub(kline.exchange_event_ts)
         } else {
             0
         };
-        self.metrics
-            .record_kline_ingestion(&kline.exchange, &kline.symbol, &kline.interval, latency_ms);
+        self.metrics.record_kline_ingestion(
+            &kline.exchange,
+            &kline.symbol,
+            &kline.interval,
+            latency_ms,
+        );
 
         // 缓存（使用统一的 cache key 归一化）
         let key = topic::kline_cache_key(&kline.exchange, &kline.symbol, &kline.interval);
@@ -733,7 +787,9 @@ impl Processor {
     /// - 否则只保留最新一条为 pending，待窗口结束由 `flush_pending_quotes_at` 发布（trailing edge），
     ///   保证"最后一次变动"一定会送达，不会因节流而让订阅者长期停留在旧报价上。
     pub fn handle_quote_at(&self, quote: Quote, now: Instant) {
-        self.metrics.quotes_processed.fetch_add(1, Ordering::Relaxed);
+        self.metrics
+            .quotes_processed
+            .fetch_add(1, Ordering::Relaxed);
 
         // 入库延迟 = recv − 交易所事件时间；时间戳缺失记 0，保证 _count 仍反映真实吞吐
         let latency_ms = if quote.connector_receive_ts > 0 && quote.timestamp > 0 {
@@ -822,7 +878,6 @@ mod tests {
     use super::*;
     use std::time::Duration;
 
-
     fn make_tick(exchange: &str, symbol: &str, price: &str) -> Tick {
         Tick {
             exchange: exchange.to_string(),
@@ -907,9 +962,7 @@ mod tests {
     async fn cache_returns_none_for_missing() {
         let proc = Processor::new(100, 100);
         assert!(proc.get_latest_tick("binance", "NONEXIST").is_none());
-        assert!(proc
-            .get_latest_kline("binance", "NONEXIST", "1m")
-            .is_none());
+        assert!(proc.get_latest_kline("binance", "NONEXIST", "1m").is_none());
     }
 
     #[tokio::test]
@@ -1104,12 +1157,21 @@ mod tests {
         metrics.record_kline_ingestion("okx", "BTC-USDT", "1m", 100);
 
         let snap = metrics.snapshot();
-        let btc = snap.ingestion_series.iter()
-            .find(|s| s.symbol == "BTCUSDT" && s.kind == "tick").unwrap();
-        let eth = snap.ingestion_series.iter()
-            .find(|s| s.symbol == "ETHUSDT" && s.kind == "tick").unwrap();
-        let kline = snap.ingestion_series.iter()
-            .find(|s| s.symbol == "BTC-USDT" && s.kind == "kline").unwrap();
+        let btc = snap
+            .ingestion_series
+            .iter()
+            .find(|s| s.symbol == "BTCUSDT" && s.kind == "tick")
+            .unwrap();
+        let eth = snap
+            .ingestion_series
+            .iter()
+            .find(|s| s.symbol == "ETHUSDT" && s.kind == "tick")
+            .unwrap();
+        let kline = snap
+            .ingestion_series
+            .iter()
+            .find(|s| s.symbol == "BTC-USDT" && s.kind == "kline")
+            .unwrap();
 
         assert_eq!(btc.latency.count, 2);
         assert_eq!(btc.latency.sum, 30); // 到达延迟 10+20
@@ -1119,8 +1181,11 @@ mod tests {
         assert_eq!(kline.latency.count, 1);
 
         // 端到端延迟（recv-T）独立成列，且数值不同（含交易所内部延迟）
-        let btc_e2e = snap.ingestion_e2e_series.iter()
-            .find(|s| s.symbol == "BTCUSDT" && s.kind == "tick").unwrap();
+        let btc_e2e = snap
+            .ingestion_e2e_series
+            .iter()
+            .find(|s| s.symbol == "BTCUSDT" && s.kind == "tick")
+            .unwrap();
         assert_eq!(btc_e2e.latency.count, 2);
         assert_eq!(btc_e2e.latency.sum, 90); // 端到端 40+50，明显高于到达延迟 30
     }
@@ -1133,8 +1198,11 @@ mod tests {
         metrics.record_gateway_forward_latency_ms("kline.1m.okx.BTC-USDT", 1);
 
         let snap = metrics.snapshot();
-        let t = snap.gateway_series.iter()
-            .find(|s| s.topic == "tick.binance.BTCUSDT").unwrap();
+        let t = snap
+            .gateway_series
+            .iter()
+            .find(|s| s.topic == "tick.binance.BTCUSDT")
+            .unwrap();
         assert_eq!(t.latency.count, 2);
         assert_eq!(t.latency.sum, 6);
         assert_eq!(snap.gateway_series.len(), 2);
@@ -1240,12 +1308,21 @@ mod tests {
         assert_eq!(tail[0].bid_price, "p29", "trailing 必须是最后一条");
         published_at.push(29 * 10 + 100);
 
-        assert!(published_at.len() <= 5, "300ms 内发布 {} 次，超过 10/s", published_at.len());
+        assert!(
+            published_at.len() <= 5,
+            "300ms 内发布 {} 次，超过 10/s",
+            published_at.len()
+        );
         for w in published_at.windows(2) {
             assert!(w[1] - w[0] >= 100, "相邻发布间隔 {}ms < 100ms", w[1] - w[0]);
         }
         // 缓存始终是最新值
-        assert_eq!(proc.get_latest_quote("binance", "BNBUSDT").unwrap().bid_price, "p29");
+        assert_eq!(
+            proc.get_latest_quote("binance", "BNBUSDT")
+                .unwrap()
+                .bid_price,
+            "p29"
+        );
     }
 
     /// 1 秒内每 10ms 一条（100 条/秒）→ 发布数必须 ≤ 10 次/秒（+1 为首条 leading 的边界），
@@ -1290,8 +1367,12 @@ mod tests {
         let handle = tokio::spawn(async move { p.run().await });
 
         let tx = proc.quote_tx();
-        tx.send(make_quote("binance", "BNBUSDT", "first")).await.unwrap();
-        tx.send(make_quote("binance", "BNBUSDT", "second")).await.unwrap();
+        tx.send(make_quote("binance", "BNBUSDT", "first"))
+            .await
+            .unwrap();
+        tx.send(make_quote("binance", "BNBUSDT", "second"))
+            .await
+            .unwrap();
 
         let first = tokio::time::timeout(Duration::from_millis(500), sub.rx.recv())
             .await
@@ -1310,7 +1391,10 @@ mod tests {
             BroadcastEvent::Quote(q, _) => assert_eq!(q.bid_price, "second"),
             other => panic!("unexpected {:?}", other),
         }
-        assert!(t_first.elapsed() >= Duration::from_millis(60), "trailing 不应早于节流窗口");
+        assert!(
+            t_first.elapsed() >= Duration::from_millis(60),
+            "trailing 不应早于节流窗口"
+        );
 
         proc.shutdown();
         let _ = tokio::time::timeout(Duration::from_secs(1), handle).await;

@@ -45,11 +45,17 @@ impl Connector for MockConnector {
     async fn stop(&self) -> Result<(), ConnectorError> {
         Ok(())
     }
-    async fn add_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError> {
+    async fn add_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError> {
         self.subs.write().await.extend(targets);
         Ok(())
     }
-    async fn remove_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError> {
+    async fn remove_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError> {
         let mut subs = self.subs.write().await;
         for t in targets {
             subs.retain(|s| s != &t);
@@ -100,7 +106,9 @@ fn quote(exchange: &str, symbol: &str, bid: &str, last: &str) -> Quote {
 }
 
 async fn next_text(
-    ws: &mut tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
+    ws: &mut tokio_tungstenite::WebSocketStream<
+        tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+    >,
     ms: u64,
 ) -> Option<String> {
     match tokio::time::timeout(Duration::from_millis(ms), ws.next()).await {
@@ -132,7 +140,10 @@ async fn http(method: &str, url: &str, body: Option<&str>) -> (u16, String) {
     let body = text.split("\r\n\r\n").nth(1).unwrap_or("").to_string();
     // 处理 chunked：本测试响应体很小，axum 通常带 content-length；兜底去掉 chunk 头
     let body = if text.to_lowercase().contains("transfer-encoding: chunked") {
-        body.lines().filter(|l| l.starts_with('{') || l.starts_with('[')).collect::<Vec<_>>().join("")
+        body.lines()
+            .filter(|l| l.starts_with('{') || l.starts_with('['))
+            .collect::<Vec<_>>()
+            .join("")
     } else {
         body
     };
@@ -180,13 +191,22 @@ async fn gateway_ws_quote_only_matches_subscribed_topic_and_unsubscribe_works() 
     let _ack = next_text(&mut ws, 1000).await.unwrap();
 
     // 其它交易所/品种的 quote 不应送达
-    srv.processor.handle_quote(quote("binance", "BNBUSDT", "1", ""));
-    assert!(next_text(&mut ws, 300).await.is_none(), "不应收到未订阅的 quote");
+    srv.processor
+        .handle_quote(quote("binance", "BNBUSDT", "1", ""));
+    assert!(
+        next_text(&mut ws, 300).await.is_none(),
+        "不应收到未订阅的 quote"
+    );
 
     // 订阅的主题送达，OKX 带 last
-    srv.processor.handle_quote(quote("okx", "BNB-USDT-SWAP", "744", "744"));
+    srv.processor
+        .handle_quote(quote("okx", "BNB-USDT-SWAP", "744", "744"));
     let msg = next_text(&mut ws, 1000).await.expect("okx quote");
-    assert!(msg.starts_with(r#"{"type":"quote","topic":"quote.okx.BNB-USDT-SWAP""#), "{}", msg);
+    assert!(
+        msg.starts_with(r#"{"type":"quote","topic":"quote.okx.BNB-USDT-SWAP""#),
+        "{}",
+        msg
+    );
     assert!(msg.contains(r#""last_price":"744""#));
 
     // 退订后不再推送（等过节流窗口再发）
@@ -198,7 +218,8 @@ async fn gateway_ws_quote_only_matches_subscribed_topic_and_unsubscribe_works() 
     let unsub_ack = next_text(&mut ws, 1000).await.unwrap();
     assert!(unsub_ack.contains(r#""action":"unsubscribe""#));
     tokio::time::sleep(Duration::from_millis(150)).await;
-    srv.processor.handle_quote(quote("okx", "BNB-USDT-SWAP", "745", "745"));
+    srv.processor
+        .handle_quote(quote("okx", "BNB-USDT-SWAP", "745", "745"));
     assert!(next_text(&mut ws, 300).await.is_none(), "退订后不应再收到");
 }
 
@@ -210,7 +231,8 @@ async fn gateway_ws_tick_and_quote_coexist() {
         .await
         .unwrap();
     ws.send(Message::Text(
-        r#"{"action":"subscribe","streams":["tick.binance.BNBUSDT","quote.binance.BNBUSDT"]}"#.into(),
+        r#"{"action":"subscribe","streams":["tick.binance.BNBUSDT","quote.binance.BNBUSDT"]}"#
+            .into(),
     ))
     .await
     .unwrap();
@@ -224,7 +246,8 @@ async fn gateway_ws_tick_and_quote_coexist() {
         timestamp: 1,
         ..Default::default()
     });
-    srv.processor.handle_quote(quote("binance", "BNBUSDT", "744.4", ""));
+    srv.processor
+        .handle_quote(quote("binance", "BNBUSDT", "744.4", ""));
 
     let mut types = Vec::new();
     for _ in 0..2 {
@@ -266,7 +289,8 @@ async fn legacy_ws_never_receives_quote() {
         r#"{"event":"subscribe","status":"success","topics":["tick.binance.BNBUSDT"]}"#
     );
 
-    srv.processor.handle_quote(quote("binance", "BNBUSDT", "744", ""));
+    srv.processor
+        .handle_quote(quote("binance", "BNBUSDT", "744", ""));
     srv.processor.handle_tick(Tick {
         exchange: "binance".into(),
         symbol: "BNBUSDT".into(),
@@ -276,10 +300,17 @@ async fn legacy_ws_never_receives_quote() {
     });
 
     let m = next_text(&mut ws, 1000).await.expect("legacy tick");
-    assert_eq!(m, r#"{"topic":"tick.binance.BNBUSDT","data":{"exchange":"binance","symbol":"BNBUSDT","timestamp":1,"price":"744.46"}}"#);
+    assert_eq!(
+        m,
+        r#"{"topic":"tick.binance.BNBUSDT","data":{"exchange":"binance","symbol":"BNBUSDT","timestamp":1,"price":"744.46"}}"#
+    );
     // 此后 500ms 内不得再有任何消息（尤其不能有 quote）
     while let Some(extra) = next_text(&mut ws, 500).await {
-        assert!(!extra.contains("quote"), "legacy /ws 收到了 quote: {}", extra);
+        assert!(
+            !extra.contains("quote"),
+            "legacy /ws 收到了 quote: {}",
+            extra
+        );
         assert!(!extra.contains(r#""type":"quote""#));
     }
 }
@@ -289,17 +320,24 @@ async fn rest_latest_quote_found_and_not_found() {
     let srv = start_server(&[]).await;
     let (status, body) = http(
         "GET",
-        &format!("http://{}/api/v1/data/latest/quote/binance/BNBUSDT", srv.base),
+        &format!(
+            "http://{}/api/v1/data/latest/quote/binance/BNBUSDT",
+            srv.base
+        ),
         None,
     )
     .await;
     assert_eq!(status, 404);
     assert_eq!(body, r#"{"error":"no quote data for binance:BNBUSDT"}"#);
 
-    srv.processor.handle_quote(quote("binance", "BNBUSDT", "743.90", ""));
+    srv.processor
+        .handle_quote(quote("binance", "BNBUSDT", "743.90", ""));
     let (status, body) = http(
         "GET",
-        &format!("http://{}/api/v1/data/latest/quote/binance/bnbusdt", srv.base),
+        &format!(
+            "http://{}/api/v1/data/latest/quote/binance/bnbusdt",
+            srv.base
+        ),
         None,
     )
     .await;
@@ -325,7 +363,10 @@ async fn rest_subscriptions_quote_post_list_delete() {
 
     let (status, body) = http("GET", &url, None).await;
     assert_eq!(status, 200);
-    assert_eq!(body, r#"[{"exchange":"binance","data_type":3,"symbol":"BNBUSDT"}]"#);
+    assert_eq!(
+        body,
+        r#"[{"exchange":"binance","data_type":3,"symbol":"BNBUSDT"}]"#
+    );
 
     let (status, _) = http(
         "DELETE",
@@ -362,8 +403,14 @@ async fn rest_existing_tick_kline_behaviour_unchanged() {
     let url = format!("http://{}/api/v1/subscriptions", srv.base);
 
     for (body, expect) in [
-        (r#"{"exchange":"binance","type":"TICK","symbols":["BTCUSDT"]}"#, 200u16),
-        (r#"{"exchange":"okx","type":"KLINE","symbols":["BTC-USDT-SWAP"],"interval":"5m"}"#, 200),
+        (
+            r#"{"exchange":"binance","type":"TICK","symbols":["BTCUSDT"]}"#,
+            200u16,
+        ),
+        (
+            r#"{"exchange":"okx","type":"KLINE","symbols":["BTC-USDT-SWAP"],"interval":"5m"}"#,
+            200,
+        ),
     ] {
         let (status, resp) = http("POST", &url, Some(body)).await;
         assert_eq!(status, expect);
@@ -375,10 +422,18 @@ async fn rest_existing_tick_kline_behaviour_unchanged() {
         .as_array()
         .unwrap()
         .iter()
-        .map(|e| (e["data_type"].as_i64().unwrap(), e["symbol"].as_str().unwrap().to_string()))
+        .map(|e| {
+            (
+                e["data_type"].as_i64().unwrap(),
+                e["symbol"].as_str().unwrap().to_string(),
+            )
+        })
         .collect();
     pairs.sort();
-    assert_eq!(pairs, vec![(1, "BTCUSDT".to_string()), (2, "BTC-USDT-SWAP".to_string())]);
+    assert_eq!(
+        pairs,
+        vec![(1, "BTCUSDT".to_string()), (2, "BTC-USDT-SWAP".to_string())]
+    );
 
     // 非法 type 的错误文案保持与 1.0.0 逐字节一致
     let (status, body) = http(

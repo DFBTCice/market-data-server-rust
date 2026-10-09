@@ -44,10 +44,9 @@ impl AdminService for AdminServiceImpl {
             return Err(Status::invalid_argument("at least one symbol is required"));
         }
 
-        let data_type = data_type_from_proto(
-            DataType::try_from(req.data_type).unwrap_or(DataType::Unknown),
-        )
-        .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
+        let data_type =
+            data_type_from_proto(DataType::try_from(req.data_type).unwrap_or(DataType::Unknown))
+                .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
 
         let connectors = self.connectors.read().await;
         let exchange_key = req.exchange.to_lowercase();
@@ -79,7 +78,11 @@ impl AdminService for AdminServiceImpl {
 
         match connector.add_subscriptions(targets).await {
             Ok(()) => {
-                info!("Added {} subscriptions for {}", req.symbols.len(), exchange_key);
+                info!(
+                    "Added {} subscriptions for {}",
+                    req.symbols.len(),
+                    exchange_key
+                );
                 Ok(Response::new(SubscriptionChangeResponse {
                     success: true,
                     message: format!(
@@ -111,10 +114,9 @@ impl AdminService for AdminServiceImpl {
             return Err(Status::invalid_argument("at least one symbol is required"));
         }
 
-        let data_type = data_type_from_proto(
-            DataType::try_from(req.data_type).unwrap_or(DataType::Unknown),
-        )
-        .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
+        let data_type =
+            data_type_from_proto(DataType::try_from(req.data_type).unwrap_or(DataType::Unknown))
+                .ok_or_else(|| Status::invalid_argument("data_type must be TICK or KLINE"))?;
 
         let connectors = self.connectors.read().await;
         let exchange_key = req.exchange.to_lowercase();
@@ -146,7 +148,11 @@ impl AdminService for AdminServiceImpl {
 
         match connector.remove_subscriptions(targets).await {
             Ok(()) => {
-                info!("Removed {} subscriptions for {}", req.symbols.len(), req.exchange);
+                info!(
+                    "Removed {} subscriptions for {}",
+                    req.symbols.len(),
+                    req.exchange
+                );
                 Ok(Response::new(SubscriptionChangeResponse {
                     success: true,
                     message: format!(
@@ -295,10 +301,7 @@ mod tests {
             kline_interval: "".into(),
         });
         let result = svc.add_subscription(req).await;
-        assert_eq!(
-            result.unwrap_err().code(),
-            tonic::Code::InvalidArgument
-        );
+        assert_eq!(result.unwrap_err().code(), tonic::Code::InvalidArgument);
     }
 
     #[tokio::test]
@@ -392,12 +395,17 @@ mod tests {
     #[tokio::test]
     async fn add_quote_subscription_not_enabled() {
         let svc = make_admin_with(&["binance"]);
-        let err = svc.add_subscription(quote_req("binance")).await.unwrap_err();
+        let err = svc
+            .add_subscription(quote_req("binance"))
+            .await
+            .unwrap_err();
         assert_eq!(err.code(), tonic::Code::NotFound);
         assert!(err.message().contains("quote connector not enabled"));
         // tick 连接器上没有被悄悄加订阅
         let resp = svc
-            .get_subscriptions(Request::new(GetSubscriptionsRequest { exchange: "".into() }))
+            .get_subscriptions(Request::new(GetSubscriptionsRequest {
+                exchange: "".into(),
+            }))
             .await
             .unwrap()
             .into_inner();
@@ -407,12 +415,18 @@ mod tests {
     #[tokio::test]
     async fn add_and_list_quote_subscription() {
         let svc = make_admin_with(&["binance", "binance-quote"]);
-        let resp = svc.add_subscription(quote_req("binance")).await.unwrap().into_inner();
+        let resp = svc
+            .add_subscription(quote_req("binance"))
+            .await
+            .unwrap()
+            .into_inner();
         assert!(resp.success);
         assert!(resp.message.contains("quote"), "msg={}", resp.message);
 
         let list = svc
-            .get_subscriptions(Request::new(GetSubscriptionsRequest { exchange: "binance".into() }))
+            .get_subscriptions(Request::new(GetSubscriptionsRequest {
+                exchange: "binance".into(),
+            }))
             .await
             .unwrap()
             .into_inner();

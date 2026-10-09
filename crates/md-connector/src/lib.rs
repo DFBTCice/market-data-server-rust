@@ -93,8 +93,14 @@ pub trait Connector: Send + Sync {
     fn name(&self) -> &str;
     async fn start(&self) -> Result<(), ConnectorError>;
     async fn stop(&self) -> Result<(), ConnectorError>;
-    async fn add_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError>;
-    async fn remove_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError>;
+    async fn add_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError>;
+    async fn remove_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError>;
     fn current_subscriptions(&self) -> Vec<SubscriptionTarget>;
 }
 
@@ -178,10 +184,16 @@ mod routing_tests {
         async fn stop(&self) -> Result<(), ConnectorError> {
             Ok(())
         }
-        async fn add_subscriptions(&self, _: Vec<SubscriptionTarget>) -> Result<(), ConnectorError> {
+        async fn add_subscriptions(
+            &self,
+            _: Vec<SubscriptionTarget>,
+        ) -> Result<(), ConnectorError> {
             Ok(())
         }
-        async fn remove_subscriptions(&self, _: Vec<SubscriptionTarget>) -> Result<(), ConnectorError> {
+        async fn remove_subscriptions(
+            &self,
+            _: Vec<SubscriptionTarget>,
+        ) -> Result<(), ConnectorError> {
             Ok(())
         }
         fn current_subscriptions(&self) -> Vec<SubscriptionTarget> {
@@ -199,11 +211,27 @@ mod routing_tests {
     #[test]
     fn tick_and_kline_routing_unchanged() {
         let m = map(&["binance", "okx", "okx-kline"]);
-        assert_eq!(find_connector(&m, "binance", DataType::Tick).unwrap().name(), "binance");
-        assert_eq!(find_connector(&m, "okx", DataType::Tick).unwrap().name(), "okx");
-        assert_eq!(find_connector(&m, "okx", DataType::Kline).unwrap().name(), "okx-kline");
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Tick)
+                .unwrap()
+                .name(),
+            "binance"
+        );
+        assert_eq!(
+            find_connector(&m, "okx", DataType::Tick).unwrap().name(),
+            "okx"
+        );
+        assert_eq!(
+            find_connector(&m, "okx", DataType::Kline).unwrap().name(),
+            "okx-kline"
+        );
         // binance 无 -kline 连接器 → 回退到 binance
-        assert_eq!(find_connector(&m, "binance", DataType::Kline).unwrap().name(), "binance");
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Kline)
+                .unwrap()
+                .name(),
+            "binance"
+        );
         assert!(find_connector(&m, "bybit", DataType::Tick).is_none());
     }
 
@@ -215,9 +243,22 @@ mod routing_tests {
         assert!(find_connector(&m, "okx", DataType::Quote).is_none());
         // 开关开启
         let m = map(&["binance", "binance-quote", "okx", "okx-quote"]);
-        assert_eq!(find_connector(&m, "binance", DataType::Quote).unwrap().name(), "binance-quote");
-        assert_eq!(find_connector(&m, "okx", DataType::Quote).unwrap().name(), "okx-quote");
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Quote)
+                .unwrap()
+                .name(),
+            "binance-quote"
+        );
+        assert_eq!(
+            find_connector(&m, "okx", DataType::Quote).unwrap().name(),
+            "okx-quote"
+        );
         // 开启 quote 后 tick 路由不受影响
-        assert_eq!(find_connector(&m, "binance", DataType::Tick).unwrap().name(), "binance");
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Tick)
+                .unwrap()
+                .name(),
+            "binance"
+        );
     }
 }

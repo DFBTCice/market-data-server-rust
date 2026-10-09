@@ -160,11 +160,7 @@ fn all_fixtures_are_non_empty() {
             continue;
         }
         let content = fs::read_to_string(&path).unwrap();
-        assert!(
-            !content.trim().is_empty(),
-            "{} 是空快照",
-            path.display()
-        );
+        assert!(!content.trim().is_empty(), "{} 是空快照", path.display());
         let _: Value = serde_json::from_str(&content)
             .unwrap_or_else(|e| panic!("{} 不是合法 JSON: {}", path.display(), e));
         count += 1;
@@ -182,19 +178,32 @@ fn subscriptions_snapshot_shape_and_data_type_values() {
     let mut saw_tick = false;
     let mut saw_kline = false;
     for item in arr {
-        let dt = item["data_type"].as_i64().expect("data_type must be integer");
+        let dt = item["data_type"]
+            .as_i64()
+            .expect("data_type must be integer");
         assert!(item["exchange"].is_string() && item["symbol"].is_string());
         match dt {
             1 => {
                 saw_tick = true;
                 // TICK 无 kline_interval 字段
-                assert!(item.get("kline_interval").is_none(), "TICK 不应带 kline_interval: {}", item);
+                assert!(
+                    item.get("kline_interval").is_none(),
+                    "TICK 不应带 kline_interval: {}",
+                    item
+                );
             }
             2 => {
                 saw_kline = true;
-                assert!(item["kline_interval"].is_string(), "KLINE 必须带 kline_interval: {}", item);
+                assert!(
+                    item["kline_interval"].is_string(),
+                    "KLINE 必须带 kline_interval: {}",
+                    item
+                );
             }
-            other => panic!("旧快照中出现未知 data_type={}（QUOTE=3 只应在开启 quote 后新增出现）", other),
+            other => panic!(
+                "旧快照中出现未知 data_type={}（QUOTE=3 只应在开启 quote 后新增出现）",
+                other
+            ),
         }
     }
     assert!(saw_tick && saw_kline, "快照应同时包含 TICK(1) 与 KLINE(2)");
@@ -231,15 +240,26 @@ fn ws_gateway_tick_push_data_is_byte_stable() {
     // serde_json 的 Value 默认按 key 排序，不能用来比顺序；这里直接比较 Rust 结构体的输出
     // 与快照里 data 的 key 顺序（取自 1.0.0 基线原始推送行）
     let expected_order = [
-        "exchange", "symbol", "timestamp", "price", "quantity", "trade_id",
-        "exchange_event_ts", "connector_receive_ts",
+        "exchange",
+        "symbol",
+        "timestamp",
+        "price",
+        "quantity",
+        "trade_id",
+        "exchange_event_ts",
+        "connector_receive_ts",
     ];
     let mut last = 0usize;
     for key in expected_order {
         let pos = reserialized
             .find(&format!("\"{}\"", key))
             .unwrap_or_else(|| panic!("字段 {} 丢失: {}", key, reserialized));
-        assert!(pos >= last, "字段顺序变化：{} 出现在前面字段之前: {}", key, reserialized);
+        assert!(
+            pos >= last,
+            "字段顺序变化：{} 出现在前面字段之前: {}",
+            key,
+            reserialized
+        );
         last = pos;
     }
     assert_eq!(
@@ -273,12 +293,14 @@ fn quote_json_has_all_fields_even_when_empty() {
 /// 新增 Quote 不应改变既有 Tick / Kline 的序列化（对旧快照做严格字符串比较）
 #[test]
 fn tick_and_kline_serialization_unchanged_by_quote_addition() {
-    let tick: Tick = serde_json::from_str(&load_fixture("tick_okx_btc-usdt-swap.json").unwrap()).unwrap();
+    let tick: Tick =
+        serde_json::from_str(&load_fixture("tick_okx_btc-usdt-swap.json").unwrap()).unwrap();
     assert_eq!(
         serde_json::to_string(&tick).unwrap(),
         r#"{"exchange":"okx","symbol":"BTC-USDT-SWAP","timestamp":1777966262338,"price":"80992","quantity":"0.01","trade_id":2573412162,"exchange_event_ts":1777966262338,"connector_receive_ts":1777966262232}"#
     );
-    let kline: Kline = serde_json::from_str(&load_fixture("kline_binance_btcusdt_1m.json").unwrap()).unwrap();
+    let kline: Kline =
+        serde_json::from_str(&load_fixture("kline_binance_btcusdt_1m.json").unwrap()).unwrap();
     assert_eq!(
         serde_json::to_string(&kline).unwrap(),
         r#"{"exchange":"binance","symbol":"BTCUSDT","interval":"1m","open_time":1777966260000,"open":"80987.40","high":"80987.40","low":"80987.30","close":"80987.30","volume":"0.630","close_time":1777966319999,"quote_asset_volume":"51022.00760","number_of_trades":34,"exchange_event_ts":1777966260000,"connector_receive_ts":1777966262471}"#

@@ -3,8 +3,8 @@ use async_trait::async_trait;
 use futures_util::{SinkExt, StreamExt};
 use md_domain::types::{Kline, Quote, Tick};
 use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::{mpsc, watch, Mutex, RwLock};
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream};
@@ -93,7 +93,11 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
     }
 
     /// 设置 metrics 计数器（可选）
-    pub fn with_metrics(mut self, ticks_dropped: Arc<AtomicU64>, klines_dropped: Arc<AtomicU64>) -> Self {
+    pub fn with_metrics(
+        mut self,
+        ticks_dropped: Arc<AtomicU64>,
+        klines_dropped: Arc<AtomicU64>,
+    ) -> Self {
         self.ticks_dropped = Some(ticks_dropped);
         self.klines_dropped = Some(klines_dropped);
         self
@@ -101,7 +105,11 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
 
     /// 设置 quote 通道与丢弃计数器（1.1.0 新增）。仅 quote 专用连接器调用；
     /// 不调用则 Quote 事件被丢弃（既有连接器不会产生 Quote 事件）。
-    pub fn with_quote(mut self, quote_tx: mpsc::Sender<Quote>, quotes_dropped: Arc<AtomicU64>) -> Self {
+    pub fn with_quote(
+        mut self,
+        quote_tx: mpsc::Sender<Quote>,
+        quotes_dropped: Arc<AtomicU64>,
+    ) -> Self {
         self.quote_tx = Some(quote_tx);
         self.quotes_dropped = Some(quotes_dropped);
         self
@@ -133,36 +141,56 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
         loop {
             // 检查关闭信号
             if *shutdown_rx.borrow() {
-                info!("[{}] shutdown requested, exiting connection loop", adapter_name);
+                info!(
+                    "[{}] shutdown requested, exiting connection loop",
+                    adapter_name
+                );
                 return;
             }
 
             info!("[{}] connecting to {}", adapter_name, self.adapter.ws_url());
 
             // 尝试连接（带超时）
-            let ws_stream = match tokio::time::timeout(CONNECT_TIMEOUT, connect_async(self.adapter.ws_url())).await {
-                Ok(Ok((stream, _))) => stream,
-                Ok(Err(e)) => {
-                    warn!("[{}] connection failed: {}, retrying in {:?}", adapter_name, e, self.reconnect_delay);
-                    if let Some(ref m) = self.connected { m.store(0, Ordering::Relaxed); }
-                    if let Some(ref m) = self.reconnect_total { m.fetch_add(1, Ordering::Relaxed); }
-                    tokio::select! {
-                        _ = tokio::time::sleep(self.reconnect_delay) => {}
-                        _ = shutdown_rx.changed() => { return; }
+            let ws_stream =
+                match tokio::time::timeout(CONNECT_TIMEOUT, connect_async(self.adapter.ws_url()))
+                    .await
+                {
+                    Ok(Ok((stream, _))) => stream,
+                    Ok(Err(e)) => {
+                        warn!(
+                            "[{}] connection failed: {}, retrying in {:?}",
+                            adapter_name, e, self.reconnect_delay
+                        );
+                        if let Some(ref m) = self.connected {
+                            m.store(0, Ordering::Relaxed);
+                        }
+                        if let Some(ref m) = self.reconnect_total {
+                            m.fetch_add(1, Ordering::Relaxed);
+                        }
+                        tokio::select! {
+                            _ = tokio::time::sleep(self.reconnect_delay) => {}
+                            _ = shutdown_rx.changed() => { return; }
+                        }
+                        continue;
                     }
-                    continue;
-                }
-                Err(_) => {
-                    warn!("[{}] connection timeout ({:?}), retrying in {:?}", adapter_name, CONNECT_TIMEOUT, self.reconnect_delay);
-                    if let Some(ref m) = self.connected { m.store(0, Ordering::Relaxed); }
-                    if let Some(ref m) = self.reconnect_total { m.fetch_add(1, Ordering::Relaxed); }
-                    tokio::select! {
-                        _ = tokio::time::sleep(self.reconnect_delay) => {}
-                        _ = shutdown_rx.changed() => { return; }
+                    Err(_) => {
+                        warn!(
+                            "[{}] connection timeout ({:?}), retrying in {:?}",
+                            adapter_name, CONNECT_TIMEOUT, self.reconnect_delay
+                        );
+                        if let Some(ref m) = self.connected {
+                            m.store(0, Ordering::Relaxed);
+                        }
+                        if let Some(ref m) = self.reconnect_total {
+                            m.fetch_add(1, Ordering::Relaxed);
+                        }
+                        tokio::select! {
+                            _ = tokio::time::sleep(self.reconnect_delay) => {}
+                            _ = shutdown_rx.changed() => { return; }
+                        }
+                        continue;
                     }
-                    continue;
-                }
-            };
+                };
 
             // 设置 TCP keepalive
             if let MaybeTlsStream::Plain(ref tcp_stream) = ws_stream.get_ref() {
@@ -208,10 +236,19 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
 
             // 连接成功后同步订阅
             if let Err(e) = self.sync_subscriptions_on_connect(&ws_write_tx).await {
-                warn!("[{}] subscription sync failed: {}, reconnecting", adapter_name, e);
-                if let Some(ref m) = self.subscribe_failed_total { m.fetch_add(1, Ordering::Relaxed); }
-                if let Some(ref m) = self.connected { m.store(0, Ordering::Relaxed); }
-                if let Some(ref m) = self.reconnect_total { m.fetch_add(1, Ordering::Relaxed); }
+                warn!(
+                    "[{}] subscription sync failed: {}, reconnecting",
+                    adapter_name, e
+                );
+                if let Some(ref m) = self.subscribe_failed_total {
+                    m.fetch_add(1, Ordering::Relaxed);
+                }
+                if let Some(ref m) = self.connected {
+                    m.store(0, Ordering::Relaxed);
+                }
+                if let Some(ref m) = self.reconnect_total {
+                    m.fetch_add(1, Ordering::Relaxed);
+                }
                 // 清除写 channel
                 {
                     let mut tx = self.state.ws_write_tx.write().await;
@@ -250,13 +287,21 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
                     interval.tick().await;
                     if let Some(ref msg) = heartbeat_msg {
                         // OKX: 发送文本 "ping"
-                        if ws_write_tx_heartbeat.send(WsCommand::Text(msg.clone())).await.is_err() {
+                        if ws_write_tx_heartbeat
+                            .send(WsCommand::Text(msg.clone()))
+                            .await
+                            .is_err()
+                        {
                             warn!("[{}] heartbeat send failed", heartbeat_name);
                             break;
                         }
                     } else {
                         // Binance: 发送协议层 Ping
-                        if ws_write_tx_heartbeat.send(WsCommand::Ping(vec![])).await.is_err() {
+                        if ws_write_tx_heartbeat
+                            .send(WsCommand::Ping(vec![]))
+                            .await
+                            .is_err()
+                        {
                             warn!("[{}] heartbeat send failed", heartbeat_name);
                             break;
                         }
@@ -286,18 +331,27 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
 
             match read_result {
                 ReadResult::Disconnected => {
-                    warn!("[{}] disconnected, reconnecting in {:?}", adapter_name, self.reconnect_delay);
+                    warn!(
+                        "[{}] disconnected, reconnecting in {:?}",
+                        adapter_name, self.reconnect_delay
+                    );
                 }
                 ReadResult::Shutdown => {
-                    if let Some(ref m) = self.connected { m.store(0, Ordering::Relaxed); }
+                    if let Some(ref m) = self.connected {
+                        m.store(0, Ordering::Relaxed);
+                    }
                     info!("[{}] shutdown signal received", adapter_name);
                     return;
                 }
             }
 
             // 断开连接，准备重连
-            if let Some(ref m) = self.connected { m.store(0, Ordering::Relaxed); }
-            if let Some(ref m) = self.reconnect_total { m.fetch_add(1, Ordering::Relaxed); }
+            if let Some(ref m) = self.connected {
+                m.store(0, Ordering::Relaxed);
+            }
+            if let Some(ref m) = self.reconnect_total {
+                m.fetch_add(1, Ordering::Relaxed);
+            }
 
             tokio::select! {
                 _ = tokio::time::sleep(self.reconnect_delay) => {}
@@ -448,25 +502,28 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
                     }
                 }
             }
-            DataEvent::Quote(quote) => {
-                match self.quote_tx.as_ref() {
-                    Some(tx) => {
-                        if tx.try_send(quote).is_err() {
-                            warn!("[{}] quote channel full, dropping", adapter_name);
-                            if let Some(ref counter) = self.quotes_dropped {
-                                counter.fetch_add(1, Ordering::Relaxed);
-                            }
+            DataEvent::Quote(quote) => match self.quote_tx.as_ref() {
+                Some(tx) => {
+                    if tx.try_send(quote).is_err() {
+                        warn!("[{}] quote channel full, dropping", adapter_name);
+                        if let Some(ref counter) = self.quotes_dropped {
+                            counter.fetch_add(1, Ordering::Relaxed);
                         }
                     }
-                    None => {
-                        debug!("[{}] quote event without quote channel, ignored", adapter_name);
-                    }
                 }
-            }
+                None => {
+                    debug!(
+                        "[{}] quote event without quote channel, ignored",
+                        adapter_name
+                    );
+                }
+            },
             DataEvent::SubscribeError(err) => {
                 // 订阅失败：从 active_streams 移除，更新指标
-                warn!("[{}] subscribe error: code={}, stream={}, msg={}",
-                    adapter_name, err.code, err.stream, err.message);
+                warn!(
+                    "[{}] subscribe error: code={}, stream={}, msg={}",
+                    adapter_name, err.code, err.stream, err.message
+                );
                 if !err.stream.is_empty() {
                     let mut active = self.state.active_streams.write().await;
                     active.remove(&err.stream);
@@ -516,19 +573,31 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
 
         // 2. 发送取消订阅消息
         if !unsubs_to_send.is_empty() {
-            info!("[{}] unsubscribing from {} streams", adapter_name, unsubs_to_send.len());
+            info!(
+                "[{}] unsubscribing from {} streams",
+                adapter_name,
+                unsubs_to_send.len()
+            );
             for stream in &unsubs_to_send {
                 let msg = self.adapter.build_unsubscribe_msg(&[stream.clone()]);
-                ws_write_tx.send(WsCommand::Text(msg)).await
+                ws_write_tx
+                    .send(WsCommand::Text(msg))
+                    .await
                     .map_err(|e| ConnectorError::SubscribeFailed(e.to_string()))?;
             }
         }
 
         // 3. 发送订阅消息
         if !subs_to_send.is_empty() {
-            info!("[{}] subscribing to {} streams", adapter_name, subs_to_send.len());
+            info!(
+                "[{}] subscribing to {} streams",
+                adapter_name,
+                subs_to_send.len()
+            );
             let msg = self.adapter.build_subscribe_msg(&subs_to_send);
-            ws_write_tx.send(WsCommand::Text(msg)).await
+            ws_write_tx
+                .send(WsCommand::Text(msg))
+                .await
                 .map_err(|e| ConnectorError::SubscribeFailed(e.to_string()))?;
 
             // 更新活跃订阅
@@ -557,7 +626,9 @@ enum ReadResult {
 }
 
 /// 设置 TCP keepalive（仅对 Plain TCP 连接有效）
-fn set_tcp_keepalive(tcp_stream: &tokio::net::TcpStream) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn set_tcp_keepalive(
+    tcp_stream: &tokio::net::TcpStream,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     use socket2::Socket;
     use std::os::unix::io::{AsRawFd, FromRawFd};
 
@@ -609,7 +680,10 @@ impl<A: ExchangeAdapter> Connector for BaseConnector<A> {
         Ok(())
     }
 
-    async fn add_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError> {
+    async fn add_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError> {
         let mut desired = self.state.desired_subs.write().await;
         let mut pending = self.state.pending_ops.lock().await;
 
@@ -629,14 +703,20 @@ impl<A: ExchangeAdapter> Connector for BaseConnector<A> {
             let msg = self.adapter.build_subscribe_msg(&streams_to_subscribe);
             if tx.send(WsCommand::Text(msg)).await.is_err() {
                 // 连接已断开，pending_ops 会在重连时处理
-                debug!("[{}] immediate subscribe failed (disconnected), will retry on reconnect", self.adapter.name());
+                debug!(
+                    "[{}] immediate subscribe failed (disconnected), will retry on reconnect",
+                    self.adapter.name()
+                );
             }
         }
 
         Ok(())
     }
 
-    async fn remove_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError> {
+    async fn remove_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError> {
         let mut desired = self.state.desired_subs.write().await;
         let mut pending = self.state.pending_ops.lock().await;
 
@@ -655,7 +735,10 @@ impl<A: ExchangeAdapter> Connector for BaseConnector<A> {
         if let Some(tx) = self.state.ws_write_tx.read().await.as_ref() {
             let msg = self.adapter.build_unsubscribe_msg(&streams_to_unsubscribe);
             if tx.send(WsCommand::Text(msg)).await.is_err() {
-                debug!("[{}] immediate unsubscribe failed (disconnected), will retry on reconnect", self.adapter.name());
+                debug!(
+                    "[{}] immediate unsubscribe failed (disconnected), will retry on reconnect",
+                    self.adapter.name()
+                );
             }
         }
 
