@@ -140,6 +140,34 @@ pub struct Kline {
     pub connector_receive_ts: i64,
 }
 
+/// Quote 报价数据 -- 1.1.0 新增主题 `quote.<exchange>.<SYMBOL>`
+///
+/// 买一卖一 + 最新价，用于让消费端区分"价格没变"与"数据断了"（tick 只由成交驱动，
+/// 成交稀疏的合约两笔成交之间可能十几秒无推送）。
+///
+/// JSON 约定（与 tick 风格一致，但**不使用 omitempty**）：
+/// - 数值一律字符串，时间戳为毫秒整数；
+/// - 字段顺序固定：exchange, symbol, bid_price, bid_qty, ask_price, ask_qty,
+///   last_price, timestamp, connector_receive_ts；
+/// - 币安 bookTicker 不含最新成交价，`last_price` 恒为空串 `""` 且仍然输出
+///   （消费端据此区分"无 last"与"字段缺失"）。
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(default)]
+pub struct Quote {
+    pub exchange: String,
+    pub symbol: String,
+    pub bid_price: String,
+    pub bid_qty: String,
+    pub ask_price: String,
+    pub ask_qty: String,
+    /// 最新成交价；币安 bookTicker 无此字段时为空串，OKX 取 tickers.last
+    pub last_price: String,
+    /// 交易所事件时间（毫秒）：币安 bookTicker 的 E、OKX tickers 的 ts
+    pub timestamp: i64,
+    /// 连接器接收时间（毫秒）
+    pub connector_receive_ts: i64,
+}
+
 /// WebSocket 推送消息 -- API Gateway 格式
 /// {"type": "tick", "topic": "tick.binance.BTCUSDT", "data": {...}}
 #[derive(Debug, Clone, Serialize, Deserialize)]
