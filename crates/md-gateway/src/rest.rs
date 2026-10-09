@@ -35,7 +35,7 @@ pub struct SubscriptionRequest {
 }
 
 /// 订阅信息响应 -- 对标 Go 版 protobuf SubscriptionInfo
-/// Go 版用 data_type (int32): 1=TICK, 2=KLINE
+/// Go 版用 data_type (int32): 1=TICK, 2=KLINE；1.1.0 新增 3=QUOTE（既有数值不变）
 #[derive(Serialize)]
 struct SubscriptionInfo {
     exchange: String,
@@ -70,7 +70,31 @@ pub fn routes(
             "/api/v1/data/latest/kline/:exchange/:symbol/:interval",
             get(get_latest_kline),
         )
+        .route(
+            "/api/v1/data/latest/quote/:exchange/:symbol",
+            get(get_latest_quote),
+        )
         .with_state(state)
+}
+
+/// 解析订阅请求里的 type（大小写不敏感）。QUOTE 为 1.1.0 新增。
+fn parse_data_type(raw: &str) -> Option<md_connector::DataType> {
+    match raw.to_uppercase().as_str() {
+        "TICK" => Some(md_connector::DataType::Tick),
+        "KLINE" => Some(md_connector::DataType::Kline),
+        "QUOTE" => Some(md_connector::DataType::Quote),
+        _ => None,
+    }
+}
+
+/// 连接器未找到的 404 响应。TICK/KLINE 文案与 1.0.0 一致；QUOTE 单独提示"未启用"。
+fn connector_not_found(data_type: md_connector::DataType, exchange: &str) -> axum::response::Response {
+    let error = if data_type == md_connector::DataType::Quote {
+        format!("quote connector not enabled: {}", exchange)
+    } else {
+        format!("connector not found: {}", exchange)
+    };
+    (StatusCode::NOT_FOUND, Json(ErrorResponse { error })).into_response()
 }
 
 /// GET /api/v1/subscriptions
@@ -87,6 +111,7 @@ async fn get_subscriptions(
                 data_type: match target.data_type {
                     md_connector::DataType::Tick => 1,
                     md_connector::DataType::Kline => 2,
+                    md_connector::DataType::Quote => 3,
                 },
                 symbol: target.symbol,
                 kline_interval: target.kline_interval.unwrap_or_default(),
@@ -109,10 +134,10 @@ async fn add_subscription(
         return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "at least one symbol is required".into() })).into_response();
     }
 
-    let data_type = match req.data_type.to_uppercase().as_str() {
-        "TICK" => md_connector::DataType::Tick,
-        "KLINE" => md_connector::DataType::Kline,
-        _ => return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "type must be TICK or KLINE".into() })).into_response(),
+    let data_type = match parse_data_type(&req.data_type) {
+        Some(dt) => dt,
+        // 既有错误文案保持与 1.0.0 逐字节一致（QUOTE 为 1.1.0 新增的可选类型，不改动该文案）
+        None => return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "type must be TICK or KLINE".into() })).into_response(),
     };
 
     if data_type == md_connector::DataType::Kline && req.interval.is_empty() {
@@ -121,15 +146,11 @@ async fn add_subscription(
 
     let connectors = state.connectors.read().await;
     let exchange_key = req.exchange.to_lowercase();
-    // OKX 双连接路由：KLINE → "{exchange}-kline"，TICK → "{exchange}"
-    let connector_key = if data_type == md_connector::DataType::Kline {
-        format!("{}-kline", exchange_key)
-    } else {
-        exchange_key.clone()
-    };
-    let connector = match connectors.get(&connector_key).or_else(|| connectors.get(&exchange_key)) {
+    // 连接器路由：TICK → "{exchange}"，KLINE → "{exchange}-kline"（回退 "{exchange}"），
+    // QUOTE → "{exchange}-quote"（严格匹配，见 md_connector::find_connector）
+    let connector = match md_connector::find_connector(&connectors, &exchange_key, data_type) {
         Some(c) => c,
-        None => return (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("connector not found: {}", req.exchange) })).into_response(),
+        None => return connector_not_found(data_type, &req.exchange),
     };
 
     let targets: Vec<md_connector::SubscriptionTarget> = req.symbols.iter().map(|sym| {
@@ -160,22 +181,16 @@ async fn remove_subscription(
         return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "exchange and symbols are required".into() })).into_response();
     }
 
-    let data_type = match req.data_type.to_uppercase().as_str() {
-        "TICK" => md_connector::DataType::Tick,
-        "KLINE" => md_connector::DataType::Kline,
-        _ => return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "type must be TICK or KLINE".into() })).into_response(),
+    let data_type = match parse_data_type(&req.data_type) {
+        Some(dt) => dt,
+        None => return (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: "type must be TICK or KLINE".into() })).into_response(),
     };
 
     let connectors = state.connectors.read().await;
     let exchange_key = req.exchange.to_lowercase();
-    let connector_key = if data_type == md_connector::DataType::Kline {
-        format!("{}-kline", exchange_key)
-    } else {
-        exchange_key.clone()
-    };
-    let connector = match connectors.get(&connector_key).or_else(|| connectors.get(&exchange_key)) {
+    let connector = match md_connector::find_connector(&connectors, &exchange_key, data_type) {
         Some(c) => c,
-        None => return (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("connector not found: {}", req.exchange) })).into_response(),
+        None => return connector_not_found(data_type, &req.exchange),
     };
 
     let targets: Vec<md_connector::SubscriptionTarget> = req.symbols.iter().map(|sym| {
@@ -205,6 +220,17 @@ async fn get_latest_tick(
     match state.processor.get_latest_tick(&exchange, &symbol) {
         Some(tick) => (StatusCode::OK, Json(tick.as_ref().clone())).into_response(),
         None => (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("no tick data for {}:{}", exchange, symbol) })).into_response(),
+    }
+}
+
+/// GET /api/v1/data/latest/quote/{exchange}/{symbol}（1.1.0 新增）
+async fn get_latest_quote(
+    State(state): State<AppState>,
+    Path((exchange, symbol)): Path<(String, String)>,
+) -> impl IntoResponse {
+    match state.processor.get_latest_quote(&exchange, &symbol) {
+        Some(quote) => (StatusCode::OK, Json(quote.as_ref().clone())).into_response(),
+        None => (StatusCode::NOT_FOUND, Json(ErrorResponse { error: format!("no quote data for {}:{}", exchange, symbol) })).into_response(),
     }
 }
 
