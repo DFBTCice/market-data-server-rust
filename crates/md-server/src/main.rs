@@ -187,7 +187,132 @@ async fn start_connectors(
         }
     }
 
+    // ---- Quote 专用连接器（1.1.0 新增；开关默认关闭，关闭时不建任何新连接）----
+    start_quote_connectors(cfg, processor, &connectors, &mut connector_metrics_map).await;
+
     (connectors, connector_metrics_map)
+}
+
+/// 启动 quote 专用连接器（`binance-quote` / `okx-quote`）。
+///
+/// 设计要点：
+/// - 与既有 tick/kline 连接器完全隔离：独立 WebSocket 连接、独立重连/心跳状态，
+///   quote 侧故障（断线、订阅被拒）不会影响 tick/kline；
+/// - 币安 bookTicker 属 Public 类流，连 `connectors.binance.stream_base_url_public`；
+///   OKX tickers 走 Public WebSocket；
+/// - 仅当 `quotes_enabled=true` 且对应交易所 `enabled=true` 且初始列表非空时才启动
+///   （与 OKX tick 连接器一致：OKX 对无订阅连接约 30 秒后会断开，空连接只会造成重连噪声）。
+async fn start_quote_connectors(
+    cfg: &md_config::Config,
+    processor: &Arc<Processor>,
+    connectors: &Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
+    connector_metrics_map: &mut HashMap<String, Arc<ConnectorMetrics>>,
+) {
+    // ---- Binance quote（bookTicker，Public 流）----
+    let b = &cfg.connectors.binance;
+    if b.quotes_enabled && !b.enabled {
+        warn!("binance.quotes_enabled=true 但 binance.enabled=false，quote 连接器不会启动");
+    } else if b.quotes_enabled && b.subscribe_quotes.is_empty() {
+        warn!("binance.quotes_enabled=true 但 subscribe_quotes 为空，quote 连接器不会启动（补充列表后需重启）");
+    } else if b.quotes_enabled {
+        info!("starting Binance quote connector (bookTicker) -> {}", b.stream_base_url_public);
+        let adapter = BinanceAdapter::new_quote(BinanceConnectorConfig {
+            // quote 连接器连 Public 流地址
+            stream_base_url: b.stream_base_url_public.clone(),
+            subscribe_ticks: Vec::new(),
+            subscribe_klines: HashMap::new(),
+            reconnect_delay: b.reconnect_delay,
+            ping_interval: b.ping_interval,
+        });
+        let m = ConnectorMetrics::new();
+        connector_metrics_map.insert("binance-quote".into(), m.clone());
+        let connector = Arc::new(
+            BaseConnector::new(
+                adapter,
+                processor.tick_tx(),
+                processor.kline_tx(),
+                b.reconnect_delay,
+            )
+            .with_quote(processor.quote_tx(), processor.metrics.quotes_dropped.clone())
+            .with_full_metrics(
+                processor.metrics.ticks_dropped.clone(),
+                processor.metrics.klines_dropped.clone(),
+                m.connected.clone(),
+                m.reconnect_total.clone(),
+                m.subscribe_failed_total.clone(),
+            ),
+        );
+        let targets: Vec<SubscriptionTarget> = b
+            .subscribe_quotes
+            .iter()
+            .map(|symbol| SubscriptionTarget {
+                exchange: "binance".into(),
+                data_type: DataType::Quote,
+                symbol: symbol.clone(),
+                kline_interval: None,
+            })
+            .collect();
+        if let Err(e) = connector.add_subscriptions(targets).await {
+            warn!("failed to add Binance quote subscriptions: {}", e);
+        }
+        connectors.write().await.insert("binance-quote".into(), connector.clone());
+        tokio::spawn(async move {
+            connector.run_connection_loop().await;
+        });
+    }
+
+    // ---- OKX quote（tickers，Public WebSocket）----
+    let o = &cfg.connectors.okx;
+    if o.quotes_enabled && !o.enabled {
+        warn!("okx.quotes_enabled=true 但 okx.enabled=false，quote 连接器不会启动");
+    } else if o.quotes_enabled && o.subscribe_quotes.is_empty() {
+        warn!("okx.quotes_enabled=true 但 subscribe_quotes 为空，quote 连接器不会启动（补充列表后需重启）");
+    } else if o.quotes_enabled {
+        info!("starting OKX quote connector (tickers) -> {}", o.stream_base_url_public);
+        let adapter = OkxAdapter::new_quote(OkxConnectorConfig {
+            stream_base_url_public: o.stream_base_url_public.clone(),
+            stream_base_url_business: o.stream_base_url_business.clone(),
+            subscribe_ticks: Vec::new(),
+            subscribe_klines: HashMap::new(),
+            reconnect_delay: o.reconnect_delay,
+            ping_interval: o.ping_interval,
+        });
+        let m = ConnectorMetrics::new();
+        connector_metrics_map.insert("okx-quote".into(), m.clone());
+        let connector = Arc::new(
+            BaseConnector::new(
+                adapter,
+                processor.tick_tx(),
+                processor.kline_tx(),
+                o.reconnect_delay,
+            )
+            .with_quote(processor.quote_tx(), processor.metrics.quotes_dropped.clone())
+            .with_full_metrics(
+                processor.metrics.ticks_dropped.clone(),
+                processor.metrics.klines_dropped.clone(),
+                m.connected.clone(),
+                m.reconnect_total.clone(),
+                m.subscribe_failed_total.clone(),
+            ),
+        );
+        let targets: Vec<SubscriptionTarget> = o
+            .subscribe_quotes
+            .iter()
+            .map(|symbol| SubscriptionTarget {
+                exchange: "okx".into(),
+                data_type: DataType::Quote,
+                symbol: symbol.clone(),
+                kline_interval: None,
+            })
+            .collect();
+        if let Err(e) = connector.add_subscriptions(targets).await {
+            warn!("failed to add OKX quote subscriptions: {}", e);
+        }
+        connectors.write().await.insert("okx-quote".into(), connector.clone());
+        tokio::spawn(async move {
+            connector.run_connection_loop().await;
+        });
+    }
 }
 
 /// 将 ":PORT" 格式的地址加上偏移量
@@ -258,10 +383,11 @@ async fn main() {
     info!("API Gateway: {}", cfg.api_gateway.listen_address);
 
     // 创建 Processor
-    let processor = Arc::new(Processor::new_with_broadcast_capacity(
+    let processor = Arc::new(Processor::new_full(
         cfg.processor.tick_channel_buffer,
         cfg.processor.kline_channel_buffer,
         cfg.processor.broadcast_capacity,
+        cfg.processor.quote_channel_buffer,
     ));
 
     // 启动连接器
@@ -414,13 +540,30 @@ async fn wait_for_signal(
                                 needs_restart = true;
                             }
 
+                            // 3b. quote 开关 / Public 流地址变更需要重启（1.1.0 新增）
+                            if new_cfg.connectors.binance.quotes_enabled != current_cfg.connectors.binance.quotes_enabled {
+                                warn!("  binance.quotes_enabled changed: {} -> {} (requires restart)",
+                                    current_cfg.connectors.binance.quotes_enabled, new_cfg.connectors.binance.quotes_enabled);
+                                needs_restart = true;
+                            }
+                            if new_cfg.connectors.okx.quotes_enabled != current_cfg.connectors.okx.quotes_enabled {
+                                warn!("  okx.quotes_enabled changed: {} -> {} (requires restart)",
+                                    current_cfg.connectors.okx.quotes_enabled, new_cfg.connectors.okx.quotes_enabled);
+                                needs_restart = true;
+                            }
+
                             // 4. 订阅列表变更：对比并应用
                             let binance_ticks_changed = new_cfg.connectors.binance.subscribe_ticks != current_cfg.connectors.binance.subscribe_ticks;
                             let binance_klines_changed = new_cfg.connectors.binance.subscribe_klines != current_cfg.connectors.binance.subscribe_klines;
                             let okx_ticks_changed = new_cfg.connectors.okx.subscribe_ticks != current_cfg.connectors.okx.subscribe_ticks;
                             let okx_klines_changed = new_cfg.connectors.okx.subscribe_klines != current_cfg.connectors.okx.subscribe_klines;
 
-                            if binance_ticks_changed || binance_klines_changed || okx_ticks_changed || okx_klines_changed {
+                            let binance_quotes_changed = new_cfg.connectors.binance.subscribe_quotes != current_cfg.connectors.binance.subscribe_quotes;
+                            let okx_quotes_changed = new_cfg.connectors.okx.subscribe_quotes != current_cfg.connectors.okx.subscribe_quotes;
+
+                            if binance_ticks_changed || binance_klines_changed || okx_ticks_changed || okx_klines_changed
+                                || binance_quotes_changed || okx_quotes_changed
+                            {
                                 info!("  subscription lists changed, applying...");
                                 apply_subscription_changes(&current_cfg, &new_cfg, connectors).await;
                             }
@@ -432,6 +575,10 @@ async fn wait_for_signal(
                             }
                             if new_cfg.connectors.okx.stream_base_url_public != current_cfg.connectors.okx.stream_base_url_public {
                                 warn!("  okx.stream_base_url_public changed (requires restart)");
+                                needs_restart = true;
+                            }
+                            if new_cfg.connectors.binance.stream_base_url_public != current_cfg.connectors.binance.stream_base_url_public {
+                                warn!("  binance.stream_base_url_public changed (requires restart)");
                                 needs_restart = true;
                             }
 
@@ -602,6 +749,81 @@ async fn apply_subscription_changes(
             }
         }
     }
+
+    // ---- Quote 订阅变更（1.1.0 新增）----
+    // 仅当对应 quote 连接器已在运行时才能热更；quotes_enabled 关闭或启动时列表为空
+    // 导致连接器不存在的情况，需重启生效（给出明确提示，而不是静默忽略）。
+    apply_quote_changes(
+        "binance",
+        "binance-quote",
+        &old_cfg.connectors.binance.subscribe_quotes,
+        &new_cfg.connectors.binance.subscribe_quotes,
+        &conns,
+    )
+    .await;
+    apply_quote_changes(
+        "okx",
+        "okx-quote",
+        &old_cfg.connectors.okx.subscribe_quotes,
+        &new_cfg.connectors.okx.subscribe_quotes,
+        &conns,
+    )
+    .await;
+}
+
+/// 计算 quote 订阅差集：返回 (新增, 移除)，均为带交易所名的订阅目标
+fn diff_quote_targets(
+    exchange: &str,
+    old_list: &[String],
+    new_list: &[String],
+) -> (Vec<SubscriptionTarget>, Vec<SubscriptionTarget>) {
+    use std::collections::HashSet;
+    let old_set: HashSet<&String> = old_list.iter().collect();
+    let new_set: HashSet<&String> = new_list.iter().collect();
+    let mk = |sym: &String| SubscriptionTarget {
+        exchange: exchange.into(),
+        data_type: DataType::Quote,
+        symbol: sym.clone(),
+        kline_interval: None,
+    };
+    let mut to_add: Vec<SubscriptionTarget> = new_set.difference(&old_set).map(|s| mk(s)).collect();
+    let mut to_remove: Vec<SubscriptionTarget> = old_set.difference(&new_set).map(|s| mk(s)).collect();
+    to_add.sort_by(|a, b| a.symbol.cmp(&b.symbol));
+    to_remove.sort_by(|a, b| a.symbol.cmp(&b.symbol));
+    (to_add, to_remove)
+}
+
+async fn apply_quote_changes(
+    exchange: &str,
+    connector_key: &str,
+    old_list: &[String],
+    new_list: &[String],
+    conns: &HashMap<String, Arc<dyn Connector>>,
+) {
+    if old_list == new_list {
+        return;
+    }
+    let Some(connector) = conns.get(connector_key) else {
+        warn!(
+            "  {}: subscribe_quotes changed but quote connector is not running \
+             (quotes_enabled=false or list was empty at startup) -- requires restart",
+            exchange
+        );
+        return;
+    };
+    let (to_add, to_remove) = diff_quote_targets(exchange, old_list, new_list);
+    if !to_add.is_empty() {
+        info!("  {}: adding {} quote subscriptions", connector_key, to_add.len());
+        if let Err(e) = connector.add_subscriptions(to_add).await {
+            warn!("  {}: failed to add quote subscriptions: {}", connector_key, e);
+        }
+    }
+    if !to_remove.is_empty() {
+        info!("  {}: removing {} quote subscriptions", connector_key, to_remove.len());
+        if let Err(e) = connector.remove_subscriptions(to_remove).await {
+            warn!("  {}: failed to remove quote subscriptions: {}", connector_key, e);
+        }
+    }
 }
 
 /// 等待关停信号（用于 axum graceful shutdown）
@@ -656,6 +878,7 @@ fn esc(v: &str) -> String {
 /// **吞吐 / 处理**
 /// - `md_ticks_processed` / `md_klines_processed` (counter，全局顶部 stat)
 /// - `md_ticks_dropped` / `md_klines_dropped` (counter，channel 满丢弃)
+/// - `md_quotes_processed` / `md_quotes_dropped` (counter，1.1.0 新增)
 ///
 /// **入库延迟 / 吞吐（核心多维指标）**
 /// - `md_ingestion_latency_ms{exchange,type,symbol,interval}` (histogram)
@@ -701,6 +924,13 @@ async fn metrics_handler(
     out.push_str("# HELP md_klines_dropped Total klines dropped (mpsc channel full)\n");
     out.push_str("# TYPE md_klines_dropped counter\n");
     out.push_str(&format!("md_klines_dropped {}\n", snap.klines_dropped));
+    // quote（1.1.0 新增；开关关闭时恒为 0）
+    out.push_str("# HELP md_quotes_processed Total quotes processed (global)\n");
+    out.push_str("# TYPE md_quotes_processed counter\n");
+    out.push_str(&format!("md_quotes_processed {}\n", snap.quotes_processed));
+    out.push_str("# HELP md_quotes_dropped Total quotes dropped (mpsc channel full)\n");
+    out.push_str("# TYPE md_quotes_dropped counter\n");
+    out.push_str(&format!("md_quotes_dropped {}\n", snap.quotes_dropped));
 
     // ---- 入库延迟/吞吐多维 histogram（exchange + type + symbol + interval）----
     // 到达延迟 md_ingestion_latency_ms = recv − E（交易所推送 → 本机接收）：我们这条链路的真实延迟。
@@ -775,6 +1005,10 @@ async fn metrics_handler(
         "md_ws_messages_sent_total{{kind=\"kline\"}} {}\n",
         snap.ws_messages_sent_kline
     ));
+    out.push_str(&format!(
+        "md_ws_messages_sent_total{{kind=\"quote\"}} {}\n",
+        snap.ws_messages_sent_quote
+    ));
 
     out.push_str("# HELP md_broadcast_lagged_total Total broadcast lagged events (subscriber fell behind)\n");
     out.push_str("# TYPE md_broadcast_lagged_total counter\n");
@@ -785,6 +1019,10 @@ async fn metrics_handler(
     out.push_str(&format!(
         "md_broadcast_lagged_total{{topic_kind=\"kline\"}} {}\n",
         snap.broadcast_lagged_kline
+    ));
+    out.push_str(&format!(
+        "md_broadcast_lagged_total{{topic_kind=\"quote\"}} {}\n",
+        snap.broadcast_lagged_quote
     ));
 
     // ---- 网关内部转发延迟（按 topic）：总体延迟 + 按 topic 推送吞吐 ----
@@ -900,5 +1138,73 @@ mod tests {
         assert!(out.contains("process_max_fds"), "missing process_max_fds");
         assert!(out.contains("process_start_time_seconds"), "missing process_start_time_seconds");
         assert!(out.contains("process_uptime_seconds"), "missing process_uptime_seconds");
+    }
+
+    // ---- quote（1.1.0 新增）----
+
+    /// quote 指标只新增、不改旧指标；开关关闭（无 quote 流量）时也有占位 0 值，便于面板不断线
+    #[tokio::test]
+    async fn metrics_handler_exposes_quote_metrics() {
+        let processor = Arc::new(Processor::new_with_broadcast_capacity(100, 100, 256));
+        process_metrics::init();
+
+        // 无任何 quote 流量
+        let out = metrics_handler(processor.clone(), HashMap::new()).await;
+        assert!(out.contains("md_quotes_processed 0"));
+        assert!(out.contains("md_quotes_dropped 0"));
+        assert!(out.contains("md_ws_messages_sent_total{kind=\"quote\"} 0"));
+        assert!(out.contains("md_broadcast_lagged_total{topic_kind=\"quote\"} 0"));
+        // 无 quote 流量时不应有 type="quote" 的入库延迟序列
+        assert!(!out.contains("type=\"quote\""));
+
+        // 有流量后：processed 递增，且带 exchange/type/symbol 维度的入库延迟出现
+        processor.handle_quote(md_domain::types::Quote {
+            exchange: "okx".into(),
+            symbol: "BNB-USDT-SWAP".into(),
+            bid_price: "744".into(),
+            ask_price: "744.1".into(),
+            last_price: "744".into(),
+            timestamp: 1711929600000,
+            connector_receive_ts: 1711929600050,
+            ..Default::default()
+        });
+        processor.metrics.ws_message_sent("quote");
+        processor.metrics.record_broadcast_lagged("quote");
+        let out = metrics_handler(processor, HashMap::new()).await;
+        assert!(out.contains("md_quotes_processed 1"));
+        assert!(out.contains("md_ws_messages_sent_total{kind=\"quote\"} 1"));
+        assert!(out.contains("md_broadcast_lagged_total{topic_kind=\"quote\"} 1"));
+        assert!(
+            out.contains("md_ingestion_latency_ms_count{exchange=\"okx\",type=\"quote\",symbol=\"BNB-USDT-SWAP\",interval=\"\"}"),
+            "missing quote ingestion latency series"
+        );
+    }
+
+    #[test]
+    fn diff_quote_targets_add_and_remove() {
+        let old = vec!["BNBUSDT".to_string(), "BTCUSDT".to_string()];
+        let new = vec!["BNBUSDT".to_string(), "ETHUSDT".to_string()];
+        let (add, remove) = diff_quote_targets("binance", &old, &new);
+        assert_eq!(add.len(), 1);
+        assert_eq!(add[0].symbol, "ETHUSDT");
+        assert_eq!(add[0].exchange, "binance");
+        assert_eq!(add[0].data_type, DataType::Quote);
+        assert_eq!(remove.len(), 1);
+        assert_eq!(remove[0].symbol, "BTCUSDT");
+
+        // 无变化 → 无操作
+        let (add, remove) = diff_quote_targets("okx", &old, &old);
+        assert!(add.is_empty() && remove.is_empty());
+    }
+
+    /// 旧版配置（无任何 quote 键）：SIGHUP 的 quote 逻辑不应产生任何订阅动作
+    #[tokio::test]
+    async fn apply_quote_changes_noop_when_lists_equal_or_connector_missing() {
+        let conns: HashMap<String, Arc<dyn Connector>> = HashMap::new();
+        // 列表相同：直接返回
+        apply_quote_changes("binance", "binance-quote", &[], &[], &conns).await;
+        // 列表不同但连接器未启动：只告警（不 panic，不创建连接器）
+        apply_quote_changes("binance", "binance-quote", &[], &["BNBUSDT".to_string()], &conns).await;
+        assert!(conns.is_empty());
     }
 }
