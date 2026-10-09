@@ -703,8 +703,9 @@ async fn metrics_handler(
     out.push_str(&format!("md_klines_dropped {}\n", snap.klines_dropped));
 
     // ---- 入库延迟/吞吐多维 histogram（exchange + type + symbol + interval）----
-    // 单一指标，dashboard 自行聚合到交易所/标的/周期维度。对标 Go 版 ingestion_latency_ms
-    out.push_str("# HELP md_ingestion_latency_ms Ingestion latency exchange_event->local_receive (ms), by exchange/type/symbol/interval\n");
+    // 到达延迟 md_ingestion_latency_ms = recv − E（交易所推送 → 本机接收）：我们这条链路的真实延迟。
+    // 对标 Go 版 ingestion_latency_ms；dashboard 自行聚合到交易所/标的/周期维度。
+    out.push_str("# HELP md_ingestion_latency_ms Arrival latency: exchange push event(E)->local receive (ms), by exchange/type/symbol/interval\n");
     out.push_str("# TYPE md_ingestion_latency_ms histogram\n");
     for s in &snap.ingestion_series {
         let base = format!(
@@ -712,6 +713,18 @@ async fn metrics_handler(
             esc(&s.exchange), s.kind, esc(&s.symbol), esc(&s.interval)
         );
         render_histogram_series(&mut out, "md_ingestion_latency_ms", &s.latency, &base);
+    }
+
+    // 端到端延迟 md_ingestion_latency_e2e_ms = recv − T（交易所成交 → 本机接收）：含交易所内部聚合延迟。
+    // 与到达延迟对照：两者之差 ≈ 交易所内部延迟（币安 aggTrade E−T≈29ms；OKX 二者相等）。
+    out.push_str("# HELP md_ingestion_latency_e2e_ms End-to-end latency: exchange trade time(T)->local receive (ms), includes exchange-side aggregation delay\n");
+    out.push_str("# TYPE md_ingestion_latency_e2e_ms histogram\n");
+    for s in &snap.ingestion_e2e_series {
+        let base = format!(
+            "exchange=\"{}\",type=\"{}\",symbol=\"{}\",interval=\"{}\"",
+            esc(&s.exchange), s.kind, esc(&s.symbol), esc(&s.interval)
+        );
+        render_histogram_series(&mut out, "md_ingestion_latency_e2e_ms", &s.latency, &base);
     }
 
     // ---- 连接器级别指标 ----
@@ -854,6 +867,11 @@ mod tests {
         assert!(
             out.contains("md_ingestion_latency_ms_count{exchange=\"binance\",type=\"tick\",symbol=\"BTCUSDT\",interval=\"\"}"),
             "missing ingestion _count for throughput"
+        );
+        // 端到端延迟（recv-T）：与到达延迟（recv-E）对照，判断高延迟来自我们还是交易所
+        assert!(
+            out.contains("md_ingestion_latency_e2e_ms_bucket{exchange=\"binance\",type=\"tick\",symbol=\"BTCUSDT\",interval=\"\""),
+            "missing end-to-end (recv-T) tick latency series"
         );
         // ---- 网关内部转发延迟（按 topic，Go dashboard"网关内部延迟"+"推送 TOP10"）----
         assert!(

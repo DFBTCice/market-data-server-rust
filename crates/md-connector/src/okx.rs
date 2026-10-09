@@ -117,6 +117,9 @@ pub fn parse_trade(data: &serde_json::Value, inst_id: &str) -> Result<Tick, Pars
         best_ask_quantity: String::new(),
         exchange_event_ts: ts,
         connector_receive_ts: now_ms,
+        // OKX trades 只有一个时间戳 ts（成交时间），无独立推送时间；
+        // 端到端延迟与到达延迟一致，置为相同值。
+        exchange_trade_ts: ts,
     })
 }
 

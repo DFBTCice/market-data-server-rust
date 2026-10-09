@@ -16,6 +16,7 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(15);
 /// TCP keepalive 参数
 const TCP_KEEPALIVE_IDLE: Duration = Duration::from_secs(60);
 const TCP_KEEPALIVE_INTERVAL: Duration = Duration::from_secs(15);
+#[allow(dead_code)] // 非 Linux 平台（如本机 macOS 编译）不引用该常量
 const TCP_KEEPALIVE_RETRIES: u32 = 4;
 
 /// BaseConnector -- 封装公共 WebSocket 管理逻辑
@@ -538,8 +539,17 @@ fn set_tcp_keepalive(tcp_stream: &tokio::net::TcpStream) -> Result<(), Box<dyn s
 
     let keepalive = socket2::TcpKeepalive::new()
         .with_time(TCP_KEEPALIVE_IDLE)
-        .with_interval(TCP_KEEPALIVE_INTERVAL)
-        .with_retries(TCP_KEEPALIVE_RETRIES);
+        .with_interval(TCP_KEEPALIVE_INTERVAL);
+
+    // 重试次数（TCP_KEEPCNT）仅在 Linux 等支持该选项的平台可设；macOS/Windows 无此选项，
+    // 编译期跳过即可。生产部署目标为 x86_64 Linux，此处行为不变。
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "android",
+        target_os = "freebsd",
+        target_os = "netbsd"
+    ))]
+    let keepalive = keepalive.with_retries(TCP_KEEPALIVE_RETRIES);
 
     socket.set_tcp_keepalive(&keepalive)?;
 

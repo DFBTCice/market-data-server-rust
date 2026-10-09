@@ -40,12 +40,19 @@ struct BinanceStreamMessage {
 struct AggTradeData {
     #[serde(rename = "e")]
     event_type: String,
+    /// 事件推送时间（毫秒）：币安撮合并聚合完成后对外推送该事件的时刻。
+    /// 用作采集延迟基准，度量"交易所推送 → 本机接收"的真实到达延迟。
+    #[serde(rename = "E")]
+    event_time: i64,
     #[serde(rename = "s")]
     symbol: String,
     #[serde(rename = "p")]
     price: String,
     #[serde(rename = "q")]
     quantity: String,
+    /// 成交撮合时间（毫秒）：仅保留备查。注意 E - T 是币安内部聚合/分发延迟
+    /// （实测 BTCUSDT 永续中位约 29ms、尾部可达 200ms），不属于我们这条链路的延迟，
+    /// 因此不能用 T 作为采集延迟基准。
     #[serde(rename = "T")]
     trade_time: i64,
     #[serde(rename = "a")]
@@ -107,7 +114,8 @@ pub fn parse_aggtrade(json: &serde_json::Value) -> Result<Tick, ParseError> {
     Ok(Tick {
         exchange: "binance".to_string(),
         symbol: normalize_symbol(&data.symbol),
-        timestamp: data.trade_time,
+        // 对标 Go 版：timestamp 使用事件时间 E（旧实现误用成交时间 T，导致与 Go 不一致）
+        timestamp: data.event_time,
         price: data.price,
         quantity: data.quantity,
         trade_id: data.trade_id,
@@ -116,8 +124,12 @@ pub fn parse_aggtrade(json: &serde_json::Value) -> Result<Tick, ParseError> {
         best_bid_quantity: String::new(),
         best_ask_price: String::new(),
         best_ask_quantity: String::new(),
-        exchange_event_ts: data.trade_time,
+        // 采集延迟基准用事件推送时间 E：connector_receive_ts - E 才是"到达我们服务器"的真实延迟。
+        // 不用 T，否则会把币安内部聚合延迟 (E-T≈29ms) 错误计入我们的延迟。
+        exchange_event_ts: data.event_time,
         connector_receive_ts: now_ms,
+        // 保留成交时间 T，供"端到端延迟(recv-T)"指标对照（含币安内部聚合延迟）
+        exchange_trade_ts: data.trade_time,
     })
 }
 
@@ -301,8 +313,10 @@ mod tests {
 
     #[test]
     fn parse_aggtrade_to_tick() {
+        // E = 事件推送时间（晚于 T），T = 成交时间；二者相差即币安内部聚合延迟
         let json = serde_json::json!({
             "e": "aggTrade",
+            "E": 1711929600029i64,
             "s": "BTCUSDT",
             "p": "67000.50",
             "q": "0.1",
@@ -318,7 +332,9 @@ mod tests {
         assert_eq!(tick.quantity, "0.1");
         assert_eq!(tick.trade_id, 12345);
         assert!(tick.is_buyer_maker);
-        assert_eq!(tick.exchange_event_ts, 1711929600000);
+        // timestamp 与 exchange_event_ts 均采用事件时间 E（对标 Go + 真实到达延迟）
+        assert_eq!(tick.timestamp, 1711929600029);
+        assert_eq!(tick.exchange_event_ts, 1711929600029);
         assert!(tick.connector_receive_ts > 0);
     }
 
@@ -326,6 +342,7 @@ mod tests {
     fn parse_aggtrade_symbol_normalized() {
         let json = serde_json::json!({
             "e": "aggTrade",
+            "E": 1029,
             "s": "btcusdt",
             "p": "100.0",
             "q": "1.0",
@@ -407,6 +424,7 @@ mod tests {
             "stream": "btcusdt@aggTrade",
             "data": {
                 "e": "aggTrade",
+                "E": 1711929600029i64,
                 "s": "BTCUSDT",
                 "p": "67000.50",
                 "q": "0.1",
@@ -422,6 +440,7 @@ mod tests {
             DataEvent::Tick(t) => {
                 assert_eq!(t.symbol, "BTCUSDT");
                 assert_eq!(t.price, "67000.50");
+                assert_eq!(t.exchange_event_ts, 1711929600029);
             }
             _ => panic!("expected Tick"),
         }

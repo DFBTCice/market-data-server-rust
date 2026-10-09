@@ -61,6 +61,13 @@ pub struct Tick {
 
     #[serde(skip_serializing_if = "serde_helpers::is_zero_i64")]
     pub connector_receive_ts: i64,
+
+    /// 交易所成交撮合时间 T（毫秒）。仅内部用于"端到端延迟(recv-T)"指标：
+    /// 币安 aggTrade 的 T 早于事件推送时间 E（E-T 是币安内部聚合/分发延迟）；
+    /// OKX 无独立推送时间，置为与 ts 相同。
+    /// `#[serde(skip)]`：不参与 JSON/proto 序列化，保持与 Go 线格式字节级一致。
+    #[serde(skip)]
+    pub exchange_trade_ts: i64,
 }
 
 /// Kline 数据 -- 对标 Go 版 `marketdata.Kline` protobuf struct
@@ -175,6 +182,7 @@ impl Default for Tick {
             best_ask_quantity: String::new(),
             exchange_event_ts: 0,
             connector_receive_ts: 0,
+            exchange_trade_ts: 0,
         }
     }
 }

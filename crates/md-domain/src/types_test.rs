@@ -31,6 +31,7 @@ mod tick_json_compat {
             best_ask_quantity: "2.0".into(),
             exchange_event_ts: 1711929600001,
             connector_receive_ts: 1711929600002,
+            exchange_trade_ts: 1711929600001,
         };
         let json = serde_json::to_string(&tick).unwrap();
         // 所有字段都有值，全部输出
@@ -63,6 +64,7 @@ mod tick_json_compat {
             best_ask_quantity: String::new(),
             exchange_event_ts: 0,
             connector_receive_ts: 0,
+            exchange_trade_ts: 0,
         };
         let json = serde_json::to_string(&tick).unwrap();
 
@@ -103,6 +105,7 @@ mod tick_json_compat {
             best_ask_quantity: "20".into(),
             exchange_event_ts: 101,
             connector_receive_ts: 102,
+            exchange_trade_ts: 101,
         };
         let json = serde_json::to_string(&tick).unwrap();
 

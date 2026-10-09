@@ -41,6 +41,8 @@ pub fn tick_from_proto(tick: &md_proto::Tick) -> md_domain::types::Tick {
         best_ask_quantity: tick.best_ask_quantity.clone(),
         exchange_event_ts: tick.exchange_event_ts,
         connector_receive_ts: tick.connector_receive_ts,
+        // proto 不传输成交时间 T（端到端延迟仅在连接器→处理器在进程内统计）
+        exchange_trade_ts: 0,
     }
 }
 
@@ -123,6 +125,8 @@ mod tests {
             best_ask_quantity: "2.0".into(),
             exchange_event_ts: 1711929600001,
             connector_receive_ts: 1711929600002,
+            // proto 不传输成交时间 T，roundtrip 后必为 0，这里同步置 0 以便断言相等
+            exchange_trade_ts: 0,
         };
 
         let proto_tick = tick_to_proto(&domain_tick);
