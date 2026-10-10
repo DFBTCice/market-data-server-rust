@@ -1,3 +1,4 @@
+mod alloc_stats;
 mod process_metrics;
 
 use clap::Parser;
@@ -1002,11 +1003,16 @@ fn esc(v: &str) -> String {
 ///
 /// **网关 / WebSocket**
 /// - `md_ws_active_clients` (gauge)
+/// - `md_ws_subscriptions_active` (gauge，1.1.1 新增：全部 WS 连接持有的 broadcast 接收端总数)
 /// - `md_ws_kicked_lagged_total` (counter)
 /// - `md_ws_messages_sent_total{kind}` (counter)
 /// - `md_broadcast_lagged_total{topic_kind}` (counter)
 /// - `md_gateway_internal_latency_ms{topic}` (histogram)
 ///   对标 Go 版 marketdata_gateway_internal_latency_ms。总体延迟 `by (le)`，推送吞吐 TOP10 用 `_count by (topic)`。
+///
+/// **运行时 / 分配器诊断（1.1.1 新增）**
+/// - `md_tokio_alive_tasks` / `md_tokio_workers` / `md_tokio_global_queue_depth` (gauge)
+/// - `md_jemalloc_{allocated,active,resident,retained,mapped}_bytes` (gauge，仅 `jemalloc-stats` 构建)
 ///
 /// **进程级（Linux 标准）**
 /// - `process_resident_memory_bytes` / `process_virtual_memory_bytes` (gauge)
@@ -1111,6 +1117,15 @@ async fn metrics_handler(
         snap.ws_active_clients
     ));
 
+    out.push_str(
+        "# HELP md_ws_subscriptions_active Broadcast receivers currently held by all WebSocket connections (gateway + legacy)\n",
+    );
+    out.push_str("# TYPE md_ws_subscriptions_active gauge\n");
+    out.push_str(&format!(
+        "md_ws_subscriptions_active {}\n",
+        snap.ws_subscriptions_active
+    ));
+
     out.push_str("# HELP md_ws_kicked_lagged_total Total WebSocket clients kicked due to consecutive broadcast lagged\n");
     out.push_str("# TYPE md_ws_kicked_lagged_total counter\n");
     out.push_str(&format!(
@@ -1163,6 +1178,28 @@ async fn metrics_handler(
         );
     }
 
+    // ---- tokio 运行时指标（1.1.1：重连前后存活 task 数应回到同一水平，用于发现孤儿 task）----
+    if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        let rt = handle.metrics();
+        out.push_str("# HELP md_tokio_alive_tasks Tasks currently alive in the tokio runtime\n");
+        out.push_str("# TYPE md_tokio_alive_tasks gauge\n");
+        out.push_str(&format!("md_tokio_alive_tasks {}\n", rt.num_alive_tasks()));
+        out.push_str("# HELP md_tokio_workers Tokio runtime worker threads\n");
+        out.push_str("# TYPE md_tokio_workers gauge\n");
+        out.push_str(&format!("md_tokio_workers {}\n", rt.num_workers()));
+        out.push_str(
+            "# HELP md_tokio_global_queue_depth Tasks waiting in the tokio global queue\n",
+        );
+        out.push_str("# TYPE md_tokio_global_queue_depth gauge\n");
+        out.push_str(&format!(
+            "md_tokio_global_queue_depth {}\n",
+            rt.global_queue_depth()
+        ));
+    }
+
+    // ---- 分配器统计（仅 jemalloc-stats 构建；默认构建无输出）----
+    alloc_stats::render(&mut out);
+
     // ---- 进程级标准指标（Linux 上才有真实值，与 Go process_exporter 等价）----
     let proc_snap = process_metrics::collect();
     process_metrics::render(&proc_snap, &mut out);
@@ -1202,6 +1239,8 @@ mod tests {
             ..Default::default()
         });
         processor.metrics.ws_client_connected();
+        let mut sub_guard = md_processor::WsSubscriptionGuard::new(processor.metrics.clone());
+        sub_guard.sync(3);
         processor.metrics.ws_message_sent("tick");
         processor.metrics.ws_message_sent("kline");
         processor.metrics.ws_client_kicked_lagged();
@@ -1263,6 +1302,28 @@ mod tests {
             out.contains("md_ws_active_clients 1"),
             "missing ws_active_clients"
         );
+        assert!(
+            out.contains("md_ws_subscriptions_active 3"),
+            "missing md_ws_subscriptions_active"
+        );
+        // ---- tokio 运行时指标（1.1.1）----
+        assert!(
+            out.contains("md_tokio_alive_tasks "),
+            "missing md_tokio_alive_tasks"
+        );
+        assert!(
+            out.contains("md_tokio_workers "),
+            "missing md_tokio_workers"
+        );
+        assert!(
+            out.contains("md_tokio_global_queue_depth "),
+            "missing md_tokio_global_queue_depth"
+        );
+        // 默认构建不含 jemalloc 统计
+        #[cfg(not(feature = "jemalloc-stats"))]
+        assert!(!out.contains("md_jemalloc_"));
+        #[cfg(feature = "jemalloc-stats")]
+        assert!(out.contains("md_jemalloc_allocated_bytes "));
         assert!(
             out.contains("md_ws_kicked_lagged_total 1"),
             "missing ws_kicked_lagged_total"

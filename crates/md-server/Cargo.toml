@@ -7,6 +7,11 @@ edition = "2021"
 name = "md-server"
 path = "src/main.rs"
 
+[features]
+# 诊断专用：jemalloc 作为全局分配器 + /metrics 暴露 md_jemalloc_*（见 src/alloc_stats.rs）。
+# 默认关闭；生产镜像不使用。
+jemalloc-stats = ["dep:tikv-jemallocator", "dep:tikv-jemalloc-ctl"]
+
 [dependencies]
 md-domain = { path = "../md-domain" }
 md-config = { path = "../md-config" }
@@ -22,3 +27,5 @@ axum = "0.7"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde_json = "1"
+tikv-jemallocator = { version = "0.6", optional = true, features = ["stats"] }
+tikv-jemalloc-ctl = { version = "0.6", optional = true, features = ["stats"] }
