@@ -4,12 +4,16 @@ use axum::response::IntoResponse;
 use axum::Router;
 use futures_util::{SinkExt, StreamExt};
 use md_domain::types::{WsGatewayMessage, WsLegacyMessage};
-use md_processor::{BroadcastEvent, Processor};
+use md_processor::{BroadcastEvent, Processor, WsSubscriptionGuard};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::pin::Pin;
 use std::sync::Arc;
+use std::task::{Context, Poll};
 use tokio::sync::broadcast;
-use tracing::{info, warn};
+use tokio_stream::wrappers::errors::BroadcastStreamRecvError;
+use tokio_stream::wrappers::BroadcastStream;
+use tokio_stream::{Stream, StreamMap};
+use tracing::{debug, info, warn};
 
 /// 单个客户端连续 broadcast lagged 多少次后主动踢出
 /// （默认 3 次：偶发拥塞容忍，持续跟不上就视为僵尸客户端）
@@ -102,8 +106,11 @@ async fn handle_gateway_ws(
     metrics: Arc<md_processor::ProcessorMetrics>,
 ) {
     let (mut sender, mut receiver) = socket.split();
-    let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
-    let mut topics: HashSet<String> = HashSet::new();
+    // 1.1.1：每个已订阅 stream 恰好持有一个接收端（以客户端传入的 stream 字符串为键）。
+    // 退订 = 从 map 移除 = Receiver 立即释放；重复订阅不新增接收端；连接结束整体释放。
+    let mut subscriptions: StreamMap<String, TopicStream> = StreamMap::new();
+    // 全局 md_ws_subscriptions_active 的 RAII 守卫：连接任何方式结束都会把本连接的份额扣回
+    let mut sub_guard = WsSubscriptionGuard::new(metrics.clone());
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
@@ -125,9 +132,16 @@ async fn handle_gateway_ws(
                                 match req.action.as_str() {
                                     "subscribe" => {
                                         for stream in &req.streams {
-                                            if topics.insert(stream.clone()) {
+                                            if !subscriptions.contains_key(stream) {
                                                 let sub = processor.subscribe(stream);
-                                                subscriptions.push(sub.rx);
+                                                subscriptions.insert(stream.clone(), TopicStream::new(stream, sub.rx));
+                                                sub_guard.sync(subscriptions.len());
+                                                debug!(
+                                                    "gateway ws subscribe stream={} conn_subscriptions={} total_active={}",
+                                                    stream,
+                                                    subscriptions.len(),
+                                                    metrics.ws_subscriptions_active.load(std::sync::atomic::Ordering::Relaxed)
+                                                );
                                                 let ack = GatewayAck {
                                                     action: "subscribe".into(),
                                                     status: "success".into(),
@@ -139,7 +153,16 @@ async fn handle_gateway_ws(
                                     }
                                     "unsubscribe" => {
                                         for stream in &req.streams {
-                                            topics.remove(stream);
+                                            // 1.1.1：真正释放该 stream 的接收端（此前只删了 topics 集合，Receiver 泄漏且重订后事件重复推送）
+                                            let released = subscriptions.remove(stream).is_some();
+                                            sub_guard.sync(subscriptions.len());
+                                            debug!(
+                                                "gateway ws unsubscribe stream={} released={} conn_subscriptions={} total_active={}",
+                                                stream,
+                                                released,
+                                                subscriptions.len(),
+                                                metrics.ws_subscriptions_active.load(std::sync::atomic::Ordering::Relaxed)
+                                            );
                                             let ack = GatewayAck {
                                                 action: "unsubscribe".into(),
                                                 status: "success".into(),
@@ -165,7 +188,7 @@ async fn handle_gateway_ws(
                 }
             }
             // 接收广播事件并推送给客户端
-            recv_result = recv_from_subscriptions(&mut subscriptions, &topics, &metrics) => {
+            recv_result = recv_from_subscriptions(&mut subscriptions, &metrics) => {
                 match recv_result {
                     RecvOutcome::Event(topic_str, broadcast_event) => {
                         lagged_count = 0; // 成功收到一条就重置 lagged 计数
@@ -193,6 +216,9 @@ async fn handle_gateway_ws(
         }
     }
 
+    // 释放本连接全部接收端（显式 drop，使 total_active 在日志里立即反映）
+    drop(subscriptions);
+    sub_guard.sync(0);
     metrics.ws_client_disconnected();
     info!(
         "Gateway WebSocket client disconnected (active={})",
@@ -211,35 +237,60 @@ enum RecvOutcome {
     None,
 }
 
-/// 从所有 subscription 中接收下一个匹配 topics 的事件
+/// 单个 stream 的接收端：持有预解析的 `Topic`，只放行与该 topic 精确匹配的事件
+/// （与 1.0.0 的逐事件 `event_matches_topic` 语义完全一致，但解析只在订阅时做一次）。
+struct TopicStream {
+    topic: Option<md_domain::topic::Topic>,
+    inner: BroadcastStream<BroadcastEvent>,
+}
+
+impl TopicStream {
+    fn new(stream: &str, rx: broadcast::Receiver<BroadcastEvent>) -> Self {
+        Self {
+            topic: md_domain::topic::Topic::parse(stream).ok(),
+            inner: BroadcastStream::new(rx),
+        }
+    }
+}
+
+impl Stream for TopicStream {
+    type Item = Result<BroadcastEvent, BroadcastStreamRecvError>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        loop {
+            match Pin::new(&mut self.inner).poll_next(cx) {
+                Poll::Ready(Some(Ok(event))) => {
+                    let matched = match self.topic.as_ref() {
+                        Some(t) => event_matches_parsed_topic(&event, t),
+                        None => false, // 无法解析的 topic 永不匹配（与 1.0.0 一致：ack 成功但无事件）
+                    };
+                    if matched {
+                        return Poll::Ready(Some(Ok(event)));
+                    }
+                    // 不匹配：丢弃并继续取下一条
+                }
+                other => return other,
+            }
+        }
+    }
+}
+
+/// 从所有已订阅 stream 中接收下一个事件。
+///
+/// 1.1.1：使用 `StreamMap`，每事件无 `Vec<Box<Future>>` 重建、无 `select_all`、无 `Topic::parse`。
 async fn recv_from_subscriptions(
-    subscriptions: &mut Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>>,
-    topics: &HashSet<String>,
+    subscriptions: &mut StreamMap<String, TopicStream>,
     metrics: &md_processor::ProcessorMetrics,
 ) -> RecvOutcome {
     if subscriptions.is_empty() {
         std::future::pending::<()>().await;
         return RecvOutcome::None;
     }
-    // 构建 boxed futures for select_all
-    let futures: Vec<_> = subscriptions
-        .iter_mut()
-        .map(|rx| Box::pin(async { rx.recv().await }))
-        .collect();
-    let (result, _idx, _remaining) = futures_util::future::select_all(futures).await;
-    match result {
-        Ok(event) => {
-            // 匹配 topic：遍历已订阅的 topics，找到匹配的
-            for topic_str in topics {
-                if event_matches_topic(&event, topic_str) {
-                    return RecvOutcome::Event(topic_str.clone(), event);
-                }
-            }
-            RecvOutcome::None
-        }
-        Err(broadcast::error::RecvError::Lagged(n)) => {
-            // 记录 lagged 事件（按 topic 类型分类）
-            let kind = detect_topic_kind_from_subscriptions(topics);
+    match StreamExt::next(subscriptions).await {
+        Some((topic_str, Ok(event))) => RecvOutcome::Event(topic_str, event),
+        Some((topic_str, Err(BroadcastStreamRecvError::Lagged(n)))) => {
+            // 记录 lagged 事件（按该 stream 的 topic 类型分类）
+            let kind = topic_kind_from_stream(&topic_str);
             metrics.record_broadcast_lagged(kind);
             warn!(
                 "broadcast lagged ({} messages dropped), topic_kind={}",
@@ -247,49 +298,52 @@ async fn recv_from_subscriptions(
             );
             RecvOutcome::Lagged
         }
-        Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,
+        // 所有流都已结束（channel 关闭）：StreamMap 已自动移除，外层循环会回到 pending
+        None => RecvOutcome::Closed,
+    }
+}
+
+/// 由单个 stream 字符串推断 topic 类型（"tick" / "kline" / "quote"），用于 lagged 指标分类
+fn topic_kind_from_stream(stream: &str) -> &'static str {
+    if stream.starts_with("tick.") {
+        "tick"
+    } else if stream.starts_with("kline.") {
+        "kline"
+    } else if stream.starts_with("quote.") {
+        "quote"
+    } else {
+        "unknown"
     }
 }
 
 /// 判断事件是否匹配给定的 topic（精确匹配，非子串匹配）
 fn event_matches_topic(event: &BroadcastEvent, topic_str: &str) -> bool {
-    let topic = match md_domain::topic::Topic::parse(topic_str) {
-        Ok(t) => t,
-        Err(_) => return false,
-    };
+    match md_domain::topic::Topic::parse(topic_str) {
+        Ok(t) => event_matches_parsed_topic(event, &t),
+        Err(_) => false,
+    }
+}
+
+/// 同上，但 topic 已解析（Gateway 在订阅时解析一次，避免逐事件 `Topic::parse`）
+fn event_matches_parsed_topic(event: &BroadcastEvent, topic: &md_domain::topic::Topic) -> bool {
+    use md_domain::topic::Topic;
     match (event, topic) {
-        (BroadcastEvent::Tick(tick, _), md_domain::topic::Topic::Tick { exchange, symbol }) => {
-            tick.exchange == exchange && tick.symbol == symbol
+        (BroadcastEvent::Tick(tick, _), Topic::Tick { exchange, symbol }) => {
+            tick.exchange == *exchange && tick.symbol == *symbol
         }
         (
             BroadcastEvent::Kline(kline, _),
-            md_domain::topic::Topic::Kline {
+            Topic::Kline {
                 interval,
                 exchange,
                 symbol,
             },
-        ) => kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol,
-        (BroadcastEvent::Quote(quote, _), md_domain::topic::Topic::Quote { exchange, symbol }) => {
-            quote.exchange == exchange && quote.symbol == symbol
+        ) => kline.interval == *interval && kline.exchange == *exchange && kline.symbol == *symbol,
+        (BroadcastEvent::Quote(quote, _), Topic::Quote { exchange, symbol }) => {
+            quote.exchange == *exchange && quote.symbol == *symbol
         }
         _ => false,
     }
-}
-
-/// 从订阅 topic 集合推断 topic 类型（"tick" 或 "kline"），用于 lagged 指标分类
-fn detect_topic_kind_from_subscriptions(topics: &HashSet<String>) -> &str {
-    for t in topics {
-        if t.starts_with("tick.") {
-            return "tick";
-        }
-        if t.starts_with("kline.") {
-            return "kline";
-        }
-        if t.starts_with("quote.") {
-            return "quote";
-        }
-    }
-    "unknown"
 }
 
 /// 从订阅 topic 列表推断 topic 类型（Legacy 模式）
@@ -316,6 +370,8 @@ async fn handle_legacy_ws(
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: Vec<String> = Vec::new();
     let mut lagged_count: u32 = 0;
+    // 1.1.1：仅做 md_ws_subscriptions_active 计数（Legacy 订阅/退订语义保持 1.0.0 不变）
+    let mut sub_guard = WsSubscriptionGuard::new(metrics.clone());
 
     metrics.ws_client_connected();
     info!(
@@ -354,6 +410,7 @@ async fn handle_legacy_ws(
                                             subscriptions.push(sub.rx);
                                             topics.push(topic.clone());
                                         }
+                                        sub_guard.sync(subscriptions.len());
                                         let ack = LegacyAck {
                                             event: "subscribe".into(),
                                             status: "success".into(),
@@ -364,6 +421,7 @@ async fn handle_legacy_ws(
                                     "unsubscribe" => {
                                         subscriptions.clear();
                                         topics.clear();
+                                        sub_guard.sync(0);
                                         let ack = LegacyUnsubAck {
                                             event: "unsubscribe".into(),
                                             status: "success".into(),
@@ -622,17 +680,12 @@ mod tests {
     }
 
     #[test]
-    fn detect_topic_kind_from_subscriptions_works() {
-        let mut topics = HashSet::new();
-        topics.insert("tick.binance.BTCUSDT".into());
-        assert_eq!(detect_topic_kind_from_subscriptions(&topics), "tick");
-
-        let mut topics = HashSet::new();
-        topics.insert("kline.1m.binance.BTCUSDT".into());
-        assert_eq!(detect_topic_kind_from_subscriptions(&topics), "kline");
-
-        let topics = HashSet::new();
-        assert_eq!(detect_topic_kind_from_subscriptions(&topics), "unknown");
+    fn topic_kind_from_stream_works() {
+        assert_eq!(topic_kind_from_stream("tick.binance.BTCUSDT"), "tick");
+        assert_eq!(topic_kind_from_stream("kline.1m.binance.BTCUSDT"), "kline");
+        assert_eq!(topic_kind_from_stream("quote.binance.BNBUSDT"), "quote");
+        assert_eq!(topic_kind_from_stream("whatever"), "unknown");
+        assert_eq!(topic_kind_from_stream(""), "unknown");
     }
 
     #[test]
@@ -708,10 +761,84 @@ mod tests {
         assert!(!event_matches_topic(&ev, "tick.binance.BNBUSDT"));
     }
 
-    #[test]
-    fn detect_topic_kind_quote() {
-        let mut topics = HashSet::new();
-        topics.insert("quote.binance.BNBUSDT".to_string());
-        assert_eq!(detect_topic_kind_from_subscriptions(&topics), "quote");
+    // ---- 1.1.1：TopicStream（逐 stream 接收端）语义 ----
+
+    fn tick_event(exchange: &str, symbol: &str, id: i64) -> BroadcastEvent {
+        BroadcastEvent::Tick(
+            Arc::new(Tick {
+                exchange: exchange.into(),
+                symbol: symbol.into(),
+                trade_id: id,
+                ..Default::default()
+            }),
+            std::time::Instant::now(),
+        )
+    }
+
+    /// 与 1.0.0 的 `event_matches_topic` 语义一致：只放行精确匹配的事件，其余静默丢弃
+    #[tokio::test]
+    async fn topic_stream_filters_non_matching_events_like_1_0_0() {
+        let (tx, rx) = broadcast::channel(16);
+        let mut map: StreamMap<String, TopicStream> = StreamMap::new();
+        map.insert(
+            "tick.binance.BTCUSDT".into(),
+            TopicStream::new("tick.binance.BTCUSDT", rx),
+        );
+        tx.send(tick_event("binance", "ETHUSDT", 1)).unwrap(); // symbol 不同
+        tx.send(tick_event("okx", "BTCUSDT", 2)).unwrap(); // 交易所不同
+        tx.send(tick_event("binance", "BTCUSDT", 3)).unwrap(); // 匹配
+        let (key, ev) = StreamExt::next(&mut map).await.unwrap();
+        assert_eq!(key, "tick.binance.BTCUSDT");
+        match ev.unwrap() {
+            BroadcastEvent::Tick(t, _) => assert_eq!(t.trade_id, 3),
+            _ => panic!("unexpected event kind"),
+        }
+    }
+
+    /// 无法解析的 topic：永不匹配（ack 成功但无事件，与 1.0.0 一致）
+    #[tokio::test]
+    async fn topic_stream_with_unparseable_topic_never_matches() {
+        let (tx, rx) = broadcast::channel(16);
+        let mut map: StreamMap<String, TopicStream> = StreamMap::new();
+        map.insert("garbage".into(), TopicStream::new("garbage", rx));
+        tx.send(tick_event("binance", "BTCUSDT", 1)).unwrap();
+        let r = tokio::time::timeout(
+            std::time::Duration::from_millis(100),
+            StreamExt::next(&mut map),
+        )
+        .await;
+        assert!(r.is_err(), "不应产出任何事件");
+    }
+
+    /// 移除 stream 即释放接收端（receiver_count 归零），这是 A1 的最直接判据
+    #[tokio::test]
+    async fn removing_stream_releases_receiver() {
+        let (tx, rx) = broadcast::channel::<BroadcastEvent>(16);
+        let mut map: StreamMap<String, TopicStream> = StreamMap::new();
+        map.insert(
+            "tick.binance.BTCUSDT".into(),
+            TopicStream::new("tick.binance.BTCUSDT", rx),
+        );
+        assert_eq!(tx.receiver_count(), 1);
+        assert!(map.remove("tick.binance.BTCUSDT").is_some());
+        assert_eq!(tx.receiver_count(), 0);
+        // 对未订阅的 stream 移除是无害的
+        assert!(map.remove("tick.binance.BTCUSDT").is_none());
+    }
+
+    /// 发布端落后时，Lagged 经 StreamMap 透传（供 lagged 指标 + 踢人逻辑使用）
+    #[tokio::test]
+    async fn topic_stream_surfaces_lagged() {
+        let (tx, rx) = broadcast::channel(2);
+        let mut map: StreamMap<String, TopicStream> = StreamMap::new();
+        map.insert(
+            "tick.binance.BTCUSDT".into(),
+            TopicStream::new("tick.binance.BTCUSDT", rx),
+        );
+        for i in 0..5 {
+            tx.send(tick_event("binance", "BTCUSDT", i)).unwrap();
+        }
+        let (_, r) = StreamExt::next(&mut map).await.unwrap();
+        assert!(matches!(r, Err(BroadcastStreamRecvError::Lagged(_))));
     }
 }
