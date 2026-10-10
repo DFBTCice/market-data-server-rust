@@ -17,3 +17,7 @@ futures-util = "0.3"
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
+# 集成测试：真实起 axum + WebSocket 客户端
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.24"
+async-trait = "0.1"

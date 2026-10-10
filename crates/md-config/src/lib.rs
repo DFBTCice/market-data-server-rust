@@ -53,6 +53,18 @@ pub struct BinanceConfig {
     pub reconnect_delay: Duration,
     #[serde(with = "humantime_serde")]
     pub ping_interval: Duration,
+
+    // ---- 1.1.0 新增（全部可选，旧配置文件原样可用）----
+    /// quote（买一卖一）主题开关，默认 false；关闭时不建任何新连接、不订阅任何新流
+    #[serde(default)]
+    pub quotes_enabled: bool,
+    /// 开关开启时的初始 quote 订阅列表（如 ["BNBUSDT"]），支持 SIGHUP 热重载
+    #[serde(default)]
+    pub subscribe_quotes: Vec<String>,
+    /// 币安 U 本位合约 Public 类流地址。bookTicker 属 Public 类，
+    /// 在 `/market/stream` 上订阅会成功但不推送任何数据（实测），必须独立连接此地址
+    #[serde(default = "default_binance_stream_base_url_public")]
+    pub stream_base_url_public: String,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -67,6 +79,14 @@ pub struct OkxConfig {
     pub reconnect_delay: Duration,
     #[serde(with = "humantime_serde")]
     pub ping_interval: Duration,
+
+    // ---- 1.1.0 新增（全部可选）----
+    /// quote 主题开关，默认 false
+    #[serde(default)]
+    pub quotes_enabled: bool,
+    /// 开关开启时的初始 quote 订阅列表（如 ["BNB-USDT-SWAP"]），支持 SIGHUP 热重载
+    #[serde(default)]
+    pub subscribe_quotes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -75,6 +95,22 @@ pub struct ProcessorConfig {
     pub kline_channel_buffer: usize,
     /// broadcast channel 容量（默认 4096，高吞吐场景可调大）
     pub broadcast_capacity: usize,
+    /// quote 入口 mpsc channel 容量（1.1.0 新增，默认 1000，独立于 tick/kline）
+    #[serde(default = "default_quote_channel_buffer")]
+    pub quote_channel_buffer: usize,
+}
+
+/// quote 入口 channel 默认容量
+pub const DEFAULT_QUOTE_CHANNEL_BUFFER: usize = 1000;
+/// 币安 U 本位合约 Public 类流默认地址
+pub const DEFAULT_BINANCE_STREAM_BASE_URL_PUBLIC: &str = "wss://fstream.binance.com/public/stream";
+
+fn default_quote_channel_buffer() -> usize {
+    DEFAULT_QUOTE_CHANNEL_BUFFER
+}
+
+fn default_binance_stream_base_url_public() -> String {
+    DEFAULT_BINANCE_STREAM_BASE_URL_PUBLIC.to_string()
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -263,6 +299,24 @@ fn validate(cfg: &Config) -> Result<(), ConfigError> {
                 "binance 连接器已启用但未配置 rest_base_url".into(),
             ));
         }
+    }
+    if cfg.connectors.binance.enabled
+        && cfg.connectors.binance.quotes_enabled
+        && cfg
+            .connectors
+            .binance
+            .stream_base_url_public
+            .trim()
+            .is_empty()
+    {
+        return Err(ConfigError::ValidationError(
+            "binance quotes_enabled=true 但 stream_base_url_public 为空".into(),
+        ));
+    }
+    if cfg.processor.quote_channel_buffer == 0 {
+        return Err(ConfigError::ValidationError(
+            "processor.quote_channel_buffer 必须 >= 1".into(),
+        ));
     }
     if cfg.connectors.okx.enabled {
         if cfg.connectors.okx.stream_base_url_public.trim().is_empty() {
@@ -561,5 +615,97 @@ api_gateway:
     fn field_order_matches_go() {
         let cfg = load_config("../../config.yaml").unwrap();
         assert!(!cfg.log_level.is_empty());
+    }
+
+    // ---- 1.1.0 quote 新增配置键 ----
+
+    /// 旧配置文件（无任何 quote 新键）原样可用，且 quote 默认全部关闭
+    #[test]
+    fn legacy_config_without_quote_keys_defaults_off() {
+        // config.yaml 为 1.0.0 时代的原样配置，不含任何新键
+        let raw = std::fs::read_to_string("../../config.yaml").unwrap();
+        assert!(
+            !raw.contains("quotes_enabled"),
+            "config.yaml 必须保持旧格式作为兼容样本"
+        );
+        assert!(!raw.contains("quote_channel_buffer"));
+        let cfg = load_config("../../config.yaml").unwrap();
+        assert!(!cfg.connectors.binance.quotes_enabled);
+        assert!(cfg.connectors.binance.subscribe_quotes.is_empty());
+        assert!(!cfg.connectors.okx.quotes_enabled);
+        assert!(cfg.connectors.okx.subscribe_quotes.is_empty());
+        assert_eq!(
+            cfg.processor.quote_channel_buffer,
+            DEFAULT_QUOTE_CHANNEL_BUFFER
+        );
+        assert_eq!(
+            cfg.connectors.binance.stream_base_url_public,
+            DEFAULT_BINANCE_STREAM_BASE_URL_PUBLIC
+        );
+    }
+
+    #[test]
+    fn quote_keys_parse() {
+        let yaml = r#"
+connectors:
+  binance:
+    enabled: true
+    stream_base_url: "wss://fstream.binance.com/market/stream"
+    rest_base_url: "https://fapi.binance.com"
+    subscribe_ticks: ["BTCUSDT"]
+    subscribe_klines: {}
+    quotes_enabled: true
+    subscribe_quotes: ["BNBUSDT"]
+    stream_base_url_public: "wss://example.invalid/public/stream"
+  okx:
+    enabled: true
+    stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public"
+    stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business"
+    rest_base_url: "https://www.okx.com"
+    subscribe_ticks: ["BTC-USDT-SWAP"]
+    subscribe_klines: {}
+    quotes_enabled: true
+    subscribe_quotes: ["BNB-USDT-SWAP"]
+processor:
+  tick_channel_buffer: 1000
+  kline_channel_buffer: 1000
+  quote_channel_buffer: 321
+"#;
+        let cfg = load_config_from_str(yaml).unwrap();
+        assert!(cfg.connectors.binance.quotes_enabled);
+        assert_eq!(cfg.connectors.binance.subscribe_quotes, vec!["BNBUSDT"]);
+        assert_eq!(
+            cfg.connectors.binance.stream_base_url_public,
+            "wss://example.invalid/public/stream"
+        );
+        assert!(cfg.connectors.okx.quotes_enabled);
+        assert_eq!(cfg.connectors.okx.subscribe_quotes, vec!["BNB-USDT-SWAP"]);
+        assert_eq!(cfg.processor.quote_channel_buffer, 321);
+    }
+
+    #[test]
+    fn quote_channel_buffer_zero_rejected() {
+        let yaml = r#"
+connectors:
+  binance:
+    enabled: false
+    stream_base_url: ""
+    rest_base_url: ""
+    subscribe_ticks: []
+    subscribe_klines: {}
+  okx:
+    enabled: false
+    stream_base_url_public: ""
+    stream_base_url_business: ""
+    rest_base_url: ""
+    subscribe_ticks: []
+    subscribe_klines: {}
+processor:
+  tick_channel_buffer: 1000
+  kline_channel_buffer: 1000
+  quote_channel_buffer: 0
+"#;
+        let err = load_config_from_str(yaml).unwrap_err().to_string();
+        assert!(err.contains("quote_channel_buffer"), "error: {}", err);
     }
 }

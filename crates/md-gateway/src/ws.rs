@@ -96,14 +96,23 @@ async fn legacy_ws_handler(
 }
 
 /// Gateway WebSocket 处理
-async fn handle_gateway_ws(socket: WebSocket, processor: Arc<Processor>, metrics: Arc<md_processor::ProcessorMetrics>) {
+async fn handle_gateway_ws(
+    socket: WebSocket,
+    processor: Arc<Processor>,
+    metrics: Arc<md_processor::ProcessorMetrics>,
+) {
     let (mut sender, mut receiver) = socket.split();
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: HashSet<String> = HashSet::new();
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
-    info!("Gateway WebSocket client connected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Gateway WebSocket client connected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 
     loop {
         tokio::select! {
@@ -185,7 +194,12 @@ async fn handle_gateway_ws(socket: WebSocket, processor: Arc<Processor>, metrics
     }
 
     metrics.ws_client_disconnected();
-    info!("Gateway WebSocket client disconnected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Gateway WebSocket client disconnected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 }
 
 /// 接收结果分类（用于上层判断是否需要踢出客户端）
@@ -227,7 +241,10 @@ async fn recv_from_subscriptions(
             // 记录 lagged 事件（按 topic 类型分类）
             let kind = detect_topic_kind_from_subscriptions(topics);
             metrics.record_broadcast_lagged(kind);
-            warn!("broadcast lagged ({} messages dropped), topic_kind={}", n, kind);
+            warn!(
+                "broadcast lagged ({} messages dropped), topic_kind={}",
+                n, kind
+            );
             RecvOutcome::Lagged
         }
         Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,
@@ -244,8 +261,16 @@ fn event_matches_topic(event: &BroadcastEvent, topic_str: &str) -> bool {
         (BroadcastEvent::Tick(tick, _), md_domain::topic::Topic::Tick { exchange, symbol }) => {
             tick.exchange == exchange && tick.symbol == symbol
         }
-        (BroadcastEvent::Kline(kline, _), md_domain::topic::Topic::Kline { interval, exchange, symbol }) => {
-            kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol
+        (
+            BroadcastEvent::Kline(kline, _),
+            md_domain::topic::Topic::Kline {
+                interval,
+                exchange,
+                symbol,
+            },
+        ) => kline.interval == interval && kline.exchange == exchange && kline.symbol == symbol,
+        (BroadcastEvent::Quote(quote, _), md_domain::topic::Topic::Quote { exchange, symbol }) => {
+            quote.exchange == exchange && quote.symbol == symbol
         }
         _ => false,
     }
@@ -260,6 +285,9 @@ fn detect_topic_kind_from_subscriptions(topics: &HashSet<String>) -> &str {
         if t.starts_with("kline.") {
             return "kline";
         }
+        if t.starts_with("quote.") {
+            return "quote";
+        }
     }
     "unknown"
 }
@@ -273,19 +301,29 @@ fn detect_topic_kind_from_topics(topics: &[String]) -> &str {
         if t.starts_with("kline.") {
             return "kline";
         }
+        // Legacy 模式不支持 quote（订阅时已过滤），此处无需处理 quote. 前缀
     }
     "unknown"
 }
 
 /// Legacy WebSocket 处理
-async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics: Arc<md_processor::ProcessorMetrics>) {
+async fn handle_legacy_ws(
+    socket: WebSocket,
+    processor: Arc<Processor>,
+    metrics: Arc<md_processor::ProcessorMetrics>,
+) {
     let (mut sender, mut receiver) = socket.split();
     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
     let mut topics: Vec<String> = Vec::new();
     let mut lagged_count: u32 = 0;
 
     metrics.ws_client_connected();
-    info!("Legacy WebSocket client connected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Legacy WebSocket client connected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 
     loop {
         tokio::select! {
@@ -300,6 +338,18 @@ async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics:
                                         subscriptions.clear();
                                         topics.clear();
                                         for topic in &req.args {
+                                            // quote.* 仅 Gateway 模式（/ws/v1/data）支持；Legacy 明确拒绝，
+                                            // 避免旧消费者收到不认识的消息，也避免静默吞订阅
+                                            if is_quote_topic(topic) {
+                                                let err = WsError {
+                                                    error: format!(
+                                                        "quote topics are not supported on legacy /ws, use /ws/v1/data: {}",
+                                                        topic
+                                                    ),
+                                                };
+                                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap())).await;
+                                                continue;
+                                            }
                                             let sub = processor.subscribe(topic);
                                             subscriptions.push(sub.rx);
                                             topics.push(topic.clone());
@@ -344,7 +394,11 @@ async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics:
                         lagged_count = 0;
                         let kind = broadcast_event.kind();
                         let emit_at = broadcast_event.emit_instant();
-                        let json = build_legacy_message(&topic_str, &broadcast_event);
+                        let json = match legacy_payload(&topic_str, &broadcast_event) {
+                            Some(j) => j,
+                            // quote 事件不得发给 Legacy 客户端（双保险：订阅时已过滤）
+                            None => continue,
+                        };
                         if sender.send(Message::Text(json.into())).await.is_err() {
                             break;
                         }
@@ -367,7 +421,12 @@ async fn handle_legacy_ws(socket: WebSocket, processor: Arc<Processor>, metrics:
     }
 
     metrics.ws_client_disconnected();
-    info!("Legacy WebSocket client disconnected (active={})", metrics.ws_active_clients.load(std::sync::atomic::Ordering::Relaxed));
+    info!(
+        "Legacy WebSocket client disconnected (active={})",
+        metrics
+            .ws_active_clients
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
 }
 
 /// 从所有 subscription 中接收下一个事件（Legacy 模式，返回第一个匹配的 topic）
@@ -397,7 +456,10 @@ async fn recv_from_subscriptions_legacy(
         Err(broadcast::error::RecvError::Lagged(n)) => {
             let kind = detect_topic_kind_from_topics(topics);
             metrics.record_broadcast_lagged(kind);
-            warn!("broadcast lagged ({} messages dropped), topic_kind={}", n, kind);
+            warn!(
+                "broadcast lagged ({} messages dropped), topic_kind={}",
+                n, kind
+            );
             RecvOutcome::Lagged
         }
         Err(broadcast::error::RecvError::Closed) => RecvOutcome::Closed,
@@ -423,10 +485,21 @@ fn build_gateway_message(topic_str: &str, event: &BroadcastEvent) -> String {
             };
             serde_json::to_string(&msg).unwrap()
         }
+        BroadcastEvent::Quote(quote, _) => {
+            let msg = WsGatewayMessage {
+                msg_type: "quote".into(),
+                topic: topic_str.to_string(),
+                data: quote.as_ref().clone(),
+            };
+            serde_json::to_string(&msg).unwrap()
+        }
     }
 }
 
-/// 构建 Legacy 格式的推送消息
+/// 构建 Legacy 格式的推送消息（签名与 1.0.0 一致）
+///
+/// 注意：Legacy `/ws` 永不推送 quote。调用方必须经 `legacy_payload` 过滤；
+/// 此处 Quote 分支仅为 match 穷尽，不会被 Legacy 发送路径触达。
 fn build_legacy_message(topic_str: &str, event: &BroadcastEvent) -> String {
     match event {
         BroadcastEvent::Tick(tick, _) => {
@@ -443,7 +516,28 @@ fn build_legacy_message(topic_str: &str, event: &BroadcastEvent) -> String {
             };
             serde_json::to_string(&msg).unwrap()
         }
+        BroadcastEvent::Quote(quote, _) => {
+            let msg = WsLegacyMessage {
+                topic: topic_str.to_string(),
+                data: quote.as_ref().clone(),
+            };
+            serde_json::to_string(&msg).unwrap()
+        }
     }
+}
+
+/// Legacy 发送路径的唯一出口：quote 事件返回 `None`（旧消费者无法过滤主题，
+/// 任务书 §三-3 要求旧 `/ws` 不得出现 quote 消息），其余与 `build_legacy_message` 相同。
+fn legacy_payload(topic_str: &str, event: &BroadcastEvent) -> Option<String> {
+    match event {
+        BroadcastEvent::Quote(..) => None,
+        _ => Some(build_legacy_message(topic_str, event)),
+    }
+}
+
+/// 该 topic 是否为 quote 主题（Legacy `/ws` 不支持）
+fn is_quote_topic(topic_str: &str) -> bool {
+    topic_str.starts_with("quote.")
 }
 
 #[cfg(test)]
@@ -551,5 +645,73 @@ mod tests {
 
         let topics: Vec<String> = vec![];
         assert_eq!(detect_topic_kind_from_topics(&topics), "unknown");
+    }
+
+    // ---- quote（1.1.0 新增）----
+
+    #[test]
+    fn gateway_quote_message_format() {
+        let quote = md_domain::types::Quote {
+            exchange: "okx".into(),
+            symbol: "BNB-USDT-SWAP".into(),
+            bid_price: "744".into(),
+            ask_price: "744.1".into(),
+            last_price: "744".into(),
+            ..Default::default()
+        };
+        let event = BroadcastEvent::Quote(Arc::new(quote), std::time::Instant::now());
+        let json = build_gateway_message("quote.okx.BNB-USDT-SWAP", &event);
+        let val: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(val["type"], "quote");
+        assert_eq!(val["topic"], "quote.okx.BNB-USDT-SWAP");
+        assert_eq!(val["data"]["bid_price"], "744");
+        assert_eq!(val["data"]["last_price"], "744");
+    }
+
+    /// 兼容约束 3：Legacy 发送出口对 quote 恒为 None；tick/kline 与 1.0.0 一致
+    #[test]
+    fn legacy_payload_never_emits_quote() {
+        let quote_ev = BroadcastEvent::Quote(
+            Arc::new(md_domain::types::Quote::default()),
+            std::time::Instant::now(),
+        );
+        assert!(legacy_payload("quote.binance.BNBUSDT", &quote_ev).is_none());
+
+        let tick_ev = BroadcastEvent::Tick(
+            Arc::new(Tick {
+                exchange: "binance".into(),
+                symbol: "BNBUSDT".into(),
+                ..Default::default()
+            }),
+            std::time::Instant::now(),
+        );
+        let json = legacy_payload("tick.binance.BNBUSDT", &tick_ev).expect("tick must pass");
+        let val: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert!(val.get("type").is_none());
+        assert_eq!(val["topic"], "tick.binance.BNBUSDT");
+    }
+
+    #[test]
+    fn event_matches_quote_topic_exactly() {
+        let ev = BroadcastEvent::Quote(
+            Arc::new(md_domain::types::Quote {
+                exchange: "binance".into(),
+                symbol: "BNBUSDT".into(),
+                ..Default::default()
+            }),
+            std::time::Instant::now(),
+        );
+        assert!(event_matches_topic(&ev, "quote.binance.BNBUSDT"));
+        assert!(!event_matches_topic(&ev, "quote.binance.BTCUSDT"));
+        assert!(!event_matches_topic(&ev, "quote.okx.BNBUSDT"));
+        // quote 事件不会匹配 tick 主题（反之亦然）
+        assert!(!event_matches_topic(&ev, "tick.binance.BNBUSDT"));
+    }
+
+    #[test]
+    fn detect_topic_kind_quote() {
+        let mut topics = HashSet::new();
+        topics.insert("quote.binance.BNBUSDT".to_string());
+        assert_eq!(detect_topic_kind_from_subscriptions(&topics), "quote");
     }
 }

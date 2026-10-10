@@ -22,6 +22,7 @@ impl std::error::Error for TopicError {}
 ///
 /// - `tick.<exchange>.<symbol>`
 /// - `kline.<interval>.<exchange>.<symbol>`
+/// - `quote.<exchange>.<symbol>`（1.1.0 新增）
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Topic {
     Tick {
@@ -30,6 +31,10 @@ pub enum Topic {
     },
     Kline {
         interval: String,
+        exchange: String,
+        symbol: String,
+    },
+    Quote {
         exchange: String,
         symbol: String,
     },
@@ -62,6 +67,15 @@ impl Topic {
                     symbol: parts[3].to_string(),
                 })
             }
+            Some(&"quote") => {
+                if parts.len() != 3 {
+                    return Err(TopicError::InvalidFormat(s.to_string()));
+                }
+                Ok(Topic::Quote {
+                    exchange: parts[1].to_string(),
+                    symbol: parts[2].to_string(),
+                })
+            }
             Some(other) => Err(TopicError::UnknownPrefix(other.to_string())),
             None => Err(TopicError::InvalidFormat(s.to_string())),
         }
@@ -85,6 +99,9 @@ impl Topic {
                     normalize_symbol(symbol)
                 )
             }
+            Topic::Quote { exchange, symbol } => {
+                format!("quote.{}.{}", exchange, normalize_symbol(symbol))
+            }
         }
     }
 }
@@ -106,6 +123,11 @@ pub fn tick_topic(exchange: &str, symbol: &str) -> String {
     format!("tick.{}.{}", exchange, normalize_symbol(symbol))
 }
 
+/// 构建 quote topic 字符串：`quote.<exchange>.<SYMBOL>`
+pub fn quote_topic(exchange: &str, symbol: &str) -> String {
+    format!("quote.{}.{}", exchange, normalize_symbol(symbol))
+}
+
 /// 构建 kline topic 字符串
 pub fn kline_topic(exchange: &str, symbol: &str, interval: &str) -> String {
     format!(
@@ -118,6 +140,11 @@ pub fn kline_topic(exchange: &str, symbol: &str, interval: &str) -> String {
 
 /// Tick cache key -- 对标 Go 版 `getTickCacheKey`
 pub fn tick_cache_key(exchange: &str, symbol: &str) -> String {
+    format!("{}:{}", exchange.to_uppercase(), symbol.to_uppercase())
+}
+
+/// Quote cache key -- 与 tick 同一归一化规则（交易所、symbol 均大写）
+pub fn quote_cache_key(exchange: &str, symbol: &str) -> String {
     format!("{}:{}", exchange.to_uppercase(), symbol.to_uppercase())
 }
 
@@ -138,6 +165,7 @@ pub fn extract_exchange_symbol(topic_str: &str) -> Option<(String, String)> {
         Ok(Topic::Kline {
             exchange, symbol, ..
         }) => Some((exchange, symbol)),
+        Ok(Topic::Quote { exchange, symbol }) => Some((exchange, symbol)),
         Err(_) => None,
     }
 }
@@ -294,5 +322,78 @@ mod tests {
     #[test]
     fn extract_invalid_returns_none() {
         assert!(extract_exchange_symbol("invalid").is_none());
+    }
+
+    // ---- quote（1.1.0 新增）----
+
+    #[test]
+    fn parse_quote_topic() {
+        let t = Topic::parse("quote.binance.BNBUSDT").unwrap();
+        assert_eq!(
+            t,
+            Topic::Quote {
+                exchange: "binance".into(),
+                symbol: "BNBUSDT".into(),
+            }
+        );
+        let t = Topic::parse("quote.okx.BNB-USDT-SWAP").unwrap();
+        assert_eq!(
+            t,
+            Topic::Quote {
+                exchange: "okx".into(),
+                symbol: "BNB-USDT-SWAP".into(),
+            }
+        );
+    }
+
+    #[test]
+    fn parse_quote_topic_invalid_format() {
+        assert!(Topic::parse("quote.binance").is_err());
+        assert!(Topic::parse("quote.binance.BNBUSDT.extra").is_err());
+        assert!(Topic::parse("quote").is_err());
+    }
+
+    #[test]
+    fn format_quote_normalizes_symbol() {
+        let t = Topic::Quote {
+            exchange: "binance".into(),
+            symbol: "bnbusdt".into(),
+        };
+        assert_eq!(t.format(), "quote.binance.BNBUSDT");
+    }
+
+    #[test]
+    fn quote_topic_builder_and_cache_key() {
+        assert_eq!(quote_topic("binance", "bnbusdt"), "quote.binance.BNBUSDT");
+        assert_eq!(
+            quote_topic("okx", "BNB-USDT-SWAP"),
+            "quote.okx.BNB-USDT-SWAP"
+        );
+        assert_eq!(quote_cache_key("Binance", "bnbusdt"), "BINANCE:BNBUSDT");
+    }
+
+    #[test]
+    fn quote_roundtrip_and_extract() {
+        for input in ["quote.binance.BNBUSDT", "quote.okx.BNB-USDT-SWAP"] {
+            assert_eq!(Topic::parse(input).unwrap().format(), input);
+        }
+        let (ex, sym) = extract_exchange_symbol("quote.okx.BNB-USDT-SWAP").unwrap();
+        assert_eq!(ex, "okx");
+        assert_eq!(sym, "BNB-USDT-SWAP");
+    }
+
+    /// 既有主题解析不受新增 quote 影响（回归）
+    #[test]
+    fn existing_topics_unaffected_by_quote() {
+        assert!(matches!(
+            Topic::parse("tick.binance.BNBUSDT").unwrap(),
+            Topic::Tick { .. }
+        ));
+        assert!(matches!(
+            Topic::parse("kline.1m.binance.BNBUSDT").unwrap(),
+            Topic::Kline { .. }
+        ));
+        // quote 前缀不会吞掉其他未知前缀
+        assert!(Topic::parse("quotes.binance.BNBUSDT").is_err());
     }
 }

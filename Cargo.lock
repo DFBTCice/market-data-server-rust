@@ -945,6 +945,7 @@ dependencies = [
 name = "md-gateway"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum",
  "futures-util",
  "md-connector",
@@ -953,6 +954,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tokio-tungstenite",
  "tower 0.5.3",
  "tower-http",
  "tracing",
