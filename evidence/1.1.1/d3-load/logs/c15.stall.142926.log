@@ -1,0 +1,5 @@
+2026-10-10T14:29:26.913Z handshake ok (HTTP/1.1 101 Switchi), subscribing 39 streams, then STOP READING for 60s
+2026-10-10T14:29:28.425Z socket paused; bytes read so far=61385
+2026-10-10T14:30:26.904Z holding... bytes read=61385 open
+2026-10-10T14:30:26.907Z hold finished -> closing connection
+2026-10-10T14:30:26.908Z socket closed

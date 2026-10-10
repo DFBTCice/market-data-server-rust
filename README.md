@@ -396,6 +396,8 @@ scrape_configs:
 - `md_gateway_internal_latency_ms{topic}` — 网关内部转发延迟直方图
 - `md_ws_active_clients` / `md_ws_kicked_lagged_total` — WebSocket 活跃连接 / 慢客户端踢出
 - `md_ws_subscriptions_active` — 全部 WS 连接当前持有的 broadcast 接收端总数（1.1.1 新增；退订/断线后应回落，只增不减即泄漏）
+- `md_ws_kicked_write_timeout_total` — Gateway 客户端因写超时（`api_gateway.ws_write_wait`）被断开的累计数（1.1.1 新增）
+- `md_jemalloc_{allocated,active,resident,retained,mapped,metadata}_bytes` — 仅 `--features md-server/jemalloc-stats` 构建（jemalloc 分配器）暴露的分配器统计（1.1.1 新增）
 - `md_tokio_alive_tasks` / `md_tokio_workers` / `md_tokio_global_queue_depth` — tokio 运行时存活 task / 工作线程 / 全局队列（1.1.1 新增，排查任务泄漏用）
 - `process_resident_memory_bytes` / `process_cpu_seconds_total` / `process_open_fds` … — 标准进程指标
 

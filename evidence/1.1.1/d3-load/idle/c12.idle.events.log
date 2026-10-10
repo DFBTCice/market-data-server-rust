@@ -1,0 +1,15 @@
+2026-10-10T14:40:42.675Z TICKS_DROPPED 1950->2427
+2026-10-10T14:57:42.666Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 18->19
+2026-10-10T14:57:42.666Z RECONNECT md_connector_reconnect_total{exchange="okx"} 18->19
+2026-10-10T14:57:42.666Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 19->20
+2026-10-10T15:17:42.710Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 19->20
+2026-10-10T15:17:42.710Z RECONNECT md_connector_reconnect_total{exchange="okx"} 19->20
+2026-10-10T15:17:42.710Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 20->21
+2026-10-10T15:37:42.800Z CONNECTED md_connector_connected{exchange="okx-kline"} 1->0
+2026-10-10T15:37:42.801Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 20->21
+2026-10-10T15:37:42.801Z RECONNECT md_connector_reconnect_total{exchange="okx"} 20->21
+2026-10-10T15:37:42.801Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 21->22
+2026-10-10T15:38:42.905Z CONNECTED md_connector_connected{exchange="okx-kline"} 0->1
+2026-10-10T15:57:42.850Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 21->22
+2026-10-10T15:57:42.850Z RECONNECT md_connector_reconnect_total{exchange="okx"} 21->22
+2026-10-10T15:58:43.006Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 22->23

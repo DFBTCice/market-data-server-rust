@@ -1,0 +1,7 @@
+   old 样本 1251, new 样本 1262; 删除=0, 新增=11
+   old 指标族 23, new 指标族 34; TYPE 变更/删除=0, HELP 变更/删除=0
+   新增指标族: md_ws_subscriptions_active, md_ws_kicked_write_timeout_total, md_tokio_alive_tasks, md_tokio_workers, md_tokio_global_queue_depth, md_jemalloc_allocated_bytes, md_jemalloc_active_bytes, md_jemalloc_resident_bytes, md_jemalloc_retained_bytes, md_jemalloc_mapped_bytes, md_jemalloc_metadata_bytes
+   新增样本(前 11 条): md_ws_subscriptions_active ; md_ws_kicked_write_timeout_total ; md_tokio_alive_tasks ; md_tokio_workers ; md_tokio_global_queue_depth ; md_jemalloc_allocated_bytes ; md_jemalloc_active_bytes ; md_jemalloc_resident_bytes ; md_jemalloc_retained_bytes ; md_jemalloc_mapped_bytes ; md_jemalloc_metadata_bytes
+
+RESULT: PASS
+exit=0

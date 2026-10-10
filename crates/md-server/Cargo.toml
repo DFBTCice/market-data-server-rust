@@ -8,8 +8,11 @@ name = "md-server"
 path = "src/main.rs"
 
 [features]
-# 诊断专用：jemalloc 作为全局分配器 + /metrics 暴露 md_jemalloc_*（见 src/alloc_stats.rs）。
-# 默认关闭；生产镜像不使用。
+# jemalloc 作为全局分配器 + /metrics 暴露 md_jemalloc_*（见 src/alloc_stats.rs）。
+# 默认关闭（默认构建仍是 musl 自带分配器，行为与 1.1.0 相同）。
+# 1.1.1 调查结论：musl 自带分配器在「订阅者短暂停读 / 抖动」后 RSS 只升不降（高水位），
+# 同样的代码用 jemalloc 则平稳（evidence/1.1.1/INVESTIGATION_REPORT.md §D1/§D3）。
+# 是否用于现网镜像由换版计划决定（evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md）。
 jemalloc-stats = ["dep:tikv-jemallocator", "dep:tikv-jemalloc-ctl"]
 
 [dependencies]

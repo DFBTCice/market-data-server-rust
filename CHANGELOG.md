@@ -4,6 +4,65 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.1.1] - 待换版（2026-10-10 完成开发与旁路验证；**未打标签、未上现网**）
+
+**内存增长调查 + Gateway 退订泄漏修复**，作为阶段 3（扩展品种）的前置条件。完整调查见
+`evidence/1.1.1/INVESTIGATION_REPORT.md`；换版计划见 `evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md`。
+遵循"只增不改"：tick/kline/quote 的语义与逐字节输出、REST/gRPC、旧 `/ws`（Legacy）均不变；
+新增配置项无（沿用已有的 `api_gateway.ws_write_wait`），新增监控只增不减。
+
+### 修复（Fixes）
+
+- **Gateway（`/ws/v1/data`）退订不释放接收端（A1）**：此前 `unsubscribe` 只把主题从订阅集合里删掉，
+  对应的 broadcast 接收端仍留在连接的接收列表里并继续被轮询。后果：同一连接对同一主题"订阅→退订→再订阅" N 次后，
+  该主题的每条事件被**重复推送 N 份**，接收端也不会释放（每个泄漏的接收端约 3~4 KiB，且持续消耗 CPU：旁路对照 6 小时 CPU 约为修复后的 2.5 倍）。
+  现网 1.1.0 已确认存在重复推送（`evidence/1.1.1/probe/prod-1.1.0-before.json`）。
+  修复：每个连接用 `StreamMap<主题, 流>` 持有接收端，退订即移除；同主题重复订阅为幂等。
+- **接收路径等价改写（A2）**：新的接收路径对外输出的字节与 1.1.0 完全相同：`compat_1_0_0` 回放、`md-tests` 通过；
+  `compare.mjs` 同窗口对比中 tick/kline（Gateway 与 Legacy）逐字节一致，订阅集合、metrics（只新增不删除）一致。
+  **例外（如实）**：`quote.binance.BNBUSDT` 的逐字节项在两条独立连接间有噪声（仅 `bid_qty`/`ask_qty`，0.1%~0.6% 条数，1.1.0 对 1.1.0 同样出现），见 `evidence/1.1.1/report/quote-byte-noise.txt` 与调查报告 §12.9。Legacy `/ws` 不改动。
+- **Gateway 写超时（A5，唯一的行为变化）**：`api_gateway.ws_write_wait`（默认 `10s`）在 1.1.0 及以前被解析但**从未生效**。
+  客户端停止读取（进程挂起 / 半开连接 / 严重卡顿）时，服务端对该连接的 `send` 会一直阻塞，连接处理协程不再轮询接收端，
+  broadcast 环（每主题 4096 条）里的事件被一直持有。1.1.1 起写入超过 `ws_write_wait` 即断开该连接（消费者需自行重连并重新订阅）。
+  设为 `"0s"` 可恢复旧行为。新增指标 `md_ws_kicked_write_timeout_total`。
+- **分配器（见下"调查结论"）**：新增可选构建 `--features md-server/jemalloc-stats`（jemalloc 作为全局分配器）。**默认构建仍使用 musl 自带分配器**，行为与 1.1.0 相同。
+
+### 新增（Features，均为只增）
+
+- **`md_ws_subscriptions_active`**（gauge）：所有 WS 连接当前持有的 broadcast 接收端总数（RAII 计数，连接断开自动扣减）。
+  用来在现网直接发现"订阅数只增不减"。
+- **`md_ws_kicked_write_timeout_total`**、**`md_tokio_alive_tasks` / `md_tokio_workers` / `md_tokio_global_queue_depth`**；
+  `--features md-server/jemalloc-stats` 构建额外暴露 `md_jemalloc_{allocated,active,resident,retained,mapped,metadata}_bytes`。
+- **订阅/退订 debug 日志**（`RUST_LOG=md_gateway=debug`）：订阅、退订、当前接收端数。
+- **丢弃告警限频**：connector 的 tick/kline/quote 入口队列满时，同一连接器同一类数据每秒最多一条 WARN；
+  被抑制的丢弃条数累计到下一条日志里（日志里的条数之和 == 实际丢弃总数），并带"入口队列深度 / 累计丢弃数"
+  （此前每丢一条打一条 WARN：1.0.0 对照容器 6 小时产生约 1.6 千行）。
+- **仅调试用环境变量**：`MD_DEBUG_FORCE_RECONNECT_SECS` / `MD_DEBUG_FORCE_RECONNECT_ONLY`（强制周期性重连，默认不设即无任何影响）。
+- **调查/验证工具**：`scripts/compat/{load_consumers,stall_client,sample_metrics,md_ws_dup_probe}.mjs`、
+  `crates/md-processor/examples/retention_sizing.rs`、`evidence/1.1.1/tools/`。
+
+### 测试（A4，均带"在修复前代码上必须失败"的正对照）
+
+- `crates/md-gateway/tests/unsubscribe_gateway.rs`（6 个）：退订后无事件、重订恰好 1 份、反复抖动仍 1 份、重复订阅无额外副本、
+  部分退订不影响其它主题且字节不变、一个连接退订不影响另一个连接。修复前代码上 3 个失败（`evidence/1.1.1/a4-tests/`）。
+- `crates/md-gateway/tests/ws_subscriptions_gauge.rs`：gauge 随订阅/退订/断开增减。
+- `crates/md-gateway/tests/write_timeout_gateway.rs`（3 个）：停读客户端被踢（对照：`ws_write_wait=None` 时连接被永远钉住）、健康客户端不受影响。
+  去掉超时实现的变异版上"被踢"用例失败（`evidence/1.1.1/a5-write-timeout/`）。
+
+### 调查结论（内存增长，详见调查报告）
+
+- **不是逻辑泄漏**：同样的代码换 jemalloc，存活堆（`allocated`）在 7 小时、含 30 分钟停读与行情突发的负载下稳定在 6~10 MiB；
+  musl 自带分配器的 14 个对照容器全部上涨（起止 +4 ~ +138 MiB）；jemalloc 的 4 个容器预热 1 小时后斜率为 +0.08 ~ +0.85 MiB/h（均 ≤ 1 MiB/h；起止 +0.2 ~ +8 MiB，停读造成的峰值最高 56.8 MiB，之后回落）。
+  上涨来自 musl 分配器的**高水位（只升不降）**，触发因素包括消费者卡顿（环里滞留事件）和行情突发，且无消费者时也会继续缓慢上涨。
+- **A1 泄漏真实但很小**（约 3.4 KiB/个接收端），不是内存增长主因，但会造成重复推送与 CPU 浪费。
+- **固定滞留有上界**：广播环容量 4096，满环约 1.8~2.4 MiB/主题（现网 39 主题合计上界约 88 MiB，需消费者长时间停读才会出现）；A5 把停读造成的滞留限制在 `ws_write_wait`（10 秒）内。
+- 单靠 A5（默认分配器）在旁路等价负载下**仍不满足** RSS 斜率 ≤ 1 MiB/h；**A5 + jemalloc** 满足（详见报告 §D3 与换版计划的候选选择）。
+- 现网 `md_ticks_dropped` 的来源：行情突发时 tick 入口队列（1000）在毫秒级被打满；同一时刻现网与全部旁路容器同时出现丢弃，证明来自上游行情而非本进程故障。
+
+### 文档更正
+
+- 1.0.0 发布说明里的"失败 stream 黑名单"、`MAX_STREAMS_PER_MSG` 订阅分批、重连抖动（jitter）三项在代码中并不存在，已在 1.0.0 条目中划线更正。
+
 ## [1.1.0] - 2026-10-09
 
 新增 **quote（买一卖一报价）** 独立主题。遵循"只增不改"：开关默认关闭，不改配置升级时

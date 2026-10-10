@@ -1,0 +1,138 @@
+2026-10-10T10:38:56.320276627Z 2026-10-10T10:38:56.299707Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T10:52:48.727697395Z 2026-10-10T10:52:48.727426Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T10:52:48.739402808Z 2026-10-10T10:52:48.727496Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T10:52:48.777403465Z 2026-10-10T10:52:48.775031Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T10:52:48.777466512Z 2026-10-10T10:52:48.775110Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T10:52:48.807237541Z 2026-10-10T10:52:48.807074Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T10:52:48.807310738Z 2026-10-10T10:52:48.807210Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T10:59:53.830485744Z 2026-10-10T10:59:53.830213Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T11:12:59.173271959Z 2026-10-10T11:12:59.172994Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:12:59.173358716Z 2026-10-10T11:12:59.173036Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T11:12:59.221770757Z 2026-10-10T11:12:59.221536Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:12:59.221862637Z 2026-10-10T11:12:59.221572Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T11:12:59.460257598Z 2026-10-10T11:12:59.458847Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:12:59.460320668Z 2026-10-10T11:12:59.458880Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T11:20:53.737571114Z 2026-10-10T11:20:53.737381Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T11:33:09.628900494Z 2026-10-10T11:33:09.628715Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:33:09.661236082Z 2026-10-10T11:33:09.628768Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T11:33:09.661310696Z 2026-10-10T11:33:09.628949Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:33:09.661318180Z 2026-10-10T11:33:09.628961Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T11:33:09.897367317Z 2026-10-10T11:33:09.897191Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:33:09.897576885Z 2026-10-10T11:33:09.897456Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T11:41:53.366796181Z 2026-10-10T11:41:53.366522Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T11:53:20.019172325Z 2026-10-10T11:53:20.016539Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:53:20.019243340Z 2026-10-10T11:53:20.019055Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T11:53:20.020327163Z 2026-10-10T11:53:20.008277Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:53:20.020395101Z 2026-10-10T11:53:20.020236Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T11:53:20.296016455Z 2026-10-10T11:53:20.295861Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T11:53:20.296057561Z 2026-10-10T11:53:20.295892Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:02:47.974011929Z 2026-10-10T12:02:47.954371Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T12:13:30.396354026Z 2026-10-10T12:13:30.396084Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:13:30.396514282Z 2026-10-10T12:13:30.396146Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T12:13:30.427746614Z 2026-10-10T12:13:30.427455Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:13:30.427911180Z 2026-10-10T12:13:30.427517Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:13:30.715010610Z 2026-10-10T12:13:30.714769Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:13:30.715088095Z 2026-10-10T12:13:30.714803Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:23:52.601593233Z 2026-10-10T12:23:52.601067Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T12:32:02.539963707Z 2026-10-10T12:32:02.539835Z  WARN md_connector::base: [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:32:02.540011987Z 2026-10-10T12:32:02.539869Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T12:33:40.811290263Z 2026-10-10T12:33:40.811088Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:33:40.811356958Z 2026-10-10T12:33:40.811130Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:33:41.091327589Z 2026-10-10T12:33:41.091160Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:33:41.091386465Z 2026-10-10T12:33:41.091192Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:44:52.359656488Z 2026-10-10T12:44:52.359446Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T12:52:12.937982196Z 2026-10-10T12:52:12.937438Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:52:12.938043997Z 2026-10-10T12:52:12.937486Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T12:53:51.187157645Z 2026-10-10T12:53:51.186940Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:53:51.187230749Z 2026-10-10T12:53:51.186990Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:53:51.422619781Z 2026-10-10T12:53:51.422489Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T12:53:51.422670012Z 2026-10-10T12:53:51.422519Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:05:50.618050624Z 2026-10-10T13:05:50.617586Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T13:12:23.291524246Z 2026-10-10T13:12:23.291390Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:12:23.291578571Z 2026-10-10T13:12:23.291419Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T13:14:01.539622786Z 2026-10-10T13:14:01.539402Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:14:01.539707922Z 2026-10-10T13:14:01.539439Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:14:01.838781479Z 2026-10-10T13:14:01.838627Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:14:01.838837795Z 2026-10-10T13:14:01.838659Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:26:55.039609534Z 2026-10-10T13:26:55.038706Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T13:32:33.656542077Z 2026-10-10T13:32:33.656421Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:32:33.656581512Z 2026-10-10T13:32:33.656445Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T13:34:11.918048187Z 2026-10-10T13:34:11.917707Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:34:11.918128286Z 2026-10-10T13:34:11.917777Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:34:12.238773724Z 2026-10-10T13:34:12.238635Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:34:12.238830483Z 2026-10-10T13:34:12.238662Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:47:57.355520650Z 2026-10-10T13:47:57.354141Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T13:52:44.151858383Z 2026-10-10T13:52:44.151655Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:52:44.224684929Z 2026-10-10T13:52:44.151691Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T13:54:22.313523027Z 2026-10-10T13:54:22.312346Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:54:22.313607617Z 2026-10-10T13:54:22.312384Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:54:22.559618545Z 2026-10-10T13:54:22.559471Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T13:54:22.559711706Z 2026-10-10T13:54:22.559496Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:08:57.733289919Z 2026-10-10T14:08:57.733050Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T14:12:54.533730053Z 2026-10-10T14:12:54.533371Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:12:54.533793441Z 2026-10-10T14:12:54.533411Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T14:14:32.712241825Z 2026-10-10T14:14:32.711924Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:14:32.712291491Z 2026-10-10T14:14:32.711959Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:14:33.274902560Z 2026-10-10T14:14:33.273429Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:14:33.275081431Z 2026-10-10T14:14:33.273466Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:27:57.174615244Z 2026-10-10T14:27:57.170027Z  WARN md_connector::base: [okx] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1)
+2026-10-10T14:29:47.454958151Z 2026-10-10T14:29:47.454708Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T14:33:04.892403028Z 2026-10-10T14:33:04.892005Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:33:04.892468375Z 2026-10-10T14:33:04.892040Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T14:34:43.156113770Z 2026-10-10T14:34:43.155908Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:34:43.156154321Z 2026-10-10T14:34:43.155941Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:34:43.639289745Z 2026-10-10T14:34:43.639130Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:34:43.639590310Z 2026-10-10T14:34:43.639378Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:40:03.763768891Z 2026-10-10T14:40:03.761694Z  WARN md_connector::base: [okx] tick channel full, dropped 1290 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1291)
+2026-10-10T14:40:03.787699532Z 2026-10-10T14:40:03.763944Z  WARN md_connector::base: [binance] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1377)
+2026-10-10T14:50:48.436134846Z 2026-10-10T14:50:48.435940Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T14:53:15.305471862Z 2026-10-10T14:53:15.305275Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:53:15.305530624Z 2026-10-10T14:53:15.305309Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T14:54:53.517000397Z 2026-10-10T14:54:53.516861Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:54:53.517055815Z 2026-10-10T14:54:53.516892Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:54:53.997667211Z 2026-10-10T14:54:53.997507Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T14:54:53.997771337Z 2026-10-10T14:54:53.997682Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T15:11:49.570862025Z 2026-10-10T15:11:49.569185Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T15:13:25.720949957Z 2026-10-10T15:13:25.720780Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:13:25.720992247Z 2026-10-10T15:13:25.720807Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T15:15:03.863779700Z 2026-10-10T15:15:03.863577Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:15:03.863828696Z 2026-10-10T15:15:03.863615Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T15:15:04.343559574Z 2026-10-10T15:15:04.343360Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:15:04.343626378Z 2026-10-10T15:15:04.343393Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T15:32:50.276157281Z 2026-10-10T15:32:50.275871Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T15:33:36.086865855Z 2026-10-10T15:33:36.086371Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:33:36.086945450Z 2026-10-10T15:33:36.086539Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T15:35:14.293964373Z 2026-10-10T15:35:14.293695Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:35:14.294052762Z 2026-10-10T15:35:14.293757Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T15:35:14.731416046Z 2026-10-10T15:35:14.731144Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:35:14.731457530Z 2026-10-10T15:35:14.731177Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T15:53:46.488132998Z 2026-10-10T15:53:46.487865Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:53:46.488418738Z 2026-10-10T15:53:46.487893Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T15:53:54.195435426Z 2026-10-10T15:53:54.195296Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T15:55:24.724737543Z 2026-10-10T15:55:24.724551Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:55:24.724799733Z 2026-10-10T15:55:24.724593Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T15:55:25.145107728Z 2026-10-10T15:55:25.144950Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T15:55:25.145202777Z 2026-10-10T15:55:25.144980Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:13:56.860946018Z 2026-10-10T16:13:56.860778Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:13:56.888016346Z 2026-10-10T16:13:56.860808Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T16:14:55.233028815Z 2026-10-10T16:14:55.232871Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T16:15:35.080254884Z 2026-10-10T16:15:35.080024Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:15:35.080316169Z 2026-10-10T16:15:35.080122Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:15:35.571555890Z 2026-10-10T16:15:35.571269Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:15:35.571648068Z 2026-10-10T16:15:35.571315Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:34:07.261794078Z 2026-10-10T16:34:07.261626Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:34:07.262110814Z 2026-10-10T16:34:07.261956Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T16:35:45.460908733Z 2026-10-10T16:35:45.460769Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:35:45.460953939Z 2026-10-10T16:35:45.460802Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:35:45.949338102Z 2026-10-10T16:35:45.948996Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:35:45.949424522Z 2026-10-10T16:35:45.949047Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:35:58.202868748Z 2026-10-10T16:35:58.202452Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)
+2026-10-10T16:53:49.524225692Z 2026-10-10T16:53:49.523975Z  WARN md_connector::base: [binance] pong timeout (90s), reconnecting
+2026-10-10T16:53:49.524309205Z 2026-10-10T16:53:49.524035Z  WARN md_connector::base: [binance] disconnected, reconnecting in 5s
+2026-10-10T16:54:17.629196912Z 2026-10-10T16:54:17.628796Z  WARN md_connector::base: [okx-quote] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:54:17.629272646Z 2026-10-10T16:54:17.628854Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T16:55:55.798974796Z 2026-10-10T16:55:55.798793Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:55:55.799023449Z 2026-10-10T16:55:55.798827Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:55:56.352671074Z 2026-10-10T16:55:56.352505Z  WARN md_connector::base: [okx] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)
+2026-10-10T16:55:56.352728043Z 2026-10-10T16:55:56.352537Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T16:56:55.637310911Z 2026-10-10T16:56:55.637006Z  WARN md_gateway::ws: Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)

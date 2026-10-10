@@ -2,7 +2,7 @@
 //!
 //! 默认构建（生产镜像使用的构建）：本模块不改变分配器，`render` 不输出任何内容。
 //!
-//! `--features jemalloc-stats` 构建（仅用于旁路诊断容器，**不用于生产镜像**）：
+//! `--features jemalloc-stats` 构建（旁路诊断容器使用；是否用于现网镜像见换版计划）：
 //! 使用 jemalloc 作为全局分配器，并在 `/metrics` 暴露
 //! `md_jemalloc_{allocated,active,resident,retained,mapped,metadata}_bytes`，用于区分
 //!

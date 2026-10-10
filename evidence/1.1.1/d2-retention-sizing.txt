@@ -1,0 +1,6 @@
+BroadcastEvent 大小 = 32 B
+kline(okx)     cap=4096: 空环槽位数组   256.1 KiB | 每事件  342 B / 10 次分配 | 满环事件总计   1.59 MiB (musl 估算   2.06 MiB) | 满载合计   1.84 MiB (musl 估算   2.31 MiB)
+kline(binance) cap=4096: 空环槽位数组   256.1 KiB | 每事件  349 B / 10 次分配 | 满环事件总计   1.61 MiB (musl 估算   2.13 MiB) | 满载合计   1.86 MiB (musl 估算   2.38 MiB)
+tick(okx)      cap=4096: 空环槽位数组   256.1 KiB | 每事件  282 B / 5 次分配 | 满环事件总计   1.35 MiB (musl 估算   1.69 MiB) | 满载合计   1.60 MiB (musl 估算   1.94 MiB)
+tick(binance)  cap=4096: 空环槽位数组   256.1 KiB | 每事件  285 B / 5 次分配 | 满环事件总计   1.36 MiB (musl 估算   1.63 MiB) | 满载合计   1.61 MiB (musl 估算   1.88 MiB)
+quote(okx)     cap=4096: 空环槽位数组   256.1 KiB | 每事件  239 B / 8 次分配 | 满环事件总计   1.18 MiB (musl 估算   1.63 MiB) | 满载合计   1.43 MiB (musl 估算   1.88 MiB)
