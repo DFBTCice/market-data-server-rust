@@ -395,6 +395,8 @@ scrape_configs:
 - `md_ingestion_latency_ms{exchange,type,symbol,interval}` — 多维入库延迟直方图
 - `md_gateway_internal_latency_ms{topic}` — 网关内部转发延迟直方图
 - `md_ws_active_clients` / `md_ws_kicked_lagged_total` — WebSocket 活跃连接 / 慢客户端踢出
+- `md_ws_subscriptions_active` — 全部 WS 连接当前持有的 broadcast 接收端总数（1.1.1 新增；退订/断线后应回落，只增不减即泄漏）
+- `md_tokio_alive_tasks` / `md_tokio_workers` / `md_tokio_global_queue_depth` — tokio 运行时存活 task / 工作线程 / 全局队列（1.1.1 新增，排查任务泄漏用）
 - `process_resident_memory_bytes` / `process_cpu_seconds_total` / `process_open_fds` … — 标准进程指标
 
 ## 已知差异

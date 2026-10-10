@@ -706,8 +706,18 @@ topk(10, sum by (topic) (rate(md_gateway_internal_latency_ms_count[1m])))
 | `md_ws_kicked_lagged_total` | counter | — | 因连续 lagged 被踢出的客户端累计数 | 慢客户端踢出事件 |
 | `md_ws_messages_sent_total` | counter | `kind` | 成功推送给客户端的消息累计 | 网关推送吞吐量 |
 | `md_broadcast_lagged_total` | counter | `topic_kind` | broadcast 订阅者跟不上的次数 | 消息丢弃率（订阅者缓冲满） |
+| `md_ws_subscriptions_active` | gauge | — | 所有 WS 连接（gateway+legacy）当前持有的 broadcast 接收端总数（**1.1.1 新增**）。退订/断线后必须回落；与 `md_ws_active_clients` 对照：单个连接订阅 N 个主题就贡献 N | —（新增） |
 
 > 说明：当某个 WS 客户端连续 3 次出现 broadcast lagged，会被自动踢出（`md_ws_kicked_lagged_total +1`），防止僵尸客户端拖累 broadcast channel。
+
+#### 7.2.5b 运行时诊断（1.1.1 新增，只增不改）
+
+| 指标名 | 类型 | 含义 |
+|---|---|---|
+| `md_tokio_alive_tasks` | gauge | tokio 当前存活 task 数。重连前后应回到同一水平，只增不减说明有 task 泄漏 |
+| `md_tokio_workers` | gauge | tokio 工作线程数（受容器 CPU 限额影响：`--cpus=2` ⇒ 2） |
+| `md_tokio_global_queue_depth` | gauge | tokio 全局注入队列深度（持续 > 0 说明运行时过载） |
+| `md_jemalloc_{allocated,active,resident,retained,mapped,metadata}_bytes` | gauge | **仅在 `--features jemalloc-stats` 的诊断构建中存在**（默认构建与镜像不含）。`allocated` 持平而 `resident` 上升 = 分配器碎片；`allocated` 上升 = 逻辑滞留/泄漏 |
 
 #### 7.2.6 进程级（标准 Prometheus，与 Go process_exporter 等价）
 
@@ -829,6 +839,13 @@ groups:
           summary: "{{ $labels.exchange }} 重连频繁（10m 内 > 30 次）"
 
       # ---- P2 提示（资源使用） ----
+      - alert: MemoryApproachingLimit      # 1.1.1 新增：容器限额 512MiB 时的"提前量"告警（见 OPS_GUIDE §七）
+        expr: process_resident_memory_bytes{job="md-server"} > 400 * 1024 * 1024
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "RSS > 400MiB：请在低峰期重建容器（musl 下 RSS 为历史高水位，不会自行回落）"
+
       - alert: HighMemoryUsage
         expr: process_resident_memory_bytes{job="md-server"} > 500000000
         for: 10m
@@ -1151,6 +1168,51 @@ USER md-user
 
 验收辅助脚本：`scripts/compat/analyze_quote.mjs`（quote 间隔 / 节流 / 非空 / 字段顺序 / 正对照）、
 `scripts/compat/sample_process.sh`（10 分钟进程指标采样）、`scripts/compat/restore_subs.mjs`（补回动态订阅）。
+
+### 12.2 升级到 1.1.1（内存调查 + Gateway 退订泄漏 + 写超时；分阶段、可回滚）
+
+1.1.1 的内容与结论见 [CHANGELOG](CHANGELOG.md) 与 `evidence/1.1.1/INVESTIGATION_REPORT.md`。要点：
+
+- 修 Gateway `unsubscribe` 不释放接收端（A1）、改用 `StreamMap` 接收路径（A2，输出字节不变）；
+- **Gateway 写超时**：生效已有配置 `api_gateway.ws_write_wait`（默认 `10s`，`0s` 关闭）。这是 1.1.1 **唯一的行为变化**：
+  停读 ≥10 秒的 Gateway 客户端会被断开，需自行重连并重新订阅；Legacy `/ws` 不变。**换版前请知会 1stbotv3 等消费者**；
+- 新增指标 `md_ws_subscriptions_active`、`md_ws_kicked_write_timeout_total`、`md_tokio_*`；
+- 配置文件**不需要改**（沿用 1.1.0 的 `config.yaml`，无新键）。
+
+**为什么 `md-server:latest` 仍指向 1.0.0（刻意不动）**：NAS 198 上 `md-server:latest` 与 `md-server:1.0.0-rollback` 是同一个镜像
+（`06907bdf7fd8`）。它是整条升级链（1.0.0 → 1.1.0 → 1.1.1）**最后的回滚依据**，所以：
+
+1. 现网容器一律用**显式版本标签**（`md-server:1.1.0-quote-bnb`、`md-server:1.1.1`），从不依赖 `latest`；
+2. 若把 `latest` 挪到新版本，任何仍写着 `md-server:latest` 的 compose / 脚本会在下次重建时**悄悄升级**，且回滚依据只剩一个标签，容易被误清理；
+3. 只有在业务方确认新版本稳定运行 ≥7 天、且另有一份独立的回滚标签后，才考虑移动 `latest`（并在 CHANGELOG 记一笔）。
+
+**阶段 0：留基线**（升级前）
+
+```bash
+# 记录现网容器参数与订阅（含 1stbotv3 运行期动态加的订阅）——换版后要补回
+docker inspect md-server > baseline/md-server.inspect.json
+curl -s http://HOST:8081/api/v1/subscriptions > baseline/subscriptions.json
+curl -s http://HOST:8081/metrics               > baseline/metrics.txt
+node scripts/compat/capture_ws.mjs gateway ws://HOST:8081/ws/v1/data 60 baseline/ws-gateway tick.binance.BTCUSDT
+```
+
+**阶段 1：旁路验证（不碰现网）**——另起一个 ≤256MiB 的临时容器（不同端口），用 1.1.1 镜像 + 同一份配置，
+`restore_subs.mjs` 补入现网订阅，与现网/基线用 `compare.mjs push|subs|metrics` 做同窗口对比；通过后删除临时容器。
+
+**阶段 2：低峰换版**（业务方批准的窗口；约 6 秒中断）
+
+```bash
+# 复用 1.1.0 的换版工具：旧容器改名为 md-server-1.1.0-bak 并停止，按旧容器参数用新镜像重建同名 md-server
+python3 evidence/1.1.0/nas-198/tools/pt_swap.py swap md-server:1.1.1 md-server-1.1.0-bak
+# 立刻补回订阅（Docker 方式：订阅不写回配置，重启即丢）
+node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:8081 --apply
+```
+
+**回滚**（任一验收项不通过）：`python3 evidence/1.1.0/nas-198/tools/pt_swap.py rollback md-server-1.1.0-bak`，随后同样 `restore_subs.mjs` 补订阅。
+
+**换版后 24 小时观察项**：`process_resident_memory_bytes`（逐小时；告警阈值 400MiB）、`md_ws_subscriptions_active`（退订后回落）、
+`md_ws_kicked_write_timeout_total`（应≈0；增长 = 有消费者卡顿）、`md_ticks_dropped`（日志同时有限频 WARN）、
+`md_connector_reconnect_total`、`md_tokio_alive_tasks`（重连前后同水平）、1stbotv3 与 OMS 消费正常。
 
 ---
 

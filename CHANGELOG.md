@@ -78,7 +78,10 @@ NAS 测试服务器（192.168.1.198）上 1.0.0 实际运行的二进制，包�
   `process_start_time_seconds`、`process_uptime_seconds`。
 - **Grafana dashboard 模板** `dashboards/md-server-rust.json`，与 Go 版面板一一对应。
 - **慢客户端自动踢出**：连续 3 次 broadcast Lagged 即主动断开，保护整体推送链路。
-- **失败 stream 黑名单**：订阅持续失败的 stream 进入黑名单并在重连时跳过，到期自动恢复。
+- ~~**失败 stream 黑名单**：订阅持续失败的 stream 进入黑名单并在重连时跳过，到期自动恢复。~~
+  **【1.1.1 更正】代码中不存在黑名单机制。** 实际行为：订阅被交易所拒绝时，该 stream 只从 `active_streams`
+  移除并累加 `md_connector_subscribe_failed_total`（见 `base.rs::dispatch_event` 的 `SubscribeError` 分支）；
+  下次重连同步订阅时会再次尝试，不会跳过。1.0.0 发布说明里的这条描述有误。
 - **可选 `vendored-tls` feature**（`md-connector`，默认关闭）：交叉编译时让 OpenSSL
   随源码静态编译，支持在 macOS 上产出 x86_64 Linux 全静态二进制。
 - **`Dockerfile.cn`**：国内/内网镜像加速构建（基础镜像 daocloud、apt 阿里云、crates rsproxy）。
@@ -96,8 +99,10 @@ NAS 测试服务器（192.168.1.198）上 1.0.0 实际运行的二进制，包�
 ### 性能（Performance）
 
 - **release 编译优化**：启用 `lto`、`codegen-units=1`、`strip`、`panic=abort`，减小体积、提升运行时性能。
-- **订阅分批**：大批量订阅按 `MAX_STREAMS_PER_MSG` 分片并间隔发送，避免单帧过大被交易所拒绝。
-- **重连抖动（jitter）**：在重连退避基础上叠加随机抖动，避免大量连接同时重连造成雪崩。
+- ~~**订阅分批**：大批量订阅按 `MAX_STREAMS_PER_MSG` 分片并间隔发送，避免单帧过大被交易所拒绝。~~
+  **【1.1.1 更正】代码中不存在 `MAX_STREAMS_PER_MSG` 分片逻辑**（`sync_subscriptions_on_connect` 一次性发送全部待订阅 stream）。
+- ~~**重连抖动（jitter）**：在重连退避基础上叠加随机抖动，避免大量连接同时重连造成雪崩。~~
+  **【1.1.1 更正】代码中不存在抖动/退避**：`base.rs::run_connection_loop` 使用固定的 `reconnect_delay`（与 Go 版一致）。
 
 ### 重构（Refactor）
 

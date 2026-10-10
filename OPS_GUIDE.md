@@ -259,5 +259,73 @@ docker exec md-server tar -czf - /var/log/md-server > md-logs-backup.tar.gz
 | 容器启动后退出 | `docker logs md-server` | 检查 config.yaml 格式是否正确 |
 | 健康检查失败 | `curl -v http://localhost:8081/health` | 检查端口映射和防火墙 |
 | 无数据流入 | `docker logs md-server \| grep connector` | 检查网络连通性，Binance/OKX 是否可达 |
-| 内存过高 | `docker stats md-server` | 减小 `broadcast_capacity` 和 channel buffer |
+| 内存过高 | `docker stats md-server` | 先看 [七、内存监控与客户端卡顿](#七内存监控与客户端卡顿111-起)：多数是消费者卡顿后 musl 分配器不归还内存（RSS 只升不降）；重建容器可清零。调小 `broadcast_capacity` 只能降低单次卡顿的上限，不是根治 |
 | SIGHUP 无效 | `docker kill --signal=HUP md-server` | Docker 容器中 kill -HUP 可能需要 docker kill |
+
+---
+
+## 七、内存监控与客户端卡顿（1.1.1 起）
+
+### 7.1 一句话结论（详见 `evidence/1.1.1/INVESTIGATION_REPORT.md`）
+
+现网 RSS"只升不降、呈台阶状"的主因不是慢速泄漏，而是：**消费者端卡顿（停止读 socket）→ 服务端该连接的写操作永久阻塞
+→ 各主题 broadcast 环（容量 `broadcast_capacity`，默认 4096）里的事件无法被释放而滞留 → 滞留期间申请的内存在
+musl 分配器下不会归还给系统，RSS 就停在"历史高水位"**。同样的代码换 jemalloc 分配器，卡顿结束后内存会回落。
+1.1.1 起 Gateway（`/ws/v1/data`）按已有配置项 `api_gateway.ws_write_wait`（默认 `10s`）给每次写入加超时，
+卡顿超过该时长的客户端被断开并释放其全部订阅（计数 `md_ws_kicked_write_timeout_total`）。
+
+> **行为变化（仅此一项，需知会消费者）**：1.1.0 及以前该配置项被解析但从未生效；1.1.1 起，Gateway 客户端若 `ws_write_wait`
+> 内读不动数据（进程挂起 / 半开连接 / 严重卡顿）会被服务端断开，需自行重连并重新订阅。想保持旧行为：`ws_write_wait: "0s"`。
+> Legacy `/ws` 不受影响（本版未改动，同样存在"停读客户端钉住连接"的风险）。
+
+### 7.2 退订语义（1.1.1 修正）
+
+| 操作 | 1.1.0 及以前（Gateway） | 1.1.1 |
+|---|---|---|
+| `unsubscribe` 一个 stream | 只从"已订阅集合"移除，接收端仍留在连接内（泄漏）；之后重新 `subscribe` 会**重复推送**（现网探针实测 100% 重复） | 立刻释放该 stream 的接收端；`md_ws_subscriptions_active` 同步回落 |
+| 重复 `subscribe` 同一 stream | 已订阅则忽略 | 不变（不再新增接收端、不再重复 ack） |
+| 对未订阅的 stream `unsubscribe` | 返回 success ack | 不变 |
+| 连接断开 | 连接内全部接收端随连接释放 | 不变 |
+| 推送字节 | — | 与 1.1.0 逐字节相同（`compat_1_0_0` + `compare.mjs` 验证） |
+
+Legacy `/ws` 的订阅/退订行为未改动。
+
+### 7.3 内存与连接监控
+
+| 指标 | 怎么看 |
+|---|---|
+| `process_resident_memory_bytes` | RSS。**建议阈值：≥ 400 MiB（容器限额 512 MiB 的约 78%）持续 10 分钟 → 在低峰期主动重建容器**（清零 musl 高水位；重建后补订阅，见 DEPLOYMENT §12.2）；≥ 480 MiB 视为紧急 |
+| `md_ws_subscriptions_active` | 所有 WS 连接持有的接收端总数。退订/断线后必须回落；与 `md_ws_active_clients` 对照（一个连接订 N 个主题就贡献 N）。只增不减 = 泄漏 |
+| `md_ws_kicked_write_timeout_total` | 因写超时被踢的 Gateway 客户端累计数。**增长说明有消费者卡顿**——去查消费者（GC/阻塞/网络），不是服务端问题 |
+| `md_ws_kicked_lagged_total` / `md_broadcast_lagged_total` | 消费者跟不上被踢 / 环溢出丢事件 |
+| `md_ticks_dropped` / `md_klines_dropped` / `md_quotes_dropped` | 入口队列满丢弃。1.1.1 起日志里会限频输出 WARN（含时间与队列深度） |
+| `md_tokio_alive_tasks` | 重连前后应回到同一水平（22 左右），只增不减 = task 泄漏 |
+
+Prometheus 告警示例（与 DEPLOYMENT §7 的 500MB 提示规则并存，这条更早）：
+
+```yaml
+- alert: MdServerMemoryHigh
+  expr: process_resident_memory_bytes{job="md-server"} > 400 * 1024 * 1024
+  for: 10m
+  labels: { severity: warning }
+  annotations:
+    summary: "md-server RSS > 400MiB，请在低峰期重建容器（限额 512MiB）"
+- alert: MdWsClientStalled
+  expr: increase(md_ws_kicked_write_timeout_total{job="md-server"}[10m]) > 0
+  labels: { severity: info }
+  annotations:
+    summary: "有 Gateway 消费者卡顿被踢出（写超时），请检查消费者"
+- alert: MdWsSubscriptionsLeak
+  expr: md_ws_subscriptions_active{job="md-server"} > 10 * md_ws_active_clients{job="md-server"} + 100
+  for: 15m
+  labels: { severity: warning }
+```
+
+### 7.4 排障顺序（RSS 异常时）
+
+1. `curl :8081/metrics | grep -E 'md_ws_|process_resident|md_tokio'`：`md_ws_subscriptions_active` 是否异常大？`md_ws_kicked_write_timeout_total` 是否在涨？
+2. 看日志里 `kicked: write blocked longer than ws_write_wait`：谁在卡、多久一次。
+3. RSS 在"平台 + 台阶"形态（不是持续斜线）→ 高水位，不是泄漏；重建容器可清零；根治靠消费者别卡 + 1.1.1 的写超时。
+4. 需要区分"逻辑滞留 vs 分配器"时，用诊断构建（`--features md-server/jemalloc-stats`，**不用于生产镜像**）看 `md_jemalloc_allocated_bytes`（持平）与 `md_jemalloc_resident_bytes`。
+5. `MD_DEBUG_FORCE_RECONNECT_SECS` / `MD_DEBUG_FORCE_RECONNECT_ONLY` 是**仅限旁路实验**的调试开关（强制周期性重连），不要在生产设置。
+
