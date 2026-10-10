@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
+use std::time::Duration;
 use tokio::sync::broadcast;
 use tokio_stream::wrappers::errors::BroadcastStreamRecvError;
 use tokio_stream::wrappers::BroadcastStream;
@@ -24,6 +25,8 @@ const LAGGED_KICK_THRESHOLD: u32 = 3;
 pub struct WsState {
     pub processor: Arc<Processor>,
     pub metrics: Arc<md_processor::ProcessorMetrics>,
+    /// Gateway WS 单次写超时（`api_gateway.ws_write_wait`）；`None` = 不限。Legacy `/ws` 不使用。
+    pub write_wait: Option<Duration>,
 }
 
 /// 客户端请求格式 -- Gateway 模式
@@ -72,9 +75,17 @@ struct WsError {
 
 /// 构建 WebSocket 路由
 pub fn routes(processor: Arc<Processor>) -> Router {
+    routes_with_write_wait(processor, None)
+}
+
+/// 构建 WebSocket 路由，并为 Gateway（`/ws/v1/data`）指定写超时（1.1.1）。
+/// 客户端停读/半死时，一次写入阻塞超过 `write_wait` 就断开该连接（释放其全部 broadcast 接收端）。
+/// `None` = 不限（与 1.0.0/1.1.0 相同）。Legacy `/ws` 不受影响。
+pub fn routes_with_write_wait(processor: Arc<Processor>, write_wait: Option<Duration>) -> Router {
     let state = WsState {
         metrics: processor.metrics.clone(),
         processor,
+        write_wait,
     };
 
     Router::new()
@@ -88,7 +99,9 @@ async fn gateway_ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<WsState>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_gateway_ws(socket, state.processor, state.metrics))
+    ws.on_upgrade(move |socket| {
+        handle_gateway_ws(socket, state.processor, state.metrics, state.write_wait)
+    })
 }
 
 /// Legacy WebSocket handler -- 对标 Go 版 /ws
@@ -99,11 +112,25 @@ async fn legacy_ws_handler(
     ws.on_upgrade(move |socket| handle_legacy_ws(socket, state.processor, state.metrics))
 }
 
+/// 写一条消息；写超时则记录并踢出连接（`break $label`）。对端已关闭时与 1.0.0 一致：忽略，由下一轮 `receiver.next()` 发现并退出。
+macro_rules! send_or_kick {
+    ($sender:expr, $text:expr, $write_wait:expr, $metrics:expr, $label:lifetime) => {
+        if matches!(
+            send_text(&mut $sender, $text, $write_wait).await,
+            SendResult::TimedOut
+        ) {
+            kick_write_timeout(&$metrics, $write_wait);
+            break $label;
+        }
+    };
+}
+
 /// Gateway WebSocket 处理
 async fn handle_gateway_ws(
     socket: WebSocket,
     processor: Arc<Processor>,
     metrics: Arc<md_processor::ProcessorMetrics>,
+    write_wait: Option<Duration>,
 ) {
     let (mut sender, mut receiver) = socket.split();
     // 1.1.1：每个已订阅 stream 恰好持有一个接收端（以客户端传入的 stream 字符串为键）。
@@ -121,7 +148,7 @@ async fn handle_gateway_ws(
             .load(std::sync::atomic::Ordering::Relaxed)
     );
 
-    loop {
+    'conn: loop {
         tokio::select! {
             // 接收客户端消息
             msg = receiver.next() => {
@@ -147,7 +174,7 @@ async fn handle_gateway_ws(
                                                     status: "success".into(),
                                                     stream: stream.clone(),
                                                 };
-                                                let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+                                                send_or_kick!(sender, serde_json::to_string(&ack).unwrap(), write_wait, metrics, 'conn);
                                             }
                                         }
                                     }
@@ -168,18 +195,18 @@ async fn handle_gateway_ws(
                                                 status: "success".into(),
                                                 stream: stream.clone(),
                                             };
-                                            let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+                                            send_or_kick!(sender, serde_json::to_string(&ack).unwrap(), write_wait, metrics, 'conn);
                                         }
                                     }
                                     _ => {
                                         let err = WsError { error: format!("unknown action: {}", req.action) };
-                                        let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+                                        send_or_kick!(sender, serde_json::to_string(&err).unwrap(), write_wait, metrics, 'conn);
                                     }
                                 }
                             }
                             Err(e) => {
                                 let err = WsError { error: format!("invalid request: {}", e) };
-                                let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+                                send_or_kick!(sender, serde_json::to_string(&err).unwrap(), write_wait, metrics, 'conn);
                             }
                         }
                     }
@@ -195,8 +222,13 @@ async fn handle_gateway_ws(
                         let kind = broadcast_event.kind();
                         let emit_at = broadcast_event.emit_instant();
                         let json = build_gateway_message(&topic_str, &broadcast_event);
-                        if sender.send(Message::Text(json.into())).await.is_err() {
-                            break;
+                        match send_text(&mut sender, json, write_wait).await {
+                            SendResult::Ok => {}
+                            SendResult::Closed => break 'conn,
+                            SendResult::TimedOut => {
+                                kick_write_timeout(&metrics, write_wait);
+                                break 'conn;
+                            }
                         }
                         metrics.ws_message_sent(kind);
                         let elapsed_ms = emit_at.elapsed().as_millis() as u64;
@@ -225,6 +257,44 @@ async fn handle_gateway_ws(
         metrics
             .ws_active_clients
             .load(std::sync::atomic::Ordering::Relaxed)
+    );
+}
+
+/// 一次写入的结果
+enum SendResult {
+    Ok,
+    /// 对端已关闭 / 写失败
+    Closed,
+    /// 写入阻塞超过 `write_wait`（客户端停读或半死）
+    TimedOut,
+}
+
+/// 向客户端写一条文本消息；`write_wait` 为 `Some` 时给这次写入加超时。
+/// 超时后调用方必须关闭连接（被取消的 `send` 可能留下半帧）。
+async fn send_text<S>(sender: &mut S, text: String, write_wait: Option<Duration>) -> SendResult
+where
+    S: futures_util::Sink<Message> + Unpin,
+{
+    let fut = sender.send(Message::Text(text.into()));
+    match write_wait {
+        None => match fut.await {
+            Ok(()) => SendResult::Ok,
+            Err(_) => SendResult::Closed,
+        },
+        Some(d) => match tokio::time::timeout(d, fut).await {
+            Ok(Ok(())) => SendResult::Ok,
+            Ok(Err(_)) => SendResult::Closed,
+            Err(_) => SendResult::TimedOut,
+        },
+    }
+}
+
+fn kick_write_timeout(metrics: &md_processor::ProcessorMetrics, write_wait: Option<Duration>) {
+    metrics.ws_client_kicked_write_timeout();
+    warn!(
+        "Gateway WebSocket client kicked: write blocked longer than ws_write_wait ({:?}); \
+         client is not reading (stalled or half-open)",
+        write_wait.unwrap_or_default()
     );
 }
 

@@ -479,7 +479,9 @@ async fn main() {
     let gateway_addr = parse_addr(&cfg.api_gateway.listen_address);
     let processor_metrics = processor.clone();
     let connector_metrics_for_handler = connector_metrics_map.clone();
-    let gateway = md_gateway::Gateway::new(processor.clone(), connectors.clone());
+    // 1.1.1：Gateway WS 写超时取配置项 api_gateway.ws_write_wait（默认 10s，"0s" 关闭）；Legacy /ws 不受影响
+    let gateway = md_gateway::Gateway::new(processor.clone(), connectors.clone())
+        .with_ws_write_wait(cfg.api_gateway.ws_write_wait);
     let router = gateway
         .router()
         .route("/health", axum::routing::get(health_handler))
@@ -1005,6 +1007,7 @@ fn esc(v: &str) -> String {
 /// - `md_ws_active_clients` (gauge)
 /// - `md_ws_subscriptions_active` (gauge，1.1.1 新增：全部 WS 连接持有的 broadcast 接收端总数)
 /// - `md_ws_kicked_lagged_total` (counter)
+/// - `md_ws_kicked_write_timeout_total` (counter，1.1.1 新增：因写超时被踢出的 Gateway 客户端)
 /// - `md_ws_messages_sent_total{kind}` (counter)
 /// - `md_broadcast_lagged_total{topic_kind}` (counter)
 /// - `md_gateway_internal_latency_ms{topic}` (histogram)
@@ -1133,6 +1136,13 @@ async fn metrics_handler(
         snap.ws_kicked_lagged_total
     ));
 
+    out.push_str("# HELP md_ws_kicked_write_timeout_total Total gateway WebSocket clients kicked because a write blocked longer than api_gateway.ws_write_wait\n");
+    out.push_str("# TYPE md_ws_kicked_write_timeout_total counter\n");
+    out.push_str(&format!(
+        "md_ws_kicked_write_timeout_total {}\n",
+        snap.ws_kicked_write_timeout_total
+    ));
+
     out.push_str("# HELP md_ws_messages_sent_total Total WebSocket / gRPC messages successfully delivered to clients\n");
     out.push_str("# TYPE md_ws_messages_sent_total counter\n");
     out.push_str(&format!(
@@ -1244,6 +1254,7 @@ mod tests {
         processor.metrics.ws_message_sent("tick");
         processor.metrics.ws_message_sent("kline");
         processor.metrics.ws_client_kicked_lagged();
+        processor.metrics.ws_client_kicked_write_timeout();
         processor.metrics.record_broadcast_lagged("tick");
         processor
             .metrics
@@ -1327,6 +1338,10 @@ mod tests {
         assert!(
             out.contains("md_ws_kicked_lagged_total 1"),
             "missing ws_kicked_lagged_total"
+        );
+        assert!(
+            out.contains("md_ws_kicked_write_timeout_total 1"),
+            "missing ws_kicked_write_timeout_total"
         );
         assert!(
             out.contains("md_ws_messages_sent_total{kind=\"tick\"}"),

@@ -982,6 +982,7 @@ version = "0.1.0"
 dependencies = [
  "dashmap",
  "md-domain",
+ "serde_json",
  "tokio",
  "tracing",
  "uuid",

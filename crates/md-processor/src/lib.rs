@@ -171,6 +171,8 @@ pub struct ProcessorMetrics {
     pub ws_subscriptions_active: AtomicU64,
     /// 因 broadcast lagged 累计达到阈值被踢出的客户端总数
     pub ws_kicked_lagged_total: AtomicU64,
+    /// 1.1.1：因写超时（`ws_write_wait`）被踢出的 Gateway 客户端累计数
+    pub ws_kicked_write_timeout_total: AtomicU64,
     /// 网关推送总条数（每条 WS 消息 +1，按 topic_kind 区分）
     pub ws_messages_sent_tick: AtomicU64,
     pub ws_messages_sent_kline: AtomicU64,
@@ -198,6 +200,7 @@ impl Default for ProcessorMetrics {
             ws_active_clients: AtomicU64::new(0),
             ws_subscriptions_active: AtomicU64::new(0),
             ws_kicked_lagged_total: AtomicU64::new(0),
+            ws_kicked_write_timeout_total: AtomicU64::new(0),
             ws_messages_sent_tick: AtomicU64::new(0),
             ws_messages_sent_kline: AtomicU64::new(0),
             ws_messages_sent_quote: AtomicU64::new(0),
@@ -289,6 +292,9 @@ impl ProcessorMetrics {
             ws_active_clients: self.ws_active_clients.load(Ordering::Relaxed),
             ws_subscriptions_active: self.ws_subscriptions_active.load(Ordering::Relaxed),
             ws_kicked_lagged_total: self.ws_kicked_lagged_total.load(Ordering::Relaxed),
+            ws_kicked_write_timeout_total: self
+                .ws_kicked_write_timeout_total
+                .load(Ordering::Relaxed),
             ws_messages_sent_tick: self.ws_messages_sent_tick.load(Ordering::Relaxed),
             ws_messages_sent_kline: self.ws_messages_sent_kline.load(Ordering::Relaxed),
             ws_messages_sent_quote: self.ws_messages_sent_quote.load(Ordering::Relaxed),
@@ -389,6 +395,12 @@ impl ProcessorMetrics {
         self.ws_kicked_lagged_total.fetch_add(1, Ordering::Relaxed);
     }
 
+    /// 因写超时（客户端停读、发送缓冲塞满）主动踢出客户端
+    pub fn ws_client_kicked_write_timeout(&self) {
+        self.ws_kicked_write_timeout_total
+            .fetch_add(1, Ordering::Relaxed);
+    }
+
     /// 网关成功推送一条消息
     pub fn ws_message_sent(&self, kind: &str) {
         match kind {
@@ -446,6 +458,7 @@ pub struct MetricsSnapshot {
     pub ws_active_clients: u64,
     pub ws_subscriptions_active: u64,
     pub ws_kicked_lagged_total: u64,
+    pub ws_kicked_write_timeout_total: u64,
     pub ws_messages_sent_tick: u64,
     pub ws_messages_sent_kline: u64,
     pub ws_messages_sent_quote: u64,

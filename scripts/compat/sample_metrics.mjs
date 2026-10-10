@@ -6,7 +6,7 @@
 // 用法: node scripts/compat/sample_metrics.mjs <base-url> <总秒数> <间隔秒> <out.csv> [--snapshot-every-min 60]
 // 只发 GET，不修改被采样实例；采样失败的行用空值占位，不中断。
 import { appendFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 
 const [base, totalS, everyS, out] = process.argv.slice(2);
 if (!base || !totalS || !everyS || !out) {
@@ -112,7 +112,7 @@ while (true) {
   }
   if (m) prevM = m;
   if (snapEveryMin > 0 && n % Math.max(1, Math.round((snapEveryMin * 60) / Number(everyS))) === 0 && text) {
-    writeFileSync(join(dirname(out), `snapshot-${row.ts_utc.replace(/[:]/g, '')}.metrics.txt`), text);
+    writeFileSync(join(dirname(out), `${basename(out, '.csv')}.snapshot-${row.ts_utc.replace(/[:]/g, '')}.metrics.txt`), text);
   }
   n++;
   if (Date.now() >= end) break;
