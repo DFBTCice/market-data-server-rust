@@ -1,5 +1,7 @@
 # evidence/1.1.1 —— 1.1.0 现网内存增长调查 + Gateway 退订泄漏修复（1.1.1）证据索引
 
+**交主审的总结报告（五段式）：[`FINAL_REPORT.md`](FINAL_REPORT.md)**
+
 先看：[`INVESTIGATION_REPORT.md`](INVESTIGATION_REPORT.md)（调查报告：时间线、D1–D7 结论、增长构成、"5×"解释、准入条件自检、没做/没证明）。
 换版计划（仅计划，未执行）：[`nas-198/SWAP_PLAN_1.1.1.md`](nas-198/SWAP_PLAN_1.1.1.md)。
 
