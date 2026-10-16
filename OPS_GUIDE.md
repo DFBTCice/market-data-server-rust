@@ -6,31 +6,41 @@
 
 ## 一、热重载（SIGHUP）真实能力清单
 
-从代码 `crates/md-server/src/main.rs` 的 `wait_for_signal()` 和 `apply_subscription_changes()` 函数分析，**SIGHUP 热重载的实际能力如下**：
+从代码 `crates/md-server/src/reload.rs`（重载逻辑）和 `main.rs` 的 `wait_for_signal()` 分析，**SIGHUP 热重载的实际能力如下**：
+
+> **规则一句话**：SIGHUP **只热更订阅列表**；其余所有配置项都"只在进程启动时读取"，文件里改了**不会生效**，必须重启。
+>
+> 进程内部把「文件里的新配置」和「实际已应用配置」分开记录。每次 SIGHUP 都拿文件和**实际在运行的配置**对比：
+> 只要还有没生效的差异，**每一次** SIGHUP 都会继续点名提示（不会因为发过一次就"记成已应用"）；把文件改回原值，提示自动消失。
+> **只有日志里出现 `config reloaded and applied successfully`，才表示文件内容已全部生效。**
+> （1.1.0 / 1.1.1 的缺陷：只改 OKX Business 地址会误报成功；第二次 SIGHUP 会把未生效的地址当成已应用。已修复，见 `CHANGELOG.md`「未发布」。）
 
 ### ✅ 真正支持热更（无需重启）
 
 | 配置项 | 是否热更 | 说明 |
 |--------|---------|------|
 | **订阅列表** | ✅ | `subscribe_ticks`、`subscribe_klines` 的增删会调用 `add_subscriptions` / `remove_subscriptions`，实时生效 |
-| **quote 订阅列表**（1.1.0） | ✅（有前提） | `connectors.{binance,okx}.subscribe_quotes` 的增删实时生效，**前提**是对应 quote 连接器已在运行（启动时 `quotes_enabled=true` 且列表非空）；否则日志提示"quote connector is not running ... requires restart" |
-| `log_level` | ⚠️ **只能检测，无法真正生效** | tracing 不支持运行时改 level，代码里只记录了 `"log_level: info -> debug (applied)"` 日志，实际日志级别不会变 |
+| **quote 订阅列表**（1.1.0） | ✅（有前提） | `connectors.{binance,okx}.subscribe_quotes` 的增删实时生效，**前提**是对应 quote 连接器已在运行（启动时 `quotes_enabled=true` 且列表非空） |
+
+订阅列表热更的**共同前提**是对应连接器启动时已创建：Binance 需 `binance.enabled=true`；OKX tick 需 `okx.enabled` 且 `subscribe_ticks` 非空；
+OKX K 线需 `okx.enabled` 且 `subscribe_klines` 非空；quote 需 `quotes_enabled=true` 且列表非空。
+不满足时变更**不会被静默吞掉**：日志点名 `... connector is not running ... NOT applied, requires restart`，且之后**每次** SIGHUP 都会继续提示，直到重启或把列表改回原值。
 
 ### ❌ 不支持热更（修改后提示需要重启）
 
+除订阅列表外，**其余所有配置项**都归此类（新增配置项默认也归此类，代码里用穷尽解构强制分类）。常见项：
+
 | 配置项 | 说明 |
 |--------|------|
-| `grpc_server.listen_address` | 端口已绑定，无法热更 |
-| `api_gateway.listen_address` | 同上 |
-| `connectors.{binance,okx}.enabled` | 连接器启停需要重建 |
-| `connectors.{binance,okx}.stream_base_url` | URL 变更需要重建连接 |
-| `connectors.{binance,okx}.stream_base_url_public` | 同上 |
-| `connectors.{binance,okx}.quotes_enabled`（1.1.0） | quote 连接器启停需要重建；变更时日志会提示 `quotes_enabled changed ... (requires restart)` |
-| `processor.quote_channel_buffer`（1.1.0） | 同 tick/kline 的通道 buffer，无法 resize |
-| `processor.tick_channel_buffer` | 通道 buffer 已创建，无法 resize |
-| `processor.kline_channel_buffer` | 同上 |
-| `processor.broadcast_capacity` | broadcast channel 已创建，无法 resize |
-| `reconnect_delay`、`ping_interval` | 当前实现不读取运行时变更 |
+| `connectors.{binance,okx}.stream_base_url*`（`binance.stream_base_url`、`binance.stream_base_url_public`、`okx.stream_base_url_public`、**`okx.stream_base_url_business`**） | 地址变更需要重建连接，不支持热更。**自动重连也不会换地址**：连接器只持有启动时的地址，等断线重连不会重新读 YAML，必须重启 |
+| `connectors.{binance,okx}.enabled`、`quotes_enabled`（1.1.0） | 连接器启停需要重建 |
+| `connectors.{binance,okx}.reconnect_delay`、`ping_interval`、`rest_base_url` | 只在启动时读取（此前 SIGHUP 完全不检测，现在会点名提示） |
+| `grpc_server.*`、`api_gateway.*`（含 `listen_address`、`ws_write_wait`）、`admin_server.*`、`ws_server.*` | 端口已绑定 / 参数启动时读取 |
+| `processor.{tick,kline,quote}_channel_buffer`、`processor.broadcast_capacity` | 通道已创建，无法 resize |
+| `log_level` | ⚠️ **不会生效**：日志过滤器启动时由 `RUST_LOG`（默认 `info`）决定，YAML 的 `log_level` 不驱动它。SIGHUP 只会 WARN 点名，不再写"(applied)"，也不报成功 |
+
+> `--port-offset` 与环境变量覆盖（如 `API_GATEWAY_LISTEN_ADDRESS`）：启动与 SIGHUP 使用同一套"生效配置"推导，
+> 配置文件没改时不会再误报"监听地址变更"（此前带 `--port-offset` 的实例每次 SIGHUP 都会误报）。
 
 ### 使用方式
 
@@ -43,12 +53,21 @@ kill -HUP $(docker inspect --format='{{.State.Pid}}' md-server)
 # 或 systemd 方式：
 sudo systemctl kill -s HUP md-server
 
-# 3. 查看日志确认
-# 预期输出：
-# "subscription lists changed, applying..."
-# "binance: adding 1 subscriptions"
-# "config reloaded and applied successfully"
+# 3. 查看日志确认（以下为 RUST_LOG=info 时的预期输出）
+# 订阅变更热更成功：
+#   subscription lists changed, applying...
+#   binance: adding 1 subscriptions
+#   config reloaded and applied successfully
+# 有需要重启才生效的变更（点名配置路径、旧值与文件值；WARN 级别，之后每次 SIGHUP 重复提示）：
+#   WARN connectors.okx.stream_base_url_business changed: "wss://old" -> "wss://new" (NOT applied, requires restart)
+#   WARN some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)
+# 配置文件读不出来 / YAML 解析失败 / 校验失败（ERROR 级别；运行配置与订阅均保持不变）：
+#   ERROR failed to reload config: ..., keeping current running config (nothing applied)
 ```
+
+**线上 198 使用 `RUST_LOG=warn`**：`config reloaded and applied successfully` 是 INFO，在该级别下看不到——**成功时日志是静默的**；
+只要出现任何 WARN / ERROR（`some config changes require connector restart ...`、`failed to reload config ...`），就说明有事要处理。
+（1.1.0 / 1.1.1 在该级别下，只改 OKX Business 地址再发 SIGHUP 是**完全没有任何输出**。）
 
 ### 与 Go 版热重载对比
 

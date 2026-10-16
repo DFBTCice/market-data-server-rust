@@ -4,6 +4,45 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布] - SIGHUP 配置重载修复（本地分支 `fix/sighup-config-reload`；**未推送、未打标签、未上现网**，版本归属待主审决定）
+
+调查、复现与验证见 `evidence/sighup-reload-fix/REPORT.md`。**只改 SIGHUP 重载逻辑**：行情数据路径（tick/kline/quote 输出）、
+REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更需要重启"的设计，**没有**引入连接器热重建。
+线上 1.1.0（SHA-256 `d73f7a4c…ba60`）与 1.1.1 分支 HEAD 均已复现下列缺陷。
+
+### 修复（Fixes）
+
+- **漏检 OKX Business 地址**：SIGHUP 检查了 `okx.stream_base_url_public`，却漏了 `okx.stream_base_url_business`。
+  只改 Business 地址时日志是 `config reloaded and applied successfully`，而连接器仍连旧地址；
+  在线上同款 `RUST_LOG=warn` 下则是**完全没有任何输出**。
+- **把没生效的配置记成"当前配置"**：重载结束无条件 `current_cfg = new_cfg`。改了 URL 并提示需重启后，第二次 SIGHUP 比较的是"自己和自己"，于是报成功，
+  连接器却仍用旧地址。现在区分"文件中的新配置"和"已应用配置"：只有真正热更成功的订阅列表才进入已应用配置；
+  需重启的变更每次 SIGHUP 都继续点名，改回原值才消失。**Binance**（`binance.stream_base_url`、`binance.stream_base_url_public`）有同样缺陷，一并修复。
+- **自动重连不会应用新地址**（设计如此，现在文档与日志写明）：连接器只持有启动时的地址，断线重连不会重新读 YAML；改地址必须重启。重启后连接器连到新地址（已用端到端测试验证）。
+- **同类问题（调查中一并发现并修复）**
+  - 带 `--port-offset` 或环境变量覆盖（如 `API_GATEWAY_LISTEN_ADDRESS`）时，每次 SIGHUP 都误报监听地址变更；现在启动与重载共用同一个"生效配置"推导。
+  - 订阅列表变更但对应连接器没在运行（OKX tick / K 线：交易所未启用或列表启动时为空）被静默吞掉并报成功；quote 只警告一次。现在每次都点名提示、不报成功、不推进已应用配置。
+  - 订阅下发失败（连接器返回错误）也报成功；现在不报成功，保持旧列表，下一次 SIGHUP 重试。
+  - `reconnect_delay`、`ping_interval`、`rest_base_url`、`processor.*`、`api_gateway.*` 等只在启动时读取的字段，SIGHUP 以前完全不检测；现在用结构体穷尽解构统一覆盖，**新增配置项不分类就编译不过**。
+  - `log_level` 变更被标注 `(applied)`，实际日志过滤器启动时由 `RUST_LOG` 决定、YAML 的 `log_level` 从未驱动它；现在如实提示"未生效"。
+  - 配置读取 / 解析 / 校验失败从 WARN 提升为 ERROR，并明确"运行配置保持不变（nothing applied）"。
+
+### 行为变化（只涉及 SIGHUP 的日志与判定，运维需知）
+
+- 以前报"成功"的若干情形现在会报"需要重启"——这是修复的目的（见上）。
+- 保留的日志串：`config reloaded and applied successfully`、`some config changes require connector restart -- please restart the service`（末尾追加 `(N pending: 路径列表)`）、`failed to reload config`、订阅热更的 `adding/removing N ... subscriptions` 系列；日志 target 仍为 `md_server`。
+- 变更的日志文案：地址 / 开关等需重启项改为 `<YAML 路径> changed: <旧值> -> <文件值> (NOT applied, requires restart)`；不再输出 `log_level: ... (applied)`。
+  如有依赖旧文案的告警 / 脚本，请对照 `OPS_GUIDE.md` 第一节更新。
+- 订阅列表热更的行为不变（对运行中的连接器增量 add/remove，不重连）；同一批次内下发顺序改为按符号排序（稳定、可测试）。
+
+### 测试
+
+- `md-server` 单元测试 5 → 21：逐字段检测（每个"只在启动时读取"的字段单独改动都必须被检出）、任一地址连续多次 SIGHUP 不误报、改回原值提示消失、
+  订阅热更与待重启并存、连接器缺失 / 下发失败、读取失败保持运行配置、端口偏移推导一致，以及"重启后每个连接器连到配置里对应字段的地址"（进程内假上游）。
+- 新增端到端脚本 `scripts/compat/sighup_reload_e2e.mjs`（+ `fake_upstream.mjs`，零依赖）：真实进程、真实 SIGHUP、假上游；14 个场景、92 条断言，
+  支持原生进程与 Docker（线上同款静态二进制）两种运行方式。修复前 59/92 通过（线上 1.1.0 二进制与 1.1.1 分支 HEAD 的失败项完全相同），修复后 92/92（原生进程、Docker 静态二进制两种方式均是）。
+- 变异验证：故意还原三类缺陷（写回未生效配置 / 漏检 Business 地址 / 连接器缺失时推进配置）与一处接线错误，对应测试均变红。
+
 ## [1.1.1] - 待换版（2026-10-10 完成开发与旁路验证；**未打标签、未上现网**）
 
 **内存增长调查 + Gateway 退订泄漏修复**，作为阶段 3（扩展品种）的前置条件。完整调查见
