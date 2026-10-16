@@ -1,0 +1,4 @@
+2026-10-16T23:13:39.663Z [harness] ---- process ready ----
+2026-10-16T23:13:39.663Z [harness] ---- SIGHUP no change ----
+2026-10-16T23:13:41.402Z [harness] ---- SIGHUP yaml->debug #1 ----
+2026-10-16T23:13:43.137Z [harness] ---- SIGHUP yaml->debug #2 ----

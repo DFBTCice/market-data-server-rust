@@ -1,0 +1,22 @@
+started md-exp-c0-v0-both 7b3ba67e3780 md-server:exp-v0 http=28101 ['MD_DEBUG_FORCE_RECONNECT_SECS=1200', 'MD_DEBUG_FORCE_RECONNECT_ONLY=okx']
+started md-exp-c1-v1-both fa1c0c933647 md-server:exp-v1 http=28102 ['MD_DEBUG_FORCE_RECONNECT_SECS=1200', 'MD_DEBUG_FORCE_RECONNECT_ONLY=okx']
+started md-exp-c2-v2-jemold 513a7a19fb11 md-server:exp-v2 http=28103 ['MD_DEBUG_FORCE_RECONNECT_SECS=1200', 'MD_DEBUG_FORCE_RECONNECT_ONLY=okx']
+started md-exp-c3-v3-jemnew 3d6ab9568bb3 md-server:exp-v3 http=28104 ['MD_DEBUG_FORCE_RECONNECT_SECS=1200', 'MD_DEBUG_FORCE_RECONNECT_ONLY=okx']
+started md-exp-c4-v0-churn dbe2fc10dd17 md-server:exp-v0 http=28105 []
+started md-exp-c5-v0-reconn 66c86695d86e md-server:exp-v0 http=28106 ['MD_DEBUG_FORCE_RECONNECT_SECS=1200', 'MD_DEBUG_FORCE_RECONNECT_ONLY=okx']
+started md-exp-c6-v0-quiet 6e380b301076 md-server:exp-v0 http=28107 []
+after: total=39 stillMissing=0 extraVsBaseline=0
+after: total=39 stillMissing=0 extraVsBaseline=0
+after: total=39 stillMissing=0 extraVsBaseline=0
+after: total=39 stillMissing=0 extraVsBaseline=0
+after: total=39 stillMissing=0 extraVsBaseline=0
+after: total=39 stillMissing=0 extraVsBaseline=0
+after: total=39 stillMissing=0 extraVsBaseline=0
+evidence/1.1.1/tools/d3_start.sh: line 48:  6390 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+evidence/1.1.1/tools/d3_start.sh: line 48:  6396 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+evidence/1.1.1/tools/d3_start.sh: line 48:  6403 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+evidence/1.1.1/tools/d3_start.sh: line 48:  6410 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+evidence/1.1.1/tools/d3_start.sh: line 48:  6417 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+evidence/1.1.1/tools/d3_start.sh: line 48:  6422 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+evidence/1.1.1/tools/d3_start.sh: line 48:  6431 Terminated: 15          node scripts/compat/sample_metrics.mjs "http://$HOST:$port" "$SECS" 60 "$OUT/$short.csv" --snapshot-every-min 60 > $OUT/logs/$short.sampler.log 2>&1
+D3 done
