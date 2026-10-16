@@ -1,8 +1,8 @@
 mod alloc_stats;
 mod process_metrics;
+mod reload;
 
 use clap::Parser;
-use md_config::load_config;
 use md_connector::base::BaseConnector;
 use md_connector::binance::{BinanceAdapter, BinanceConnectorConfig};
 use md_connector::okx::{OkxAdapter, OkxConnectorConfig};
@@ -361,20 +361,6 @@ async fn start_quote_connectors(
     }
 }
 
-/// 将 ":PORT" 格式的地址加上偏移量
-fn offset_port(addr: &str, offset: u16) -> String {
-    if let Some(port_str) = addr.strip_prefix(':') {
-        if let Ok(port) = port_str.parse::<u16>() {
-            return format!(":{}", port + offset);
-        }
-    }
-    if let Ok(mut sa) = addr.parse::<std::net::SocketAddr>() {
-        sa.set_port(sa.port() + offset);
-        return sa.to_string();
-    }
-    addr.to_string()
-}
-
 /// 将 ":PORT" 解析为 SocketAddr（补全 0.0.0.0）
 fn parse_addr(addr: &str) -> std::net::SocketAddr {
     let full = if addr.starts_with(':') {
@@ -403,27 +389,17 @@ async fn main() {
     // 初始化进程级指标（记录启动时间）
     process_metrics::init();
 
-    // 加载配置
+    // 加载"生效配置"（YAML + 环境变量覆盖 + 端口偏移）。
+    // SIGHUP 重载走同一个函数，保证启动与重载的配置推导一致（见 reload.rs）。
     info!("loading config from {}", cli.config);
-    let mut cfg = match load_config(&cli.config) {
+    let cfg = match reload::load_effective_config(&cli.config, cli.port_offset) {
         Ok(cfg) => cfg,
         Err(e) => {
             eprintln!("failed to load config: {}", e);
             std::process::exit(1);
         }
     };
-
-    // 应用环境变量覆盖
-    md_config::apply_env_overrides(&mut cfg);
-
-    // 应用端口偏移
     if cli.port_offset > 0 {
-        cfg.grpc_server.listen_address =
-            offset_port(&cfg.grpc_server.listen_address, cli.port_offset);
-        cfg.api_gateway.listen_address =
-            offset_port(&cfg.api_gateway.listen_address, cli.port_offset);
-        cfg.admin_server.listen_address =
-            offset_port(&cfg.admin_server.listen_address, cli.port_offset);
         info!("port offset: +{}", cli.port_offset);
     }
 
@@ -508,7 +484,15 @@ async fn main() {
     });
 
     // 等待 SIGTERM / SIGINT / SIGHUP
-    wait_for_signal(&cli.config, &cfg, &processor, &connectors, &shutdown_tx).await;
+    wait_for_signal(
+        &cli.config,
+        cli.port_offset,
+        &cfg,
+        &processor,
+        &connectors,
+        &shutdown_tx,
+    )
+    .await;
 
     info!("received shutdown signal, shutting down");
 
@@ -531,9 +515,13 @@ async fn main() {
     info!("shutdown complete");
 }
 
-/// 等待信号：SIGTERM/SIGINT 触发关停，SIGHUP 触发热重载
+/// 等待信号：SIGTERM/SIGINT 触发关停，SIGHUP 触发配置重载（逻辑见 `reload.rs`）
+///
+/// `cfg` 必须是启动时实际使用的"生效配置"（已含环境变量覆盖和端口偏移）；
+/// `port_offset` 用于让重载时用同一套规则推导文件里的新配置。
 async fn wait_for_signal(
     config_path: &str,
+    port_offset: u16,
     cfg: &md_config::Config,
     _processor: &Arc<Processor>,
     connectors: &Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
@@ -546,8 +534,8 @@ async fn wait_for_signal(
             signal(SignalKind::terminate()).expect("failed to register SIGTERM handler");
         let mut sighup = signal(SignalKind::hangup()).expect("failed to register SIGHUP handler");
 
-        // 可变副本，用于热重载后更新当前配置
-        let mut current_cfg = cfg.clone();
+        // "已应用配置"：只记录进程真正在用的配置；重启才能生效的变更不会写进来
+        let mut reload_state = reload::ReloadState::new(cfg.clone());
 
         loop {
             tokio::select! {
@@ -560,96 +548,7 @@ async fn wait_for_signal(
                     break;
                 }
                 _ = sighup.recv() => {
-                    info!("received SIGHUP, reloading config from {}", config_path);
-                    match md_config::load_config(config_path) {
-                        Ok(new_cfg) => {
-                            let mut needs_restart = false;
-
-                            // 1. log_level 可运行时更新
-                            if new_cfg.log_level != current_cfg.log_level {
-                                info!("  log_level: {} -> {} (applied)", current_cfg.log_level, new_cfg.log_level);
-                                // tracing 不支持运行时改 level，但记录变更
-                            }
-
-                            // 2. 监听地址变更需要重启
-                            if new_cfg.grpc_server.listen_address != current_cfg.grpc_server.listen_address {
-                                warn!("  grpc_server.listen_address changed: {} -> {} (requires restart)",
-                                    current_cfg.grpc_server.listen_address, new_cfg.grpc_server.listen_address);
-                                needs_restart = true;
-                            }
-                            if new_cfg.api_gateway.listen_address != current_cfg.api_gateway.listen_address {
-                                warn!("  api_gateway.listen_address changed: {} -> {} (requires restart)",
-                                    current_cfg.api_gateway.listen_address, new_cfg.api_gateway.listen_address);
-                                needs_restart = true;
-                            }
-
-                            // 3. 连接器启停变更需要重启
-                            if new_cfg.connectors.binance.enabled != current_cfg.connectors.binance.enabled {
-                                warn!("  binance.enabled changed: {} -> {} (requires restart)",
-                                    current_cfg.connectors.binance.enabled, new_cfg.connectors.binance.enabled);
-                                needs_restart = true;
-                            }
-                            if new_cfg.connectors.okx.enabled != current_cfg.connectors.okx.enabled {
-                                warn!("  okx.enabled changed: {} -> {} (requires restart)",
-                                    current_cfg.connectors.okx.enabled, new_cfg.connectors.okx.enabled);
-                                needs_restart = true;
-                            }
-
-                            // 3b. quote 开关 / Public 流地址变更需要重启（1.1.0 新增）
-                            if new_cfg.connectors.binance.quotes_enabled != current_cfg.connectors.binance.quotes_enabled {
-                                warn!("  binance.quotes_enabled changed: {} -> {} (requires restart)",
-                                    current_cfg.connectors.binance.quotes_enabled, new_cfg.connectors.binance.quotes_enabled);
-                                needs_restart = true;
-                            }
-                            if new_cfg.connectors.okx.quotes_enabled != current_cfg.connectors.okx.quotes_enabled {
-                                warn!("  okx.quotes_enabled changed: {} -> {} (requires restart)",
-                                    current_cfg.connectors.okx.quotes_enabled, new_cfg.connectors.okx.quotes_enabled);
-                                needs_restart = true;
-                            }
-
-                            // 4. 订阅列表变更：对比并应用
-                            let binance_ticks_changed = new_cfg.connectors.binance.subscribe_ticks != current_cfg.connectors.binance.subscribe_ticks;
-                            let binance_klines_changed = new_cfg.connectors.binance.subscribe_klines != current_cfg.connectors.binance.subscribe_klines;
-                            let okx_ticks_changed = new_cfg.connectors.okx.subscribe_ticks != current_cfg.connectors.okx.subscribe_ticks;
-                            let okx_klines_changed = new_cfg.connectors.okx.subscribe_klines != current_cfg.connectors.okx.subscribe_klines;
-
-                            let binance_quotes_changed = new_cfg.connectors.binance.subscribe_quotes != current_cfg.connectors.binance.subscribe_quotes;
-                            let okx_quotes_changed = new_cfg.connectors.okx.subscribe_quotes != current_cfg.connectors.okx.subscribe_quotes;
-
-                            if binance_ticks_changed || binance_klines_changed || okx_ticks_changed || okx_klines_changed
-                                || binance_quotes_changed || okx_quotes_changed
-                            {
-                                info!("  subscription lists changed, applying...");
-                                apply_subscription_changes(&current_cfg, &new_cfg, connectors).await;
-                            }
-
-                            // 5. URL 变更需要重启
-                            if new_cfg.connectors.binance.stream_base_url != current_cfg.connectors.binance.stream_base_url {
-                                warn!("  binance.stream_base_url changed (requires restart)");
-                                needs_restart = true;
-                            }
-                            if new_cfg.connectors.okx.stream_base_url_public != current_cfg.connectors.okx.stream_base_url_public {
-                                warn!("  okx.stream_base_url_public changed (requires restart)");
-                                needs_restart = true;
-                            }
-                            if new_cfg.connectors.binance.stream_base_url_public != current_cfg.connectors.binance.stream_base_url_public {
-                                warn!("  binance.stream_base_url_public changed (requires restart)");
-                                needs_restart = true;
-                            }
-
-                            if needs_restart {
-                                warn!("some config changes require connector restart -- please restart the service");
-                            } else {
-                                info!("config reloaded and applied successfully");
-                            }
-
-                            // 更新当前配置
-                            current_cfg = new_cfg;
-                        }
-                        Err(e) => {
-                            warn!("failed to reload config: {}, keeping current config", e);
-                        }
-                    }
+                    reload::handle_sighup(&mut reload_state, config_path, port_offset, connectors).await;
                 }
             }
         }
@@ -657,6 +556,7 @@ async fn wait_for_signal(
 
     #[cfg(not(unix))]
     {
+        let _ = (config_path, port_offset, cfg, connectors);
         tokio::signal::ctrl_c()
             .await
             .expect("failed to listen for Ctrl+C");
@@ -664,272 +564,6 @@ async fn wait_for_signal(
     }
 
     let _ = shutdown_tx.send(true);
-}
-
-/// 热重载：对比新旧配置的订阅列表差异并应用
-async fn apply_subscription_changes(
-    old_cfg: &md_config::Config,
-    new_cfg: &md_config::Config,
-    connectors: &Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
-) {
-    use std::collections::{HashMap, HashSet};
-
-    // 构建旧/新订阅集合
-    fn build_subs(
-        ticks: &[String],
-        klines: &HashMap<String, Vec<String>>,
-    ) -> HashSet<SubscriptionTarget> {
-        let mut set = HashSet::new();
-        for sym in ticks {
-            set.insert(SubscriptionTarget {
-                exchange: String::new(), // 占位，后面填充
-                data_type: DataType::Tick,
-                symbol: sym.clone(),
-                kline_interval: None,
-            });
-        }
-        for (interval, syms) in klines {
-            for sym in syms {
-                set.insert(SubscriptionTarget {
-                    exchange: String::new(),
-                    data_type: DataType::Kline,
-                    symbol: sym.clone(),
-                    kline_interval: Some(interval.clone()),
-                });
-            }
-        }
-        set
-    }
-
-    let conns = connectors.read().await;
-
-    // Binance 订阅变更
-    if new_cfg.connectors.binance.subscribe_ticks != old_cfg.connectors.binance.subscribe_ticks
-        || new_cfg.connectors.binance.subscribe_klines
-            != old_cfg.connectors.binance.subscribe_klines
-    {
-        if let Some(connector) = conns.get("binance") {
-            let old_subs = build_subs(
-                &old_cfg.connectors.binance.subscribe_ticks,
-                &old_cfg.connectors.binance.subscribe_klines,
-            );
-            let new_subs = build_subs(
-                &new_cfg.connectors.binance.subscribe_ticks,
-                &new_cfg.connectors.binance.subscribe_klines,
-            );
-
-            // 需要新增的
-            let to_add: Vec<SubscriptionTarget> = new_subs
-                .difference(&old_subs)
-                .map(|t| SubscriptionTarget {
-                    exchange: "binance".into(),
-                    ..t.clone()
-                })
-                .collect();
-            // 需要移除的
-            let to_remove: Vec<SubscriptionTarget> = old_subs
-                .difference(&new_subs)
-                .map(|t| SubscriptionTarget {
-                    exchange: "binance".into(),
-                    ..t.clone()
-                })
-                .collect();
-
-            if !to_add.is_empty() {
-                info!("  binance: adding {} subscriptions", to_add.len());
-                if let Err(e) = connector.add_subscriptions(to_add).await {
-                    warn!("  binance: failed to add subscriptions: {}", e);
-                }
-            }
-            if !to_remove.is_empty() {
-                info!("  binance: removing {} subscriptions", to_remove.len());
-                if let Err(e) = connector.remove_subscriptions(to_remove).await {
-                    warn!("  binance: failed to remove subscriptions: {}", e);
-                }
-            }
-        }
-    }
-
-    // OKX Public (trades) 订阅变更
-    if new_cfg.connectors.okx.subscribe_ticks != old_cfg.connectors.okx.subscribe_ticks {
-        if let Some(connector) = conns.get("okx") {
-            let old_ticks: HashSet<String> = old_cfg
-                .connectors
-                .okx
-                .subscribe_ticks
-                .iter()
-                .cloned()
-                .collect();
-            let new_ticks: HashSet<String> = new_cfg
-                .connectors
-                .okx
-                .subscribe_ticks
-                .iter()
-                .cloned()
-                .collect();
-
-            let to_add: Vec<SubscriptionTarget> = new_ticks
-                .difference(&old_ticks)
-                .map(|sym| SubscriptionTarget {
-                    exchange: "okx".into(),
-                    data_type: DataType::Tick,
-                    symbol: sym.clone(),
-                    kline_interval: None,
-                })
-                .collect();
-            let to_remove: Vec<SubscriptionTarget> = old_ticks
-                .difference(&new_ticks)
-                .map(|sym| SubscriptionTarget {
-                    exchange: "okx".into(),
-                    data_type: DataType::Tick,
-                    symbol: sym.clone(),
-                    kline_interval: None,
-                })
-                .collect();
-
-            if !to_add.is_empty() {
-                info!("  okx: adding {} tick subscriptions", to_add.len());
-                if let Err(e) = connector.add_subscriptions(to_add).await {
-                    warn!("  okx: failed to add tick subscriptions: {}", e);
-                }
-            }
-            if !to_remove.is_empty() {
-                info!("  okx: removing {} tick subscriptions", to_remove.len());
-                if let Err(e) = connector.remove_subscriptions(to_remove).await {
-                    warn!("  okx: failed to remove tick subscriptions: {}", e);
-                }
-            }
-        }
-    }
-
-    // OKX Business (klines) 订阅变更
-    if new_cfg.connectors.okx.subscribe_klines != old_cfg.connectors.okx.subscribe_klines {
-        if let Some(connector) = conns.get("okx-kline") {
-            let old_klines = build_subs(&[], &old_cfg.connectors.okx.subscribe_klines);
-            let new_klines = build_subs(&[], &new_cfg.connectors.okx.subscribe_klines);
-
-            let to_add: Vec<SubscriptionTarget> = new_klines
-                .difference(&old_klines)
-                .map(|t| SubscriptionTarget {
-                    exchange: "okx".into(),
-                    ..t.clone()
-                })
-                .collect();
-            let to_remove: Vec<SubscriptionTarget> = old_klines
-                .difference(&new_klines)
-                .map(|t| SubscriptionTarget {
-                    exchange: "okx".into(),
-                    ..t.clone()
-                })
-                .collect();
-
-            if !to_add.is_empty() {
-                info!("  okx-kline: adding {} kline subscriptions", to_add.len());
-                if let Err(e) = connector.add_subscriptions(to_add).await {
-                    warn!("  okx-kline: failed to add kline subscriptions: {}", e);
-                }
-            }
-            if !to_remove.is_empty() {
-                info!(
-                    "  okx-kline: removing {} kline subscriptions",
-                    to_remove.len()
-                );
-                if let Err(e) = connector.remove_subscriptions(to_remove).await {
-                    warn!("  okx-kline: failed to remove kline subscriptions: {}", e);
-                }
-            }
-        }
-    }
-
-    // ---- Quote 订阅变更（1.1.0 新增）----
-    // 仅当对应 quote 连接器已在运行时才能热更；quotes_enabled 关闭或启动时列表为空
-    // 导致连接器不存在的情况，需重启生效（给出明确提示，而不是静默忽略）。
-    apply_quote_changes(
-        "binance",
-        "binance-quote",
-        &old_cfg.connectors.binance.subscribe_quotes,
-        &new_cfg.connectors.binance.subscribe_quotes,
-        &conns,
-    )
-    .await;
-    apply_quote_changes(
-        "okx",
-        "okx-quote",
-        &old_cfg.connectors.okx.subscribe_quotes,
-        &new_cfg.connectors.okx.subscribe_quotes,
-        &conns,
-    )
-    .await;
-}
-
-/// 计算 quote 订阅差集：返回 (新增, 移除)，均为带交易所名的订阅目标
-fn diff_quote_targets(
-    exchange: &str,
-    old_list: &[String],
-    new_list: &[String],
-) -> (Vec<SubscriptionTarget>, Vec<SubscriptionTarget>) {
-    use std::collections::HashSet;
-    let old_set: HashSet<&String> = old_list.iter().collect();
-    let new_set: HashSet<&String> = new_list.iter().collect();
-    let mk = |sym: &String| SubscriptionTarget {
-        exchange: exchange.into(),
-        data_type: DataType::Quote,
-        symbol: sym.clone(),
-        kline_interval: None,
-    };
-    let mut to_add: Vec<SubscriptionTarget> = new_set.difference(&old_set).map(|s| mk(s)).collect();
-    let mut to_remove: Vec<SubscriptionTarget> =
-        old_set.difference(&new_set).map(|s| mk(s)).collect();
-    to_add.sort_by(|a, b| a.symbol.cmp(&b.symbol));
-    to_remove.sort_by(|a, b| a.symbol.cmp(&b.symbol));
-    (to_add, to_remove)
-}
-
-async fn apply_quote_changes(
-    exchange: &str,
-    connector_key: &str,
-    old_list: &[String],
-    new_list: &[String],
-    conns: &HashMap<String, Arc<dyn Connector>>,
-) {
-    if old_list == new_list {
-        return;
-    }
-    let Some(connector) = conns.get(connector_key) else {
-        warn!(
-            "  {}: subscribe_quotes changed but quote connector is not running \
-             (quotes_enabled=false or list was empty at startup) -- requires restart",
-            exchange
-        );
-        return;
-    };
-    let (to_add, to_remove) = diff_quote_targets(exchange, old_list, new_list);
-    if !to_add.is_empty() {
-        info!(
-            "  {}: adding {} quote subscriptions",
-            connector_key,
-            to_add.len()
-        );
-        if let Err(e) = connector.add_subscriptions(to_add).await {
-            warn!(
-                "  {}: failed to add quote subscriptions: {}",
-                connector_key, e
-            );
-        }
-    }
-    if !to_remove.is_empty() {
-        info!(
-            "  {}: removing {} quote subscriptions",
-            connector_key,
-            to_remove.len()
-        );
-        if let Err(e) = connector.remove_subscriptions(to_remove).await {
-            warn!(
-                "  {}: failed to remove quote subscriptions: {}",
-                connector_key, e
-            );
-        }
-    }
 }
 
 /// 等待关停信号（用于 axum graceful shutdown）
@@ -1424,38 +1058,141 @@ mod tests {
         );
     }
 
-    #[test]
-    fn diff_quote_targets_add_and_remove() {
-        let old = vec!["BNBUSDT".to_string(), "BTCUSDT".to_string()];
-        let new = vec!["BNBUSDT".to_string(), "ETHUSDT".to_string()];
-        let (add, remove) = diff_quote_targets("binance", &old, &new);
-        assert_eq!(add.len(), 1);
-        assert_eq!(add[0].symbol, "ETHUSDT");
-        assert_eq!(add[0].exchange, "binance");
-        assert_eq!(add[0].data_type, DataType::Quote);
-        assert_eq!(remove.len(), 1);
-        assert_eq!(remove[0].symbol, "BTCUSDT");
+    /// 起一个假上游 WS 服务：记录每个连接收到的文本帧（`tag` 标识这是哪一个配置地址）
+    async fn fake_upstream(
+        tag: &'static str,
+        tx: tokio::sync::mpsc::UnboundedSender<(&'static str, String)>,
+    ) -> String {
+        use futures_util::StreamExt;
+        use tokio_tungstenite::tungstenite::Message;
 
-        // 无变化 → 无操作
-        let (add, remove) = diff_quote_targets("okx", &old, &old);
-        assert!(add.is_empty() && remove.is_empty());
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let port = listener.local_addr().unwrap().port();
+        tokio::spawn(async move {
+            while let Ok((stream, _)) = listener.accept().await {
+                let tx = tx.clone();
+                tokio::spawn(async move {
+                    let Ok(mut ws) = tokio_tungstenite::accept_async(stream).await else {
+                        return;
+                    };
+                    let _ = tx.send((tag, "<connected>".to_string()));
+                    while let Some(Ok(msg)) = ws.next().await {
+                        if let Message::Text(text) = msg {
+                            let _ = tx.send((tag, text.to_string()));
+                        }
+                    }
+                });
+            }
+        });
+        format!("ws://127.0.0.1:{}/ws", port)
     }
 
-    /// 旧版配置（无任何 quote 键）：SIGHUP 的 quote 逻辑不应产生任何订阅动作
+    /// 验收 (c)：重启（= 用配置重新 `start_connectors`）后，每个连接器实际连到**配置里对应字段**的地址，
+    /// 并且字段和连接器的对应关系正确：
+    /// OKX Public → trades / tickers，OKX Business → K 线，Binance market → aggTrade / kline，Binance public → bookTicker。
     #[tokio::test]
-    async fn apply_quote_changes_noop_when_lists_equal_or_connector_missing() {
-        let conns: HashMap<String, Arc<dyn Connector>> = HashMap::new();
-        // 列表相同：直接返回
-        apply_quote_changes("binance", "binance-quote", &[], &[], &conns).await;
-        // 列表不同但连接器未启动：只告警（不 panic，不创建连接器）
-        apply_quote_changes(
-            "binance",
-            "binance-quote",
-            &[],
-            &["BNBUSDT".to_string()],
-            &conns,
-        )
-        .await;
-        assert!(conns.is_empty());
+    async fn start_connectors_connects_each_connector_to_its_configured_url() {
+        let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
+        let binance_market = fake_upstream("binance-market", tx.clone()).await;
+        let binance_public = fake_upstream("binance-public", tx.clone()).await;
+        let okx_public = fake_upstream("okx-public", tx.clone()).await;
+        let okx_business = fake_upstream("okx-business", tx.clone()).await;
+
+        let yaml = r#"
+connectors:
+  binance:
+    enabled: true
+    stream_base_url: "@BINANCE_MARKET@"
+    stream_base_url_public: "@BINANCE_PUBLIC@"
+    rest_base_url: "http://127.0.0.1:1"
+    subscribe_ticks: ["BTCUSDT"]
+    subscribe_klines: { "1m": ["BTCUSDT"] }
+    reconnect_delay: "1s"
+    ping_interval: "30s"
+    quotes_enabled: true
+    subscribe_quotes: ["BNBUSDT"]
+  okx:
+    enabled: true
+    stream_base_url_public: "@OKX_PUBLIC@"
+    stream_base_url_business: "@OKX_BUSINESS@"
+    rest_base_url: "http://127.0.0.1:1"
+    subscribe_ticks: ["BTC-USDT-SWAP"]
+    subscribe_klines: { "1m": ["BTC-USDT-SWAP"] }
+    reconnect_delay: "1s"
+    ping_interval: "25s"
+    quotes_enabled: true
+    subscribe_quotes: ["BNB-USDT-SWAP"]
+"#
+        .replace("@BINANCE_MARKET@", &binance_market)
+        .replace("@BINANCE_PUBLIC@", &binance_public)
+        .replace("@OKX_PUBLIC@", &okx_public)
+        .replace("@OKX_BUSINESS@", &okx_business);
+        let cfg = md_config::load_config_from_str(&yaml).unwrap();
+
+        let processor = Arc::new(Processor::new_full(1000, 1000, 4096, 1000));
+        let (connectors, _metrics) = start_connectors(&cfg, &processor).await;
+
+        // 期望：每个地址收到的订阅帧
+        let expect: [(&str, &[&str]); 4] = [
+            ("binance-market", &["btcusdt@aggTrade", "btcusdt@kline_1m"]),
+            ("binance-public", &["bnbusdt@bookTicker"]),
+            (
+                "okx-public",
+                &["\"channel\":\"trades\"", "\"channel\":\"tickers\""],
+            ),
+            ("okx-business", &["\"channel\":\"candle1m\""]),
+        ];
+        let mut seen: HashMap<&'static str, Vec<String>> = HashMap::new();
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(15);
+        let satisfied = |seen: &HashMap<&'static str, Vec<String>>| {
+            expect.iter().all(|(tag, needles)| {
+                let frames = seen.get(tag).map(|v| v.join("\n")).unwrap_or_default();
+                needles.iter().all(|n| frames.contains(n))
+            })
+        };
+        while !satisfied(&seen) {
+            match tokio::time::timeout_at(deadline, rx.recv()).await {
+                Ok(Some((tag, frame))) => seen.entry(tag).or_default().push(frame),
+                _ => break,
+            }
+        }
+        // 再留一小段时间，让可能的"串线"帧也到达
+        while let Ok(Some((tag, frame))) =
+            tokio::time::timeout(Duration::from_millis(300), rx.recv()).await
+        {
+            seen.entry(tag).or_default().push(frame);
+        }
+
+        for (tag, needles) in expect {
+            let frames = seen.get(tag).map(|v| v.join("\n")).unwrap_or_default();
+            for n in needles {
+                assert!(
+                    frames.contains(n),
+                    "{tag} 应收到含 {n} 的订阅帧，实际: {frames}"
+                );
+            }
+        }
+        // 不串线
+        let frames_of = |tag: &str| seen.get(tag).map(|v| v.join("\n")).unwrap_or_default();
+        assert!(
+            !frames_of("okx-business").contains("trades")
+                && !frames_of("okx-business").contains("tickers")
+        );
+        assert!(!frames_of("okx-public").contains("candle"));
+        assert!(!frames_of("binance-market").contains("bookTicker"));
+        assert!(!frames_of("binance-public").contains("aggTrade"));
+        // OKX Public 地址上有两条连接：trades 连接器 + okx-quote 连接器
+        let okx_public_connections = seen
+            .get("okx-public")
+            .map(|v| v.iter().filter(|f| *f == "<connected>").count())
+            .unwrap_or(0);
+        assert_eq!(
+            okx_public_connections, 2,
+            "okx / okx-quote 都应连 stream_base_url_public"
+        );
+
+        for connector in connectors.read().await.values() {
+            let _ = connector.stop().await;
+        }
     }
 }

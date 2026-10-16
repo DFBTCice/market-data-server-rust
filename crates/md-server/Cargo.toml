@@ -32,3 +32,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde_json = "1"
 tikv-jemallocator = { version = "0.6", optional = true, features = ["stats"] }
 tikv-jemalloc-ctl = { version = "0.6", optional = true, features = ["stats"] }
+
+[dev-dependencies]
+# reload.rs 的 mock Connector、main.rs 的"重启后连接器连到配置地址"测试（假上游 WS 服务）
+async-trait = "0.1"
+futures-util = "0.3"
+tokio-tungstenite = "0.24"
