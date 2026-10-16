@@ -1,0 +1,10 @@
+{"i":0,"t":1792189114162,"label":"okxPubA","type":"connect","path":"/ws"}
+{"i":1,"t":1792189114162,"label":"bnPublicA","type":"connect","path":"/ws"}
+{"i":2,"t":1792189114162,"label":"bnMarketA","type":"connect","path":"/ws"}
+{"i":3,"t":1792189114192,"label":"bnPublicA","type":"frame","text":"{\"id\":1,\"method\":\"SUBSCRIBE\",\"params\":[\"bnbusdt@bookTicker\"]}"}
+{"i":4,"t":1792189114192,"label":"bnMarketA","type":"frame","text":"{\"id\":1,\"method\":\"SUBSCRIBE\",\"params\":[\"btcusdt@kline_1m\",\"btcusdt@aggTrade\"]}"}
+{"i":5,"t":1792189114192,"label":"okxPubA","type":"frame","text":"{\"args\":[{\"channel\":\"trades\",\"instId\":\"BTC-USDT-SWAP\"}],\"op\":\"subscribe\"}"}
+{"i":6,"t":1792189114192,"label":"okxPubA","type":"frame","text":"ping"}
+{"i":7,"t":1792189118782,"label":"bnPublicA","type":"close"}
+{"i":8,"t":1792189118782,"label":"okxPubA","type":"close"}
+{"i":9,"t":1792189118782,"label":"bnMarketA","type":"close"}

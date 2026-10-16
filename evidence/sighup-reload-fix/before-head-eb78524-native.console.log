@@ -1,0 +1,232 @@
+runner=native bin=/tmp/md-server-prefix-head out=/tmp/final-e2e/before-head-eb78524-native scenarios=14
+
+== s00-noop  无变更 SIGHUP：应成功，无重启提示
+  PASS  报告成功
+  PASS  无重启提示
+
+== s1-url-okxPublic  仅修改 OKX Public 地址，连续两次 SIGHUP
+  PASS  第1次：检测到 OKX Public 地址变更并点名
+  PASS  第1次：给出"需要重启"的结论
+  PASS  第1次：不得报告"已成功应用"
+  FAIL  第2次：检测到 OKX Public 地址变更并点名
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:22.585001Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxPublic-Xo1uS8/config.yaml
+        2026-10-16T22:16:22.585522Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：给出"需要重启"的结论
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:22.585001Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxPublic-Xo1uS8/config.yaml
+        2026-10-16T22:16:22.585522Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：不得报告"已成功应用"
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:22.585001Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxPublic-Xo1uS8/config.yaml
+        2026-10-16T22:16:22.585522Z  INFO md_server: config reloaded and applied successfully
+  PASS  旧上游连接保持、新上游无连接（地址未被热切换）
+
+== s1-url-okxBusiness  仅修改 OKX Business 地址，连续两次 SIGHUP
+  FAIL  第1次：检测到 OKX Business 地址变更并点名
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:16:26.203242Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxBusiness-nhFCNl/config.yaml
+        2026-10-16T22:16:26.204461Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第1次：给出"需要重启"的结论
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:16:26.203242Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxBusiness-nhFCNl/config.yaml
+        2026-10-16T22:16:26.204461Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第1次：不得报告"已成功应用"
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:16:26.203242Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxBusiness-nhFCNl/config.yaml
+        2026-10-16T22:16:26.204461Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：检测到 OKX Business 地址变更并点名
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:26.708320Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxBusiness-nhFCNl/config.yaml
+        2026-10-16T22:16:26.709558Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：给出"需要重启"的结论
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:26.708320Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxBusiness-nhFCNl/config.yaml
+        2026-10-16T22:16:26.709558Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：不得报告"已成功应用"
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:26.708320Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-okxBusiness-nhFCNl/config.yaml
+        2026-10-16T22:16:26.709558Z  INFO md_server: config reloaded and applied successfully
+  PASS  旧上游连接保持、新上游无连接（地址未被热切换）
+
+== s1-url-binanceMarket  仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP
+  PASS  第1次：检测到 Binance Market(tick/kline) 地址变更并点名
+  PASS  第1次：给出"需要重启"的结论
+  PASS  第1次：不得报告"已成功应用"
+  FAIL  第2次：检测到 Binance Market(tick/kline) 地址变更并点名
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:30.828061Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-binanceMarket-uszK73/config.yaml
+        2026-10-16T22:16:30.829016Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：给出"需要重启"的结论
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:30.828061Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-binanceMarket-uszK73/config.yaml
+        2026-10-16T22:16:30.829016Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：不得报告"已成功应用"
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:30.828061Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-binanceMarket-uszK73/config.yaml
+        2026-10-16T22:16:30.829016Z  INFO md_server: config reloaded and applied successfully
+  PASS  旧上游连接保持、新上游无连接（地址未被热切换）
+
+== s1-url-binancePublic  仅修改 Binance Public(quote) 地址，连续两次 SIGHUP
+  PASS  第1次：检测到 Binance Public(quote) 地址变更并点名
+  PASS  第1次：给出"需要重启"的结论
+  PASS  第1次：不得报告"已成功应用"
+  FAIL  第2次：检测到 Binance Public(quote) 地址变更并点名
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:34.950444Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-binancePublic-IIf6uv/config.yaml
+        2026-10-16T22:16:34.951300Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：给出"需要重启"的结论
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:34.950444Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-binancePublic-IIf6uv/config.yaml
+        2026-10-16T22:16:34.951300Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：不得报告"已成功应用"
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:34.950444Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s1-url-binancePublic-IIf6uv/config.yaml
+        2026-10-16T22:16:34.951300Z  INFO md_server: config reloaded and applied successfully
+  PASS  旧上游连接保持、新上游无连接（地址未被热切换）
+
+== s2-reconnect-keeps-startup-urls  改地址后上游断线：自动重连仍用启动时地址（需重启才换）
+  PASS  SIGHUP 给出"需要重启"，且不报成功
+  PASS  OKX Public：重连回旧地址
+  PASS  OKX Public：新地址仍无连接
+  PASS  OKX Business：重连回旧地址
+  PASS  OKX Business：新地址仍无连接
+  PASS  Binance Market(tick/kline)：重连回旧地址
+  PASS  Binance Market(tick/kline)：新地址仍无连接
+  PASS  Binance Public(quote)：重连回旧地址
+  PASS  Binance Public(quote)：新地址仍无连接
+
+== s3-restart-picks-new-urls  改四个地址后重启：连接器连到新地址
+  PASS  OKX Public：新进程连到新地址
+  PASS  OKX Public：新进程不再连旧地址
+  PASS  OKX Business：新进程连到新地址
+  PASS  OKX Business：新进程不再连旧地址
+  PASS  Binance Market(tick/kline)：新进程连到新地址
+  PASS  Binance Market(tick/kline)：新进程不再连旧地址
+  PASS  Binance Public(quote)：新进程连到新地址
+  PASS  Binance Public(quote)：新进程不再连旧地址
+  PASS  重启后文件与运行配置一致：SIGHUP 报成功
+
+== s4-subs-hot-update-with-pending-url  订阅列表热更新不受影响（同时有待重启的地址变更）
+  PASS  OKX 逐笔：新增 ETH 订阅帧已发出
+  PASS  OKX 逐笔：BTC 取消订阅帧已发出
+  PASS  Binance：新增 ethusdt@aggTrade 订阅帧已发出
+  PASS  OKX K 线：新增 ETH 订阅帧已发出
+  FAIL  地址变更仍被点名为待重启，不报成功
+        2026-10-16T22:16:53.397630Z  INFO md_server:   subscription lists changed, applying...
+        2026-10-16T22:16:53.397916Z  INFO md_server:   binance: adding 1 subscriptions
+        2026-10-16T22:16:53.397994Z  INFO md_server:   okx: adding 1 tick subscriptions
+        2026-10-16T22:16:53.398029Z  INFO md_server:   okx: removing 1 tick subscriptions
+        2026-10-16T22:16:53.398065Z  INFO md_server:   okx-kline: adding 1 kline subscriptions
+        2026-10-16T22:16:53.398093Z  INFO md_server: config reloaded and applied successfully
+  PASS  第二次 SIGHUP 不重复下发订阅帧
+  FAIL  第二次 SIGHUP 仍提示待重启，不报成功
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:16:53.898024Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s4-subs-hot-update-with-pending-url-vRMRlU/config.yaml
+        2026-10-16T22:16:53.898623Z  INFO md_server: config reloaded and applied successfully
+
+== s5-invalid-yaml-keeps-running-config  YAML 坏了：保留运行配置并报错，修好后恢复
+  PASS  语法错误：明确报错
+  PASS  语法错误：声明保留运行配置
+  PASS  语法错误：不报成功
+  PASS  语法错误：进程仍在运行
+  PASS  语法错误：没有任何订阅动作
+  PASS  校验失败(okx.enabled 但 business 地址为空)：明确报错
+  PASS  校验失败(okx.enabled 但 business 地址为空)：声明保留运行配置
+  PASS  校验失败(okx.enabled 但 business 地址为空)：不报成功
+  PASS  校验失败(okx.enabled 但 business 地址为空)：进程仍在运行
+  PASS  校验失败(okx.enabled 但 business 地址为空)：没有任何订阅动作
+  PASS  文件不存在：明确报错
+  PASS  文件不存在：声明保留运行配置
+  PASS  文件不存在：不报成功
+  PASS  文件不存在：进程仍在运行
+  PASS  文件不存在：没有任何订阅动作
+  PASS  恢复后：订阅热更新生效
+  PASS  恢复后：报成功
+
+== s6-port-offset-no-false-positive  --port-offset：配置没改，SIGHUP 不得误报监听地址变更
+  FAIL  不误报 listen_address 变更
+        [harness] ---- SIGHUP  ----
+        2026-10-16T22:17:02.653774Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s6-port-offset-no-false-positive-emEzOr/config.yaml
+        2026-10-16T22:17:02.665082Z  WARN md_server:   grpc_server.listen_address changed: 127.0.0.1:24906 -> 127.0.0.1:24896 (requires restart)
+        2026-10-16T22:17:02.665148Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:27277 -> 127.0.0.1:27267 (requires restart)
+        2026-10-16T22:17:02.665177Z  WARN md_server: some config changes require connector restart -- please restart the service
+  FAIL  报成功
+        [harness] ---- SIGHUP  ----
+        2026-10-16T22:17:02.653774Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s6-port-offset-no-false-positive-emEzOr/config.yaml
+        2026-10-16T22:17:02.665082Z  WARN md_server:   grpc_server.listen_address changed: 127.0.0.1:24906 -> 127.0.0.1:24896 (requires restart)
+        2026-10-16T22:17:02.665148Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:27277 -> 127.0.0.1:27267 (requires restart)
+        2026-10-16T22:17:02.665177Z  WARN md_server: some config changes require connector restart -- please restart the service
+
+== s7-env-override-no-false-positive  环境变量覆盖监听地址：配置没改，SIGHUP 不得误报
+  FAIL  不误报 api_gateway.listen_address 变更
+        [harness] ---- SIGHUP  ----
+        2026-10-16T22:17:06.267316Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s7-env-override-no-false-positive-tiCxjG/config.yaml
+        2026-10-16T22:17:06.267915Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:53362 -> 127.0.0.1:53361 (requires restart)
+        2026-10-16T22:17:06.267931Z  WARN md_server: some config changes require connector restart -- please restart the service
+  FAIL  报成功
+        [harness] ---- SIGHUP  ----
+        2026-10-16T22:17:06.267316Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s7-env-override-no-false-positive-tiCxjG/config.yaml
+        2026-10-16T22:17:06.267915Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:53362 -> 127.0.0.1:53361 (requires restart)
+        2026-10-16T22:17:06.267931Z  WARN md_server: some config changes require connector restart -- please restart the service
+
+== s8-absent-connectors  连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功
+  FAIL  第1次：点名 okx.subscribe_klines 未能应用
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:17:09.881007Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s8-absent-connectors-kVd8An/config.yaml
+        2026-10-16T22:17:09.881840Z  INFO md_server:   subscription lists changed, applying...
+        2026-10-16T22:17:09.881871Z  WARN md_server:   okx: subscribe_quotes changed but quote connector is not running (quotes_enabled=false or list was empty at startup) -- requires restart
+        2026-10-16T22:17:09.881886Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第1次：点名 okx.subscribe_quotes 未能应用
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:17:09.881007Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s8-absent-connectors-kVd8An/config.yaml
+        2026-10-16T22:17:09.881840Z  INFO md_server:   subscription lists changed, applying...
+        2026-10-16T22:17:09.881871Z  WARN md_server:   okx: subscribe_quotes changed but quote connector is not running (quotes_enabled=false or list was empty at startup) -- requires restart
+        2026-10-16T22:17:09.881886Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第1次：给出"需要重启"，不报成功
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:17:09.881007Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s8-absent-connectors-kVd8An/config.yaml
+        2026-10-16T22:17:09.881840Z  INFO md_server:   subscription lists changed, applying...
+        2026-10-16T22:17:09.881871Z  WARN md_server:   okx: subscribe_quotes changed but quote connector is not running (quotes_enabled=false or list was empty at startup) -- requires restart
+        2026-10-16T22:17:09.881886Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：点名 okx.subscribe_klines 未能应用
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:17:10.382661Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s8-absent-connectors-kVd8An/config.yaml
+        2026-10-16T22:17:10.383350Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：点名 okx.subscribe_quotes 未能应用
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:17:10.382661Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s8-absent-connectors-kVd8An/config.yaml
+        2026-10-16T22:17:10.383350Z  INFO md_server: config reloaded and applied successfully
+  FAIL  第2次：给出"需要重启"，不报成功
+        [harness] ---- SIGHUP #2 ----
+        2026-10-16T22:17:10.382661Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s8-absent-connectors-kVd8An/config.yaml
+        2026-10-16T22:17:10.383350Z  INFO md_server: config reloaded and applied successfully
+
+== s9-log-level-not-claimed-applied  log_level 变更：不得声称已应用
+  PASS  点名 log_level
+  FAIL  不得写"(applied)"
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:17:14.001281Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9-log-level-not-claimed-applied-f0Alll/config.yaml
+        2026-10-16T22:17:14.001943Z  INFO md_server:   log_level: info -> error (applied)
+        2026-10-16T22:17:14.001969Z  INFO md_server: config reloaded and applied successfully
+  FAIL  不报成功
+        [harness] ---- SIGHUP #1 ----
+        2026-10-16T22:17:14.001281Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9-log-level-not-claimed-applied-f0Alll/config.yaml
+        2026-10-16T22:17:14.001943Z  INFO md_server:   log_level: info -> error (applied)
+        2026-10-16T22:17:14.001969Z  INFO md_server: config reloaded and applied successfully
+  PASS  实际日志级别未变（第二次 SIGHUP 的 info 日志仍可见）——仅作事实记录
+
+== s10-prod-log-level-warn  RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静
+  PASS  无变更：没有 WARN/ERROR 输出
+  FAIL  仅改 OKX Business 地址，第1次：WARN 级别可见并点名
+        [harness] ---- SIGHUP business url #1 ----
+  FAIL  仅改 OKX Business 地址，第1次：WARN 级别给出需要重启的结论
+        [harness] ---- SIGHUP business url #1 ----
+  FAIL  仅改 OKX Business 地址，第2次：WARN 级别可见并点名
+        [harness] ---- SIGHUP business url #2 ----
+  FAIL  仅改 OKX Business 地址，第2次：WARN 级别给出需要重启的结论
+        [harness] ---- SIGHUP business url #2 ----
+  PASS  YAML 解析失败：WARN/ERROR 级别可见
+
+==== 汇总: 59/92 PASS, 33 FAIL  -> /tmp/final-e2e/before-head-eb78524-native/results.md
+exit=0

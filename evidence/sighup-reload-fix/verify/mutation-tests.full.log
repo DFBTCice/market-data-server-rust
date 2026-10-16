@@ -1,0 +1,398 @@
+
+
+=============== M1 把文件配置整体记为已应用（即原 `current_cfg = new_cfg;`） ===============
+
+running 21 tests
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... FAILED
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... FAILED
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... FAILED
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... FAILED
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... FAILED
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert' (3678186) panicked at crates/md-server/src/reload.rs:1064:17:
+assertion `left == right` failed: connectors.okx.stream_base_url_public: 已应用配置不得记录未生效的 URL
+  left: "wss://changed.test/ws"
+ right: "wss://okx.test/public"
+
+---- reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload' (3678187) panicked at crates/md-server/src/reload.rs:1301:9:
+assertion `left == right` failed
+  left: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
+ right: ["BTC-USDT-SWAP"]
+
+---- reload::tests::missing_connector_keeps_group_pending_until_reverted stdout ----
+
+thread 'reload::tests::missing_connector_keeps_group_pending_until_reverted' (3678190) panicked at crates/md-server/src/reload.rs:1270:13:
+assertion failed: state.applied().connectors.okx.subscribe_klines.is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::pending_restart_items_accumulate_and_stay_visible stdout ----
+
+thread 'reload::tests::pending_restart_items_accumulate_and_stay_visible' (3678193) panicked at crates/md-server/src/reload.rs:1113:13:
+assertion `left == right` failed
+  left: 0
+ right: 3
+
+---- reload::tests::subscription_hot_update_coexists_with_pending_url_change stdout ----
+
+thread 'reload::tests::subscription_hot_update_coexists_with_pending_url_change' (3678196) panicked at crates/md-server/src/reload.rs:1216:9:
+assertion failed: report.has_pending("connectors.okx.stream_base_url_business")
+
+
+failures:
+    reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert
+    reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload
+    reload::tests::missing_connector_keeps_group_pending_until_reverted
+    reload::tests::pending_restart_items_accumulate_and_stay_visible
+    reload::tests::subscription_hot_update_coexists_with_pending_url_change
+
+test result: FAILED. 16 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.37s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M2 漏掉 OKX Business 地址检测 ===============
+
+running 21 tests
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... FAILED
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... FAILED
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... FAILED
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... FAILED
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... FAILED
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::every_restart_only_field_is_detected_individually stdout ----
+
+thread 'reload::tests::every_restart_only_field_is_detected_individually' (3678611) panicked at crates/md-server/src/reload.rs:987:9:
+assertion `left == right` failed: 测试表必须覆盖 restart_only_fields 的每个字段
+  left: 36
+ right: 35
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success stdout ----
+
+thread 'reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success' (3678618) panicked at crates/md-server/src/reload.rs:1033:9:
+不得报告全部应用成功
+
+---- reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert' (3678612) panicked at crates/md-server/src/reload.rs:1054:17:
+connectors.okx.stream_base_url_business: 第 1 次 SIGHUP 不得报告成功
+
+---- reload::tests::subscription_hot_update_coexists_with_pending_url_change stdout ----
+
+thread 'reload::tests::subscription_hot_update_coexists_with_pending_url_change' (3678622) panicked at crates/md-server/src/reload.rs:1200:9:
+assertion failed: !report.fully_applied()
+
+---- reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address stdout ----
+
+thread 'reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address' (3678625) panicked at crates/md-server/src/reload.rs:1082:13:
+assertion `left == right` failed
+  left: 0
+ right: 1
+
+
+failures:
+    reload::tests::every_restart_only_field_is_detected_individually
+    reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert
+    reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success
+    reload::tests::subscription_hot_update_coexists_with_pending_url_change
+    reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address
+
+test result: FAILED. 16 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: unused variable: `okx_stream_url_business`
+   --> crates/md-server/src/reload.rs:251:51
+    |
+251 |                         stream_base_url_business: okx_stream_url_business,
+    |                                                   ^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_okx_stream_url_business`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning (run `cargo fix --bin "md-server" -p md-server --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.32s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M3 连接器缺失时仍视为已应用（静默吞掉） ===============
+
+running 21 tests
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... FAILED
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... FAILED
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::quote_group_noop_when_lists_equal_or_connector_missing stdout ----
+
+thread 'reload::tests::quote_group_noop_when_lists_equal_or_connector_missing' (3679023) panicked at crates/md-server/src/reload.rs:1448:9:
+assertion `left == right` failed
+  left: Applied
+ right: NotRunning
+
+---- reload::tests::missing_connector_keeps_group_pending_until_reverted stdout ----
+
+thread 'reload::tests::missing_connector_keeps_group_pending_until_reverted' (3679019) panicked at crates/md-server/src/reload.rs:1256:13:
+第 1 次不得报成功
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reload::tests::missing_connector_keeps_group_pending_until_reverted
+    reload::tests::quote_group_noop_when_lists_equal_or_connector_missing
+
+test result: FAILED. 19 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.33s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M4 订阅下发失败仍视为已应用（报成功、不重试） ===============
+
+running 21 tests
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... FAILED
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload' (3679413) panicked at crates/md-server/src/reload.rs:1292:9:
+下发失败不得报告成功
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload
+
+test result: FAILED. 20 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: variant `Failed` is never constructed
+   --> crates/md-server/src/reload.rs:592:5
+    |
+584 | pub(crate) enum GroupOutcome {
+    |                 ------------ variant in this enum
+...
+592 |     Failed(String),
+    |     ^^^^^^
+    |
+    = note: `GroupOutcome` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.29s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M5 订阅热更成功后不推进已应用列表（每次 SIGHUP 重复下发） ===============
+
+running 21 tests
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... FAILED
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... FAILED
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... FAILED
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload' (3679842) panicked at crates/md-server/src/reload.rs:1314:9:
+assertion `left == right` failed
+  left: ["BTC-USDT-SWAP"]
+ right: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::subscription_hot_update_coexists_with_pending_url_change stdout ----
+
+thread 'reload::tests::subscription_hot_update_coexists_with_pending_url_change' (3679851) panicked at crates/md-server/src/reload.rs:1215:9:
+assertion `left == right` failed: 订阅不得重复下发
+  left: 2
+ right: 1
+
+---- reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists stdout ----
+
+thread 'reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists' (3679850) panicked at crates/md-server/src/reload.rs:1162:9:
+assertion `left == right` failed
+  left: ["BTC-USDT-SWAP"]
+ right: ["ETH-USDT-SWAP"]
+
+
+failures:
+    reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload
+    reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists
+    reload::tests::subscription_hot_update_coexists_with_pending_url_change
+
+test result: FAILED. 18 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: variable does not need to be mutable
+   --> crates/md-server/src/reload.rs:667:13
+    |
+667 |         let mut next = self.applied.clone();
+    |             ----^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `adopt` is never used
+   --> crates/md-server/src/reload.rs:462:8
+    |
+387 | impl SubGroup {
+    | ------------- method in this implementation
+...
+462 |     fn adopt(self, applied: &mut Config, file: &Config) {
+    |        ^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 2 warnings (run `cargo fix --bin "md-server" -p md-server --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.39s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M6 启动接线错误：OKX Business 连接器被接到 Public 地址 ===============
+
+running 21 tests
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... FAILED
+
+failures:
+
+---- tests::start_connectors_connects_each_connector_to_its_configured_url stdout ----
+
+thread 'tests::start_connectors_connects_each_connector_to_its_configured_url' (3680274) panicked at crates/md-server/src/main.rs:1169:17:
+okx-business 应收到含 "channel":"candle1m" 的订阅帧，实际: 
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::start_connectors_connects_each_connector_to_its_configured_url
+
+test result: FAILED. 20 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.94s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`

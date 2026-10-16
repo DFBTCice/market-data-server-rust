@@ -1,0 +1,18 @@
+# 本次调查/验证涉及的二进制（SHA-256）
+
+线上 198 镜像 md-server:1.1.0-quote-bnb 内的二进制（= dist/md-server-1.1.0-linux-x86_64，已核对一致）：
+d73f7a4c7e6e565499113616928d789977b61dda312d1035a92f037e2ddbba60  dist/md-server-1.1.0-linux-x86_64
+
+修复后的静态二进制（x86_64-unknown-linux-musl，--features md-connector/vendored-tls；未上现网；dist/ 在 .gitignore 中，不入库）：
+ecb412258f7a106c9d237a4d9506e2d0740b5338e853c513077d427da0c1cc12  dist/md-server-sighup-reload-fix-linux-x86_64
+
+修复前对照（HEAD eb78524 原生 debug 构建，仅用于本机端到端对照，不留存）：/tmp/md-server-prefix-head
+
+基线提交：eb78524ae13a2b382e9552f625b666b0ea0c6897 (docs: add 1.1.1 final summary report for reviewer (five sections))
+rustc: rustc 1.95.0 (59807616e 2026-04-14)
+node: v24.11.1
+docker: Docker version 27.5.1, build 9f9e405
+
+可复现性（2026-10-17 复核）：在工作树干净的代码提交 9d6a726（其后的提交只含文档、脚本、证据，不含代码）上，重新执行
+  cargo zigbuild -p md-server --release --target x86_64-unknown-linux-musl --features md-connector/vendored-tls
+得到的二进制与上面的修复后静态二进制逐字节相同（SHA-256 一致：ecb412258f7a106c9d237a4d9506e2d0740b5338e853c513077d427da0c1cc12）。
