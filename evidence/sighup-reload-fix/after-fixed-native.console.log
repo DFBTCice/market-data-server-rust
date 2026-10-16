@@ -1,4 +1,4 @@
-runner=native bin=/tmp/md-server-fixed-native out=/tmp/final-e2e/after-fixed-native scenarios=14
+runner=native bin=/tmp/md-server-after-debug out=/tmp/ev/after-fixed-native scenarios=19
 
 == s00-noop  无变更 SIGHUP：应成功，无重启提示
   PASS  报告成功
@@ -106,11 +106,58 @@ runner=native bin=/tmp/md-server-fixed-native out=/tmp/final-e2e/after-fixed-nat
   PASS  第2次：点名 okx.subscribe_quotes 未能应用
   PASS  第2次：给出"需要重启"，不报成功
 
-== s9-log-level-not-claimed-applied  log_level 变更：不得声称已应用
-  PASS  点名 log_level
-  PASS  不得写"(applied)"
-  PASS  不报成功
-  PASS  实际日志级别未变（第二次 SIGHUP 的 info 日志仍可见）——仅作事实记录
+== s9a-log-level-hot-apply  log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启
+  PASS  启动日志说明过滤器来自配置的 log_level
+  PASS  info→warn：点名 log_level 变更并开始应用
+  PASS  warn 级别：无变更 SIGHUP 没有任何 INFO 输出（INFO 已被过滤）
+  PASS  warn 级别：WARN 仍可见（待重启提示照常输出）
+  PASS  error 级别：同样的待重启情形不再输出 WARN（对照上一步 warn 级别可见）
+  PASS  error 级别：ERROR 仍可见（YAML 解析失败照常报错）
+  PASS  error→info：确认已应用
+  PASS  error→info：此后报成功（地址已改回，无待处理项）
+  PASS  info 恢复：无变更 SIGHUP 的 INFO 日志重新可见
+  PASS  全程没有重连 / 断线（热更，不重启）
+
+== s9b-log-level-from-config-at-startup  启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志
+  PASS  启动阶段没有任何 INFO 日志（旧版本这里会输出全部 INFO）
+  PASS  连接器照常连上（只是日志安静）
+  PASS  无变更 SIGHUP：安静
+  PASS  warn→info：确认已应用
+  PASS  warn→info：此后 INFO 可见（结论行报成功）
+
+== s9c-rust-log-takes-precedence  RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效
+  PASS  启动：WARN 点名 YAML 的 log_level 被 RUST_LOG 覆盖
+  PASS  启动：实际生效的是 RUST_LOG（有 INFO、没有 DEBUG）
+  PASS  第1次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖
+  PASS  第1次：给出"需要重启"的结论，不报成功
+  PASS  第1次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）
+  PASS  第2次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖
+  PASS  第2次：给出"需要重启"的结论，不报成功
+  PASS  第2次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）
+  PASS  改回启动时的值：待处理项消失，报成功
+
+== s9d-invalid-log-level-rejected  非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变
+  PASS  启动：进程自己退出，退出码为 1（不是跑到超时被杀）
+  PASS  启动：报错点名 log_level 和错误值
+  PASS  重载：明确报错并点名 log_level
+  PASS  重载：声明保留运行配置
+  PASS  重载：不报成功
+  PASS  重载：进程仍在运行
+  PASS  修好后：报成功，且 INFO 仍可见（运行中的日志级别没有被坏配置改动）
+
+== s9e-log-level-env-override  环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报
+  PASS  启动：按 LOG_LEVEL=warn 生效（没有 INFO 日志）
+  PASS  无变更 SIGHUP：安静，不误报 log_level 变更
+  PASS  YAML 改动被环境变量覆盖：生效配置不变，不输出任何 INFO/WARN/ERROR
+
+== s9f-prod-198-combination  线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn
+  PASS  启动：生效的仍是 RUST_LOG=warn（没有 INFO 日志，行为与升级前一致）
+  PASS  启动：WARN 明确说明 YAML 的 log_level 被 RUST_LOG 覆盖
+  PASS  无变更 SIGHUP：安静
+  PASS  第1次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先
+  PASS  第1次：给出"需要重启"的结论
+  PASS  第2次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先
+  PASS  第2次：给出"需要重启"的结论
 
 == s10-prod-log-level-warn  RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静
   PASS  无变更：没有 WARN/ERROR 输出
@@ -120,5 +167,5 @@ runner=native bin=/tmp/md-server-fixed-native out=/tmp/final-e2e/after-fixed-nat
   PASS  仅改 OKX Business 地址，第2次：WARN 级别给出需要重启的结论
   PASS  YAML 解析失败：WARN/ERROR 级别可见
 
-==== 汇总: 92/92 PASS, 0 FAIL  -> /tmp/final-e2e/after-fixed-native/results.md
+==== 汇总: 129/129 PASS, 0 FAIL  -> /tmp/ev/after-fixed-native/results.md
 exit=0

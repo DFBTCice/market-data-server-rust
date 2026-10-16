@@ -4,56 +4,56 @@
     "title": "无变更 SIGHUP：应成功，无重启提示",
     "name": "报告成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T22:20:07.723330Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:07.725563Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T23:14:02.607793Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:02.614428Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s00-noop",
     "title": "无变更 SIGHUP：应成功，无重启提示",
     "name": "无重启提示",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T22:20:07.723330Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:07.725563Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T23:14:02.607793Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:02.614428Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s1-url-okxPublic",
     "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
     "name": "第1次：检测到 OKX Public 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:12.515628Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:12.519049Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54309/ws\" -> \"ws://host.docker.internal:54310/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:12.519537Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:07.962152Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:07.966037Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63183/ws\" -> \"ws://host.docker.internal:63184/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:07.966467Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-okxPublic",
     "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
     "name": "第1次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:12.515628Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:12.519049Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54309/ws\" -> \"ws://host.docker.internal:54310/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:12.519537Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:07.962152Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:07.966037Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63183/ws\" -> \"ws://host.docker.internal:63184/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:07.966467Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-okxPublic",
     "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
     "name": "第1次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:12.515628Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:12.519049Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54309/ws\" -> \"ws://host.docker.internal:54310/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:12.519537Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:07.962152Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:07.966037Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63183/ws\" -> \"ws://host.docker.internal:63184/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:07.966467Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-okxPublic",
     "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
     "name": "第2次：检测到 OKX Public 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:13.171458Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:13.172732Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54309/ws\" -> \"ws://host.docker.internal:54310/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:13.172786Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:08.611856Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:08.613827Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63183/ws\" -> \"ws://host.docker.internal:63184/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:08.613856Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-okxPublic",
     "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
     "name": "第2次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:13.171458Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:13.172732Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54309/ws\" -> \"ws://host.docker.internal:54310/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:13.172786Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:08.611856Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:08.613827Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63183/ws\" -> \"ws://host.docker.internal:63184/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:08.613856Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-okxPublic",
     "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
     "name": "第2次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:13.171458Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:13.172732Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54309/ws\" -> \"ws://host.docker.internal:54310/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:13.172786Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:08.611856Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:08.613827Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63183/ws\" -> \"ws://host.docker.internal:63184/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:08.613856Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-okxPublic",
@@ -67,42 +67,42 @@
     "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
     "name": "第1次：检测到 OKX Business 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:17.941796Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:17.945456Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54336/ws\" -> \"ws://host.docker.internal:54337/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:17.945740Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:13.882071Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:13.897226Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63226/ws\" -> \"ws://host.docker.internal:63227/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:13.897440Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s1-url-okxBusiness",
     "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
     "name": "第1次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:17.941796Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:17.945456Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54336/ws\" -> \"ws://host.docker.internal:54337/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:17.945740Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:13.882071Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:13.897226Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63226/ws\" -> \"ws://host.docker.internal:63227/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:13.897440Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s1-url-okxBusiness",
     "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
     "name": "第1次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:17.941796Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:17.945456Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54336/ws\" -> \"ws://host.docker.internal:54337/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:17.945740Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:13.882071Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:13.897226Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63226/ws\" -> \"ws://host.docker.internal:63227/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:13.897440Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s1-url-okxBusiness",
     "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
     "name": "第2次：检测到 OKX Business 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:18.583191Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:18.584330Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54336/ws\" -> \"ws://host.docker.internal:54337/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:18.584361Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:16.222340Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:16.336511Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63226/ws\" -> \"ws://host.docker.internal:63227/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:16.336581Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s1-url-okxBusiness",
     "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
     "name": "第2次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:18.583191Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:18.584330Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54336/ws\" -> \"ws://host.docker.internal:54337/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:18.584361Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:16.222340Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:16.336511Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63226/ws\" -> \"ws://host.docker.internal:63227/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:16.336581Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s1-url-okxBusiness",
     "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
     "name": "第2次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:18.583191Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:18.584330Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54336/ws\" -> \"ws://host.docker.internal:54337/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:18.584361Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:16.222340Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:16.336511Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63226/ws\" -> \"ws://host.docker.internal:63227/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:16.336581Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s1-url-okxBusiness",
@@ -116,42 +116,42 @@
     "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
     "name": "第1次：检测到 Binance Market(tick/kline) 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:23.333394Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:23.337387Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54362/ws\" -> \"ws://host.docker.internal:54363/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:23.337800Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:21.740170Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:21.743864Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63299/ws\" -> \"ws://host.docker.internal:63300/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:21.744037Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
   },
   {
     "scenario": "s1-url-binanceMarket",
     "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
     "name": "第1次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:23.333394Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:23.337387Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54362/ws\" -> \"ws://host.docker.internal:54363/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:23.337800Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:21.740170Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:21.743864Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63299/ws\" -> \"ws://host.docker.internal:63300/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:21.744037Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
   },
   {
     "scenario": "s1-url-binanceMarket",
     "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
     "name": "第1次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:23.333394Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:23.337387Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54362/ws\" -> \"ws://host.docker.internal:54363/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:23.337800Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:21.740170Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:21.743864Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63299/ws\" -> \"ws://host.docker.internal:63300/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:21.744037Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
   },
   {
     "scenario": "s1-url-binanceMarket",
     "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
     "name": "第2次：检测到 Binance Market(tick/kline) 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:23.979388Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:23.980066Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54362/ws\" -> \"ws://host.docker.internal:54363/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:23.980089Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:22.371389Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:22.372027Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63299/ws\" -> \"ws://host.docker.internal:63300/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:22.372049Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
   },
   {
     "scenario": "s1-url-binanceMarket",
     "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
     "name": "第2次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:23.979388Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:23.980066Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54362/ws\" -> \"ws://host.docker.internal:54363/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:23.980089Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:22.371389Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:22.372027Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63299/ws\" -> \"ws://host.docker.internal:63300/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:22.372049Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
   },
   {
     "scenario": "s1-url-binanceMarket",
     "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
     "name": "第2次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:23.979388Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:23.980066Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54362/ws\" -> \"ws://host.docker.internal:54363/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:23.980089Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:22.371389Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:22.372027Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63299/ws\" -> \"ws://host.docker.internal:63300/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:22.372049Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url)"
   },
   {
     "scenario": "s1-url-binanceMarket",
@@ -165,42 +165,42 @@
     "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
     "name": "第1次：检测到 Binance Public(quote) 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:28.756692Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:28.760551Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54390/ws\" -> \"ws://host.docker.internal:54391/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:28.761006Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:28.654600Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:28.658646Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63364/ws\" -> \"ws://host.docker.internal:63365/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:28.658833Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-binancePublic",
     "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
     "name": "第1次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:28.756692Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:28.760551Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54390/ws\" -> \"ws://host.docker.internal:54391/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:28.761006Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:28.654600Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:28.658646Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63364/ws\" -> \"ws://host.docker.internal:63365/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:28.658833Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-binancePublic",
     "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
     "name": "第1次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:20:28.756692Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:28.760551Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54390/ws\" -> \"ws://host.docker.internal:54391/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:28.761006Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:14:28.654600Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:28.658646Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63364/ws\" -> \"ws://host.docker.internal:63365/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:28.658833Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-binancePublic",
     "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
     "name": "第2次：检测到 Binance Public(quote) 地址变更并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:29.401580Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:29.402366Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54390/ws\" -> \"ws://host.docker.internal:54391/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:29.402400Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:29.325457Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:29.328416Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63364/ws\" -> \"ws://host.docker.internal:63365/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:29.328482Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-binancePublic",
     "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
     "name": "第2次：给出\"需要重启\"的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:29.401580Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:29.402366Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54390/ws\" -> \"ws://host.docker.internal:54391/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:29.402400Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:29.325457Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:29.328416Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63364/ws\" -> \"ws://host.docker.internal:63365/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:29.328482Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-binancePublic",
     "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
     "name": "第2次：不得报告\"已成功应用\"",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:29.401580Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:29.402366Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54390/ws\" -> \"ws://host.docker.internal:54391/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:29.402400Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:29.325457Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:29.328416Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63364/ws\" -> \"ws://host.docker.internal:63365/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:29.328482Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.binance.stream_base_url_public)"
   },
   {
     "scenario": "s1-url-binancePublic",
@@ -214,7 +214,7 @@
     "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
     "name": "SIGHUP 给出\"需要重启\"，且不报成功",
     "ok": true,
-    "detail": "2026-10-16T22:20:34.168050Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:34.172837Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:54416/ws\" -> \"ws://host.docker.internal:54417/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:34.172907Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:54418/ws\" -> \"ws://host.docker.internal:54419/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:34.172914Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:54420/ws\" -> \"ws://host.docker.internal:54421/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:34.172919Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54422/ws\" -> \"ws://host.docker.internal:54423/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:34.173281Z  WARN md_server: some config changes require connector restart -- please restart the service (4 pending: connectors.binance.stream_base_url, connectors.binance.stream_base_url_public, connectors.okx.stream_base_url_public, connectors.okx.stream_base_url_business)"
+    "detail": "2026-10-16T23:14:34.645654Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:34.680499Z  WARN md_server:   connectors.binance.stream_base_url changed: \"ws://host.docker.internal:63385/ws\" -> \"ws://host.docker.internal:63386/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:34.680555Z  WARN md_server:   connectors.binance.stream_base_url_public changed: \"ws://host.docker.internal:63387/ws\" -> \"ws://host.docker.internal:63388/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:34.680558Z  WARN md_server:   connectors.okx.stream_base_url_public changed: \"ws://host.docker.internal:63389/ws\" -> \"ws://host.docker.internal:63390/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:34.680560Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63391/ws\" -> \"ws://host.docker.internal:63392/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:34.680794Z  WARN md_server: some config changes require connector restart -- please restart the service (4 pending: connectors.binance.stream_base_url, connectors.binance.stream_base_url_public, connectors.okx.stream_base_url_public, connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s2-reconnect-keeps-startup-urls",
@@ -333,7 +333,7 @@
     "title": "改四个地址后重启：连接器连到新地址",
     "name": "重启后文件与运行配置一致：SIGHUP 报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP after restart ----\n2026-10-16T22:20:47.617276Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:47.619850Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP after restart ----\n2026-10-16T23:14:48.552836Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:48.555661Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s4-subs-hot-update-with-pending-url",
@@ -368,7 +368,7 @@
     "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
     "name": "地址变更仍被点名为待重启，不报成功",
     "ok": true,
-    "detail": "2026-10-16T22:20:52.426572Z  INFO md_server:   binance: adding 1 subscriptions\n2026-10-16T22:20:52.427531Z  INFO md_server:   okx: adding 1 tick subscriptions\n2026-10-16T22:20:52.427656Z  INFO md_server:   okx: removing 1 tick subscriptions\n2026-10-16T22:20:52.428877Z  INFO md_server:   okx-kline: adding 1 kline subscriptions\n2026-10-16T22:20:52.430724Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54506/ws\" -> \"ws://host.docker.internal:54507/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:52.431100Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "2026-10-16T23:14:53.407116Z  INFO md_server:   binance: adding 1 subscriptions\n2026-10-16T23:14:53.407792Z  INFO md_server:   okx: adding 1 tick subscriptions\n2026-10-16T23:14:53.407861Z  INFO md_server:   okx: removing 1 tick subscriptions\n2026-10-16T23:14:53.408712Z  INFO md_server:   okx-kline: adding 1 kline subscriptions\n2026-10-16T23:14:53.410454Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63478/ws\" -> \"ws://host.docker.internal:63479/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:53.410605Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s4-subs-hot-update-with-pending-url",
@@ -382,28 +382,28 @@
     "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
     "name": "第二次 SIGHUP 仍提示待重启，不报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:20:53.071987Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:53.072843Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54506/ws\" -> \"ws://host.docker.internal:54507/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:20:53.072933Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:14:54.058870Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:54.059858Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63478/ws\" -> \"ws://host.docker.internal:63479/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:14:54.059881Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "语法错误：明确报错",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-16T22:20:57.860883Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:57.863629Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-16T23:14:58.979592Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:58.982109Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "语法错误：声明保留运行配置",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-16T22:20:57.860883Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:57.863629Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-16T23:14:58.979592Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:58.982109Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "语法错误：不报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-16T22:20:57.860883Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:57.863629Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-16T23:14:58.979592Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:58.982109Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
@@ -424,21 +424,21 @@
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "校验失败(okx.enabled 但 business 地址为空)：明确报错",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-16T22:20:58.643028Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:58.644319Z ERROR md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-16T23:14:59.756421Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:59.759450Z ERROR md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "校验失败(okx.enabled 但 business 地址为空)：声明保留运行配置",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-16T22:20:58.643028Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:58.644319Z ERROR md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-16T23:14:59.756421Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:59.759450Z ERROR md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "校验失败(okx.enabled 但 business 地址为空)：不报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-16T22:20:58.643028Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:58.644319Z ERROR md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-16T23:14:59.756421Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:14:59.759450Z ERROR md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
@@ -459,21 +459,21 @@
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "文件不存在：明确报错",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-16T22:20:59.424352Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:59.424999Z ERROR md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-16T23:15:00.526119Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:00.527914Z ERROR md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "文件不存在：声明保留运行配置",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-16T22:20:59.424352Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:59.424999Z ERROR md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-16T23:15:00.526119Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:00.527914Z ERROR md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "文件不存在：不报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-16T22:20:59.424352Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:20:59.424999Z ERROR md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-16T23:15:00.526119Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:00.527914Z ERROR md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current running config (nothing applied)"
   },
   {
     "scenario": "s5-invalid-yaml-keeps-running-config",
@@ -501,105 +501,364 @@
     "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
     "name": "恢复后：报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP recover ----\n2026-10-16T22:21:00.205932Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:00.207866Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:00.208915Z  INFO md_server:   okx: adding 1 tick subscriptions\n2026-10-16T22:21:00.210401Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP recover ----\n2026-10-16T23:15:01.289844Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:01.294160Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:01.295873Z  INFO md_server:   okx: adding 1 tick subscriptions\n2026-10-16T23:15:01.298201Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s6-port-offset-no-false-positive",
     "title": "--port-offset：配置没改，SIGHUP 不得误报监听地址变更",
     "name": "不误报 listen_address 变更",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T22:21:05.074132Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:05.076967Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T23:15:06.231035Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:06.234512Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s6-port-offset-no-false-positive",
     "title": "--port-offset：配置没改，SIGHUP 不得误报监听地址变更",
     "name": "报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T22:21:05.074132Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:05.076967Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T23:15:06.231035Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:06.234512Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s7-env-override-no-false-positive",
     "title": "环境变量覆盖监听地址：配置没改，SIGHUP 不得误报",
     "name": "不误报 api_gateway.listen_address 变更",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T22:21:09.872577Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:09.876299Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T23:15:11.041875Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:11.044566Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s7-env-override-no-false-positive",
     "title": "环境变量覆盖监听地址：配置没改，SIGHUP 不得误报",
     "name": "报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T22:21:09.872577Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:09.876299Z  INFO md_server: config reloaded and applied successfully"
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-16T23:15:11.041875Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:11.044566Z  INFO md_server: config reloaded and applied successfully"
   },
   {
     "scenario": "s8-absent-connectors",
     "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
     "name": "第1次：点名 okx.subscribe_klines 未能应用",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:21:14.630199Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:14.631930Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:14.633425Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:14.633453Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:14.633672Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:15:15.820379Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:15.823316Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:15.824598Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:15.824624Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:15.824755Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
   },
   {
     "scenario": "s8-absent-connectors",
     "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
     "name": "第1次：点名 okx.subscribe_quotes 未能应用",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:21:14.630199Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:14.631930Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:14.633425Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:14.633453Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:14.633672Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:15:15.820379Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:15.823316Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:15.824598Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:15.824624Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:15.824755Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
   },
   {
     "scenario": "s8-absent-connectors",
     "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
     "name": "第1次：给出\"需要重启\"，不报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:21:14.630199Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:14.631930Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:14.633425Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:14.633453Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:14.633672Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:15:15.820379Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:15.823316Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:15.824598Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:15.824624Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:15.824755Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
   },
   {
     "scenario": "s8-absent-connectors",
     "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
     "name": "第2次：点名 okx.subscribe_klines 未能应用",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:21:15.278542Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:15.279348Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:15.279391Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:15.279395Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:15.279399Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:15:16.461464Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:16.462656Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:16.462709Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:16.462714Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:16.462717Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
   },
   {
     "scenario": "s8-absent-connectors",
     "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
     "name": "第2次：点名 okx.subscribe_quotes 未能应用",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:21:15.278542Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:15.279348Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:15.279391Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:15.279395Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:15.279399Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:15:16.461464Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:16.462656Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:16.462709Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:16.462714Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:16.462717Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
   },
   {
     "scenario": "s8-absent-connectors",
     "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
     "name": "第2次：给出\"需要重启\"，不报成功",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:21:15.278542Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:15.279348Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T22:21:15.279391Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:15.279395Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T22:21:15.279399Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:15:16.461464Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:16.462656Z  INFO md_server:   subscription lists changed, applying...\n2026-10-16T23:15:16.462709Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:16.462714Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart\n2026-10-16T23:15:16.462717Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)"
   },
   {
-    "scenario": "s9-log-level-not-claimed-applied",
-    "title": "log_level 变更：不得声称已应用",
-    "name": "点名 log_level",
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "启动日志说明过滤器来自配置的 log_level",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:21:20.191975Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:20.195310Z  WARN md_server:   log_level changed: \"info\" -> \"error\" (NOT applied, requires restart; the log filter is fixed at startup from RUST_LOG (default info); the YAML log_level does not change it at runtime)\n2026-10-16T22:21:20.195768Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+    "detail": "2026-10-16T23:15:20.302460Z  INFO md_connector::base: [binance] connected and synced\n2026-10-16T23:15:20.302517Z  INFO md_connector::base: [okx-quote] connected and synced\n2026-10-16T23:15:20.302535Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-16T23:15:20.302570Z  INFO md_connector::base: [okx] connected and synced\n2026-10-16T23:15:20.302597Z  INFO md_connector::base: [okx] connected and synced\n[harness] ---- process ready ----"
   },
   {
-    "scenario": "s9-log-level-not-claimed-applied",
-    "title": "log_level 变更：不得声称已应用",
-    "name": "不得写\"(applied)\"",
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "info→warn：点名 log_level 变更并开始应用",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:21:20.191975Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:20.195310Z  WARN md_server:   log_level changed: \"info\" -> \"error\" (NOT applied, requires restart; the log filter is fixed at startup from RUST_LOG (default info); the YAML log_level does not change it at runtime)\n2026-10-16T22:21:20.195768Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+    "detail": "[harness] ---- SIGHUP info->warn ----\n2026-10-16T23:15:21.724392Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:21.737657Z  INFO md_server:   log_level changed: info -> warn, applying..."
   },
   {
-    "scenario": "s9-log-level-not-claimed-applied",
-    "title": "log_level 变更：不得声称已应用",
-    "name": "不报成功",
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "warn 级别：无变更 SIGHUP 没有任何 INFO 输出（INFO 已被过滤）",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T22:21:20.191975Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:20.195310Z  WARN md_server:   log_level changed: \"info\" -> \"error\" (NOT applied, requires restart; the log filter is fixed at startup from RUST_LOG (default info); the YAML log_level does not change it at runtime)\n2026-10-16T22:21:20.195768Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+    "detail": "[harness] ---- SIGHUP warn, no change ----"
   },
   {
-    "scenario": "s9-log-level-not-claimed-applied",
-    "title": "log_level 变更：不得声称已应用",
-    "name": "实际日志级别未变（第二次 SIGHUP 的 info 日志仍可见）——仅作事实记录",
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "warn 级别：WARN 仍可见（待重启提示照常输出）",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T22:21:20.845467Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T22:21:20.847119Z  WARN md_server:   log_level changed: \"info\" -> \"error\" (NOT applied, requires restart; the log filter is fixed at startup from RUST_LOG (default info); the YAML log_level does not change it at runtime)\n2026-10-16T22:21:20.847161Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+    "detail": "[harness] ---- SIGHUP warn, url pending ----\n2026-10-16T23:15:25.228277Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63627/ws\" -> \"ws://host.docker.internal:63628/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:15:25.228566Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error 级别：同样的待重启情形不再输出 WARN（对照上一步 warn 级别可见）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP warn->error ----[harness] ---- SIGHUP error, same url pending ----"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error 级别：ERROR 仍可见（YAML 解析失败照常报错）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP error, bad yaml ----\n2026-10-16T23:15:30.510540Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error→info：确认已应用",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP error->info ----\n2026-10-16T23:15:32.513396Z  INFO md_server:   log_level changed: error -> info (applied)\n2026-10-16T23:15:32.514677Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error→info：此后报成功（地址已改回，无待处理项）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP error->info ----\n2026-10-16T23:15:32.513396Z  INFO md_server:   log_level changed: error -> info (applied)\n2026-10-16T23:15:32.514677Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "info 恢复：无变更 SIGHUP 的 INFO 日志重新可见",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP info, no change ----\n2026-10-16T23:15:33.146722Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:33.148221Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "全程没有重连 / 断线（热更，不重启）",
+    "ok": true,
+    "detail": "connects=0 closes=0"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "启动阶段没有任何 INFO 日志（旧版本这里会输出全部 INFO）",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "连接器照常连上（只是日志安静）",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "无变更 SIGHUP：安静",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP no change ----"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "warn→info：确认已应用",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP warn->info ----\n2026-10-16T23:15:39.771266Z  INFO md_server:   log_level changed: warn -> info (applied)\n2026-10-16T23:15:39.772313Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "warn→info：此后 INFO 可见（结论行报成功）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP warn->info ----\n2026-10-16T23:15:39.771266Z  INFO md_server:   log_level changed: warn -> info (applied)\n2026-10-16T23:15:39.772313Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "启动：WARN 点名 YAML 的 log_level 被 RUST_LOG 覆盖",
+    "ok": true,
+    "detail": "2026-10-16T23:15:43.492018Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-16T23:15:43.492053Z  INFO md_connector::base: [okx] connected and synced\n2026-10-16T23:15:43.492077Z  INFO md_connector::base: [binance] connected and synced\n2026-10-16T23:15:43.492107Z  INFO md_connector::base: [okx] connected and synced\n2026-10-16T23:15:43.492130Z  INFO md_connector::base: [okx-quote] connected and synced\n[harness] ---- process ready ----"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "启动：实际生效的是 RUST_LOG（有 INFO、没有 DEBUG）",
+    "ok": true,
+    "detail": "2026-10-16T23:15:43.492018Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-16T23:15:43.492053Z  INFO md_connector::base: [okx] connected and synced\n2026-10-16T23:15:43.492077Z  INFO md_connector::base: [binance] connected and synced\n2026-10-16T23:15:43.492107Z  INFO md_connector::base: [okx] connected and synced\n2026-10-16T23:15:43.492130Z  INFO md_connector::base: [okx-quote] connected and synced\n[harness] ---- process ready ----"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第1次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:15:44.607750Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:44.610440Z  WARN md_server:   log_level changed: debug -> warn (NOT applied, requires restart; RUST_LOG=info takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:15:44.610661Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第1次：给出\"需要重启\"的结论，不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:15:44.607750Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:44.610440Z  WARN md_server:   log_level changed: debug -> warn (NOT applied, requires restart; RUST_LOG=info takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:15:44.610661Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第1次：过滤器没有被改动（INFO 仍可见，也没有\"开始应用\"）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-16T23:15:44.607750Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:44.610440Z  WARN md_server:   log_level changed: debug -> warn (NOT applied, requires restart; RUST_LOG=info takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:15:44.610661Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第2次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:15:45.245796Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:45.246378Z  WARN md_server:   log_level changed: debug -> warn (NOT applied, requires restart; RUST_LOG=info takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:15:45.246387Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第2次：给出\"需要重启\"的结论，不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:15:45.245796Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:45.246378Z  WARN md_server:   log_level changed: debug -> warn (NOT applied, requires restart; RUST_LOG=info takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:15:45.246387Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第2次：过滤器没有被改动（INFO 仍可见，也没有\"开始应用\"）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-16T23:15:45.245796Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:45.246378Z  WARN md_server:   log_level changed: debug -> warn (NOT applied, requires restart; RUST_LOG=info takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:15:45.246387Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "改回启动时的值：待处理项消失，报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP revert ----\n2026-10-16T23:15:45.881314Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:45.883061Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "启动：进程自己退出，退出码为 1（不是跑到超时被杀）",
+    "ok": true,
+    "detail": "code=1 timedOut=false"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "启动：报错点名 log_level 和错误值",
+    "ok": true,
+    "detail": "failed to load config: Validation error: log_level \"verbose\" 不合法，可选值：trace / debug / info / warn / error（忽略大小写）\n"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：明确报错并点名 log_level",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP bad level ----\n2026-10-16T23:15:51.479386Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:51.480263Z ERROR md_server: failed to reload config: Validation error: log_level \"verbose\" 不合法，可选值：trace / debug / info / warn / error（忽略大小写）, keeping current running config (nothing applied)"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：声明保留运行配置",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP bad level ----\n2026-10-16T23:15:51.479386Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:51.480263Z ERROR md_server: failed to reload config: Validation error: log_level \"verbose\" 不合法，可选值：trace / debug / info / warn / error（忽略大小写）, keeping current running config (nothing applied)"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP bad level ----\n2026-10-16T23:15:51.479386Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:51.480263Z ERROR md_server: failed to reload config: Validation error: log_level \"verbose\" 不合法，可选值：trace / debug / info / warn / error（忽略大小写）, keeping current running config (nothing applied)"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：进程仍在运行",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "修好后：报成功，且 INFO 仍可见（运行中的日志级别没有被坏配置改动）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP restore ----\n2026-10-16T23:15:52.244169Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-16T23:15:52.247495Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9e-log-level-env-override",
+    "title": "环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报",
+    "name": "启动：按 LOG_LEVEL=warn 生效（没有 INFO 日志）",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9e-log-level-env-override",
+    "title": "环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报",
+    "name": "无变更 SIGHUP：安静，不误报 log_level 变更",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP no change ----"
+  },
+  {
+    "scenario": "s9e-log-level-env-override",
+    "title": "环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报",
+    "name": "YAML 改动被环境变量覆盖：生效配置不变，不输出任何 INFO/WARN/ERROR",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP yaml->debug ----"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "启动：生效的仍是 RUST_LOG=warn（没有 INFO 日志，行为与升级前一致）",
+    "ok": true,
+    "detail": "2026-10-16T23:16:03.851472Z  WARN md_server: config log_level \"info\" is overridden by RUST_LOG=warn: RUST_LOG takes precedence; unset RUST_LOG (and restart) to let log_level and SIGHUP control the log level"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "启动：WARN 明确说明 YAML 的 log_level 被 RUST_LOG 覆盖",
+    "ok": true,
+    "detail": "2026-10-16T23:16:03.851472Z  WARN md_server: config log_level \"info\" is overridden by RUST_LOG=warn: RUST_LOG takes precedence; unset RUST_LOG (and restart) to let log_level and SIGHUP control the log level"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "无变更 SIGHUP：安静",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP no change ----"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第1次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP yaml->debug #1 ----\n2026-10-16T23:16:06.759267Z  WARN md_server:   log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:16:06.759321Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第1次：给出\"需要重启\"的结论",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP yaml->debug #1 ----\n2026-10-16T23:16:06.759267Z  WARN md_server:   log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:16:06.759321Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第2次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP yaml->debug #2 ----\n2026-10-16T23:16:08.529116Z  WARN md_server:   log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:16:08.529171Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第2次：给出\"需要重启\"的结论",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP yaml->debug #2 ----\n2026-10-16T23:16:08.529116Z  WARN md_server:   log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)\n2026-10-16T23:16:08.529171Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)"
   },
   {
     "scenario": "s10-prod-log-level-warn",
@@ -613,34 +872,34 @@
     "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
     "name": "仅改 OKX Business 地址，第1次：WARN 级别可见并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP business url #1 ----\n2026-10-16T22:21:27.381895Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54673/ws\" -> \"ws://host.docker.internal:54674/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:21:27.382068Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP business url #1 ----\n2026-10-16T23:16:16.269411Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63824/ws\" -> \"ws://host.docker.internal:63825/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:16:16.269725Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s10-prod-log-level-warn",
     "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
     "name": "仅改 OKX Business 地址，第1次：WARN 级别给出需要重启的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP business url #1 ----\n2026-10-16T22:21:27.381895Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54673/ws\" -> \"ws://host.docker.internal:54674/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:21:27.382068Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP business url #1 ----\n2026-10-16T23:16:16.269411Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63824/ws\" -> \"ws://host.docker.internal:63825/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:16:16.269725Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s10-prod-log-level-warn",
     "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
     "name": "仅改 OKX Business 地址，第2次：WARN 级别可见并点名",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP business url #2 ----\n2026-10-16T22:21:29.132000Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54673/ws\" -> \"ws://host.docker.internal:54674/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:21:29.132035Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP business url #2 ----\n2026-10-16T23:16:18.018943Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63824/ws\" -> \"ws://host.docker.internal:63825/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:16:18.019030Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s10-prod-log-level-warn",
     "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
     "name": "仅改 OKX Business 地址，第2次：WARN 级别给出需要重启的结论",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP business url #2 ----\n2026-10-16T22:21:29.132000Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:54673/ws\" -> \"ws://host.docker.internal:54674/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T22:21:29.132035Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
+    "detail": "[harness] ---- SIGHUP business url #2 ----\n2026-10-16T23:16:18.018943Z  WARN md_server:   connectors.okx.stream_base_url_business changed: \"ws://host.docker.internal:63824/ws\" -> \"ws://host.docker.internal:63825/ws\" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)\n2026-10-16T23:16:18.019030Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)"
   },
   {
     "scenario": "s10-prod-log-level-warn",
     "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
     "name": "YAML 解析失败：WARN/ERROR 级别可见",
     "ok": true,
-    "detail": "[harness] ---- SIGHUP bad yaml ----\n2026-10-16T22:21:30.888303Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
+    "detail": "[harness] ---- SIGHUP bad yaml ----\n2026-10-16T23:16:19.770366Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)"
   }
 ]

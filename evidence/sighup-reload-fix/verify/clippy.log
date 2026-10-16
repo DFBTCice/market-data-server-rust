@@ -1,3 +1,5 @@
+    Checking md-config v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-config)
+    Checking md-connector v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-connector)
 warning: useless conversion to the same type: `std::string::String`
    --> crates/md-connector/src/base.rs:293:57
     |
@@ -16,7 +18,10 @@ warning: this call to `clone` can be replaced with `std::slice::from_ref`
     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#cloned_ref_to_slice_refs
     = note: `#[warn(clippy::cloned_ref_to_slice_refs)]` on by default
 
-warning: `md-connector` (lib) generated 2 warnings (run `cargo clippy --fix --lib -p md-connector -- ` to apply 1 suggestion)
+warning: `md-connector` (lib) generated 2 warnings (1 duplicate) (run `cargo clippy --fix --lib -p md-connector -- ` to apply 1 suggestion)
+    Checking md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+    Checking md-grpc v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-grpc)
+warning: `md-connector` (lib test) generated 2 warnings (1 duplicate)
 warning: useless conversion to the same type: `std::string::String`
    --> crates/md-gateway/src/ws.rs:278:41
     |
@@ -81,7 +86,7 @@ help: change this to
     |
 
 warning: `md-gateway` (lib) generated 7 warnings (run `cargo clippy --fix --lib -p md-gateway -- ` to apply 6 suggestions)
-warning: `md-gateway` (lib test) generated 7 warnings (7 duplicates)
-warning: `md-connector` (lib test) generated 2 warnings (2 duplicates)
     Checking md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.85s
+warning: `md-gateway` (lib test) generated 7 warnings (7 duplicates)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.98s
+clippy exit=0

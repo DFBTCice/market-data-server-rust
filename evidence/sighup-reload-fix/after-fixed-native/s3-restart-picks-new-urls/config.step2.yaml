@@ -1,12 +1,12 @@
 log_level: "info"
 grpc_server:
   enabled: true
-  listen_address: "127.0.0.1:54068"
+  listen_address: "127.0.0.1:65027"
 admin_server:
-  listen_address: "127.0.0.1:54069"
+  listen_address: "127.0.0.1:65028"
 api_gateway:
   enabled: true
-  listen_address: "127.0.0.1:54070"
+  listen_address: "127.0.0.1:65029"
 processor:
   tick_channel_buffer: 1000
   kline_channel_buffer: 1000
@@ -14,8 +14,8 @@ processor:
 connectors:
   binance:
     enabled: true
-    stream_base_url: "ws://127.0.0.1:54061/ws"
-    stream_base_url_public: "ws://127.0.0.1:54063/ws"
+    stream_base_url: "ws://127.0.0.1:65020/ws"
+    stream_base_url_public: "ws://127.0.0.1:65022/ws"
     rest_base_url: "http://127.0.0.1:1"
     subscribe_ticks: ["BTCUSDT"]
     subscribe_klines: { "1m": ["BTCUSDT"] }
@@ -25,8 +25,8 @@ connectors:
     subscribe_quotes: ["BNBUSDT"]
   okx:
     enabled: true
-    stream_base_url_public: "ws://127.0.0.1:54065/ws"
-    stream_base_url_business: "ws://127.0.0.1:54067/ws"
+    stream_base_url_public: "ws://127.0.0.1:65024/ws"
+    stream_base_url_business: "ws://127.0.0.1:65026/ws"
     rest_base_url: "http://127.0.0.1:1"
     subscribe_ticks: ["BTC-USDT-SWAP"]
     subscribe_klines: { "1m": ["BTC-USDT-SWAP"] }

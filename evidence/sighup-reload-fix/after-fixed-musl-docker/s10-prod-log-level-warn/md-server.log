@@ -1,40 +1,40 @@
-2026-10-16T22:21:24.521Z 2026-10-16T22:21:24.440653Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:54667/ws
-2026-10-16T22:21:24.521Z 2026-10-16T22:21:24.445522Z  INFO md_connector::base: [okx-quote] connecting to ws://host.docker.internal:54671/ws
-2026-10-16T22:21:24.521Z 2026-10-16T22:21:24.442214Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:54669/ws
-2026-10-16T22:21:24.521Z 2026-10-16T22:21:24.440675Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:54671/ws
-2026-10-16T22:21:24.521Z 2026-10-16T22:21:24.440698Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:54673/ws
-2026-10-16T22:21:24.578Z 2026-10-16T22:21:24.576099Z  INFO md_connector::base: [okx] subscribing to 1 streams
-2026-10-16T22:21:24.578Z 2026-10-16T22:21:24.576133Z  INFO md_connector::base: [okx] subscribing to 1 streams
-2026-10-16T22:21:24.578Z 2026-10-16T22:21:24.576996Z  INFO md_connector::base: [binance] subscribing to 2 streams
-2026-10-16T22:21:24.578Z 2026-10-16T22:21:24.576176Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
-2026-10-16T22:21:24.578Z 2026-10-16T22:21:24.576756Z  INFO md_connector::base: [binance-quote] subscribing to 1 streams
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.587651Z  INFO md_connector::base: [binance] subscription sync complete
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.587677Z  INFO md_connector::base: [okx-quote] subscription sync complete
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.587703Z  INFO md_connector::base: [binance-quote] subscription sync complete
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.587742Z  INFO md_connector::base: [okx] subscription sync complete
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.587774Z  INFO md_connector::base: [okx] subscription sync complete
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.588403Z  INFO md_connector::base: [okx-quote] connected and synced
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.588435Z  INFO md_connector::base: [binance-quote] connected and synced
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.588456Z  INFO md_connector::base: [okx] connected and synced
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.588479Z  INFO md_connector::base: [okx] connected and synced
-2026-10-16T22:21:24.591Z 2026-10-16T22:21:24.588501Z  INFO md_connector::base: [binance] connected and synced
-2026-10-16T22:21:25.608Z [harness] ---- process ready ----
-2026-10-16T22:21:25.608Z [harness] ---- SIGHUP no change ----
-2026-10-16T22:21:27.354Z [harness] ---- SIGHUP business url #1 ----
-2026-10-16T22:21:27.487Z 2026-10-16T22:21:27.381895Z  WARN md_server:   connectors.okx.stream_base_url_business changed: "ws://host.docker.internal:54673/ws" -> "ws://host.docker.internal:54674/ws" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)
-2026-10-16T22:21:27.487Z 2026-10-16T22:21:27.382068Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)
-2026-10-16T22:21:29.097Z [harness] ---- SIGHUP business url #2 ----
-2026-10-16T22:21:29.244Z 2026-10-16T22:21:29.132000Z  WARN md_server:   connectors.okx.stream_base_url_business changed: "ws://host.docker.internal:54673/ws" -> "ws://host.docker.internal:54674/ws" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)
-2026-10-16T22:21:29.244Z 2026-10-16T22:21:29.132035Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)
-2026-10-16T22:21:30.849Z [harness] ---- SIGHUP bad yaml ----
-2026-10-16T22:21:30.992Z 2026-10-16T22:21:30.888303Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.628487Z  INFO md_connector::base: [binance] stopping connector
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.629095Z  INFO md_connector::base: [binance-quote] stopping connector
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.630211Z  INFO md_connector::base: [okx-quote] stopping connector
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.630655Z  INFO md_connector::base: [okx] stopping connector
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.630667Z  INFO md_connector::base: [okx] stopping connector
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.631226Z  INFO md_connector::base: [binance] shutdown signal received
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.631362Z  INFO md_connector::base: [binance-quote] shutdown signal received
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.631763Z  INFO md_connector::base: [okx-quote] shutdown signal received
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.632006Z  INFO md_connector::base: [okx] shutdown signal received
-2026-10-16T22:21:34.855Z 2026-10-16T22:21:32.633122Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-16T23:16:13.287Z 2026-10-16T23:16:13.229351Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:63820/ws
+2026-10-16T23:16:13.287Z 2026-10-16T23:16:13.229668Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:63818/ws
+2026-10-16T23:16:13.287Z 2026-10-16T23:16:13.229907Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:63824/ws
+2026-10-16T23:16:13.287Z 2026-10-16T23:16:13.229719Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:63822/ws
+2026-10-16T23:16:13.287Z 2026-10-16T23:16:13.231219Z  INFO md_connector::base: [okx-quote] connecting to ws://host.docker.internal:63822/ws
+2026-10-16T23:16:13.379Z 2026-10-16T23:16:13.374873Z  INFO md_connector::base: [binance] subscribing to 2 streams
+2026-10-16T23:16:13.379Z 2026-10-16T23:16:13.374907Z  INFO md_connector::base: [binance-quote] subscribing to 1 streams
+2026-10-16T23:16:13.379Z 2026-10-16T23:16:13.374928Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-16T23:16:13.379Z 2026-10-16T23:16:13.374951Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-16T23:16:13.379Z 2026-10-16T23:16:13.374980Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386558Z  INFO md_connector::base: [binance] subscription sync complete
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386581Z  INFO md_connector::base: [binance-quote] subscription sync complete
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386627Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386667Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386702Z  INFO md_connector::base: [okx-quote] subscription sync complete
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386918Z  INFO md_connector::base: [binance] connected and synced
+2026-10-16T23:16:13.390Z 2026-10-16T23:16:13.386965Z  INFO md_connector::base: [binance-quote] connected and synced
+2026-10-16T23:16:13.391Z 2026-10-16T23:16:13.387005Z  INFO md_connector::base: [okx] connected and synced
+2026-10-16T23:16:13.391Z 2026-10-16T23:16:13.387050Z  INFO md_connector::base: [okx] connected and synced
+2026-10-16T23:16:13.391Z 2026-10-16T23:16:13.387087Z  INFO md_connector::base: [okx-quote] connected and synced
+2026-10-16T23:16:14.473Z [harness] ---- process ready ----
+2026-10-16T23:16:14.473Z [harness] ---- SIGHUP no change ----
+2026-10-16T23:16:16.232Z [harness] ---- SIGHUP business url #1 ----
+2026-10-16T23:16:16.377Z 2026-10-16T23:16:16.269411Z  WARN md_server:   connectors.okx.stream_base_url_business changed: "ws://host.docker.internal:63824/ws" -> "ws://host.docker.internal:63825/ws" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)
+2026-10-16T23:16:16.377Z 2026-10-16T23:16:16.269725Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)
+2026-10-16T23:16:17.978Z [harness] ---- SIGHUP business url #2 ----
+2026-10-16T23:16:18.128Z 2026-10-16T23:16:18.018943Z  WARN md_server:   connectors.okx.stream_base_url_business changed: "ws://host.docker.internal:63824/ws" -> "ws://host.docker.internal:63825/ws" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)
+2026-10-16T23:16:18.128Z 2026-10-16T23:16:18.019030Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)
+2026-10-16T23:16:19.731Z [harness] ---- SIGHUP bad yaml ----
+2026-10-16T23:16:19.879Z 2026-10-16T23:16:19.770366Z ERROR md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current running config (nothing applied)
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.531248Z  INFO md_connector::base: [okx] stopping connector
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.534414Z  INFO md_connector::base: [okx-quote] stopping connector
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.536675Z  INFO md_connector::base: [binance] stopping connector
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.536893Z  INFO md_connector::base: [binance-quote] stopping connector
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.537013Z  INFO md_connector::base: [okx] stopping connector
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.540678Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.540743Z  INFO md_connector::base: [binance-quote] shutdown signal received
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.541050Z  INFO md_connector::base: [okx-quote] shutdown signal received
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.541093Z  INFO md_connector::base: [binance] shutdown signal received
+2026-10-16T23:16:23.905Z 2026-10-16T23:16:21.543180Z  INFO md_connector::base: [okx] shutdown signal received

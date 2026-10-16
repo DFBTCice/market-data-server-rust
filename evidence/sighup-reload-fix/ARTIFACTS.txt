@@ -3,16 +3,25 @@
 线上 198 镜像 md-server:1.1.0-quote-bnb 内的二进制（= dist/md-server-1.1.0-linux-x86_64，已核对一致）：
 d73f7a4c7e6e565499113616928d789977b61dda312d1035a92f037e2ddbba60  dist/md-server-1.1.0-linux-x86_64
 
-修复后的静态二进制（x86_64-unknown-linux-musl，--features md-connector/vendored-tls；未上现网；dist/ 在 .gitignore 中，不入库）：
-ecb412258f7a106c9d237a4d9506e2d0740b5338e853c513077d427da0c1cc12  dist/md-server-sighup-reload-fix-linux-x86_64
+修复后的静态二进制（SIGHUP 重载修复 + log_level 生效；x86_64-unknown-linux-musl，--features md-connector/vendored-tls；未上现网；dist/ 在 .gitignore 中，不入库）：
+a130e411ae4896a9bbd5a7735f19d50ecd8acd909e0c4528fc465a956dbfb6d2  dist/md-server-sighup-loglevel-fix-linux-x86_64
+对应代码提交 6640938（其后的提交只含端到端脚本、文档、证据，不含代码）。
+此前只含 SIGHUP 修复的那版二进制（代码提交 9d6a726，SHA-256 ecb41225…1cc12）已被取代，已从 dist/ 删除。
 
-修复前对照（HEAD eb78524 原生 debug 构建，仅用于本机端到端对照，不留存）：/tmp/md-server-prefix-head
+修复前对照（HEAD eb78524 原生 debug 构建，仅用于本机端到端对照，不留存）。
 
 基线提交：eb78524ae13a2b382e9552f625b666b0ea0c6897 (docs: add 1.1.1 final summary report for reviewer (five sections))
 rustc: rustc 1.95.0 (59807616e 2026-04-14)
+zig: 0.16.0（cargo-zigbuild 用它做交叉链接）
 node: v24.11.1
 docker: Docker version 27.5.1, build 9f9e405
 
-可复现性（2026-10-17 复核）：在工作树干净的代码提交 9d6a726（其后的提交只含文档、脚本、证据，不含代码）上，重新执行
-  cargo zigbuild -p md-server --release --target x86_64-unknown-linux-musl --features md-connector/vendored-tls
-得到的二进制与上面的修复后静态二进制逐字节相同（SHA-256 一致：ecb412258f7a106c9d237a4d9506e2d0740b5338e853c513077d427da0c1cc12）。
+可复现性（2026-10-17 复核）：
+在代码提交 6640938 的干净工作树（git worktree，路径 /tmp/wt-musl）里，固定 SOURCE_DATE_EPOCH（取提交时间 1792191598），
+每次构建前删除目标目录，连续两次从零构建：
+  SOURCE_DATE_EPOCH=1792191598 CARGO_TARGET_DIR=/tmp/wt-musl-target \
+    cargo zigbuild -p md-server --release --target x86_64-unknown-linux-musl --features md-connector/vendored-tls
+得到的二进制逐字节相同（SHA-256 均为 a130e411ae4896a9bbd5a7735f19d50ecd8acd909e0c4528fc465a956dbfb6d2）。
+注意：不固定 SOURCE_DATE_EPOCH、或换一个目标目录，SHA 不会相同。对两个这样构建的二进制做 strings 对比，可读文本的差别只有两类：
+vendored-tls 会把 OpenSSL 静态编进去，其中内嵌了构建时间（"built on: …"）和构建目录路径（ENGINESDIR / MODULESDIR / protobuf 生成文件路径）。
+其余字节差异没有逐条分析（路径长短不同会让后面的数据整体位移）。需要核对产物时，请按上面的条件重建。

@@ -1,12 +1,12 @@
 log_level: "info"
 grpc_server:
   enabled: true
-  listen_address: "127.0.0.1:53702"
+  listen_address: "127.0.0.1:62659"
 admin_server:
-  listen_address: "127.0.0.1:53703"
+  listen_address: "127.0.0.1:62660"
 api_gateway:
   enabled: true
-  listen_address: "127.0.0.1:53704"
+  listen_address: "127.0.0.1:62661"
 processor:
   tick_channel_buffer: 1000
   kline_channel_buffer: 1000
@@ -14,8 +14,8 @@ processor:
 connectors:
   binance:
     enabled: true
-    stream_base_url: "ws://host.docker.internal:53694/ws"
-    stream_base_url_public: "ws://host.docker.internal:53696/ws"
+    stream_base_url: "ws://host.docker.internal:62651/ws"
+    stream_base_url_public: "ws://host.docker.internal:62653/ws"
     rest_base_url: "http://127.0.0.1:1"
     subscribe_ticks: ["BTCUSDT"]
     subscribe_klines: { "1m": ["BTCUSDT"] }
@@ -25,8 +25,8 @@ connectors:
     subscribe_quotes: ["BNBUSDT"]
   okx:
     enabled: true
-    stream_base_url_public: "ws://host.docker.internal:53698/ws"
-    stream_base_url_business: "ws://host.docker.internal:53700/ws"
+    stream_base_url_public: "ws://host.docker.internal:62655/ws"
+    stream_base_url_business: "ws://host.docker.internal:62657/ws"
     rest_base_url: "http://127.0.0.1:1"
     subscribe_ticks: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
     subscribe_klines: { "1m": ["BTC-USDT-SWAP"] }
