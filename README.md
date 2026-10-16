@@ -247,9 +247,15 @@ curl -X DELETE http://localhost:8081/api/v1/subscriptions -H 'Content-Type: appl
 | 配置项 | 热更 | 说明 |
 |--------|------|------|
 | `subscribe_quotes` 增删 | ✅ | 前提：对应 quote 连接器已在运行；否则日志提示"需要重启" |
+| `log_level` | ✅ | 立即切换日志级别，不重连；环境变量 `RUST_LOG` 优先于 YAML，设了它则 `log_level` 不起作用（见"日志"） |
 | `quotes_enabled` | ❌ | 需重启（日志会提示） |
 | `binance.stream_base_url_public` | ❌ | 需重启 |
+| `binance.stream_base_url`、`okx.stream_base_url_public`、`okx.stream_base_url_business` | ❌ | 需重启；自动重连也**不会**换地址（连接器只持有启动时的地址） |
 | `processor.quote_channel_buffer` | ❌ | 需重启 |
+
+SIGHUP 只热更订阅列表和日志级别，其余配置只在启动时读取。每次 SIGHUP 都和**实际运行的配置**对比：还有未生效的差异就点名并持续提示（WARN），
+只有日志出现 `config reloaded and applied successfully` 才表示文件内容已全部生效；配置文件读取 / 解析失败（ERROR）时保持运行配置不变。
+详见 `OPS_GUIDE.md` 第一节。
 
 ### 监控指标（只新增，旧指标名与标签不变）
 
@@ -362,20 +368,27 @@ scripts/compat/sample_process.sh http://HOST:8081 600 30 out/process.tsv        
 |------|------|
 | SIGINT (Ctrl+C) | 优雅关停 |
 | SIGTERM | 优雅关停 |
-| SIGHUP | 热重载配置（重新加载 config.yaml） |
+| SIGHUP | 重新加载 config.yaml：热更订阅列表和日志级别，其余变更点名提示需重启（见"热重载范围"） |
 
 ### 日志
 
 ```bash
-# 默认 info 级别
+# 默认 info 级别（config.yaml 的 log_level，缺省 info）
 cargo run -- --config config.yaml
 
-# 调试级别
+# 在 config.yaml 里改：log_level: "debug"   # trace / debug / info / warn / error，不区分大小写
+# 运行中改完发 SIGHUP 即可生效，不用重启
+
+# 用环境变量（优先于 config.yaml 的 log_level）：调试级别
 RUST_LOG=debug cargo run -- --config config.yaml
 
 # 仅看 connector 日志
 RUST_LOG=md_connector=debug,info cargo run -- --config config.yaml
 ```
+
+优先级：环境变量 `RUST_LOG`（已设置且合法）＞ YAML `log_level`（环境变量 `LOG_LEVEL` 可覆盖它）＞ 默认 `info`。
+设了 `RUST_LOG` 时，YAML 的 `log_level` 不起作用，启动日志与 SIGHUP 都会明确提示，不会装作生效；
+`log_level` 写成非法值（如 `verbose`）会在加载配置时报错。详见 `OPS_GUIDE.md` 第一节。
 
 ### Prometheus 集成
 

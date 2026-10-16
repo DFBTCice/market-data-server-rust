@@ -6,31 +6,59 @@
 
 ## 一、热重载（SIGHUP）真实能力清单
 
-从代码 `crates/md-server/src/main.rs` 的 `wait_for_signal()` 和 `apply_subscription_changes()` 函数分析，**SIGHUP 热重载的实际能力如下**：
+从代码 `crates/md-server/src/reload.rs`（重载逻辑）和 `main.rs` 的 `wait_for_signal()` 分析，**SIGHUP 热重载的实际能力如下**：
+
+> **规则一句话**：SIGHUP **只热更订阅列表**；其余所有配置项都"只在进程启动时读取"，文件里改了**不会生效**，必须重启。
+>
+> 进程内部把「文件里的新配置」和「实际已应用配置」分开记录。每次 SIGHUP 都拿文件和**实际在运行的配置**对比：
+> 只要还有没生效的差异，**每一次** SIGHUP 都会继续点名提示（不会因为发过一次就"记成已应用"）；把文件改回原值，提示自动消失。
+> **只有日志里出现 `config reloaded and applied successfully`，才表示文件内容已全部生效。**
+> （1.1.0 / 1.1.1 的缺陷：只改 OKX Business 地址会误报成功；第二次 SIGHUP 会把未生效的地址当成已应用。已修复，见 `CHANGELOG.md`「未发布」。）
 
 ### ✅ 真正支持热更（无需重启）
 
 | 配置项 | 是否热更 | 说明 |
 |--------|---------|------|
 | **订阅列表** | ✅ | `subscribe_ticks`、`subscribe_klines` 的增删会调用 `add_subscriptions` / `remove_subscriptions`，实时生效 |
-| **quote 订阅列表**（1.1.0） | ✅（有前提） | `connectors.{binance,okx}.subscribe_quotes` 的增删实时生效，**前提**是对应 quote 连接器已在运行（启动时 `quotes_enabled=true` 且列表非空）；否则日志提示"quote connector is not running ... requires restart" |
-| `log_level` | ⚠️ **只能检测，无法真正生效** | tracing 不支持运行时改 level，代码里只记录了 `"log_level: info -> debug (applied)"` 日志，实际日志级别不会变 |
+| **quote 订阅列表**（1.1.0） | ✅（有前提） | `connectors.{binance,okx}.subscribe_quotes` 的增删实时生效，**前提**是对应 quote 连接器已在运行（启动时 `quotes_enabled=true` 且列表非空） |
+| **`log_level`（日志级别）** | ✅（有前提） | SIGHUP 立即切换日志过滤器，**不重连、不重启**。**前提**：进程环境里没有设置 `RUST_LOG`——`RUST_LOG` 优先于 YAML，设了它 `log_level` 就不起作用（见下面"日志级别"一节） |
+
+订阅列表热更的**共同前提**是对应连接器启动时已创建：Binance 需 `binance.enabled=true`；OKX tick 需 `okx.enabled` 且 `subscribe_ticks` 非空；
+OKX K 线需 `okx.enabled` 且 `subscribe_klines` 非空；quote 需 `quotes_enabled=true` 且列表非空。
+不满足时变更**不会被静默吞掉**：日志点名 `... connector is not running ... NOT applied, requires restart`，且之后**每次** SIGHUP 都会继续提示，直到重启或把列表改回原值。
 
 ### ❌ 不支持热更（修改后提示需要重启）
 
+除订阅列表外，**其余所有配置项**都归此类（新增配置项默认也归此类，代码里用穷尽解构强制分类）。常见项：
+
 | 配置项 | 说明 |
 |--------|------|
-| `grpc_server.listen_address` | 端口已绑定，无法热更 |
-| `api_gateway.listen_address` | 同上 |
-| `connectors.{binance,okx}.enabled` | 连接器启停需要重建 |
-| `connectors.{binance,okx}.stream_base_url` | URL 变更需要重建连接 |
-| `connectors.{binance,okx}.stream_base_url_public` | 同上 |
-| `connectors.{binance,okx}.quotes_enabled`（1.1.0） | quote 连接器启停需要重建；变更时日志会提示 `quotes_enabled changed ... (requires restart)` |
-| `processor.quote_channel_buffer`（1.1.0） | 同 tick/kline 的通道 buffer，无法 resize |
-| `processor.tick_channel_buffer` | 通道 buffer 已创建，无法 resize |
-| `processor.kline_channel_buffer` | 同上 |
-| `processor.broadcast_capacity` | broadcast channel 已创建，无法 resize |
-| `reconnect_delay`、`ping_interval` | 当前实现不读取运行时变更 |
+| `connectors.{binance,okx}.stream_base_url*`（`binance.stream_base_url`、`binance.stream_base_url_public`、`okx.stream_base_url_public`、**`okx.stream_base_url_business`**） | 地址变更需要重建连接，不支持热更。**自动重连也不会换地址**：连接器只持有启动时的地址，等断线重连不会重新读 YAML，必须重启 |
+| `connectors.{binance,okx}.enabled`、`quotes_enabled`（1.1.0） | 连接器启停需要重建 |
+| `connectors.{binance,okx}.reconnect_delay`、`ping_interval`、`rest_base_url` | 只在启动时读取（此前 SIGHUP 完全不检测，现在会点名提示） |
+| `grpc_server.*`、`api_gateway.*`（含 `listen_address`、`ws_write_wait`）、`admin_server.*`、`ws_server.*` | 端口已绑定 / 参数启动时读取 |
+| `processor.{tick,kline,quote}_channel_buffer`、`processor.broadcast_capacity` | 通道已创建，无法 resize |
+
+> `--port-offset` 与环境变量覆盖（如 `API_GATEWAY_LISTEN_ADDRESS`）：启动与 SIGHUP 使用同一套"生效配置"推导，
+> 配置文件没改时不会再误报"监听地址变更"（此前带 `--port-offset` 的实例每次 SIGHUP 都会误报）。
+
+### 日志级别（`log_level`）怎么生效
+
+1.1.0 / 1.1.1 里 YAML 的 `log_level` **从未生效**（只是启动时打印一行，实际由环境变量 `RUST_LOG` 决定，没设就是 `info`）。现在它真正生效：
+
+| 优先级 | 来源 | 说明 |
+|--------|------|------|
+| 1（最高） | 环境变量 `RUST_LOG`（已设置、非空、写法合法） | 整个过滤器由它决定，可以写 `warn,md_connector=debug` 这类逐模块指令。**此时 YAML 的 `log_level` 不起作用**，SIGHUP 改它也不会生效（会明确提示） |
+| 2 | YAML `log_level`（环境变量 `LOG_LEVEL` 可覆盖它） | 启动时按它初始化；SIGHUP 热更 |
+| 3 | 默认 | `info` |
+
+- **合法值**：`trace` / `debug` / `info` / `warn`（也接受 `warning`）/ `error`，不区分大小写。写成别的（`fatal`、`verbose`、拼写错误）**启动时直接报错退出，SIGHUP 时拒绝并保持运行配置**——不会悄悄当成别的级别。
+- **为什么 `RUST_LOG` 优先**：环境变量优先于配置文件是通行约定；现网（198、compose、systemd 样例）都设了 `RUST_LOG=warn`，这样升级后日志量不会被悄悄改变。
+- **两者不一致时不会装作生效**：启动时有一行 WARN，例如 `config log_level "info" is overridden by RUST_LOG=warn: ...`；SIGHUP 改 `log_level` 时也会每次提示 `log_level changed: ... (NOT applied, requires restart; RUST_LOG=warn takes precedence ...)`。
+- **想让 YAML + SIGHUP 接管日志级别**：去掉容器 / 服务环境里的 `RUST_LOG`，在 YAML 里写想要的级别（线上想保持安静就写 `log_level: "warn"`），重启一次；之后改级别只需编辑 YAML 再发 SIGHUP。
+- 热更不会断开任何连接，也不会清空订阅；日志输出格式不变。
+- **`debug` / `trace` 很吵**：连接器会为收到的**每一条** WebSocket 消息写一行 debug 日志，行情高峰期日志量很大，生产环境不要长期开。
+  临时排查可以把 `log_level` 改成 `debug` 再发 SIGHUP（不断连），查完改回去再发一次 SIGHUP。
 
 ### 使用方式
 
@@ -43,12 +71,28 @@ kill -HUP $(docker inspect --format='{{.State.Pid}}' md-server)
 # 或 systemd 方式：
 sudo systemctl kill -s HUP md-server
 
-# 3. 查看日志确认
-# 预期输出：
-# "subscription lists changed, applying..."
-# "binance: adding 1 subscriptions"
-# "config reloaded and applied successfully"
+# 3. 查看日志确认（以下为日志级别 info 时的预期输出）
+# 订阅变更热更成功：
+#   subscription lists changed, applying...
+#   binance: adding 1 subscriptions
+#   config reloaded and applied successfully
+# 日志级别热更成功（没设 RUST_LOG 时；"applying..."在旧级别下输出，"(applied)"在新级别下输出）：
+#   log_level changed: info -> warn, applying...
+#   log_level changed: info -> warn (applied)
+# 设了 RUST_LOG 时 log_level 的改动不会生效（WARN，之后每次 SIGHUP 重复提示）：
+#   WARN log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; ...)
+# 有需要重启才生效的变更（点名配置路径、旧值与文件值；WARN 级别，之后每次 SIGHUP 重复提示）：
+#   WARN connectors.okx.stream_base_url_business changed: "wss://old" -> "wss://new" (NOT applied, requires restart)
+#   WARN some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_business)
+# 配置文件读不出来 / YAML 解析失败 / 校验失败（ERROR 级别；运行配置与订阅均保持不变）：
+#   ERROR failed to reload config: ..., keeping current running config (nothing applied)
 ```
+
+**线上 198 使用 `RUST_LOG=warn`**：`config reloaded and applied successfully` 是 INFO，在该级别下看不到——**成功时日志是静默的**；
+只要出现任何 WARN / ERROR（`some config changes require connector restart ...`、`failed to reload config ...`），就说明有事要处理。
+198 上 YAML 写的是 `log_level: "info"`，而 `RUST_LOG=warn` 优先，所以**实际级别是 warn**，启动时会有一行 WARN 说明这件事；
+要换成"YAML 控制 + SIGHUP 热更"，见上面"日志级别"一节最后一条。
+（1.1.0 / 1.1.1 在该级别下，只改 OKX Business 地址再发 SIGHUP 是**完全没有任何输出**。）
 
 ### 与 Go 版热重载对比
 
@@ -56,11 +100,11 @@ sudo systemctl kill -s HUP md-server
 |------|---------|---------|
 | 订阅列表热更 | ✅（通过连接器重建实现） | ✅（直接 add/remove，更轻量） |
 | 连接器重建 | ✅（Stop旧→新建→Start新） | ❌（不支持） |
-| log_level | ✅（viper 支持运行时改） | ⚠️（检测但不生效） |
+| log_level | ✅（viper 支持运行时改） | ✅（SIGHUP 热更；`RUST_LOG` 优先，设了它则 YAML 不起作用） |
 | 监听地址 | ❌ | ❌ |
 | 缓冲区大小 | ❌ | ❌ |
 
-**结论**：Rust 版的热重载在订阅列表变更上比 Go 版更轻量（不需要重建连接），但 Go 版支持完整的连接器重建和日志级别热更。Rust 版 README 的描述过于保守，实际上订阅热更已经做得很好了。
+**结论**：Rust 版的热重载在订阅列表变更上比 Go 版更轻量（不需要重建连接），日志级别也能热更；Go 版则支持完整的连接器重建。Rust 版 README 的描述过于保守，实际上订阅热更已经做得很好了。
 
 ---
 
@@ -94,6 +138,9 @@ docker run -d \
   --cpus=2 \
   ghcr.io/dfbtcice/market-data-server-rust:latest
 ```
+
+> `-e RUST_LOG=warn` 会把日志级别固定为 warn，YAML 的 `log_level` 与 SIGHUP 对它不起作用（见第一节"日志级别"）。
+> 想用 YAML + SIGHUP 控制日志级别：去掉这一行，在 `config.yaml` 里写 `log_level: "warn"`。
 
 ### 2.3 生产编排（Docker Compose + 监控）
 
