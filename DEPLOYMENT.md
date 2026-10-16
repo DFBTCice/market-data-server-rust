@@ -585,7 +585,7 @@ api_gateway:
 ### 6.2 环境变量覆盖
 
 ```bash
-# 覆盖日志级别
+# 覆盖日志级别（只能写 trace / debug / info / warn / error；设置了 RUST_LOG 时以 RUST_LOG 为准）
 export LOG_LEVEL=debug
 
 # 覆盖端口
@@ -1253,9 +1253,13 @@ node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:808
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `RUST_LOG` | 日志级别 | `info` |
-| `LOG_LEVEL` | 日志级别（Go） | `info` |
+| `RUST_LOG` | 日志过滤器（可写 `warn` 或 `warn,md_connector=debug`）。**设置后优先于 YAML 的 `log_level`**，此时 `log_level` 与 SIGHUP 都不能改日志级别 | 未设置 |
+| `LOG_LEVEL` | 覆盖 YAML 的 `log_level`（只能写 `trace` / `debug` / `info` / `warn` / `error`；仍低于 `RUST_LOG`） | 未设置 |
 | `TZ` | 时区 | 系统时区 |
+
+日志级别的优先级：`RUST_LOG`（已设置且合法）＞ YAML `log_level`（含 `LOG_LEVEL` 覆盖）＞ `info`。
+YAML 的 `log_level` 可以用 SIGHUP 热更（不重连）；已设置 `RUST_LOG` 时则不起作用，启动日志会 WARN 说明。
+详见 `OPS_GUIDE.md` 第一节"日志级别"。
 
 ---
 

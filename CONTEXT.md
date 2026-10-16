@@ -13,8 +13,9 @@
 - **Cache（缓存）**: 最新 Tick/Kline 的快照存储
 - **Processor（处理器）**: 中央数据处理模块，组合 Cache + PubSub + Metrics
 - **API Gateway**: HTTP/WebSocket 入口层，对外暴露 REST 和 WS 接口
-- **Hot Reload（热重载）**: 通过 SIGHUP 信号重新加载配置，不停机更新**订阅列表**；其余配置（含各连接器 WebSocket 地址）只在启动时读取，变更需重启
-- **Applied Config（已应用配置）**: 进程**实际在用**的配置（启动配置 + 已热更成功的订阅列表）。SIGHUP 总是拿文件里的新配置与它比较；需重启才能生效的变更不会写进它，所以会被持续提示，不会被误当成已生效
+- **Hot Reload（热重载）**: 通过 SIGHUP 信号重新加载配置，不停机更新**订阅列表**和**日志级别**；其余配置（含各连接器 WebSocket 地址）只在启动时读取，变更需重启
+- **Applied Config（已应用配置）**: 进程**实际在用**的配置（启动配置 + 已热更成功的订阅列表 / 日志级别）。SIGHUP 总是拿文件里的新配置与它比较；需重启才能生效的变更不会写进它，所以会被持续提示，不会被误当成已生效
+- **Log Filter Precedence（日志过滤器优先级）**: 环境变量 `RUST_LOG`（已设置且合法）＞ YAML `log_level`（`LOG_LEVEL` 环境变量可覆盖）＞ 默认 `info`。`RUST_LOG` 决定过滤器时，YAML 的 `log_level` 不起作用，SIGHUP 改它会明确提示"未生效"（`logging.rs`）
 - **Effective Config（生效配置）**: YAML + 环境变量覆盖 + `--port-offset`。启动与 SIGHUP 重载共用同一套推导（`reload::load_effective_config`）
 - **Seam（接缝）**: 行为可以被替换的位置（如 Connector trait）
 - **Depth（深度）**: 接口背后的杠杆率——小接口承载大行为
