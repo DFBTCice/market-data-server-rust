@@ -13,9 +13,12 @@
 //!    （OKX `stream_base_url_business` 就是这样漏掉的）。默认归类为"需重启"，宁可多提示也不误报成功。
 //! 4. **订阅列表热更保持原有行为**（对运行中的连接器做增量 add/remove，不重连）。区别只有：连接器没在运行（启动时没创建）
 //!    或下发失败的订阅组，不再被静默吞掉，而是作为"待处理"持续提示，且不推进 `applied`。
+//! 5. **`log_level` 可热更**（见 [`crate::logging`]）：SIGHUP 直接切换日志过滤器，不重连、不重启。
+//!    环境变量 `RUST_LOG` 优先于 YAML：设置了它时，`log_level` 的改动不会生效，作为待处理持续提示（并写明原因）。
 //!
 //! 约定：URL 等"需重启"的配置不做连接器热重建；自动重连只会重连启动时的地址（`ExchangeAdapter::ws_url()` 取自启动配置）。
 
+use crate::logging::{LevelOutcome, LevelSwitch};
 use md_config::{
     AdminServerConfig, ApiGatewayConfig, BinanceConfig, Config, ConfigError, ConnectorConfigs,
     GRPCConfig, OkxConfig, ProcessorConfig, WebSocketConfig,
@@ -77,7 +80,25 @@ pub(crate) fn load_effective_config(path: &str, port_offset: u16) -> Result<Conf
     let mut cfg = md_config::load_config(path)?;
     md_config::apply_env_overrides(&mut cfg);
     apply_port_offset(&mut cfg, port_offset);
+    canonicalize_log_level(&mut cfg)?;
     Ok(cfg)
+}
+
+/// 把 `log_level` 统一成标准小写写法（`INFO`、`warning` 等都规范化），保证"比较是否变更"和"交给日志过滤器"用的是同一个值。
+///
+/// YAML 里的非法值在 `md_config::load_config` 的校验里已被拒绝；这里兜住的是环境变量 `LOG_LEVEL` 覆盖进来的非法值
+/// （环境变量覆盖发生在校验之后）。
+fn canonicalize_log_level(cfg: &mut Config) -> Result<(), ConfigError> {
+    match md_config::normalize_log_level(&cfg.log_level) {
+        Some(level) => {
+            cfg.log_level = level.to_string();
+            Ok(())
+        }
+        None => Err(ConfigError::ValidationError(format!(
+            "{}（若 YAML 中的值合法，则来自环境变量 LOG_LEVEL 的覆盖）",
+            md_config::invalid_log_level_message(&cfg.log_level)
+        ))),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -90,7 +111,7 @@ pub(crate) enum PendingKind {
     RestartRequired {
         running: String,
         file: String,
-        note: Option<&'static str>,
+        note: Option<String>,
     },
     /// 订阅列表变了，但对应连接器启动时没有创建（交易所未启用 / 列表为空 / quote 开关关闭），无处下发；需重启。
     ConnectorNotRunning {
@@ -102,6 +123,8 @@ pub(crate) enum PendingKind {
         connector: &'static str,
         error: String,
     },
+    /// 日志级别切换失败（值在加载时已校验过，正常不会发生）：保持旧级别，下一次 SIGHUP 会重试。
+    LogLevelFailed { error: String },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -112,8 +135,12 @@ pub(crate) struct PendingChange {
 }
 
 impl PendingChange {
+    /// 是否需要重启才能生效（下发 / 切换失败的项不是重启问题：修好原因再发一次 SIGHUP 即可）
     fn needs_restart(&self) -> bool {
-        !matches!(self.kind, PendingKind::ApplyFailed { .. })
+        !matches!(
+            self.kind,
+            PendingKind::ApplyFailed { .. } | PendingKind::LogLevelFailed { .. }
+        )
     }
 
     fn log(&self) {
@@ -141,6 +168,11 @@ impl PendingChange {
                 "  {}: failed to apply subscription changes to the {} connector: {} \
                  (running subscriptions keep the old list; retried on the next SIGHUP)",
                 self.path, connector, error
+            ),
+            PendingKind::LogLevelFailed { error } => warn!(
+                "  {}: failed to switch the log filter: {} \
+                 (the running log level is unchanged; retried on the next SIGHUP)",
+                self.path, error
             ),
         }
     }
@@ -183,8 +215,8 @@ impl ReloadReport {
             );
         } else {
             warn!(
-                "some subscription changes failed to apply -- running subscriptions keep the old \
-                 lists; fix the cause and send SIGHUP again ({} pending: {})",
+                "some config changes failed to apply -- the running process keeps its previous \
+                 settings for them; fix the cause and send SIGHUP again ({} pending: {})",
                 self.pending.len(),
                 paths
             );
@@ -195,9 +227,6 @@ impl ReloadReport {
 // ---------------------------------------------------------------------------
 // 只在启动时读取的字段（需重启）
 // ---------------------------------------------------------------------------
-
-const LOG_LEVEL_NOTE: &str = "the log filter is fixed at startup from RUST_LOG (default info); \
-                              the YAML log_level does not change it at runtime";
 
 /// WebSocket 地址类配置的补充说明：运维常以为"等它断线重连就会换地址"，其实不会。
 const URL_NOTE: &str =
@@ -210,10 +239,11 @@ fn show<T: Debug + ?Sized>(v: &T) -> String {
 /// 全部"只在进程启动时读取"的配置项：`(YAML 路径, 值的展示串)`。
 ///
 /// **穷尽解构、不写 `..`**：`Config` 及其子结构新增字段时这里编译失败，必须在此显式归类。
-/// 三类 `subscribe_*` 订阅列表用 `_` 标出，由 [`SubGroup`] 热更，不在此处比较。
+/// 三类 `subscribe_*` 订阅列表用 `_` 标出，由 [`SubGroup`] 热更；`log_level` 同样用 `_` 标出，
+/// 由 [`ReloadState::apply`] 通过 [`LevelSwitch`] 热更。它们都不在此处比较。
 fn restart_only_fields(cfg: &Config) -> Vec<(&'static str, String)> {
     let Config {
-        log_level,
+        log_level: _,
         grpc_server:
             GRPCConfig {
                 listen_address: grpc_listen,
@@ -281,7 +311,6 @@ fn restart_only_fields(cfg: &Config) -> Vec<(&'static str, String)> {
     } = cfg;
 
     vec![
-        ("log_level", show(log_level)),
         ("grpc_server.listen_address", show(grpc_listen)),
         ("grpc_server.enabled", show(grpc_enabled)),
         ("grpc_server.read_timeout", show(grpc_read_timeout)),
@@ -356,8 +385,7 @@ pub(crate) fn restart_required_changes(applied: &Config, file: &Config) -> Vec<P
                 running,
                 file,
                 note: match path {
-                    "log_level" => Some(LOG_LEVEL_NOTE),
-                    p if p.contains("stream_base_url") => Some(URL_NOTE),
+                    p if p.contains("stream_base_url") => Some(URL_NOTE.to_string()),
                     _ => None,
                 },
             },
@@ -642,13 +670,17 @@ pub(crate) async fn apply_group(
 /// 运行中进程的"已应用配置"。**只有真正生效的内容才会写进来。**
 pub(crate) struct ReloadState {
     applied: Config,
+    /// 日志过滤器的热更接口
+    log: Arc<dyn LevelSwitch>,
 }
 
 impl ReloadState {
-    /// `startup_effective`：启动时实际使用的配置（已含环境变量覆盖和端口偏移）
-    pub(crate) fn new(startup_effective: Config) -> Self {
+    /// `startup_effective`：启动时实际使用的配置（已含环境变量覆盖和端口偏移）；
+    /// `log`：日志级别的热更接口（生产里是 `logging::LogControl`）
+    pub(crate) fn new(startup_effective: Config, log: Arc<dyn LevelSwitch>) -> Self {
         Self {
             applied: startup_effective,
+            log,
         }
     }
 
@@ -665,6 +697,48 @@ impl ReloadState {
     ) -> ReloadReport {
         let mut report = ReloadReport::default();
         let mut next = self.applied.clone();
+
+        // 0. 日志级别：热更（不重连）。RUST_LOG 优先时不生效，作为待处理持续提示。
+        //    放在最前面：调高详细度时，后面的订阅热更日志就能看到；调低时，"applying..."这行仍在旧级别下输出。
+        let mut log_pending = None;
+        if file.log_level != self.applied.log_level {
+            match self.log.overridden_by() {
+                Some(rust_log) => {
+                    log_pending = Some(PendingChange {
+                        path: "log_level",
+                        kind: PendingKind::RestartRequired {
+                            running: self.applied.log_level.clone(),
+                            file: file.log_level.clone(),
+                            note: Some(format!(
+                                "RUST_LOG={rust_log} takes precedence over log_level; \
+                                 unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level"
+                            )),
+                        },
+                    });
+                }
+                None => {
+                    info!(
+                        "  log_level changed: {} -> {}, applying...",
+                        self.applied.log_level, file.log_level
+                    );
+                    match self.log.apply(&file.log_level) {
+                        LevelOutcome::Applied => {
+                            info!(
+                                "  log_level changed: {} -> {} (applied)",
+                                self.applied.log_level, file.log_level
+                            );
+                            next.log_level = file.log_level.clone();
+                        }
+                        LevelOutcome::Rejected(error) => {
+                            log_pending = Some(PendingChange {
+                                path: "log_level",
+                                kind: PendingKind::LogLevelFailed { error },
+                            });
+                        }
+                    }
+                }
+            }
+        }
 
         // 1. 订阅列表：对运行中的连接器做增量 add/remove（不重连）
         let changed: Vec<SubGroup> = SubGroup::ALL
@@ -700,6 +774,7 @@ impl ReloadState {
         // 2. 只在启动时读取的字段：文件值 != 运行值 → 需重启。
         //    注意：这些值**不会**写进 next，所以下次 SIGHUP 仍会对比出来、继续提示。
         report.pending = restart_required_changes(&self.applied, &file);
+        report.pending.extend(log_pending);
         report.pending.extend(sub_pending);
 
         for p in &report.pending {
@@ -881,6 +956,55 @@ connectors:
         r
     }
 
+    /// 日志级别切换的 mock：记录被应用的级别；可模拟"RUST_LOG 优先"和"切换失败"
+    struct MockLevel {
+        overridden: Option<String>,
+        fail: AtomicBool,
+        applied: Mutex<Vec<String>>,
+    }
+
+    impl MockLevel {
+        fn new() -> Arc<Self> {
+            Arc::new(Self {
+                overridden: None,
+                fail: AtomicBool::new(false),
+                applied: Mutex::new(Vec::new()),
+            })
+        }
+        fn overridden_by_rust_log(raw: &str) -> Arc<Self> {
+            Arc::new(Self {
+                overridden: Some(raw.to_string()),
+                fail: AtomicBool::new(false),
+                applied: Mutex::new(Vec::new()),
+            })
+        }
+        fn applied(&self) -> Vec<String> {
+            self.applied.lock().unwrap().clone()
+        }
+    }
+
+    impl LevelSwitch for MockLevel {
+        fn overridden_by(&self) -> Option<String> {
+            self.overridden.clone()
+        }
+        fn apply(&self, level: &str) -> LevelOutcome {
+            if self.fail.load(Ordering::SeqCst) {
+                return LevelOutcome::Rejected("simulated failure".into());
+            }
+            self.applied.lock().unwrap().push(level.to_string());
+            LevelOutcome::Applied
+        }
+    }
+
+    /// 日志级别没有特别要求的测试用这个（RUST_LOG 未设置、切换总是成功）
+    fn state_of(cfg: Config) -> ReloadState {
+        ReloadState::new(cfg, MockLevel::new())
+    }
+
+    fn state_with(cfg: Config, level: &Arc<MockLevel>) -> ReloadState {
+        ReloadState::new(cfg, level.clone())
+    }
+
     const URL_PATHS: [&str; 4] = [
         "connectors.okx.stream_base_url_public",
         "connectors.okx.stream_base_url_business",
@@ -946,7 +1070,6 @@ connectors:
         type Mutator = Box<dyn Fn(&mut Config)>;
         let secs = |n| Duration::from_secs(n);
         let table: Vec<(&str, Mutator)> = vec![
-            ("log_level", Box::new(|c| c.log_level = "debug".into())),
             ("grpc_server.listen_address", Box::new(|c| c.grpc_server.listen_address = ":1".into())),
             ("grpc_server.enabled", Box::new(|c| c.grpc_server.enabled = !c.grpc_server.enabled)),
             ("grpc_server.read_timeout", Box::new(move |c| c.grpc_server.read_timeout = secs(99))),
@@ -1028,7 +1151,7 @@ connectors:
     #[tokio::test]
     async fn okx_business_url_only_change_requires_restart_and_is_not_success() {
         let r = rig(&[]);
-        let mut state = ReloadState::new(base());
+        let mut state = state_of(base());
         let mut file = base();
         file.connectors.okx.stream_base_url_business = "wss://okx.test/business-new".into();
 
@@ -1049,7 +1172,7 @@ connectors:
         for path in URL_PATHS {
             let r = rig(&[]);
             let original = base();
-            let mut state = ReloadState::new(original.clone());
+            let mut state = state_of(original.clone());
             let mut file = original.clone();
             set_url(&mut file, path, "wss://changed.test/ws");
 
@@ -1103,7 +1226,7 @@ connectors:
     #[tokio::test]
     async fn pending_restart_items_accumulate_and_stay_visible() {
         let r = rig(&[]);
-        let mut state = ReloadState::new(base());
+        let mut state = state_of(base());
         let mut file = base();
         file.connectors.okx.stream_base_url_public = "wss://a".into();
         file.connectors.binance.stream_base_url = "wss://b".into();
@@ -1120,7 +1243,7 @@ connectors:
     #[tokio::test]
     async fn subscription_hot_update_applies_once_and_updates_applied_lists() {
         let r = rig(&[]);
-        let mut state = ReloadState::new(base());
+        let mut state = state_of(base());
         let mut file = base();
         file.connectors.binance.subscribe_ticks = vec!["BTCUSDT".into(), "ETHUSDT".into()];
         file.connectors.okx.subscribe_ticks = vec!["ETH-USDT-SWAP".into()]; // 加 ETH、删 BTC
@@ -1187,7 +1310,7 @@ connectors:
     #[tokio::test]
     async fn subscription_hot_update_coexists_with_pending_url_change() {
         let r = rig(&[]);
-        let mut state = ReloadState::new(base());
+        let mut state = state_of(base());
         let mut file = base();
         file.connectors.okx.stream_base_url_business = "wss://okx.test/business-new".into();
         file.connectors
@@ -1220,7 +1343,7 @@ connectors:
     #[tokio::test]
     async fn unchanged_file_is_fully_applied_and_touches_no_connector() {
         let r = rig(&[]);
-        let mut state = ReloadState::new(base());
+        let mut state = state_of(base());
         let report = state.apply(base(), &r.conns).await;
         assert!(report.fully_applied());
         assert_eq!(
@@ -1242,7 +1365,7 @@ connectors:
         let mut applied = base();
         applied.connectors.okx.subscribe_klines.clear();
         applied.connectors.okx.subscribe_quotes.clear();
-        let mut state = ReloadState::new(applied.clone());
+        let mut state = state_of(applied.clone());
 
         let mut file = applied.clone();
         file.connectors
@@ -1280,7 +1403,7 @@ connectors:
     async fn failed_apply_keeps_old_list_and_is_retried_on_next_reload() {
         let r = rig(&[]);
         let original = base();
-        let mut state = ReloadState::new(original.clone());
+        let mut state = state_of(original.clone());
         let mut file = base();
         file.connectors
             .okx
@@ -1323,7 +1446,7 @@ connectors:
     async fn load_failure_keeps_running_config_and_touches_nothing() {
         let r = rig(&[]);
         let original = base();
-        let mut state = ReloadState::new(original.clone());
+        let mut state = state_of(original.clone());
 
         // 文件不存在
         assert!(handle_sighup(
@@ -1450,5 +1573,238 @@ connectors:
             GroupOutcome::NotRunning
         );
         assert!(conns.is_empty());
+    }
+
+    // ---- 9. log_level 热更 ----
+
+    #[test]
+    fn log_level_is_not_a_restart_only_field() {
+        // log_level 不再属于"只在启动时读取"的字段：它由 SIGHUP 热更
+        assert!(restart_only_fields(&base())
+            .iter()
+            .all(|(path, _)| *path != "log_level"));
+        let applied = base();
+        let mut file = base();
+        file.log_level = "debug".into();
+        assert!(restart_required_changes(&applied, &file).is_empty());
+    }
+
+    #[tokio::test]
+    async fn log_level_change_is_hot_applied_once_and_adopted() {
+        let r = rig(&[]);
+        let lv = MockLevel::new();
+        let mut state = state_with(base(), &lv);
+        let mut file = base();
+        file.log_level = "debug".into();
+
+        let report = state.apply(file.clone(), &r.conns).await;
+        assert!(
+            report.fully_applied(),
+            "热更成功应报告全部生效: {:?}",
+            report.pending
+        );
+        assert_eq!(lv.applied(), vec!["debug"]);
+        assert_eq!(
+            state.applied().log_level,
+            "debug",
+            "热更成功后应推进已应用配置"
+        );
+
+        // 第二次 SIGHUP：文件没变，不得重复切换
+        let report = state.apply(file.clone(), &r.conns).await;
+        assert!(report.fully_applied());
+        assert_eq!(lv.applied(), vec!["debug"], "不得重复应用同一个级别");
+
+        // 再调低
+        file.log_level = "warn".into();
+        let report = state.apply(file, &r.conns).await;
+        assert!(report.fully_applied());
+        assert_eq!(lv.applied(), vec!["debug", "warn"]);
+        assert_eq!(state.applied().log_level, "warn");
+
+        // 日志级别与连接器无关：不得有任何订阅动作
+        assert_eq!(r.okx.calls() + r.binance.calls() + r.okx_kline.calls(), 0);
+    }
+
+    #[tokio::test]
+    async fn unchanged_log_level_never_touches_the_filter() {
+        let r = rig(&[]);
+        let lv = MockLevel::new();
+        let mut state = state_with(base(), &lv);
+        let report = state.apply(base(), &r.conns).await;
+        assert!(report.fully_applied());
+        assert!(lv.applied().is_empty());
+    }
+
+    #[tokio::test]
+    async fn rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert() {
+        let r = rig(&[]);
+        let lv = MockLevel::overridden_by_rust_log("warn");
+        let mut state = state_with(base(), &lv); // 启动时 YAML = info，但实际过滤器来自 RUST_LOG=warn
+        let mut file = base();
+        file.log_level = "debug".into();
+
+        for n in 1..=3 {
+            let report = state.apply(file.clone(), &r.conns).await;
+            assert!(
+                !report.fully_applied(),
+                "第 {n} 次：RUST_LOG 优先时不得报告 log_level 已生效"
+            );
+            assert!(
+                report.has_pending("log_level"),
+                "第 {n} 次必须点名 log_level"
+            );
+            match &report.pending[0].kind {
+                PendingKind::RestartRequired {
+                    running,
+                    file,
+                    note: Some(note),
+                } => {
+                    assert_eq!(running, "info");
+                    assert_eq!(file, "debug");
+                    assert!(
+                        note.contains("RUST_LOG=warn"),
+                        "必须说明是被 RUST_LOG 覆盖: {note}"
+                    );
+                }
+                other => panic!("期望带说明的 RestartRequired，实际 {other:?}"),
+            }
+            assert!(report.pending[0].needs_restart());
+            assert!(lv.applied().is_empty(), "RUST_LOG 优先时不得去动过滤器");
+            assert_eq!(
+                state.applied().log_level,
+                "info",
+                "未生效的值不得写进已应用配置"
+            );
+        }
+
+        // 文件改回启动时的值：提示消失
+        let report = state.apply(base(), &r.conns).await;
+        assert!(report.fully_applied());
+    }
+
+    #[tokio::test]
+    async fn log_level_failure_keeps_old_level_and_is_retried_on_next_reload() {
+        let r = rig(&[]);
+        let lv = MockLevel::new();
+        let mut state = state_with(base(), &lv);
+        let mut file = base();
+        file.log_level = "debug".into();
+
+        lv.fail.store(true, Ordering::SeqCst);
+        let report = state.apply(file.clone(), &r.conns).await;
+        assert!(!report.fully_applied());
+        assert!(report.has_pending("log_level"));
+        assert!(matches!(
+            report.pending[0].kind,
+            PendingKind::LogLevelFailed { .. }
+        ));
+        assert!(!report.pending[0].needs_restart(), "切换失败不是重启问题");
+        assert_eq!(state.applied().log_level, "info", "失败时保持旧级别");
+
+        // 原因消除后再发一次 SIGHUP：重试成功
+        lv.fail.store(false, Ordering::SeqCst);
+        let report = state.apply(file, &r.conns).await;
+        assert!(report.fully_applied());
+        assert_eq!(lv.applied(), vec!["debug"]);
+        assert_eq!(state.applied().log_level, "debug");
+    }
+
+    #[tokio::test]
+    async fn log_level_hot_update_coexists_with_url_pending_and_subscription_update() {
+        let r = rig(&[]);
+        let lv = MockLevel::new();
+        let mut state = state_with(base(), &lv);
+        let mut file = base();
+        file.log_level = "debug".into();
+        file.connectors.okx.stream_base_url_business = "wss://okx.test/business-new".into();
+        file.connectors.okx.subscribe_ticks = vec!["ETH-USDT-SWAP".into()];
+
+        let report = state.apply(file, &r.conns).await;
+        assert_eq!(
+            report.pending.len(),
+            1,
+            "只剩地址变更待重启: {:?}",
+            report.pending
+        );
+        assert!(report.has_pending("connectors.okx.stream_base_url_business"));
+        assert_eq!(lv.applied(), vec!["debug"], "日志级别照常热更");
+        assert_eq!(
+            r.okx.added(),
+            vec![("TICK".into(), "ETH-USDT-SWAP".into())],
+            "订阅热更不受影响"
+        );
+    }
+
+    #[test]
+    fn effective_config_canonicalizes_log_level_spellings() {
+        for (written, want) in [("INFO", "info"), ("Warning", "warn"), ("debug", "debug")] {
+            let yaml =
+                BASE_YAML.replace("log_level: \"info\"", &format!("log_level: \"{written}\""));
+            let path = temp_file("canon", &yaml);
+            let cfg = load_effective_config(path.to_str().unwrap(), 0).unwrap();
+            let _ = std::fs::remove_file(path);
+            assert_eq!(cfg.log_level, want, "写法 {written:?}");
+        }
+    }
+
+    #[test]
+    fn canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env() {
+        // 环境变量 LOG_LEVEL 的覆盖发生在 YAML 校验之后，所以这里要兜底
+        let mut cfg = base();
+        cfg.log_level = "verbose".into();
+        let err = canonicalize_log_level(&mut cfg).unwrap_err().to_string();
+        assert!(
+            err.contains("log_level") && err.contains("verbose") && err.contains("LOG_LEVEL"),
+            "{err}"
+        );
+        assert_eq!(cfg.log_level, "verbose", "失败时不改动原值");
+
+        let mut ok = base();
+        ok.log_level = " Error ".into();
+        canonicalize_log_level(&mut ok).unwrap();
+        assert_eq!(ok.log_level, "error");
+    }
+
+    #[tokio::test]
+    async fn sighup_with_invalid_log_level_in_file_keeps_running_level() {
+        let r = rig(&[]);
+        let lv = MockLevel::new();
+        let original = base();
+        let mut state = state_with(original.clone(), &lv);
+        let bad = temp_file(
+            "badlevel",
+            &BASE_YAML.replace("log_level: \"info\"", "log_level: \"verbose\""),
+        );
+
+        let report = handle_sighup(&mut state, bad.to_str().unwrap(), 0, &r.conns).await;
+        let _ = std::fs::remove_file(bad);
+
+        assert!(report.is_none(), "非法 log_level 必须按「加载失败」处理");
+        assert!(lv.applied().is_empty());
+        assert_eq!(state.applied(), &original, "运行配置必须原样保留");
+    }
+
+    #[tokio::test]
+    async fn sighup_applies_log_level_written_in_any_accepted_spelling() {
+        let r = rig(&[]);
+        let lv = MockLevel::new();
+        let mut state = state_with(base(), &lv);
+        let good = temp_file(
+            "warnlevel",
+            &BASE_YAML.replace("log_level: \"info\"", "log_level: \"WARNING\""),
+        );
+
+        let report = handle_sighup(&mut state, good.to_str().unwrap(), 0, &r.conns)
+            .await
+            .expect("应能加载");
+        let _ = std::fs::remove_file(good);
+
+        assert!(report.fully_applied());
+        assert_eq!(
+            lv.applied(),
+            vec!["warn"],
+            "WARNING 应规范成 warn 再交给过滤器"
+        );
     }
 }

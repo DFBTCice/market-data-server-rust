@@ -1,4 +1,5 @@
 mod alloc_stats;
+mod logging;
 mod process_metrics;
 mod reload;
 
@@ -376,14 +377,6 @@ fn parse_addr(addr: &str) -> std::net::SocketAddr {
 
 #[tokio::main]
 async fn main() {
-    // 初始化日志（分层：默认 info，可通过 RUST_LOG 或配置覆盖）
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
-
     let cli = Cli::parse();
 
     // 初始化进程级指标（记录启动时间）
@@ -391,7 +384,7 @@ async fn main() {
 
     // 加载"生效配置"（YAML + 环境变量覆盖 + 端口偏移）。
     // SIGHUP 重载走同一个函数，保证启动与重载的配置推导一致（见 reload.rs）。
-    info!("loading config from {}", cli.config);
+    // 日志要等配置读完才能初始化（过滤器取决于 log_level 与 RUST_LOG），所以这里失败只能写 stderr。
     let cfg = match reload::load_effective_config(&cli.config, cli.port_offset) {
         Ok(cfg) => cfg,
         Err(e) => {
@@ -399,11 +392,15 @@ async fn main() {
             std::process::exit(1);
         }
     };
+
+    // 初始化日志：环境变量 RUST_LOG 优先，其次 YAML log_level（SIGHUP 可热更），缺省 info（见 logging.rs）
+    let log_control = Arc::new(logging::init(&cfg.log_level));
+
+    info!("loaded config from {}", cli.config);
     if cli.port_offset > 0 {
         info!("port offset: +{}", cli.port_offset);
     }
 
-    info!("log_level: {}", cfg.log_level);
     info!("gRPC: {}", cfg.grpc_server.listen_address);
     info!("API Gateway: {}", cfg.api_gateway.listen_address);
 
@@ -491,6 +488,7 @@ async fn main() {
         &processor,
         &connectors,
         &shutdown_tx,
+        log_control,
     )
     .await;
 
@@ -518,7 +516,8 @@ async fn main() {
 /// 等待信号：SIGTERM/SIGINT 触发关停，SIGHUP 触发配置重载（逻辑见 `reload.rs`）
 ///
 /// `cfg` 必须是启动时实际使用的"生效配置"（已含环境变量覆盖和端口偏移）；
-/// `port_offset` 用于让重载时用同一套规则推导文件里的新配置。
+/// `port_offset` 用于让重载时用同一套规则推导文件里的新配置；
+/// `log_control` 是日志过滤器的热更句柄（SIGHUP 时据此切换 `log_level`）。
 async fn wait_for_signal(
     config_path: &str,
     port_offset: u16,
@@ -526,6 +525,7 @@ async fn wait_for_signal(
     _processor: &Arc<Processor>,
     connectors: &Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
     shutdown_tx: &watch::Sender<bool>,
+    log_control: Arc<logging::LogControl>,
 ) {
     #[cfg(unix)]
     {
@@ -535,7 +535,7 @@ async fn wait_for_signal(
         let mut sighup = signal(SignalKind::hangup()).expect("failed to register SIGHUP handler");
 
         // "已应用配置"：只记录进程真正在用的配置；重启才能生效的变更不会写进来
-        let mut reload_state = reload::ReloadState::new(cfg.clone());
+        let mut reload_state = reload::ReloadState::new(cfg.clone(), log_control);
 
         loop {
             tokio::select! {
@@ -556,7 +556,7 @@ async fn wait_for_signal(
 
     #[cfg(not(unix))]
     {
-        let _ = (config_path, port_offset, cfg, connectors);
+        let _ = (config_path, port_offset, cfg, connectors, log_control);
         tokio::signal::ctrl_c()
             .await
             .expect("failed to listen for Ctrl+C");
