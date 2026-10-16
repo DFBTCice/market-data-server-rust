@@ -209,8 +209,8 @@ WARN md_server: some config changes require connector restart -- please restart 
 
 ## 7. 没做 / 需要决定
 
-- **`RUST_LOG` 与 YAML 的优先级**：我按"环境变量优先"做了（理由见 §3.2）。如果你希望"YAML 优先"，不是改一行的事：
-  `md-config` 的 `log_level` 带默认值 `info`，必须先区分"YAML 里显式写了"和"用了默认值"，否则 `RUST_LOG` 会永远被默认值盖住。需要的话再做。
+- **`RUST_LOG` 与 YAML 的优先级**：**已决定维持"环境变量优先"**（2026-10-17 经用户确认；理由见 §3.2），代码不需要再改。
+  以后如果要改成"YAML 优先"，不是改一行的事：`md-config` 的 `log_level` 带默认值 `info`，必须先区分"YAML 里显式写了"和"用了默认值"，否则 `RUST_LOG` 会永远被默认值盖住。
 - 没有加"待重启项数量"的 Prometheus 指标（想法，未做，超出本次范围）。
 - **合并状态 / 版本归属**：已按指示在本地用合并提交（`--no-ff`）并入 `fix/gateway-unsubscribe-leak-v1.1.1`（合并提交 `c61fbbb`；
   合并后该分支的树与 `fix/sighup-config-reload` 完全一致，并复跑了 md-config 14 / md-server 42 个测试）。
