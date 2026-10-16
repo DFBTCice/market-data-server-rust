@@ -9,7 +9,9 @@
 //   4. YAML 读取/解析/校验失败：保留运行配置并明确报错，进程不退出，修好后可再次重载。
 //   5. 端口偏移 / 环境变量覆盖下，未改动的配置文件 SIGHUP 不得误报"监听地址变更"。
 //   6. 连接器未运行（启动时列表为空）时，订阅列表变更不得静默吞掉、不得误报成功。
-//   7. log_level 变更不得声称"已应用"（日志过滤器启动时由 RUST_LOG 决定）。
+//   7. log_level 真正生效：未设置 RUST_LOG 时，启动按 YAML 的 log_level 过滤日志，SIGHUP 可热更（不重连、不重启）；
+//      设置了 RUST_LOG 时它优先，YAML 的 log_level 改动不生效，且每次 SIGHUP 都明确提示（不谎称已应用）；
+//      非法 log_level 被拒绝（启动失败 / 重载保留运行配置）。
 //
 // 用法:
 //   node scripts/compat/sighup_reload_e2e.mjs --runner native --bin target/debug/md-server --out <dir>
@@ -84,6 +86,24 @@ async function freePortWithOffset(off) {
 }
 
 // ------------------------------------------------------------------ 被测进程的两种运行方式
+/** md-config 里会覆盖 YAML 的环境变量：不能从调用者的 shell 里漏进来影响结果 */
+const OVERRIDE_ENV = [
+  'LOG_LEVEL', 'GRPC_SERVER_LISTEN_ADDRESS', 'GRPC_SERVER_ENABLED', 'WS_SERVER_LISTEN_ADDRESS',
+  'API_GATEWAY_LISTEN_ADDRESS', 'API_GATEWAY_ENABLED', 'ADMIN_SERVER_LISTEN_ADDRESS',
+];
+
+/**
+ * 被测进程的环境变量：默认 RUST_LOG=info、NO_COLOR=1；extra 里值为 null / undefined 的键表示"不要设置"
+ * （用来测试 RUST_LOG 未设置的情形）。继承来的覆盖类环境变量一律先清掉，需要时由 extra 显式给出。
+ */
+function buildEnv(inherited, extra) {
+  const env = { ...inherited };
+  for (const k of OVERRIDE_ENV) delete env[k];
+  Object.assign(env, { RUST_LOG: 'info', NO_COLOR: '1' }, extra);
+  for (const k of Object.keys(env)) if (env[k] === null || env[k] === undefined) delete env[k];
+  return env;
+}
+
 class NativeRunner {
   constructor(bin) {
     if (!bin) throw new Error('--bin required for native runner');
@@ -91,7 +111,7 @@ class NativeRunner {
   }
   async start({ dir, args: extra = [], env = {}, onLine }) {
     this.child = spawn(this.bin, ['--config', join(dir, 'config.yaml'), ...extra], {
-      env: { ...process.env, RUST_LOG: 'info', NO_COLOR: '1', ...env },
+      env: buildEnv(process.env, env),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     const feed = (stream) => {
@@ -108,6 +128,15 @@ class NativeRunner {
     feed(this.child.stdout);
     feed(this.child.stderr);
     this.exited = new Promise((r) => this.child.on('exit', (code, sig) => r({ code, sig })));
+  }
+  /** 前台跑一次，返回 { code, out }（用于"启动就应失败"的场景） */
+  runOnce({ dir, env = {} }) {
+    const r = spawnSync(this.bin, ['--config', join(dir, 'config.yaml')], {
+      env: buildEnv(process.env, env),
+      timeout: 8000,
+      encoding: 'utf8',
+    });
+    return { code: r.status, timedOut: r.error?.code === 'ETIMEDOUT', out: stripAnsi(`${r.stdout || ''}${r.stderr || ''}`) };
   }
   sendHup() {
     process.kill(this.child.pid, 'SIGHUP');
@@ -133,7 +162,7 @@ class DockerRunner {
   }
   async start({ dir, args: extra = [], env = {}, onLine }) {
     this.name = `sighup-e2e-${process.pid}-${++dockerSeq}`;
-    const envArgs = Object.entries({ RUST_LOG: 'info', NO_COLOR: '1', ...env }).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
+    const envArgs = Object.entries(buildEnv({}, env)).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
     execFileSync('docker', [
       'run', '-d', '--name', this.name, '--platform', 'linux/amd64',
       '-v', `${dir}:/cfg`, ...envArgs, this.image, '--config', '/cfg/config.yaml', ...extra,
@@ -152,6 +181,17 @@ class DockerRunner {
     };
     feed(this.logs.stdout);
     feed(this.logs.stderr);
+  }
+  runOnce({ dir, env = {} }) {
+    const envArgs = Object.entries(buildEnv({}, env)).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
+    const name = `sighup-e2e-once-${process.pid}-${++dockerSeq}`;
+    const r = spawnSync(
+      'docker',
+      ['run', '--rm', '--name', name, '--platform', 'linux/amd64', '-v', `${dir}:/cfg`, ...envArgs, this.image, '--config', '/cfg/config.yaml'],
+      { timeout: 20000, encoding: 'utf8' },
+    );
+    spawnSync('docker', ['rm', '-f', name]); // 旧版本不会因非法配置退出：超时后确保容器被清理
+    return { code: r.status, timedOut: r.error?.code === 'ETIMEDOUT', out: stripAnsi(`${r.stdout || ''}${r.stderr || ''}`) };
   }
   sendHup() {
     execFileSync('docker', ['kill', '--signal=HUP', this.name]);
@@ -318,13 +358,24 @@ class Harness {
     return this.lines.filter((l) => re.test(l.text)).length;
   }
 
-  async start(cfg, { args: extra = [], env = {} } = {}) {
+  /**
+   * 启动被测进程并等它就绪。
+   * ready='logs'（默认）：等 N 条 "connected and synced"（INFO 日志）；
+   * ready='upstream'：改为等假上游收到 N 个连接——日志级别高于 info 时（如 log_level=warn）看不到那些 INFO 日志。
+   */
+  async start(cfg, { args: extra = [], env = {}, ready = 'logs' } = {}) {
     this.write(cfg);
     this.cfg = cfg;
     const before = this.count(/connected and synced/);
+    const upMark = this.up.mark();
     await this.runner.start({ dir: this.dir, args: extra, env, onLine: (l) => this.onLine(l) });
-    const want = before + this.expectedConnectors(cfg);
-    await waitFor(() => this.count(/connected and synced/) >= want, 25000, `${want} connectors synced`);
+    const n = this.expectedConnectors(cfg);
+    if (ready === 'upstream') {
+      await waitFor(() => this.up.since(upMark, undefined, 'connect').length >= n, 25000, `${n} upstream connections`);
+    } else {
+      const want = before + n;
+      await waitFor(() => this.count(/connected and synced/) >= want, 25000, `${want} connectors synced`);
+    }
     // 日志流（尤其 docker logs）会比 WS 帧晚/早到：留一段静默期，让启动阶段的订阅帧、心跳帧都被假上游处理完，
     // 避免它们落进后面某个断言的观察窗口（曾导致"没有任何订阅动作"偶发误判）。
     await sleep(1000);
@@ -548,19 +599,166 @@ scenario('s8-absent-connectors', '连接器未运行时订阅变更：每次 SIG
   }
 });
 
-// 11. log_level：日志过滤器启动时由 RUST_LOG 决定，SIGHUP 不能声称已应用
-scenario('s9-log-level-not-claimed-applied', 'log_level 变更：不得声称已应用', async (h) => {
+// 11. log_level 真正生效（见 logging.rs）。
+//     优先级：RUST_LOG（设置且合法）> YAML log_level（含 LOG_LEVEL 环境变量覆盖）> info。
+//     共用的小工具：去掉脚本自己打的标记行；判断某级别的日志行是否出现。
+const app = (text) => text.split('\n').filter((l) => !l.startsWith('[harness]')).join('\n');
+const hasLevel = (text, ...levels) => new RegExp(`\\s(${levels.join('|')})\\s`).test(app(text));
+const allLog = (h) => h.lines.map((l) => l.text).join('\n');
+
+scenario('s9a-log-level-hot-apply', 'log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启', async (h) => {
+  const cfg = await h.defaultCfg(); // logLevel: info
+  await h.start(cfg, { env: { RUST_LOG: null } });
+  h.check('启动日志说明过滤器来自配置的 log_level', /log filter: info \(from config log_level/.test(allLog(h)), tail(allLog(h)));
+
+  const mark = h.up.mark();
+  const at = (level, mutate = () => {}) => {
+    const c = structuredClone(cfg);
+    c.logLevel = level;
+    mutate(c);
+    h.write(c);
+  };
+
+  // info → warn：切换前 INFO 还可见，所以能看到"开始应用"这一行；切换后 INFO 全部消失
+  at('warn');
+  const r1 = await h.hup('info->warn', { quiet: true });
+  h.check('info→warn：点名 log_level 变更并开始应用', /log_level changed: info -> warn, applying/.test(r1.text), tail(r1.text));
+  const r2 = await h.hup('warn, no change', { quiet: true });
+  h.check('warn 级别：无变更 SIGHUP 没有任何 INFO 输出（INFO 已被过滤）', !hasLevel(r2.text, 'INFO', 'DEBUG', 'TRACE'), r2.text || '(空)');
+
+  // 对照：warn 级别下 WARN 仍可见（待重启的地址变更照常提示）
+  at('warn', (c) => (c.okx.biz = h.url('okxBizB')));
+  const r3 = await h.hup('warn, url pending', { quiet: true });
+  h.check('warn 级别：WARN 仍可见（待重启提示照常输出）', hasLevel(r3.text, 'WARN') && /okx\.stream_base_url_business/.test(r3.text), r3.text || '(空)');
+
+  // warn → error：同样的"地址待重启"情形，WARN 不再出现
+  at('error', (c) => (c.okx.biz = h.url('okxBizB')));
+  const r4 = await h.hup('warn->error', { quiet: true });
+  const r5 = await h.hup('error, same url pending', { quiet: true });
+  h.check('error 级别：同样的待重启情形不再输出 WARN（对照上一步 warn 级别可见）', !hasLevel(r4.text + r5.text, 'WARN', 'INFO'), (r4.text + r5.text) || '(空)');
+
+  // 对照：error 级别下 ERROR 仍可见
+  h.writeRaw('connectors: [unclosed\n');
+  const r6 = await h.hup('error, bad yaml', { quiet: true });
+  h.check('error 级别：ERROR 仍可见（YAML 解析失败照常报错）', hasLevel(r6.text, 'ERROR') && LOAD_FAILED.test(r6.text), r6.text || '(空)');
+
+  // error → info：切换后 INFO 恢复；地址改回原值，待处理项随之消失
+  at('info');
+  const r7 = await h.hup('error->info');
+  h.check('error→info：确认已应用', /log_level changed: error -> info \(applied\)/.test(r7.text), tail(r7.text));
+  h.check('error→info：此后报成功（地址已改回，无待处理项）', SUCCESS.test(r7.text) && !RESTART_SUMMARY.test(r7.text), tail(r7.text));
+  const r8 = await h.hup('info, no change');
+  h.check('info 恢复：无变更 SIGHUP 的 INFO 日志重新可见', /received SIGHUP/.test(r8.text) && SUCCESS.test(r8.text), tail(r8.text));
+
+  // 全程热更：没有任何重连、断线
+  const reconnects = h.up.since(mark, undefined, 'connect').length;
+  const closes = h.up.since(mark, undefined, 'close').length;
+  h.check('全程没有重连 / 断线（热更，不重启）', reconnects === 0 && closes === 0 && h.runner.alive(), `connects=${reconnects} closes=${closes}`);
+});
+
+scenario('s9b-log-level-from-config-at-startup', '启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志', async (h) => {
   const cfg = await h.defaultCfg();
-  await h.start(cfg);
+  cfg.logLevel = 'warn';
+  await h.start(cfg, { env: { RUST_LOG: null }, ready: 'upstream' });
+  const startup = app(allLog(h));
+  h.check('启动阶段没有任何 INFO 日志（旧版本这里会输出全部 INFO）', !/\sINFO\s/.test(startup), tail(startup));
+  h.check('连接器照常连上（只是日志安静）', h.up.connects('okxPubA') >= 1 && h.up.connects('bnMarketA') >= 1, '');
+
+  const r0 = await h.hup('no change', { quiet: true });
+  h.check('无变更 SIGHUP：安静', !hasLevel(r0.text, 'INFO', 'WARN', 'ERROR'), r0.text || '(空)');
+
   const next = structuredClone(cfg);
-  next.logLevel = 'error';
+  next.logLevel = 'info';
   h.write(next);
-  const r1 = await h.hup('#1');
-  h.check('点名 log_level', /log_level/.test(r1.text), tail(r1.text));
-  h.check('不得写"(applied)"', !/log_level[^\n]*\(applied\)/.test(r1.text), tail(r1.text));
-  h.check('不报成功', !SUCCESS.test(r1.text), tail(r1.text));
-  const r2 = await h.hup('#2');
-  h.check('实际日志级别未变（第二次 SIGHUP 的 info 日志仍可见）——仅作事实记录', /received SIGHUP/.test(r2.text), tail(r2.text));
+  const r1 = await h.hup('warn->info');
+  h.check('warn→info：确认已应用', /log_level changed: warn -> info \(applied\)/.test(r1.text), tail(r1.text));
+  h.check('warn→info：此后 INFO 可见（结论行报成功）', SUCCESS.test(r1.text), tail(r1.text));
+});
+
+scenario('s9c-rust-log-takes-precedence', 'RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效', async (h) => {
+  const cfg = await h.defaultCfg();
+  cfg.logLevel = 'debug'; // YAML 写 debug
+  await h.start(cfg, { env: { RUST_LOG: 'info' } }); // 环境变量 info
+  const startup = allLog(h);
+  h.check('启动：WARN 点名 YAML 的 log_level 被 RUST_LOG 覆盖', /WARN[^\n]*log_level "debug" is overridden by RUST_LOG=info/.test(startup), tail(startup));
+  h.check('启动：实际生效的是 RUST_LOG（有 INFO、没有 DEBUG）', /\sINFO\s/.test(startup) && !/\sDEBUG\s/.test(app(startup)), tail(startup));
+
+  const next = structuredClone(cfg);
+  next.logLevel = 'warn'; // 与启动时的 debug 不同
+  h.write(next);
+  for (const n of [1, 2]) {
+    const r = await h.hup(`#${n}`);
+    h.check(`第${n}次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖`, /log_level changed: debug -> warn \(NOT applied/.test(r.text) && /RUST_LOG=info takes precedence/.test(r.text), tail(r.text));
+    h.check(`第${n}次：给出"需要重启"的结论，不报成功`, RESTART_SUMMARY.test(r.text) && !SUCCESS.test(r.text), tail(r.text));
+    h.check(`第${n}次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）`, /received SIGHUP/.test(r.text) && !/applying\.\.\./.test(r.text), tail(r.text));
+  }
+  h.write(cfg); // 改回启动时的值
+  const r = await h.hup('revert');
+  h.check('改回启动时的值：待处理项消失，报成功', SUCCESS.test(r.text) && !RESTART_SUMMARY.test(r.text), tail(r.text));
+});
+
+scenario('s9d-invalid-log-level-rejected', '非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变', async (h) => {
+  const cfg = await h.defaultCfg();
+
+  // 启动时：直接失败，明确点名
+  const badStart = structuredClone(cfg);
+  badStart.logLevel = 'verbose';
+  h.write(badStart);
+  const once = h.runner.runOnce({ dir: h.dir, env: { RUST_LOG: null } });
+  // 必须是进程自己很快退出（退出码 1），而不是跑到超时被杀：旧版本不校验 log_level，会一直运行到被超时杀掉
+  h.check('启动：进程自己退出，退出码为 1（不是跑到超时被杀）', once.code === 1 && !once.timedOut, `code=${once.code} timedOut=${once.timedOut}`);
+  h.check('启动：报错点名 log_level 和错误值', /failed to load config/.test(once.out) && /log_level/.test(once.out) && /verbose/.test(once.out), once.out);
+
+  // 运行中：重载时拒绝
+  await h.start(cfg, { env: { RUST_LOG: null } });
+  const bad = structuredClone(cfg);
+  bad.logLevel = 'verbose';
+  h.write(bad);
+  const r = await h.hup('bad level');
+  h.check('重载：明确报错并点名 log_level', LOAD_FAILED.test(r.text) && /log_level/.test(r.text) && /verbose/.test(r.text), tail(r.text));
+  h.check('重载：声明保留运行配置', /keeping current running config/.test(r.text), tail(r.text));
+  h.check('重载：不报成功', !SUCCESS.test(r.text), tail(r.text));
+  h.check('重载：进程仍在运行', h.runner.alive(), '');
+
+  h.write(cfg);
+  const r2 = await h.hup('restore');
+  h.check('修好后：报成功，且 INFO 仍可见（运行中的日志级别没有被坏配置改动）', SUCCESS.test(r2.text) && /received SIGHUP/.test(r2.text), tail(r2.text));
+});
+
+scenario('s9e-log-level-env-override', '环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报', async (h) => {
+  const cfg = await h.defaultCfg(); // YAML: info
+  await h.start(cfg, { env: { RUST_LOG: null, LOG_LEVEL: 'warn' }, ready: 'upstream' });
+  h.check('启动：按 LOG_LEVEL=warn 生效（没有 INFO 日志）', !/\sINFO\s/.test(app(allLog(h))), tail(app(allLog(h))));
+
+  const r0 = await h.hup('no change', { quiet: true });
+  h.check('无变更 SIGHUP：安静，不误报 log_level 变更', !hasLevel(r0.text, 'INFO', 'WARN', 'ERROR'), r0.text || '(空)');
+
+  // YAML 改成 debug：环境变量仍然覆盖，生效配置不变（与其他环境变量覆盖项的行为一致）
+  const next = structuredClone(cfg);
+  next.logLevel = 'debug';
+  h.write(next);
+  const r1 = await h.hup('yaml->debug', { quiet: true });
+  h.check('YAML 改动被环境变量覆盖：生效配置不变，不输出任何 INFO/WARN/ERROR', !hasLevel(r1.text, 'INFO', 'WARN', 'ERROR'), r1.text || '(空)');
+});
+
+scenario('s9f-prod-198-combination', '线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn', async (h) => {
+  const cfg = await h.defaultCfg(); // YAML: info
+  await h.start(cfg, { env: { RUST_LOG: 'warn' }, ready: 'upstream' });
+  const startup = app(allLog(h));
+  h.check('启动：生效的仍是 RUST_LOG=warn（没有 INFO 日志，行为与升级前一致）', !/\sINFO\s/.test(startup), tail(startup));
+  h.check('启动：WARN 明确说明 YAML 的 log_level 被 RUST_LOG 覆盖', /WARN[^\n]*log_level "info" is overridden by RUST_LOG=warn/.test(startup), tail(startup));
+
+  const r0 = await h.hup('no change', { quiet: true });
+  h.check('无变更 SIGHUP：安静', !hasLevel(r0.text, 'INFO', 'WARN', 'ERROR'), r0.text || '(空)');
+
+  const next = structuredClone(cfg);
+  next.logLevel = 'debug';
+  h.write(next);
+  for (const n of [1, 2]) {
+    const r = await h.hup(`yaml->debug #${n}`, { quiet: true });
+    h.check(`第${n}次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先`, hasLevel(r.text, 'WARN') && /log_level changed: info -> debug \(NOT applied/.test(r.text) && /RUST_LOG=warn takes precedence/.test(r.text), r.text || '(空)');
+    h.check(`第${n}次：给出"需要重启"的结论`, RESTART_SUMMARY.test(r.text), r.text || '(空)');
+  }
 });
 
 // 12. 线上同款日志级别（198 的 RUST_LOG=warn）：info 级的"成功"提示看不到，所以"待重启/失败"必须在 warn 以上可见
