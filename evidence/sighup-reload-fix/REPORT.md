@@ -212,9 +212,11 @@ WARN md_server: some config changes require connector restart -- please restart 
 - **`RUST_LOG` 与 YAML 的优先级**：我按"环境变量优先"做了（理由见 §3.2）。如果你希望"YAML 优先"，不是改一行的事：
   `md-config` 的 `log_level` 带默认值 `info`，必须先区分"YAML 里显式写了"和"用了默认值"，否则 `RUST_LOG` 会永远被默认值盖住。需要的话再做。
 - 没有加"待重启项数量"的 Prometheus 指标（想法，未做，超出本次范围）。
-- **合并方式 / 版本归属**：本分支线性叠在 PR #2 分支之上，可以直接合并（快进或合并提交都行）。PR #2 也改过 `crates/md-server`，
-  我在上一轮试过把代码提交单独摘到 `feat/quote-topic-v1.1.0`（1.1.0 线）：只有 `crates/md-server/Cargo.toml` 一处平凡冲突（`[dev-dependencies]` 紧挨着 PR #2 新增的 jemalloc 依赖）；
-  这一轮新增的 `log_level` 提交没有重新试摘。是否并入 1.1.1、单独发 1.1.2，由主审决定。
+- **合并状态 / 版本归属**：已按指示在本地用合并提交（`--no-ff`）并入 `fix/gateway-unsubscribe-leak-v1.1.1`（合并提交 `c61fbbb`；
+  合并后该分支的树与 `fix/sighup-config-reload` 完全一致，并复跑了 md-config 14 / md-server 42 个测试）。
+  **尚未推送**：origin 上该分支仍是 `eb78524`，PR #2 暂无变化。**未打标签、版本号未改、未换版。**
+  PR #2 也改过 `crates/md-server`，我在上一轮试过把 SIGHUP 的代码提交单独摘到 `feat/quote-topic-v1.1.0`（1.1.0 线）：只有 `crates/md-server/Cargo.toml` 一处平凡冲突（`[dev-dependencies]` 紧挨着 PR #2 新增的 jemalloc 依赖）；
+  这一轮新增的 `log_level` 提交没有重新试摘。是否作为 1.1.1 一并发布、还是单独发 1.1.2、何时换版，由主审决定。
 - **换版**：未做。产物（`dist/` 不入库）：`md-server-sighup-loglevel-fix-linux-x86_64`，SHA-256 与可复现构建方法见 `ARTIFACTS.txt`。
   198 换版清单新增一条：是否去掉 `RUST_LOG=warn`、YAML 是否改 `log_level: "warn"`（见 §6）。
 
