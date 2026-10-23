@@ -66,19 +66,19 @@
     }
   ],
   "latest_observation": {
-    "at_utc": "2026-10-23T22:06:07.953471Z",
-    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261023T2205Z/check.json",
-    "provisional_rss_target_exceeded": true,
-    "rss_slope_mib_h": 1.5223450471224367,
-    "post_warmup_span_s": 4261,
-    "rss_current_mib": 57.34375,
+    "at_utc": "2026-10-23T23:10:46.190314+00:00",
+    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261023T2309Z/check.json",
+    "provisional_rss_target_exceeded": false,
+    "rss_slope_mib_h": -0.3183833050028898,
+    "post_warmup_span_s": 8161.0,
+    "rss_current_mib": 55.70703125,
     "allocated_plateau": true,
     "write_timeouts": 0,
     "ticks_dropped": 0,
     "healthy": true,
     "rollback_threshold_exceeded": false,
-    "decision": "continue original sampling; do not declare 24h pass; no production mutation",
-    "notification_reason": "first provisional post-warmup RSS slope above 1MiB/h target",
-    "repeat_notification_policy": "do not repeat unchanged provisional warning; notify on worsening, recovery, failure, completion or required action"
+    "decision": "continue original sampling; provisional RSS warning recovered, not a complete 24h pass",
+    "notification_reason": "recovery from previous provisional RSS target exceedance",
+    "repeat_notification_policy": "stay quiet while healthy/unchanged; notify on material change, failure, completion or required action"
   }
 }
