@@ -1,0 +1,1 @@
+2026-10-23T17:51:10.648891264Z [2m2026-10-23T17:51:10.648661Z[0m [33m WARN[0m [2mmd_gateway::ws[0m[2m:[0m Gateway WebSocket client kicked: write blocked longer than ws_write_wait (10s); client is not reading (stalled or half-open)

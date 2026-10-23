@@ -1,0 +1,62 @@
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:56.998778Z  INFO md_server: log filter: info (from RUST_LOG; config log_level "info" is ignored while RUST_LOG is set)
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.000327Z  INFO md_server: loaded config from /cfg/config.yaml
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.000338Z  INFO md_server: gRPC: 127.0.0.1:61163
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.000345Z  INFO md_server: API Gateway: 127.0.0.1:61165
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.001528Z  INFO md_server: starting Binance connector
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.004914Z  INFO md_server: starting OKX Public connector (trades)
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.006384Z  INFO md_server: starting OKX Business connector (candles)
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.006833Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:61155/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.007973Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:61159/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.008476Z  INFO md_server: starting Binance quote connector (bookTicker) -> ws://host.docker.internal:61157/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.008734Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:61161/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.011947Z  INFO md_server: starting OKX quote connector (tickers) -> ws://host.docker.internal:61159/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.013276Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:61157/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.016132Z  INFO md_connector::base: [okx-quote] connecting to ws://host.docker.internal:61159/ws
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.019716Z  INFO md_processor: processor dispatch loop started
+2026-10-23T17:32:57.072Z 2026-10-23T17:32:57.023135Z  INFO md_server: gRPC server listening on 127.0.0.1:61163
+2026-10-23T17:32:57.103Z 2026-10-23T17:32:57.099330Z  INFO md_server: API Gateway listening on 127.0.0.1:61165
+2026-10-23T17:32:57.135Z 2026-10-23T17:32:57.130732Z  INFO md_connector::base: [binance-quote] subscribing to 1 streams
+2026-10-23T17:32:57.135Z 2026-10-23T17:32:57.130761Z  INFO md_connector::base: [binance] subscribing to 2 streams
+2026-10-23T17:32:57.135Z 2026-10-23T17:32:57.131027Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-23T17:32:57.135Z 2026-10-23T17:32:57.131271Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+2026-10-23T17:32:57.135Z 2026-10-23T17:32:57.131504Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-23T17:32:57.146Z 2026-10-23T17:32:57.142105Z  INFO md_connector::base: [binance-quote] subscription sync complete
+2026-10-23T17:32:57.146Z 2026-10-23T17:32:57.142147Z  INFO md_connector::base: [binance] subscription sync complete
+2026-10-23T17:32:57.146Z 2026-10-23T17:32:57.142425Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-23T17:32:57.146Z 2026-10-23T17:32:57.142704Z  INFO md_connector::base: [okx-quote] subscription sync complete
+2026-10-23T17:32:57.147Z 2026-10-23T17:32:57.143016Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-23T17:32:57.147Z 2026-10-23T17:32:57.143242Z  INFO md_connector::base: [binance-quote] connected and synced
+2026-10-23T17:32:57.147Z 2026-10-23T17:32:57.143290Z  INFO md_connector::base: [binance] connected and synced
+2026-10-23T17:32:57.147Z 2026-10-23T17:32:57.143331Z  INFO md_connector::base: [okx] connected and synced
+2026-10-23T17:32:57.147Z 2026-10-23T17:32:57.143384Z  INFO md_connector::base: [okx-quote] connected and synced
+2026-10-23T17:32:57.147Z 2026-10-23T17:32:57.143472Z  INFO md_connector::base: [okx] connected and synced
+2026-10-23T17:32:58.153Z [harness] ---- process ready ----
+2026-10-23T17:32:58.154Z [harness] ---- SIGHUP #1 ----
+2026-10-23T17:32:58.295Z 2026-10-23T17:32:58.182462Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml
+2026-10-23T17:32:58.295Z 2026-10-23T17:32:58.185448Z  WARN md_server:   connectors.okx.stream_base_url_public changed: "ws://host.docker.internal:61159/ws" -> "ws://host.docker.internal:61160/ws" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)
+2026-10-23T17:32:58.295Z 2026-10-23T17:32:58.185679Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)
+2026-10-23T17:32:58.794Z [harness] ---- SIGHUP #2 ----
+2026-10-23T17:32:58.933Z 2026-10-23T17:32:58.824196Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml
+2026-10-23T17:32:58.933Z 2026-10-23T17:32:58.824844Z  WARN md_server:   connectors.okx.stream_base_url_public changed: "ws://host.docker.internal:61159/ws" -> "ws://host.docker.internal:61160/ws" (NOT applied, requires restart; connectors keep using the startup address; auto-reconnect does not re-read the config file)
+2026-10-23T17:32:58.933Z 2026-10-23T17:32:58.824865Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: connectors.okx.stream_base_url_public)
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.458974Z  INFO md_server: received SIGTERM
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.459114Z  INFO md_server: received shutdown signal, shutting down
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.459672Z  INFO md_server: stopping connector: okx-kline
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.460398Z  INFO md_connector::base: [okx] stopping connector
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.460467Z  INFO md_server: gRPC server shutting down
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.461528Z  INFO md_server: stopping connector: binance-quote
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462290Z  INFO md_connector::base: [binance-quote] stopping connector
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462309Z  INFO md_server: stopping connector: binance
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462311Z  INFO md_connector::base: [binance] stopping connector
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462313Z  INFO md_server: stopping connector: okx-quote
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462315Z  INFO md_connector::base: [okx-quote] stopping connector
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462317Z  INFO md_server: stopping connector: okx
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.462318Z  INFO md_connector::base: [okx] stopping connector
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.463752Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.463845Z  INFO md_connector::base: [okx-quote] shutdown signal received
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.464097Z  INFO md_connector::base: [binance-quote] shutdown signal received
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.464170Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-23T17:33:01.707Z 2026-10-23T17:32:59.464316Z  INFO md_connector::base: [binance] shutdown signal received
+2026-10-23T17:33:01.707Z 2026-10-23T17:33:01.468581Z  INFO md_server: shutdown complete
+2026-10-23T17:33:01.707Z 2026-10-23T17:33:01.471876Z  INFO md_processor: processor shutdown signal received
+2026-10-23T17:33:01.707Z 2026-10-23T17:33:01.471911Z  INFO md_processor: processor dispatch loop stopped

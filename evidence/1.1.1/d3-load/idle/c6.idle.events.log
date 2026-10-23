@@ -1,0 +1,5 @@
+2026-10-10T14:40:42.676Z TICKS_DROPPED 169->189
+2026-10-10T14:48:42.600Z RECONNECT md_connector_reconnect_total{exchange="okx"} 3->4
+2026-10-10T15:03:42.637Z CONNECTED md_connector_connected{exchange="okx-quote"} 1->0
+2026-10-10T15:03:42.637Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 2->3
+2026-10-10T15:04:42.630Z CONNECTED md_connector_connected{exchange="okx-quote"} 0->1

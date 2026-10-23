@@ -1,0 +1,5 @@
+baseline=13 current=10 missing(TICK/KLINE)=3
+200 {"exchange":"binance","type":"TICK","symbols":["BNBUSDT"]} {"success":true}
+200 {"exchange":"binance","type":"KLINE","symbols":["ETHUSDT"],"interval":"1h"} {"success":true}
+200 {"exchange":"okx","type":"TICK","symbols":["BNB-USDT-SWAP"]} {"success":true}
+after: total=13 stillMissing=0 extraVsBaseline=0

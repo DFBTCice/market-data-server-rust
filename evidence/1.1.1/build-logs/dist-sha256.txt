@@ -1,0 +1,17 @@
+commit: a06fe2095e8fc58bff1e038a594b25e7002aff1b dirty=0
+SOURCE_DATE_EPOCH=1792193713
+worktree=/tmp/md-final-a06fe20
+CARGO_TARGET_DIR=/tmp/md-final-a06fe20-target
+features=md-connector/vendored-tls,md-server/jemalloc-stats
+rustc 1.95.0 (59807616e 2026-04-14)
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+cargo-zigbuild v0.22.3:
+0.16.0
+libprotoc 29.3
+command: cargo zigbuild --locked --offline -p md-server --release --target x86_64-unknown-linux-musl --features md-connector/vendored-tls,md-server/jemalloc-stats
+3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d  /Users/lihao/Desktop/web3/rust/rest重构/dist/md-server-1.1.1-rebuild-1-linux-x86_64
+3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d  /Users/lihao/Desktop/web3/rust/rest重构/dist/md-server-1.1.1-rebuild-2-linux-x86_64
+3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d  /Users/lihao/Desktop/web3/rust/rest重构/dist/md-server-1.1.1-linux-x86_64
+/Users/lihao/Desktop/web3/rust/rest重构/dist/md-server-1.1.1-linux-x86_64: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped
+cmp: identical; dirty=0 after both builds
+Supersedes historical dirty-tree/no-jemalloc artifacts; old hashes remain in git history.

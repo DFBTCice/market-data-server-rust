@@ -1,0 +1,3 @@
+旧容器: 1de7da0c7d2c md-server:1.1.0-quote-bnb -> sha256:a46c88d0aa72
+新镜像: md-server:1.1.1 | 旧容器改名为 md-server-1.1.0-quote-bnb-bak
+新容器 5d6996ca9dc0 已启动；health 就绪耗时 0.0s；从发出停止旧容器到新容器健康共 7.1s（服务中断窗口）

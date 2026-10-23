@@ -1,0 +1,404 @@
+2026-10-23T17:34:34.855Z start url=ws://192.168.1.198:28108/ws/v1/data secs=7260 ticks=6 quotes=2 klines=5 staticKlines=2 churnPool=3 churn=2/90s off=20s
+2026-10-23T17:35:34.897Z static: msgs=2553 dups=1 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:35:34.899Z churn: msgs=385 dups=2 acks=5 errors=0 reconnects=0 churn_cycles=0 wanted=5
+2026-10-23T17:36:04.897Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:36:24.900Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:36:34.897Z static: msgs=5368 dups=2 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:36:34.897Z churn: msgs=774 dups=31 acks=9 errors=0 reconnects=0 churn_cycles=1 wanted=5
+2026-10-23T17:37:34.898Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:37:34.899Z static: msgs=8596 dups=3 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:37:34.899Z churn: msgs=1397 dups=206 acks=9 errors=0 reconnects=0 churn_cycles=2 wanted=3
+2026-10-23T17:37:54.902Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:38:34.900Z static: msgs=11109 dups=4 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:38:34.902Z churn: msgs=2059 dups=476 acks=13 errors=0 reconnects=0 churn_cycles=2 wanted=5
+2026-10-23T17:39:04.903Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:39:24.906Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:39:34.903Z static: msgs=13156 dups=4 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:39:34.904Z churn: msgs=2686 dups=759 acks=17 errors=0 reconnects=0 churn_cycles=3 wanted=5
+2026-10-23T17:40:34.902Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:40:34.907Z static: msgs=15134 dups=5 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:40:34.908Z churn: msgs=3394 dups=1125 acks=17 errors=0 reconnects=0 churn_cycles=4 wanted=3
+2026-10-23T17:40:54.914Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:41:34.909Z static: msgs=18105 dups=5 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:41:34.910Z churn: msgs=4134 dups=1541 acks=21 errors=0 reconnects=0 churn_cycles=4 wanted=5
+2026-10-23T17:42:04.904Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:42:24.911Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:42:34.909Z static: msgs=19918 dups=7 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:42:34.910Z churn: msgs=4918 dups=2005 acks=25 errors=0 reconnects=0 churn_cycles=5 wanted=5
+2026-10-23T17:43:34.904Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:43:34.910Z static: msgs=22664 dups=12 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:43:34.911Z churn: msgs=6233 dups=2880 acks=25 errors=0 reconnects=0 churn_cycles=6 wanted=3
+2026-10-23T17:43:54.908Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:44:34.912Z static: msgs=24760 dups=14 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:44:34.913Z churn: msgs=7331 dups=3624 acks=29 errors=0 reconnects=0 churn_cycles=6 wanted=5
+2026-10-23T17:45:04.906Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:45:24.913Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:45:34.913Z static: msgs=27015 dups=23 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:45:34.914Z churn: msgs=8313 dups=4288 acks=33 errors=0 reconnects=0 churn_cycles=7 wanted=5
+2026-10-23T17:46:34.907Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:46:34.914Z static: msgs=28939 dups=26 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:46:34.914Z churn: msgs=9659 dups=5244 acks=34 errors=0 reconnects=0 churn_cycles=8 wanted=3
+2026-10-23T17:46:54.913Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:47:34.915Z static: msgs=31040 dups=37 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:47:34.917Z churn: msgs=10784 dups=6021 acks=37 errors=0 reconnects=0 churn_cycles=8 wanted=5
+2026-10-23T17:48:04.910Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:48:24.916Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:48:34.915Z static: msgs=33550 dups=47 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:48:34.916Z churn: msgs=12207 dups=7046 acks=41 errors=0 reconnects=0 churn_cycles=9 wanted=5
+2026-10-23T17:49:34.913Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:49:34.916Z static: msgs=36518 dups=52 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:49:34.916Z churn: msgs=13925 dups=8342 acks=42 errors=0 reconnects=0 churn_cycles=10 wanted=3
+2026-10-23T17:49:54.920Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:50:34.918Z static: msgs=38982 dups=67 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:50:34.919Z churn: msgs=15312 dups=9396 acks=45 errors=0 reconnects=0 churn_cycles=10 wanted=5
+2026-10-23T17:51:04.918Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:51:24.924Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:51:34.919Z static: msgs=39333 dups=68 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:51:34.920Z churn: msgs=16403 dups=10185 acks=49 errors=0 reconnects=0 churn_cycles=11 wanted=5
+2026-10-23T17:51:50.089Z static: connection closed, reconnect in 3s (wanted=8)
+2026-10-23T17:52:34.921Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:52:34.925Z static: msgs=41527 dups=70 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:52:34.925Z churn: msgs=18287 dups=11700 acks=49 errors=0 reconnects=0 churn_cycles=12 wanted=3
+2026-10-23T17:52:54.924Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:53:34.926Z static: msgs=44189 dups=75 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:53:34.928Z churn: msgs=20086 dups=13148 acks=53 errors=0 reconnects=0 churn_cycles=12 wanted=5
+2026-10-23T17:54:04.924Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:54:24.936Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:54:34.927Z static: msgs=46532 dups=78 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:54:34.927Z churn: msgs=21379 dups=14161 acks=57 errors=0 reconnects=0 churn_cycles=13 wanted=5
+2026-10-23T17:55:34.926Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:55:34.929Z static: msgs=48336 dups=78 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:55:34.929Z churn: msgs=23603 dups=16029 acks=58 errors=0 reconnects=0 churn_cycles=14 wanted=3
+2026-10-23T17:55:54.934Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:56:34.932Z static: msgs=50637 dups=79 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:56:34.938Z churn: msgs=25375 dups=17496 acks=61 errors=0 reconnects=0 churn_cycles=14 wanted=5
+2026-10-23T17:57:04.928Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:57:24.942Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:57:34.937Z static: msgs=52886 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:57:34.938Z churn: msgs=27127 dups=18938 acks=65 errors=0 reconnects=0 churn_cycles=15 wanted=5
+2026-10-23T17:58:34.928Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:58:34.938Z static: msgs=58145 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:58:34.939Z churn: msgs=30541 dups=21858 acks=67 errors=0 reconnects=0 churn_cycles=16 wanted=3
+2026-10-23T17:58:54.931Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:59:34.941Z static: msgs=61103 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T17:59:34.946Z churn: msgs=32804 dups=23749 acks=69 errors=0 reconnects=0 churn_cycles=16 wanted=5
+2026-10-23T18:00:04.930Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:00:24.937Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:00:34.942Z static: msgs=64590 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:00:34.942Z churn: msgs=35010 dups=25582 acks=73 errors=0 reconnects=0 churn_cycles=17 wanted=5
+2026-10-23T18:01:34.931Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:01:34.942Z static: msgs=66989 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:01:34.943Z churn: msgs=37862 dups=28012 acks=73 errors=0 reconnects=0 churn_cycles=18 wanted=3
+2026-10-23T18:01:54.934Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:02:34.944Z static: msgs=69238 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:02:34.946Z churn: msgs=40174 dups=29980 acks=77 errors=0 reconnects=0 churn_cycles=18 wanted=5
+2026-10-23T18:03:04.933Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:03:24.938Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:03:34.948Z static: msgs=71880 dups=80 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:03:34.949Z churn: msgs=42407 dups=31876 acks=81 errors=0 reconnects=0 churn_cycles=19 wanted=5
+2026-10-23T18:04:34.935Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:04:34.947Z static: msgs=74423 dups=81 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:04:34.947Z churn: msgs=46186 dups=35167 acks=83 errors=0 reconnects=0 churn_cycles=20 wanted=3
+2026-10-23T18:04:54.940Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:05:34.949Z static: msgs=77741 dups=81 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:05:34.950Z churn: msgs=49238 dups=37797 acks=85 errors=0 reconnects=0 churn_cycles=20 wanted=5
+2026-10-23T18:06:04.939Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:06:24.948Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:06:34.949Z static: msgs=80830 dups=81 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:06:34.950Z churn: msgs=52371 dups=40537 acks=89 errors=0 reconnects=0 churn_cycles=21 wanted=5
+2026-10-23T18:07:34.942Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:07:34.950Z static: msgs=84215 dups=81 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:07:34.951Z churn: msgs=55647 dups=43421 acks=91 errors=0 reconnects=0 churn_cycles=22 wanted=3
+2026-10-23T18:07:54.945Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:08:34.952Z static: msgs=86287 dups=81 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:08:34.959Z churn: msgs=57958 dups=45401 acks=93 errors=0 reconnects=0 churn_cycles=22 wanted=5
+2026-10-23T18:09:04.943Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:09:24.945Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:09:34.952Z static: msgs=88869 dups=81 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:09:34.954Z churn: msgs=61152 dups=48211 acks=97 errors=0 reconnects=0 churn_cycles=23 wanted=5
+2026-10-23T18:10:34.943Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:10:34.953Z static: msgs=91736 dups=83 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:10:34.953Z churn: msgs=65562 dups=52170 acks=97 errors=0 reconnects=0 churn_cycles=24 wanted=3
+2026-10-23T18:10:54.956Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:11:34.955Z static: msgs=94568 dups=83 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:11:34.957Z churn: msgs=69126 dups=55338 acks=101 errors=0 reconnects=0 churn_cycles=24 wanted=5
+2026-10-23T18:12:04.944Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:12:24.948Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:12:34.963Z static: msgs=96715 dups=84 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:12:34.979Z churn: msgs=72275 dups=58140 acks=105 errors=0 reconnects=0 churn_cycles=25 wanted=5
+2026-10-23T18:13:34.946Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:13:34.961Z static: msgs=99062 dups=85 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:13:34.963Z churn: msgs=76483 dups=61958 acks=107 errors=0 reconnects=0 churn_cycles=26 wanted=3
+2026-10-23T18:13:54.949Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:14:34.965Z static: msgs=101413 dups=85 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:14:34.967Z churn: msgs=79777 dups=64919 acks=109 errors=0 reconnects=0 churn_cycles=26 wanted=5
+2026-10-23T18:15:04.949Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:15:24.952Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:15:34.967Z static: msgs=103556 dups=85 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:15:34.970Z churn: msgs=82852 dups=67641 acks=113 errors=0 reconnects=0 churn_cycles=27 wanted=5
+2026-10-23T18:16:34.950Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:16:34.968Z static: msgs=106452 dups=86 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:16:34.969Z churn: msgs=87074 dups=71457 acks=115 errors=0 reconnects=0 churn_cycles=28 wanted=3
+2026-10-23T18:16:54.956Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:17:34.978Z static: msgs=108454 dups=87 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:17:34.984Z churn: msgs=89969 dups=74064 acks=117 errors=0 reconnects=0 churn_cycles=28 wanted=5
+2026-10-23T18:18:04.952Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:18:24.963Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:18:34.976Z static: msgs=110443 dups=87 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:18:34.978Z churn: msgs=92885 dups=76687 acks=121 errors=0 reconnects=0 churn_cycles=29 wanted=5
+2026-10-23T18:19:34.955Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:19:34.975Z static: msgs=112827 dups=87 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:19:34.975Z churn: msgs=96614 dups=80087 acks=121 errors=0 reconnects=0 churn_cycles=30 wanted=3
+2026-10-23T18:19:54.960Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:20:34.982Z static: msgs=114755 dups=88 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:20:34.990Z churn: msgs=99696 dups=82868 acks=125 errors=0 reconnects=0 churn_cycles=30 wanted=5
+2026-10-23T18:21:04.956Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:21:24.961Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:21:34.986Z static: msgs=116375 dups=88 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:21:34.989Z churn: msgs=102683 dups=85594 acks=129 errors=0 reconnects=0 churn_cycles=31 wanted=5
+2026-10-23T18:22:34.959Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:22:34.990Z static: msgs=118312 dups=88 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:22:34.991Z churn: msgs=106928 dups=89478 acks=131 errors=0 reconnects=0 churn_cycles=32 wanted=3
+2026-10-23T18:22:54.964Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:23:34.995Z static: msgs=120004 dups=90 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:23:34.997Z churn: msgs=109922 dups=92204 acks=133 errors=0 reconnects=0 churn_cycles=32 wanted=5
+2026-10-23T18:24:04.961Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:24:24.969Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:24:34.997Z static: msgs=122371 dups=91 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:24:34.998Z churn: msgs=113161 dups=95160 acks=137 errors=0 reconnects=0 churn_cycles=33 wanted=5
+2026-10-23T18:25:34.963Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:25:34.998Z static: msgs=124080 dups=93 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:25:34.999Z churn: msgs=117002 dups=98704 acks=139 errors=0 reconnects=0 churn_cycles=34 wanted=3
+2026-10-23T18:25:54.968Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:26:35.000Z static: msgs=125693 dups=93 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:26:35.002Z churn: msgs=119688 dups=101127 acks=141 errors=0 reconnects=0 churn_cycles=34 wanted=5
+2026-10-23T18:27:04.965Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:27:24.969Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:27:35.001Z static: msgs=127750 dups=93 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:27:35.001Z churn: msgs=122666 dups=103825 acks=145 errors=0 reconnects=0 churn_cycles=35 wanted=5
+2026-10-23T18:28:34.968Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:28:35.003Z static: msgs=130132 dups=93 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:28:35.007Z churn: msgs=127074 dups=107899 acks=145 errors=0 reconnects=0 churn_cycles=36 wanted=3
+2026-10-23T18:28:54.981Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:29:35.003Z static: msgs=131836 dups=93 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:29:35.005Z churn: msgs=130479 dups=111043 acks=149 errors=0 reconnects=0 churn_cycles=36 wanted=5
+2026-10-23T18:30:04.969Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:30:24.973Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:30:35.006Z static: msgs=135146 dups=93 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:30:35.008Z churn: msgs=135035 dups=115270 acks=153 errors=0 reconnects=0 churn_cycles=37 wanted=5
+2026-10-23T18:31:34.976Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:31:35.006Z static: msgs=137498 dups=94 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:31:35.008Z churn: msgs=142456 dups=122218 acks=155 errors=0 reconnects=0 churn_cycles=38 wanted=3
+2026-10-23T18:31:54.982Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:32:35.007Z static: msgs=140098 dups=95 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:32:35.008Z churn: msgs=148161 dups=127537 acks=157 errors=0 reconnects=0 churn_cycles=38 wanted=5
+2026-10-23T18:33:04.976Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:33:24.981Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:33:35.009Z static: msgs=143327 dups=98 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:33:35.010Z churn: msgs=152996 dups=132029 acks=161 errors=0 reconnects=0 churn_cycles=39 wanted=5
+2026-10-23T18:34:34.976Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:34:35.011Z static: msgs=145407 dups=101 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:34:35.014Z churn: msgs=158004 dups=136709 acks=163 errors=0 reconnects=0 churn_cycles=40 wanted=3
+2026-10-23T18:34:54.980Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:35:35.016Z static: msgs=147469 dups=102 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:35:35.018Z churn: msgs=161370 dups=139805 acks=165 errors=0 reconnects=0 churn_cycles=40 wanted=5
+2026-10-23T18:36:04.977Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:36:24.981Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:36:35.017Z static: msgs=149294 dups=107 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:36:35.018Z churn: msgs=165103 dups=143275 acks=169 errors=0 reconnects=0 churn_cycles=41 wanted=5
+2026-10-23T18:37:34.981Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:37:35.018Z static: msgs=150921 dups=107 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:37:35.019Z churn: msgs=170263 dups=148121 acks=169 errors=0 reconnects=0 churn_cycles=42 wanted=3
+2026-10-23T18:37:54.986Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:38:35.018Z static: msgs=153084 dups=108 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:38:35.019Z churn: msgs=174788 dups=152349 acks=173 errors=0 reconnects=0 churn_cycles=42 wanted=5
+2026-10-23T18:39:04.983Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:39:24.993Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:39:35.021Z static: msgs=154998 dups=108 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:39:35.022Z churn: msgs=178809 dups=156101 acks=177 errors=0 reconnects=0 churn_cycles=43 wanted=5
+2026-10-23T18:40:34.986Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:40:35.022Z static: msgs=157263 dups=113 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:40:35.022Z churn: msgs=185636 dups=162548 acks=179 errors=0 reconnects=0 churn_cycles=44 wanted=3
+2026-10-23T18:40:54.991Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:41:35.023Z static: msgs=160097 dups=118 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:41:35.028Z churn: msgs=191203 dups=167772 acks=181 errors=0 reconnects=0 churn_cycles=44 wanted=5
+2026-10-23T18:42:04.989Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:42:24.994Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:42:35.025Z static: msgs=161856 dups=122 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:42:35.026Z churn: msgs=197075 dups=173300 acks=185 errors=0 reconnects=0 churn_cycles=45 wanted=5
+2026-10-23T18:43:34.987Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:43:35.026Z static: msgs=163719 dups=122 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:43:35.026Z churn: msgs=204065 dups=179900 acks=187 errors=0 reconnects=0 churn_cycles=46 wanted=3
+2026-10-23T18:43:54.989Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:44:35.027Z static: msgs=165279 dups=122 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:44:35.028Z churn: msgs=209345 dups=184860 acks=189 errors=0 reconnects=0 churn_cycles=46 wanted=5
+2026-10-23T18:45:04.989Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:45:24.993Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:45:35.027Z static: msgs=167781 dups=122 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:45:35.028Z churn: msgs=215854 dups=191003 acks=193 errors=0 reconnects=0 churn_cycles=47 wanted=5
+2026-10-23T18:46:34.992Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:46:35.029Z static: msgs=170062 dups=122 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:46:35.029Z churn: msgs=224324 dups=199038 acks=193 errors=0 reconnects=0 churn_cycles=48 wanted=3
+2026-10-23T18:46:55.003Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:47:35.030Z static: msgs=173011 dups=123 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:47:35.031Z churn: msgs=231684 dups=205950 acks=197 errors=0 reconnects=0 churn_cycles=48 wanted=5
+2026-10-23T18:48:04.991Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:48:24.993Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:48:35.031Z static: msgs=176961 dups=123 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:48:35.035Z churn: msgs=239450 dups=213218 acks=201 errors=0 reconnects=0 churn_cycles=49 wanted=5
+2026-10-23T18:49:34.995Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:49:35.033Z static: msgs=179546 dups=126 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:49:35.033Z churn: msgs=248169 dups=221450 acks=203 errors=0 reconnects=0 churn_cycles=50 wanted=3
+2026-10-23T18:49:55.007Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:50:35.034Z static: msgs=181221 dups=140 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:50:35.035Z churn: msgs=253555 dups=226507 acks=205 errors=0 reconnects=0 churn_cycles=50 wanted=5
+2026-10-23T18:51:05.006Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:51:25.009Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:51:35.035Z static: msgs=184493 dups=142 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:51:35.036Z churn: msgs=260892 dups=233442 acks=209 errors=0 reconnects=0 churn_cycles=51 wanted=5
+2026-10-23T18:52:34.998Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:52:35.036Z static: msgs=187511 dups=145 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:52:35.036Z churn: msgs=268815 dups=240956 acks=211 errors=0 reconnects=0 churn_cycles=52 wanted=3
+2026-10-23T18:52:55.007Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:53:35.038Z static: msgs=189333 dups=146 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:53:35.038Z churn: msgs=273900 dups=245747 acks=213 errors=0 reconnects=0 churn_cycles=52 wanted=5
+2026-10-23T18:54:05.009Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:54:25.010Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:54:35.039Z static: msgs=190970 dups=146 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:54:35.040Z churn: msgs=278969 dups=250533 acks=217 errors=0 reconnects=0 churn_cycles=53 wanted=5
+2026-10-23T18:55:35.010Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:55:35.041Z static: msgs=193084 dups=148 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:55:35.042Z churn: msgs=285708 dups=256930 acks=217 errors=0 reconnects=0 churn_cycles=54 wanted=3
+2026-10-23T18:55:55.014Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T18:56:35.042Z static: msgs=194599 dups=148 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:56:35.042Z churn: msgs=289867 dups=260854 acks=221 errors=0 reconnects=0 churn_cycles=54 wanted=5
+2026-10-23T18:57:05.010Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:57:25.019Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T18:57:35.043Z static: msgs=195743 dups=149 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:57:35.044Z churn: msgs=293195 dups=263931 acks=225 errors=0 reconnects=0 churn_cycles=55 wanted=5
+2026-10-23T18:58:35.012Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:58:35.045Z static: msgs=198591 dups=151 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:58:35.045Z churn: msgs=300942 dups=271282 acks=227 errors=0 reconnects=0 churn_cycles=56 wanted=3
+2026-10-23T18:58:55.015Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T18:59:35.046Z static: msgs=203962 dups=151 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T18:59:35.048Z churn: msgs=307347 dups=277343 acks=229 errors=0 reconnects=0 churn_cycles=56 wanted=5
+2026-10-23T19:00:05.013Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:00:25.015Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:00:35.048Z static: msgs=207222 dups=152 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:00:35.049Z churn: msgs=314488 dups=284095 acks=233 errors=0 reconnects=0 churn_cycles=57 wanted=5
+2026-10-23T19:01:35.016Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:01:35.051Z static: msgs=210328 dups=152 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:01:35.051Z churn: msgs=324717 dups=293861 acks=235 errors=0 reconnects=0 churn_cycles=58 wanted=3
+2026-10-23T19:01:55.051Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:02:35.051Z static: msgs=213152 dups=153 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:02:35.053Z churn: msgs=332388 dups=301138 acks=237 errors=0 reconnects=0 churn_cycles=58 wanted=5
+2026-10-23T19:03:05.017Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:03:25.021Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:03:35.053Z static: msgs=216097 dups=155 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:03:35.056Z churn: msgs=341037 dups=309348 acks=241 errors=0 reconnects=0 churn_cycles=59 wanted=5
+2026-10-23T19:04:35.017Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:04:35.054Z static: msgs=218776 dups=156 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:04:35.054Z churn: msgs=350632 dups=318505 acks=241 errors=0 reconnects=0 churn_cycles=60 wanted=3
+2026-10-23T19:04:55.020Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:05:35.055Z static: msgs=221130 dups=156 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:05:35.055Z churn: msgs=358892 dups=326386 acks=245 errors=0 reconnects=0 churn_cycles=60 wanted=5
+2026-10-23T19:06:05.020Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:06:25.023Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:06:35.055Z static: msgs=223528 dups=158 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:06:35.056Z churn: msgs=366741 dups=333857 acks=249 errors=0 reconnects=0 churn_cycles=61 wanted=5
+2026-10-23T19:07:35.022Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:07:35.057Z static: msgs=226286 dups=158 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:07:35.057Z churn: msgs=377539 dups=344199 acks=251 errors=0 reconnects=0 churn_cycles=62 wanted=3
+2026-10-23T19:07:55.033Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:08:35.057Z static: msgs=230536 dups=158 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:08:35.058Z churn: msgs=387562 dups=353796 acks=253 errors=0 reconnects=0 churn_cycles=62 wanted=5
+2026-10-23T19:09:05.024Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:09:25.027Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:09:35.060Z static: msgs=233901 dups=160 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:09:35.083Z churn: msgs=398519 dups=364278 acks=257 errors=0 reconnects=0 churn_cycles=63 wanted=5
+2026-10-23T19:10:35.022Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:10:35.060Z static: msgs=237341 dups=161 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:10:35.060Z churn: msgs=411381 dups=376628 acks=259 errors=0 reconnects=0 churn_cycles=64 wanted=3
+2026-10-23T19:10:55.025Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:11:35.060Z static: msgs=245147 dups=162 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:11:35.061Z churn: msgs=421418 dups=386183 acks=261 errors=0 reconnects=0 churn_cycles=64 wanted=5
+2026-10-23T19:12:05.024Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:12:25.027Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:12:35.063Z static: msgs=248137 dups=164 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:12:35.064Z churn: msgs=430087 dups=394473 acks=265 errors=0 reconnects=0 churn_cycles=65 wanted=5
+2026-10-23T19:13:35.026Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:13:35.065Z static: msgs=252703 dups=164 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:13:35.066Z churn: msgs=443543 dups=407388 acks=265 errors=0 reconnects=0 churn_cycles=66 wanted=3
+2026-10-23T19:13:55.029Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:14:35.067Z static: msgs=256495 dups=164 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:14:35.068Z churn: msgs=456382 dups=419662 acks=269 errors=0 reconnects=0 churn_cycles=66 wanted=5
+2026-10-23T19:15:05.058Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:15:25.073Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:15:35.069Z static: msgs=259599 dups=164 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:15:35.070Z churn: msgs=466933 dups=429731 acks=273 errors=0 reconnects=0 churn_cycles=67 wanted=5
+2026-10-23T19:16:35.042Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:16:35.071Z static: msgs=263808 dups=164 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:16:35.071Z churn: msgs=481898 dups=444124 acks=275 errors=0 reconnects=0 churn_cycles=68 wanted=3
+2026-10-23T19:16:55.045Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:17:35.072Z static: msgs=267009 dups=166 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:17:35.074Z churn: msgs=492025 dups=453800 acks=277 errors=0 reconnects=0 churn_cycles=68 wanted=5
+2026-10-23T19:18:05.044Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:18:25.046Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:18:35.075Z static: msgs=270573 dups=166 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:18:35.076Z churn: msgs=503823 dups=465095 acks=281 errors=0 reconnects=0 churn_cycles=69 wanted=5
+2026-10-23T19:19:35.043Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:19:35.079Z static: msgs=280531 dups=166 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:19:35.080Z churn: msgs=519227 dups=479907 acks=283 errors=0 reconnects=0 churn_cycles=70 wanted=3
+2026-10-23T19:19:55.049Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:20:35.078Z static: msgs=284521 dups=166 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:20:35.080Z churn: msgs=530391 dups=490586 acks=285 errors=0 reconnects=0 churn_cycles=70 wanted=5
+2026-10-23T19:21:05.049Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:21:25.052Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:21:35.080Z static: msgs=287672 dups=167 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:21:35.082Z churn: msgs=541983 dups=501695 acks=289 errors=0 reconnects=0 churn_cycles=71 wanted=5
+2026-10-23T19:22:35.052Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:22:35.082Z static: msgs=290533 dups=169 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:22:35.083Z churn: msgs=555364 dups=514573 acks=289 errors=0 reconnects=0 churn_cycles=72 wanted=3
+2026-10-23T19:22:55.056Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:23:35.083Z static: msgs=294135 dups=169 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:23:35.085Z churn: msgs=566915 dups=525661 acks=293 errors=0 reconnects=0 churn_cycles=72 wanted=5
+2026-10-23T19:24:05.053Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:24:25.056Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:24:35.085Z static: msgs=299275 dups=170 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:24:35.085Z churn: msgs=579334 dups=537555 acks=297 errors=0 reconnects=0 churn_cycles=73 wanted=5
+2026-10-23T19:25:35.054Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:25:35.086Z static: msgs=302142 dups=170 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:25:35.087Z churn: msgs=593671 dups=551412 acks=299 errors=0 reconnects=0 churn_cycles=74 wanted=3
+2026-10-23T19:25:55.058Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:26:35.112Z static: msgs=305351 dups=171 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:26:35.131Z churn: msgs=605086 dups=562385 acks=301 errors=0 reconnects=0 churn_cycles=74 wanted=5
+2026-10-23T19:27:05.056Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:27:25.061Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:27:35.112Z static: msgs=308312 dups=175 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:27:35.113Z churn: msgs=616058 dups=572927 acks=305 errors=0 reconnects=0 churn_cycles=75 wanted=5
+2026-10-23T19:28:35.057Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:28:35.113Z static: msgs=311280 dups=175 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:28:35.114Z churn: msgs=628659 dups=585077 acks=307 errors=0 reconnects=0 churn_cycles=76 wanted=3
+2026-10-23T19:28:55.060Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:29:35.114Z static: msgs=313591 dups=175 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:29:35.118Z churn: msgs=637661 dups=593687 acks=309 errors=0 reconnects=0 churn_cycles=76 wanted=5
+2026-10-23T19:30:05.058Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:30:25.060Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:30:35.115Z static: msgs=317209 dups=176 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:30:35.116Z churn: msgs=648385 dups=603963 acks=313 errors=0 reconnects=0 churn_cycles=77 wanted=5
+2026-10-23T19:31:35.060Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:31:35.117Z static: msgs=320809 dups=177 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:31:35.118Z churn: msgs=664583 dups=619603 acks=313 errors=0 reconnects=0 churn_cycles=78 wanted=3
+2026-10-23T19:31:55.062Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T19:32:35.119Z static: msgs=323920 dups=179 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:32:35.125Z churn: msgs=675479 dups=630054 acks=317 errors=0 reconnects=0 churn_cycles=78 wanted=5
+2026-10-23T19:33:05.065Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:33:25.072Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T19:33:35.120Z static: msgs=326607 dups=180 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:33:35.122Z churn: msgs=685774 dups=639916 acks=321 errors=0 reconnects=0 churn_cycles=79 wanted=5
+2026-10-23T19:34:35.065Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:34:35.122Z static: msgs=329607 dups=180 acks=16 errors=0 reconnects=1 wanted=8
+2026-10-23T19:34:35.122Z churn: msgs=700940 dups=654580 acks=323 errors=0 reconnects=0 churn_cycles=80 wanted=3
+2026-10-23T19:34:55.068Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T19:35:34.948Z FINAL static: msgs=333337 dups=180 acks=16 errors=0 reconnects=1
+2026-10-23T19:35:34.949Z FINAL churn: msgs=712666 dups=665855 acks=325 errors=0 reconnects=0

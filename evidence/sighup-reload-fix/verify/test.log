@@ -1,0 +1,381 @@
+   Compiling md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+   Compiling md-grpc v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-grpc)
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+   Compiling md-connector v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-connector)
+   Compiling md-config v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-config)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.28s
+     Running unittests src/lib.rs (target/debug/deps/md_config-c80197441375292a)
+
+running 14 tests
+test tests::normalize_log_level_rejects_everything_else ... ok
+test tests::normalize_log_level_accepts_standard_names_case_insensitively ... ok
+test tests::quote_channel_buffer_zero_rejected ... ok
+test tests::legacy_config_without_quote_keys_defaults_off ... ok
+test tests::missing_fields_use_defaults ... ok
+test tests::binance_enabled_without_url_fails ... ok
+test tests::field_order_matches_go ... ok
+test tests::okx_enabled_without_url_fails ... ok
+test tests::env_var_override ... ok
+test tests::invalid_log_level_in_yaml_is_a_validation_error ... ok
+test tests::quote_keys_parse ... ok
+test tests::load_config_from_yaml_string ... ok
+test tests::load_default_config ... ok
+test tests::valid_log_level_spellings_load ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/md_connector-b8cf74b952721348)
+
+running 46 tests
+test base::tests::drop_log_limiter_rate_limits_and_accumulates ... ok
+test base::tests::drop_log_limiter_total_equals_drops ... ok
+test binance::tests::build_unsubscribe_message ... ok
+test binance::tests::adapter_ignores_book_ticker ... ok
+test binance::tests::parse_aggtrade_to_tick ... ok
+test binance::tests::adapter_parse_kline_message ... ok
+test binance::tests::build_subscribe_message ... ok
+test binance::tests::legacy_adapter_still_ignores_real_book_ticker ... ok
+test binance::tests::parse_aggtrade_symbol_normalized ... ok
+test binance::tests::parse_book_ticker_falls_back_to_transaction_time ... ok
+test binance::tests::adapter_parse_aggtrade_message ... ok
+test binance::tests::parse_book_ticker_missing_price_is_error ... ok
+test binance::tests::parse_book_ticker_real_sample ... ok
+test binance::tests::parse_invalid_json_returns_error ... ok
+test binance::tests::parse_kline_to_kline ... ok
+test binance::tests::parse_missing_field_returns_error ... ok
+test binance::tests::quote_adapter_builds_book_ticker_subscribe_msg ... ok
+test binance::tests::quote_adapter_emits_quote_event ... ok
+test binance::tests::quote_adapter_ignores_subscribe_ack ... ok
+test binance::tests::target_to_streams_kline ... ok
+test binance::tests::target_to_streams_kline_5m ... ok
+test binance::tests::target_to_streams_quote ... ok
+test binance::tests::target_to_streams_tick ... ok
+test okx::tests::adapter_ignores_event_message ... ok
+test okx::tests::build_subscribe_message ... ok
+test okx::tests::adapter_parse_trades_message ... ok
+test okx::tests::build_subscribe_message_for_tickers ... ok
+test okx::tests::adapter_parse_candle_message ... ok
+test okx::tests::heartbeat_is_ping ... ok
+test okx::tests::build_unsubscribe_message ... ok
+test okx::tests::parse_candle_not_closed ... ok
+test okx::tests::legacy_adapter_still_ignores_real_ticker ... ok
+test okx::tests::parse_candle_to_kline ... ok
+test okx::tests::parse_ticker_empty_bid_or_ask_is_error ... ok
+test okx::tests::parse_trade_buy_side ... ok
+test base::tests::burst_larger_than_buffer_drops_exactly_the_excess ... ok
+test okx::tests::parse_trade_to_tick ... ok
+test okx::tests::parse_ticker_real_sample ... ok
+test okx::tests::quote_adapter_emits_quote_event ... ok
+test okx::tests::quote_adapter_ignores_subscribe_event ... ok
+test okx::tests::target_to_streams_kline ... ok
+test okx::tests::target_to_streams_kline_5m ... ok
+test okx::tests::target_to_streams_quote ... ok
+test okx::tests::target_to_streams_tick ... ok
+test routing_tests::quote_routing_is_strict_no_fallback ... ok
+test routing_tests::tick_and_kline_routing_unchanged ... ok
+
+test result: ok. 46 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/md_domain-448015b326b2f69b)
+
+running 33 tests
+test topic::tests::normalize_lowercase ... ok
+test topic::tests::extract_from_kline ... ok
+test topic::tests::extract_from_tick ... ok
+test topic::tests::format_quote_normalizes_symbol ... ok
+test topic::tests::kline_cache_key_format ... ok
+test topic::tests::format_kline ... ok
+test topic::tests::kline_topic_builder ... ok
+test topic::tests::format_tick ... ok
+test topic::tests::existing_topics_unaffected_by_quote ... ok
+test topic::tests::extract_invalid_returns_none ... ok
+test topic::tests::normalize_mixed_case ... ok
+test topic::tests::normalize_uppercase ... ok
+test topic::tests::parse_invalid_format ... ok
+test topic::tests::parse_kline_topic ... ok
+test topic::tests::parse_quote_topic ... ok
+test topic::tests::parse_quote_topic_invalid_format ... ok
+test topic::tests::parse_then_format_roundtrip ... ok
+test topic::tests::parse_tick_topic ... ok
+test topic::tests::parse_unknown_prefix ... ok
+test topic::tests::quote_roundtrip_and_extract ... ok
+test topic::tests::quote_topic_builder_and_cache_key ... ok
+test topic::tests::tick_cache_key_format ... ok
+test topic::tests::tick_topic_builder ... ok
+test types_test::kline_json_compat::full_kline_all_fields ... ok
+test types_test::kline_json_compat::zero_fields_omitted ... ok
+test types_test::quote_json::empty_last_price_is_still_emitted ... ok
+test types_test::quote_json::matches_spec_example_byte_for_byte ... ok
+test types_test::quote_json::numbers_are_strings_and_timestamps_are_integers ... ok
+test types_test::quote_json::roundtrip ... ok
+test types_test::tick_json_compat::field_order_matches_go ... ok
+test types_test::tick_json_compat::full_tick_all_fields_present ... ok
+test types_test::tick_json_compat::only_exchange_and_symbol ... ok
+test types_test::tick_json_compat::zero_fields_omitted_like_go ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/md_gateway-948a97d723034649)
+
+running 18 tests
+test ws::tests::detect_topic_kind_from_topics_works ... ok
+test ws::tests::event_matches_quote_topic_exactly ... ok
+test ws::tests::gateway_message_format ... ok
+test ws::tests::legacy_message_format ... ok
+test ws::tests::legacy_kline_message_format ... ok
+test ws::tests::gateway_kline_message_format ... ok
+test ws::tests::gateway_quote_message_format ... ok
+test ws::tests::legacy_payload_never_emits_quote ... ok
+test ws::tests::topic_kind_from_stream_works ... ok
+test ws::tests::topic_stream_surfaces_lagged ... ok
+test ws::tests::removing_stream_releases_receiver ... ok
+test ws::tests::topic_stream_filters_non_matching_events_like_1_0_0 ... ok
+test tests::get_subscriptions_empty ... ok
+test tests::get_latest_kline_found ... ok
+test tests::get_latest_tick_found ... ok
+test tests::get_latest_kline_not_found ... ok
+test tests::get_latest_tick_not_found ... ok
+test ws::tests::topic_stream_with_unparseable_topic_never_matches ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/compat_1_0_0.rs (target/debug/deps/compat_1_0_0-840120c49e671355)
+
+running 5 tests
+test positive_control_comparison_detects_field_reorder_and_format_change ... ok
+test gateway_tick_okx_matches_1_0_0_byte_for_byte ... ok
+test legacy_ws_tick_matches_1_0_0_byte_for_byte ... ok
+test gateway_kline_matches_1_0_0_byte_for_byte ... ok
+test gateway_tick_binance_matches_1_0_0_byte_for_byte ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/quote_gateway.rs (target/debug/deps/quote_gateway-0093faa4f9d13202)
+
+running 9 tests
+test data_type_display_is_stable ... ok
+test gateway_ws_delivers_quote_with_expected_envelope ... ok
+test gateway_ws_tick_and_quote_coexist ... ok
+test rest_quote_subscription_rejected_when_disabled_and_no_fallback ... ok
+test rest_latest_quote_found_and_not_found ... ok
+test rest_subscriptions_quote_post_list_delete ... ok
+test rest_existing_tick_kline_behaviour_unchanged ... ok
+test legacy_ws_never_receives_quote ... ok
+test gateway_ws_quote_only_matches_subscribed_topic_and_unsubscribe_works ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.77s
+
+     Running tests/unsubscribe_gateway.rs (target/debug/deps/unsubscribe_gateway-c73297af87a3f9bc)
+
+running 6 tests
+test partial_unsubscribe_keeps_other_streams_and_bytes ... ok
+test resubscribe_after_unsubscribe_delivers_exactly_one_copy ... ok
+test repeated_churn_still_one_copy_per_event ... ok
+test unsubscribe_on_one_connection_does_not_affect_another ... ok
+test no_events_after_unsubscribe ... ok
+test duplicate_subscribe_adds_no_extra_copy ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+
+     Running tests/write_timeout_gateway.rs (target/debug/deps/write_timeout_gateway-868364201b806a87)
+
+running 3 tests
+test healthy_client_is_not_affected_by_write_wait ... ok
+test stalled_client_is_kicked_after_write_wait ... ok
+test without_write_wait_stalled_client_pins_the_connection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.50s
+
+     Running tests/ws_subscriptions_gauge.rs (target/debug/deps/ws_subscriptions_gauge-9c93dc5f89a510d3)
+
+running 3 tests
+test gauge_does_not_drift_under_churn ... ok
+test gauge_sums_across_gateway_and_legacy_connections ... ok
+test gauge_follows_subscribe_unsubscribe_and_disconnect ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running unittests src/lib.rs (target/debug/deps/md_grpc-99a174530da43bff)
+
+running 23 tests
+test admin_service::tests::add_subscription_unknown_connector ... ok
+test admin_service::tests::add_subscription_success ... ok
+test admin_service::tests::get_subscriptions_empty ... ok
+test admin_service::tests::add_quote_subscription_not_enabled ... ok
+test admin_service::tests::tick_response_message_unchanged ... ok
+test admin_service::tests::add_and_list_quote_subscription ... ok
+test admin_service::tests::remove_subscription_success ... ok
+test admin_service::tests::add_subscription_missing_exchange ... ok
+test admin_service::tests::get_subscriptions_after_add ... ok
+test market_data::tests::get_historical_klines_unimplemented ... ok
+test market_data::tests::get_latest_kline_missing_interval ... ok
+test market_data::tests::get_latest_kline_found ... ok
+test market_data::tests::get_latest_kline_not_found ... ok
+test market_data::tests::get_latest_tick_found ... ok
+test market_data::tests::get_latest_tick_missing_exchange ... ok
+test market_data::tests::get_latest_tick_not_found ... ok
+test market_data::tests::subscribe_klines_validation ... ok
+test tests::data_type_conversion ... ok
+test tests::data_type_numeric_values_stable_and_quote_is_new ... ok
+test market_data::tests::subscribe_ticks_validation ... ok
+test tests::kline_roundtrip ... ok
+test tests::tick_roundtrip ... ok
+test market_data::tests::subscribe_ticks_receives_data ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/md_processor-1dbcc314f93ba125)
+
+running 26 tests
+test tests::metrics_ingestion_latency_records ... ok
+test tests::metrics_gateway_latency_by_topic ... ok
+test tests::metrics_per_symbol_dimension_separated ... ok
+test tests::metrics_quote_dimensions ... ok
+test tests::metrics_record_ingestion_latency_clamps_negative ... ok
+test tests::quote_does_not_touch_tick_or_kline_state ... ok
+test tests::cache_latest_tick ... ok
+test tests::cache_latest_quote_and_case_insensitive ... ok
+test tests::cache_latest_tick_overwrites ... ok
+test tests::cache_latest_tick_case_insensitive ... ok
+test tests::cache_latest_kline ... ok
+test tests::cache_returns_none_for_missing ... ok
+test tests::metrics_kline_count ... ok
+test tests::metrics_tick_count ... ok
+test tests::multiple_subscribers_same_topic ... ok
+test tests::tick_kline_channel_senders_work ... ok
+test tests::subscribe_receives_kline ... ok
+test tests::subscribe_receives_tick ... ok
+test ws_subscription_guard_tests::guard_tracks_delta_and_releases_on_drop ... ok
+test tests::quote_throttle_is_per_topic ... ok
+test tests::subscribe_receives_quote_on_quote_topic_only ... ok
+test tests::quote_throttle_caps_rate_and_delivers_last ... ok
+test ws_subscription_guard_tests::guard_releases_even_if_task_panics ... ok
+test tests::quote_throttle_one_second_burst_capped ... ok
+test tests::subscribe_does_not_receive_wrong_topic ... ok
+test tests::quote_flows_through_run_loop_with_trailing_flush ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running unittests src/lib.rs (target/debug/deps/md_proto-c728f21a00a32aa8)
+
+running 9 tests
+test tests::admin_service_trait_exists ... ok
+test tests::data_type_enum_variants ... ok
+test tests::market_data_service_trait_exists ... ok
+test tests::tick_prost_default_is_zero_values ... ok
+test tests::kline_type_works ... ok
+test tests::subscription_request_fields ... ok
+test tests::proto_compiles_successfully ... ok
+test tests::admin_data_type_serde_roundtrip ... ok
+test tests::tick_json_serialization_matches_go_format ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+     Running tests/json_compat.rs (target/debug/deps/json_compat-17cd4118b7bf882b)
+
+running 11 tests
+test quote_json_has_all_fields_even_when_empty ... ok
+test ws_gateway_subscribe_response_format ... ok
+test error_bad_request_format ... ok
+test error_response_format ... ok
+test ws_gateway_message_format ... ok
+test tick_snapshot_binance_btcusdt ... ok
+test subscriptions_snapshot_shape_and_data_type_values ... ok
+test tick_and_kline_serialization_unchanged_by_quote_addition ... ok
+test kline_snapshot_binance_btcusdt_1m ... ok
+test ws_gateway_tick_push_data_is_byte_stable ... ok
+test all_fixtures_are_non_empty ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_config
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_connector
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_domain
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_gateway
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_grpc
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_processor
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests md_proto
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+test exit=0

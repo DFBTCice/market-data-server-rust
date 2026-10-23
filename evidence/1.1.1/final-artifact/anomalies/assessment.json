@@ -1,0 +1,17 @@
+{
+  "complete": true,
+  "safe_to_swap": true,
+  "scope": "仅本补充异常审计；不替代两小时及换后门禁",
+  "historical_client_process_stall_proven": false,
+  "historical_disconnect_root_cause": "未定位到客户端进程或网络链路；已确认一次send阻塞10s并触发保护，两侧static随后共同断连",
+  "dedup_counter_is_coarse_key_hits": true,
+  "new_churn_same_ingest_repeats": 0,
+  "old_churn_positive_control_same_ingest_repeats": 3715,
+  "duplicate_fix_residual_observed": false,
+  "limitations": [
+    "原历史~100条static命中没有逐条原文，不能全部追溯",
+    "17:51原消费者未记录事件循环延迟/close code/pcap，不能证明客户端进程停顿"
+  ],
+  "sampler_new_columns_verified": true,
+  "report": "anomalies/REPORT.md"
+}

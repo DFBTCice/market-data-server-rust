@@ -1,0 +1,36 @@
+2026-10-23T17:38:10.287Z 2026-10-23T17:38:10.210000Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:64733/ws
+2026-10-23T17:38:10.287Z 2026-10-23T17:38:10.209968Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:64728/ws
+2026-10-23T17:38:10.287Z 2026-10-23T17:38:10.210049Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:64730/ws
+2026-10-23T17:38:10.287Z 2026-10-23T17:38:10.210027Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:64735/ws
+2026-10-23T17:38:10.287Z 2026-10-23T17:38:10.212715Z  INFO md_connector::base: [okx-quote] connecting to ws://host.docker.internal:64733/ws
+2026-10-23T17:38:10.386Z 2026-10-23T17:38:10.384899Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+2026-10-23T17:38:10.386Z 2026-10-23T17:38:10.384925Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-23T17:38:10.386Z 2026-10-23T17:38:10.384944Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-23T17:38:10.386Z 2026-10-23T17:38:10.384966Z  INFO md_connector::base: [binance] subscribing to 2 streams
+2026-10-23T17:38:10.386Z 2026-10-23T17:38:10.384990Z  INFO md_connector::base: [binance-quote] subscribing to 1 streams
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396357Z  INFO md_connector::base: [binance] subscription sync complete
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396410Z  INFO md_connector::base: [binance-quote] subscription sync complete
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396450Z  INFO md_connector::base: [okx-quote] subscription sync complete
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396485Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396509Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396734Z  INFO md_connector::base: [binance] connected and synced
+2026-10-23T17:38:10.397Z 2026-10-23T17:38:10.396778Z  INFO md_connector::base: [binance-quote] connected and synced
+2026-10-23T17:38:10.398Z 2026-10-23T17:38:10.396905Z  INFO md_connector::base: [okx-quote] connected and synced
+2026-10-23T17:38:10.398Z 2026-10-23T17:38:10.396996Z  INFO md_connector::base: [okx] connected and synced
+2026-10-23T17:38:10.398Z 2026-10-23T17:38:10.397229Z  INFO md_connector::base: [okx] connected and synced
+2026-10-23T17:38:11.450Z [harness] ---- process ready ----
+2026-10-23T17:38:11.450Z [harness] ---- SIGHUP no change ----
+2026-10-23T17:38:13.190Z [harness] ---- SIGHUP business url #1 ----
+2026-10-23T17:38:14.934Z [harness] ---- SIGHUP business url #2 ----
+2026-10-23T17:38:16.678Z [harness] ---- SIGHUP bad yaml ----
+2026-10-23T17:38:16.834Z 2026-10-23T17:38:16.725480Z  WARN md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current config
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.492832Z  INFO md_connector::base: [okx] stopping connector
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.499288Z  INFO md_connector::base: [binance-quote] stopping connector
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.499736Z  INFO md_connector::base: [binance] stopping connector
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.499749Z  INFO md_connector::base: [okx-quote] stopping connector
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.499755Z  INFO md_connector::base: [okx] stopping connector
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.501457Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.502419Z  INFO md_connector::base: [okx-quote] shutdown signal received
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.503237Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.504279Z  INFO md_connector::base: [binance-quote] shutdown signal received
+2026-10-23T17:38:20.766Z 2026-10-23T17:38:18.505081Z  INFO md_connector::base: [binance] shutdown signal received

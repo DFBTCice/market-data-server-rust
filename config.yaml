@@ -1,4 +1,5 @@
-# 日志级别: "debug", "info", "warn", "error"
+# 日志级别: "trace", "debug", "info", "warn", "error"（不区分大小写，写成别的值会在加载配置时报错）
+# 发送 SIGHUP 可热更，不用重启。注意：进程环境里设置了 RUST_LOG 时，以 RUST_LOG 为准，这一项不起作用。
 log_level: "info"
 
 # gRPC 服务器配置

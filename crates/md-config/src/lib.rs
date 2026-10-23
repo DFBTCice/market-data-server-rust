@@ -155,6 +155,30 @@ pub fn load_config_from_str(yaml: &str) -> Result<Config, ConfigError> {
     Ok(cfg)
 }
 
+/// 把 `log_level` 的写法规范成小写的标准级别名；不认识的写法返回 `None`。
+///
+/// 接受（忽略大小写和首尾空白）：`trace` / `debug` / `info` / `warn` / `warning` / `error`，
+/// 其中 `warning` 视为 `warn`。**不接受**其他写法（`fatal`、`verbose`、拼写错误等）：
+/// 日志级别写错如果被悄悄忽略，等于没配；这里宁可在加载配置时直接报错。
+pub fn normalize_log_level(raw: &str) -> Option<&'static str> {
+    match raw.trim().to_ascii_lowercase().as_str() {
+        "trace" => Some("trace"),
+        "debug" => Some("debug"),
+        "info" => Some("info"),
+        "warn" | "warning" => Some("warn"),
+        "error" => Some("error"),
+        _ => None,
+    }
+}
+
+/// `log_level` 不合法时的统一报错文案（YAML 校验与环境变量 `LOG_LEVEL` 覆盖共用）
+pub fn invalid_log_level_message(raw: &str) -> String {
+    format!(
+        "log_level \"{}\" 不合法，可选值：trace / debug / info / warn / error（忽略大小写）",
+        raw
+    )
+}
+
 /// 用环境变量覆盖配置
 pub fn apply_env_overrides(cfg: &mut Config) {
     if let Ok(val) = std::env::var("GRPC_SERVER_LISTEN_ADDRESS") {
@@ -288,6 +312,11 @@ fn ensure_mapping<'a>(
 }
 
 fn validate(cfg: &Config) -> Result<(), ConfigError> {
+    if normalize_log_level(&cfg.log_level).is_none() {
+        return Err(ConfigError::ValidationError(invalid_log_level_message(
+            &cfg.log_level,
+        )));
+    }
     if cfg.connectors.binance.enabled {
         if cfg.connectors.binance.stream_base_url.trim().is_empty() {
             return Err(ConfigError::ValidationError(
@@ -707,5 +736,88 @@ processor:
 "#;
         let err = load_config_from_str(yaml).unwrap_err().to_string();
         assert!(err.contains("quote_channel_buffer"), "error: {}", err);
+    }
+
+    // ---- log_level：规范化与校验（写错必须在加载时报错，不能被悄悄忽略）----
+
+    #[test]
+    fn normalize_log_level_accepts_standard_names_case_insensitively() {
+        for (raw, want) in [
+            ("trace", "trace"),
+            ("debug", "debug"),
+            ("info", "info"),
+            ("warn", "warn"),
+            ("error", "error"),
+            ("INFO", "info"),
+            ("Warn", "warn"),
+            ("  debug  ", "debug"),
+            ("warning", "warn"),
+            ("WARNING", "warn"),
+        ] {
+            assert_eq!(normalize_log_level(raw), Some(want), "raw={raw:?}");
+        }
+    }
+
+    #[test]
+    fn normalize_log_level_rejects_everything_else() {
+        // 特别注意：这些写法如果被当成 EnvFilter 指令，会变成"某个 target 的名字"，
+        // 结果是把其他所有日志都关掉；所以必须在这里拦住。
+        for raw in [
+            "",
+            "   ",
+            "fatal",
+            "verbose",
+            "inf",
+            "off",
+            "none",
+            "info,debug",
+            "md_server=debug",
+            "warn!",
+        ] {
+            assert_eq!(normalize_log_level(raw), None, "raw={raw:?}");
+        }
+    }
+
+    /// 以仓库自带的样例配置为底，只替换 `log_level` 一行（其余必填项都在样例里）
+    fn sample_with_log_level(raw: &str) -> String {
+        let base = std::fs::read_to_string("../../config.yaml").unwrap();
+        let mut replaced = false;
+        let out: Vec<String> = base
+            .lines()
+            .map(|l| {
+                if l.starts_with("log_level:") {
+                    replaced = true;
+                    format!("log_level: \"{raw}\"")
+                } else {
+                    l.to_string()
+                }
+            })
+            .collect();
+        assert!(replaced, "config.yaml 里应有顶层 log_level 行");
+        out.join("\n") + "\n"
+    }
+
+    #[test]
+    fn invalid_log_level_in_yaml_is_a_validation_error() {
+        let err = load_config_from_str(&sample_with_log_level("verbose")).unwrap_err();
+        assert!(
+            matches!(err, ConfigError::ValidationError(_)),
+            "应是校验错误：{err:?}"
+        );
+        let msg = err.to_string();
+        assert!(
+            msg.contains("log_level") && msg.contains("verbose"),
+            "报错要点名字段和错误值：{msg}"
+        );
+    }
+
+    #[test]
+    fn valid_log_level_spellings_load() {
+        for raw in ["debug", "INFO", "warning"] {
+            let cfg = load_config_from_str(&sample_with_log_level(raw))
+                .unwrap_or_else(|e| panic!("{raw}: {e}"));
+            // load_config 保留原写法；统一成标准写法由 md-server 的"生效配置"负责
+            assert_eq!(cfg.log_level, raw);
+        }
     }
 }

@@ -1,0 +1,6 @@
+6ccb5f3a988af5905b16d8e4f5a75f44af426099dba935dff6d7c948b6fe5cf7  /tmp/md-variants/md-server-v1
+9128dc7cae8cb5c1bd7f2c604c3dcbbf39c8138d35b06af121bc6bd1daa5cf22  /tmp/md-variants/md-server-v3
+836f31839fbda697aec71195110bcf0159057f27250a3b702c6dd16f65da91da  /tmp/md-variants/md-server-v0
+6a9f830b944035e001d42422b4936e1ca58947ef4d2ca270e85be1c7a4d24bb4  /tmp/md-variants/md-server-v2
+61f7907bd08831b5c28f13b8fbbf297645bbbd20bc90f498ef7bd996dc27f47e  /tmp/md-variants/md-server-v4
+fa7be337453d83fcec83b689574dbf212495eccf9107e16d73ec4512d0e15b70  /tmp/md-variants/md-server-v5

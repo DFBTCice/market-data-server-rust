@@ -1,0 +1,8 @@
+{
+  "RestartCount": 1,
+  "State.OOMKilled": false,
+  "State.StartedAt": "2026-10-21T13:37:15.272916238Z",
+  "State.FinishedAt": "2026-10-21T13:37:14.846284377Z",
+  "event_lines": 0,
+  "note": "当前进程 OOMKilled=false 不能排除前次 OOM；历史事件无证据时不能确认重启原因。"
+}

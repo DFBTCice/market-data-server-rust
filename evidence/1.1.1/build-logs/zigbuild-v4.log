@@ -1,0 +1,5 @@
+   Compiling md-processor v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-processor)
+   Compiling md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+   Compiling md-grpc v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-grpc)
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `release` profile [optimized] target(s) in 12.73s

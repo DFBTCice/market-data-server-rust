@@ -1,0 +1,55 @@
+{
+  "new": {
+    "samples": 122,
+    "valid_samples": 122,
+    "duration_s": 7261.0,
+    "post_warmup_samples": 62,
+    "post_warmup_duration_s": 3660.0,
+    "max_gap_s": 61.0,
+    "uptime_resets": 0,
+    "rss": {
+      "first_mib": 21.83203125,
+      "last_mib": 21.875,
+      "min_mib": 21.83203125,
+      "max_mib": 22.6484375,
+      "delta_mib": 0.04296875,
+      "slope_mib_h": 0.039518190650594386
+    },
+    "allocated": {
+      "first_mib": 4.18365478515625,
+      "last_mib": 2.025390625,
+      "min_mib": 2.025390625,
+      "max_mib": 4.242591857910156,
+      "delta_mib": -2.15826416015625,
+      "slope_mib_h": -0.26726654648695075
+    }
+  },
+  "old": {
+    "samples": 122,
+    "valid_samples": 122,
+    "duration_s": 7261.0,
+    "post_warmup_samples": 62,
+    "post_warmup_duration_s": 3660.0,
+    "max_gap_s": 61.0,
+    "uptime_resets": 0,
+    "rss": {
+      "first_mib": 82.4140625,
+      "last_mib": 88.76953125,
+      "min_mib": 82.4140625,
+      "max_mib": 90.9140625,
+      "delta_mib": 6.35546875,
+      "slope_mib_h": 9.82066721122611
+    }
+  },
+  "checks": {
+    "finished_marker": true,
+    "span_at_least_2h": true,
+    "warmup_1h_then_measure_1h": true,
+    "complete_samples": true,
+    "no_restarts": true,
+    "rss_slope_le_1_mib_h": true,
+    "allocated_plateau": true,
+    "old_positive_control_growth": true
+  },
+  "pass": true
+}
