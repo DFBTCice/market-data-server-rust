@@ -1,0 +1,18 @@
+{
+  "source_commit": "a06fe2095e8fc58bff1e038a594b25e7002aff1b",
+  "first_evidence_commit": "64e1268",
+  "branch": "fix/gateway-unsubscribe-leak-v1.1.1",
+  "binary_sha256": "3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "pr_comment_id": 6371055873,
+  "pr_comment_url": "https://github.com/DFBTCice/market-data-server-rust/pull/2#issuecomment-6371055873",
+  "heartbeat_automation_id": "1-1-1",
+  "background_execution_authorized_by_user": true,
+  "ensure_subscriptions_restored": true,
+  "canary_exec_session": 19005,
+  "pre_swap_readonly_exec_session": 73754,
+  "canary_started_utc": "2026-10-23T17:34:34Z",
+  "canary_expected_finish_utc": "2026-10-23T19:35:34Z",
+  "swap_executed": false,
+  "next_step": "等待实际两小时采样结束并通过 analyze_final_memory.py；告知业务方具体窗口后，按已授权 SWAP_PLAN 换版、立即补订阅、验收、完整24h采样。不得提前宣称通过，不打标签/不合并PR/不扩品种。"
+}
