@@ -64,5 +64,21 @@
       "source": "reviewer botd normal K-line browse/churn",
       "behavior": "two subscribe/release cycles observed; 12 to 13 and back to 12; retain raw rows"
     }
-  ]
+  ],
+  "latest_observation": {
+    "at_utc": "2026-10-23T22:06:07.953471Z",
+    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261023T2205Z/check.json",
+    "provisional_rss_target_exceeded": true,
+    "rss_slope_mib_h": 1.5223450471224367,
+    "post_warmup_span_s": 4261,
+    "rss_current_mib": 57.34375,
+    "allocated_plateau": true,
+    "write_timeouts": 0,
+    "ticks_dropped": 0,
+    "healthy": true,
+    "rollback_threshold_exceeded": false,
+    "decision": "continue original sampling; do not declare 24h pass; no production mutation",
+    "notification_reason": "first provisional post-warmup RSS slope above 1MiB/h target",
+    "repeat_notification_policy": "do not repeat unchanged provisional warning; notify on worsening, recovery, failure, completion or required action"
+  }
 }

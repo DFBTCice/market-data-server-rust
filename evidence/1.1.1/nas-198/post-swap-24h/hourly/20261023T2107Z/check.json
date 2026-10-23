@@ -1,0 +1,65 @@
+{
+  "at_utc": "2026-10-23T21:08:35.684502+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 75,
+  "valid_samples": 75,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-23T21:08:14Z",
+  "span_s": 4441.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 21.684937000274658,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "current": {
+    "ws_clients": 2.0,
+    "rss_mib": 55.87109375,
+    "allocated_mib": 4.2461395263671875,
+    "ticks_dropped": 0.0,
+    "write_timeouts": 0.0,
+    "lagged": 0.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0
+  },
+  "write_timeout_sample_max": 0.0,
+  "tick_drop_sample_max": 0.0,
+  "post_warmup_span_s": 841.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 56.0859375,
+    "min_mib": 55.765625,
+    "max_mib": 56.24609375,
+    "slope_mib_h": -0.7272400743398486
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.3023223876953125,
+    "min_mib": 4.221549987792969,
+    "max_mib": 4.33233642578125,
+    "slope_mib_h": -0.010867975407127676
+  },
+  "transient_events": [
+    "21:00:14Z okx-kline connector reconnect counter 0->1",
+    "21:06:14Z WS clients sampled at 1; recovered to 2 at21:07:14Z, no write timeout/lagged/tick drop increments; client identity and exact cause not established"
+  ],
+  "analysis_is_provisional": true,
+  "interpretation": "预热后当前仅841秒；列出短窗口回归值供追踪，不构成长期趋势或24h通过结论。当前短暂WS连接下降已恢复，无写超时/lagged/掉tick增长，原因未定位；保留事件，继续观察，不沿用其他时段归因。",
+  "server_log_collection": {
+    "from_utc": "2026-10-23T21:00:00Z",
+    "at_utc": "2026-10-23T21:08:35.684502+00:00",
+    "level": "RUST_LOG=warn",
+    "tail_limit": 500,
+    "captured_text_bytes": 0,
+    "interpretation": "本窗口未取得服务端WARN/ERROR文本，不足以定位正常关闭连接的客户端身份或根因。"
+  }
+}

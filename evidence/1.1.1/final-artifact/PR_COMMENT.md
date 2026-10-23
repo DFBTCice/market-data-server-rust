@@ -32,6 +32,8 @@ ID sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010
 
 真实24h逐分钟采样从北京时间10-24 03:54:13开始，预计10-25 03:54:13之后按实际跨度/连续性验收；每小时后台跟进，不以休眠或网络缺口凑时长。五段式换版记录：`evidence/1.1.1/nas-198/post-swap-24h/DEPLOYMENT_RECORD.md`。观察达标后仍须主审/业务方批准标签与合并，阶段3继续暂停。
 
+24h阶段性变化（UTC10-23 22:06检查，采样截至22:05）：132/132有效点、最大gap61s、无进程重启。预热后约71分钟RSS OLS **+1.5223MiB/h，暂高于目标≤1**；RSS当前57.34MiB、allocated持平，写超时/lagged/掉tick均0、连接2、订阅12=12、md-server与OMS healthy。21:40/21:41Z有合计1.125MiB的RSS台阶，根因未定位；低于计划>3MiB/h回滚评估阈值，保留完整数据继续观察，不能提前判24h达标。另将已恢复的短暂WS连接下降、OKX对端重置重连单独留证，不混入主审已解释的浏览事件。详见换版记录与`hourly/20261023T2205Z/`。
+
 复跑命令、原始输出与五段式报告：`evidence/1.1.1/final-artifact/REPORT.md`、README；构建条件：`evidence/1.1.1/build-logs/dist-sha256.txt`；步骤/回滚：`evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md`。
 
 补充异常审计（用户追加三点）：`final-artifact/anomalies/REPORT.md`。17:51的日志只证明新版本一次send阻塞10s后踢除，不能从固定文案证实客户端进程停顿；共同客户端/链路原因仍未进一步定位。原dups为粗键命中，quote键漏数量、kline键漏is_closed；已有原文证实数量/闭K变化会误计。330秒追加对照：old control/churn严格同入站重复0/3715，new control/churn均0；new两连接各5个粗键命中全部为3次数量变化+2次is_closed变化，未发现退订修复残留。历史约100条static未留逐条原文，不声称已全部逐条还原。追加连接在预热期关闭，原两小时采样保持连续；后续24h CSV已补写超时/lagged/启动时间三列。
