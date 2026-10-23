@@ -1170,22 +1170,22 @@ USER md-user
 验收辅助脚本：`scripts/compat/analyze_quote.mjs`（quote 间隔 / 节流 / 非空 / 字段顺序 / 正对照）、
 `scripts/compat/sample_process.sh`（10 分钟进程指标采样）、`scripts/compat/restore_subs.mjs`（补回动态订阅）。
 
-### 12.2 升级到 1.1.1（内存调查 + Gateway 退订泄漏 + 写超时；分阶段、可回滚）
+### 12.2 升级到 1.1.1（内存调查 + Gateway 修复 + SIGHUP/log_level；分阶段、可回滚）
 
 1.1.1 的内容与结论见 [CHANGELOG](CHANGELOG.md) 与 `evidence/1.1.1/INVESTIGATION_REPORT.md`。要点：
 
 - 修 Gateway `unsubscribe` 不释放接收端（A1）、改用 `StreamMap` 接收路径（A2，输出字节不变）；
-- **Gateway 写超时**：生效已有配置 `api_gateway.ws_write_wait`（默认 `10s`，`0s` 关闭）。这是 1.1.1 **唯一的行为变化**：
+- **Gateway 写超时**：生效已有配置 `api_gateway.ws_write_wait`（默认 `10s`，`0s` 关闭）。数据连接的行为变化是：
   停读 ≥10 秒的 Gateway 客户端会被断开，需自行重连并重新订阅；Legacy `/ws` 不变。**换版前请知会 1stbotv3 等消费者**；
 - 新增指标 `md_ws_subscriptions_active`、`md_ws_kicked_write_timeout_total`、`md_tokio_*`；
-- 配置文件**不需要改**（沿用 1.1.0 的 `config.yaml`，无新键）；
-- **两个发布候选（需业务方选择，详见 `evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md`）**：
-  - **候选 A（推荐）`md-server:1.1.1`**：A1+A2+A3+A5 + **jemalloc 分配器**。构建：
-    `cargo zigbuild --release --target x86_64-unknown-linux-musl --features md-connector/vendored-tls,md-server/jemalloc-stats -p md-server`
-    → `dist/md-server-1.1.1-linux-x86_64`。旁路等价负载 6 小时 RSS 斜率 +0.08 MiB/h；
-  - 候选 B `md-server:1.1.1-default-alloc`：同上但**默认分配器**（构建去掉 `md-server/jemalloc-stats`）。旁路同样负载下斜率 +16.7 MiB/h，
-    **不能解决 RSS 只升不降**，只适合"不愿改分配器"时配合 400MiB 告警 + 定期低峰重建使用。
-  sha256 见 `evidence/1.1.1/build-logs/dist-sha256.txt`。
+- **SIGHUP/log_level 修复并入 1.1.1**：订阅列表与日志级别支持热更，需重启项持续提示；`RUST_LOG` 继续优先于 YAML。
+- 旧配置原样可用、无新必填键。本次镜像使用现网阶段 2 配置，仅将 YAML `log_level` 改为 `"warn"`，容器 **`RUST_LOG=warn` 保留**。
+- **现网必须使用候选 A `md-server:1.1.1`（A1–A5 + jemalloc + SIGHUP/log_level）**。主审已裁定默认分配器不达标（同负载斜率 +16.7 MiB/h），不再作为发布选项。
+  从 `a06fe20` 的干净 worktree 固定 `SOURCE_DATE_EPOCH`，使用
+  `--features md-connector/vendored-tls,md-server/jemalloc-stats` 连续两次从零构建并核对 sha256：
+  `bash evidence/1.1.1/tools/build_final.sh`。
+  产物 `dist/md-server-1.1.1-linux-x86_64`；sha256 与构建条件见 `evidence/1.1.1/build-logs/dist-sha256.txt`。
+  镜像基于 `md-server:1.0.0-rollback`，只叠加最终二进制和阶段 2 配置。旧 `exp-v5` 与未含 jemalloc 的 SIGHUP 产物不得部署。
 
 **为什么 `md-server:latest` 仍指向 1.0.0（刻意不动）**：NAS 198 上 `md-server:latest` 与 `md-server:1.0.0-rollback` 是同一个镜像
 （`06907bdf7fd8`）。它是整条升级链（1.0.0 → 1.1.0 → 1.1.1）**最后的回滚依据**，所以：
@@ -1208,6 +1208,9 @@ node scripts/compat/capture_ws.mjs gateway ws://HOST:8081/ws/v1/data 60 baseline
 `restore_subs.mjs` 补入现网订阅，与现网/基线用 `compare.mjs push|subs|metrics` 做同窗口对比；通过后删除临时容器。
 
 **阶段 2：低峰换版**（业务方批准的窗口；约 6 秒中断）
+
+2026-10-24 业务方补充：不主动重启现网 1.1.0；等待最终产物复验后直接换版，执行前告知业务方转主审。
+等待期间若容器自行重启，只记下时间，不手工干预。400 MiB 告警仍保留，具体处置以本次授权为准。
 
 ```bash
 # 复用 1.1.0 的换版工具：旧容器改名为 md-server-1.1.0-quote-bnb-bak 并停止，按旧容器参数用新镜像重建同名 md-server

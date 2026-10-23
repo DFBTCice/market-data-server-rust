@@ -1,0 +1,20 @@
+   Compiling md-domain v0.1.0 (/private/tmp/md-final-a06fe20/crates/md-domain)
+   Compiling md-tests v0.1.0 (/private/tmp/md-final-a06fe20/crates/md-tests)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.18s
+     Running tests/json_compat.rs (/Users/lihao/Desktop/web3/rust/rest重构/target/debug/deps/json_compat-b356615bbe8ccfa6)
+
+running 11 tests
+test error_response_format ... ok
+test error_bad_request_format ... ok
+test ws_gateway_subscribe_response_format ... ok
+test quote_json_has_all_fields_even_when_empty ... ok
+test tick_snapshot_binance_btcusdt ... ok
+test ws_gateway_message_format ... ok
+test tick_and_kline_serialization_unchanged_by_quote_addition ... ok
+test kline_snapshot_binance_btcusdt_1m ... ok
+test subscriptions_snapshot_shape_and_data_type_values ... ok
+test ws_gateway_tick_push_data_is_byte_stable ... ok
+test all_fixtures_are_non_empty ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

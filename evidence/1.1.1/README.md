@@ -2,6 +2,10 @@
 
 **交主审的总结报告（五段式）：[`FINAL_REPORT.md`](FINAL_REPORT.md)**
 
+**2026-10-24 接续交付**：见 [`final-artifact/REPORT.md`](final-artifact/REPORT.md) 与 [`final-artifact/README.md`](final-artifact/README.md)。
+源码 `a06fe20` 干净树两次从零构建的最终 jemalloc 产物 SHA-256 为 `3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d`，
+包含 SIGHUP/log_level 修复；旧 `fa7be337…`、`a130e411…` 和 `exp-v5` 均不得部署。最终镜像复验与换版状态以新报告为准，下文保留历史调查记录。
+
 先看：[`INVESTIGATION_REPORT.md`](INVESTIGATION_REPORT.md)（调查报告：时间线、D1–D7 结论、增长构成、"5×"解释、准入条件自检、没做/没证明）。
 换版计划（仅计划，未执行）：[`nas-198/SWAP_PLAN_1.1.1.md`](nas-198/SWAP_PLAN_1.1.1.md)。
 

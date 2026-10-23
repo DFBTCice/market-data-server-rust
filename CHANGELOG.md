@@ -4,13 +4,20 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布] - SIGHUP 配置重载修复 + `log_level` 真正生效（已合入 1.1.1 分支；**未打标签、未上现网**，换版时机由主审决定）
+## [1.1.1] - 待换版（最终产物复验中；未打标签、未上现网）
 
-调查、复现与验证见 `evidence/sighup-reload-fix/REPORT.md`。**只改 SIGHUP 重载逻辑与日志级别**：行情数据路径（tick/kline/quote 输出）、
+本版同时包含 A1–A5、jemalloc 分配器和 SIGHUP/log_level 修复，不另发 1.1.2。
+最终源码 `a06fe20`，干净 worktree 固定构建时间、两次从零构建 SHA-256 一致：
+`3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d`。
+构建条件见 `evidence/1.1.1/build-logs/dist-sha256.txt`；复验状态见 `evidence/1.1.1/final-artifact/REPORT.md`。
+
+### SIGHUP 配置重载与日志级别
+
+调查、复现与验证见 `evidence/sighup-reload-fix/REPORT.md`。**本节修复只涉及 SIGHUP 重载逻辑与日志级别**：行情数据路径（tick/kline/quote 输出）、
 REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更需要重启"的设计，**没有**引入连接器热重建。
 线上 1.1.0（SHA-256 `d73f7a4c…ba60`）与 1.1.1 分支 HEAD 均已复现下列缺陷。
 
-### 修复（Fixes）
+#### 修复（Fixes）
 
 - **漏检 OKX Business 地址**：SIGHUP 检查了 `okx.stream_base_url_public`，却漏了 `okx.stream_base_url_business`。
   只改 Business 地址时日志是 `config reloaded and applied successfully`，而连接器仍连旧地址；
@@ -34,11 +41,10 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
   - `reconnect_delay`、`ping_interval`、`rest_base_url`、`processor.*`、`api_gateway.*` 等只在启动时读取的字段，SIGHUP 以前完全不检测；现在用结构体穷尽解构统一覆盖，**新增配置项不分类就编译不过**。
   - 配置读取 / 解析 / 校验失败从 WARN 提升为 ERROR，并明确"运行配置保持不变（nothing applied）"。
 
-### 行为变化（只涉及 SIGHUP 与日志级别，运维需知）
+#### 行为变化（只涉及 SIGHUP 与日志级别，运维需知）
 
 - 以前报"成功"的若干情形现在会报"需要重启"——这是修复的目的（见上）。
-- **线上 198 的真实组合是 YAML `log_level: "info"` + 容器环境 `RUST_LOG=warn`**：升级后实际级别**仍是 warn**（`RUST_LOG` 优先，日志量与升级前一致），启动时多一行 WARN 说明 YAML 的 `log_level` 被覆盖。
-  要让 YAML + SIGHUP 接管日志级别：换版时去掉容器环境变量 `RUST_LOG`，并在 YAML 里写想要的级别（想保持安静就写 `log_level: "warn"`）。
+- **198 换版保留容器 `RUST_LOG=warn`**，阶段 2 配置仅将 YAML `log_level: "info"` 改为 `"warn"`。实际级别仍为 warn，升级后日志量不变，且不会新增覆盖告警；本次不去掉环境变量。
 - 保留的日志串：`config reloaded and applied successfully`、`some config changes require connector restart -- please restart the service`（末尾追加 `(N pending: 路径列表)`）、`failed to reload config`、订阅热更的 `adding/removing N ... subscriptions` 系列；日志 target 仍为 `md_server`。
 - 变更的日志文案（日志没有外部消费方，一切走 API）：地址 / 开关等需重启项改为 `<YAML 路径> changed: <旧值> -> <文件值> (NOT applied, requires restart)`；
   启动时的 `log_level: <x>` 行改为 `log filter: <x> (from …)`，`loading config from` 改为 `loaded config from`；
@@ -47,7 +53,7 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
 - 启动顺序变化：先读配置、再初始化日志（过滤器取决于 `log_level`），因此读配置失败的报错只写 stderr（以前这一行本来就是 `eprintln!`）。
 - 订阅列表热更的行为不变（对运行中的连接器增量 add/remove，不重连）；同一批次内下发顺序改为按符号排序（稳定、可测试）。
 
-### 测试
+#### 测试
 
 - 单元测试：`md-server` 5 → 42，`md-config` 10 → 14，整个工作区 248 个全部通过。
   - SIGHUP：逐字段检测（每个"只在启动时读取"的字段单独改动都必须被检出）、任一地址连续多次 SIGHUP 不误报、改回原值提示消失、
@@ -60,14 +66,14 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
 - 变异验证（`evidence/sighup-reload-fix/verify/run_mutations.py`）：21 种故意改坏（地址检测 / 基线污染 / 订阅与日志级别的各种"假装已应用" / `RUST_LOG` 优先级 / 校验 / 启动接线），全部被抓住；
   其中 2 种启动接线类变异单元测试抓不住（全局 subscriber 只能装一次），由端到端抓住。
 
-## [1.1.1] - 待换版（2026-10-10 完成开发与旁路验证；**未打标签、未上现网**）
+### Gateway 修复与内存调查
 
 **内存增长调查 + Gateway 退订泄漏修复**，作为阶段 3（扩展品种）的前置条件。完整调查见
 `evidence/1.1.1/INVESTIGATION_REPORT.md`；换版计划见 `evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md`。
 遵循"只增不改"：tick/kline/quote 的语义与逐字节输出、REST/gRPC、旧 `/ws`（Legacy）均不变；
 新增配置项无（沿用已有的 `api_gateway.ws_write_wait`），新增监控只增不减。
 
-### 修复（Fixes）
+#### 修复（Fixes）
 
 - **Gateway（`/ws/v1/data`）退订不释放接收端（A1）**：此前 `unsubscribe` 只把主题从订阅集合里删掉，
   对应的 broadcast 接收端仍留在连接的接收列表里并继续被轮询。后果：同一连接对同一主题"订阅→退订→再订阅" N 次后，
@@ -76,14 +82,14 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
   修复：每个连接用 `StreamMap<主题, 流>` 持有接收端，退订即移除；同主题重复订阅为幂等。
 - **接收路径等价改写（A2）**：新的接收路径对外输出的字节与 1.1.0 完全相同：`compat_1_0_0` 回放、`md-tests` 通过；
   `compare.mjs` 同窗口对比中 tick/kline（Gateway 与 Legacy）逐字节一致，订阅集合、metrics（只新增不删除）一致。
-  **例外（如实）**：`quote.binance.BNBUSDT` 的逐字节项在两条独立连接间有噪声（仅 `bid_qty`/`ask_qty`，0.1%~0.6% 条数，1.1.0 对 1.1.0 同样出现），见 `evidence/1.1.1/report/quote-byte-noise.txt` 与调查报告 §12.9。Legacy `/ws` 不改动。
-- **Gateway 写超时（A5，唯一的行为变化）**：`api_gateway.ws_write_wait`（默认 `10s`）在 1.1.0 及以前被解析但**从未生效**。
+  **主审已裁定不计失败的工具噪声**：`quote.binance.BNBUSDT` 的逐字节项在两条独立连接间有噪声（仅 `bid_qty`/`ask_qty`，0.1%~0.6% 条数，1.1.0 对 1.1.0 同样出现），见 `evidence/1.1.1/report/quote-byte-noise.txt` 与调查报告 §12.9。Legacy `/ws` 不改动。
+- **Gateway 写超时（A5，数据连接的行为变化）**：`api_gateway.ws_write_wait`（默认 `10s`）在 1.1.0 及以前被解析但**从未生效**。
   客户端停止读取（进程挂起 / 半开连接 / 严重卡顿）时，服务端对该连接的 `send` 会一直阻塞，连接处理协程不再轮询接收端，
   broadcast 环（每主题 4096 条）里的事件被一直持有。1.1.1 起写入超过 `ws_write_wait` 即断开该连接（消费者需自行重连并重新订阅）。
   设为 `"0s"` 可恢复旧行为。新增指标 `md_ws_kicked_write_timeout_total`。
-- **分配器（见下"调查结论"）**：新增可选构建 `--features md-server/jemalloc-stats`（jemalloc 作为全局分配器）。**默认构建仍使用 musl 自带分配器**，行为与 1.1.0 相同。
+- **分配器（见下"调查结论"）**：特性 `--features md-server/jemalloc-stats` 使用 jemalloc 作为全局分配器。**本次现网镜像必须启用此特性**；未启用的默认构建仍用 musl，内存斜率不达标。
 
-### 新增（Features，均为只增）
+#### 新增（Features，均为只增）
 
 - **`md_ws_subscriptions_active`**（gauge）：所有 WS 连接当前持有的 broadcast 接收端总数（RAII 计数，连接断开自动扣减）。
   用来在现网直接发现"订阅数只增不减"。
@@ -97,7 +103,7 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
 - **调查/验证工具**：`scripts/compat/{load_consumers,stall_client,sample_metrics,md_ws_dup_probe}.mjs`、
   `crates/md-processor/examples/retention_sizing.rs`、`evidence/1.1.1/tools/`。
 
-### 测试（A4，均带"在修复前代码上必须失败"的正对照）
+#### 测试（A4，均带"在修复前代码上必须失败"的正对照）
 
 - `crates/md-gateway/tests/unsubscribe_gateway.rs`（6 个）：退订后无事件、重订恰好 1 份、反复抖动仍 1 份、重复订阅无额外副本、
   部分退订不影响其它主题且字节不变、一个连接退订不影响另一个连接。修复前代码上 3 个失败（`evidence/1.1.1/a4-tests/`）。
@@ -105,7 +111,7 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
 - `crates/md-gateway/tests/write_timeout_gateway.rs`（3 个）：停读客户端被踢（对照：`ws_write_wait=None` 时连接被永远钉住）、健康客户端不受影响。
   去掉超时实现的变异版上"被踢"用例失败（`evidence/1.1.1/a5-write-timeout/`）。
 
-### 调查结论（内存增长，详见调查报告）
+#### 调查结论（内存增长，详见调查报告）
 
 - **不是逻辑泄漏**：同样的代码换 jemalloc，存活堆（`allocated`）在 7 小时、含 30 分钟停读与行情突发的负载下稳定在 6~10 MiB；
   musl 自带分配器的 14 个对照容器全部上涨（起止 +4 ~ +138 MiB）；jemalloc 的 4 个容器预热 1 小时后斜率为 +0.08 ~ +0.85 MiB/h（均 ≤ 1 MiB/h；起止 +0.2 ~ +8 MiB，停读造成的峰值最高 56.8 MiB，之后回落）。
@@ -115,7 +121,7 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
 - 单靠 A5（默认分配器）在旁路等价负载下**仍不满足** RSS 斜率 ≤ 1 MiB/h；**A5 + jemalloc** 满足（详见报告 §D3 与换版计划的候选选择）。
 - 现网 `md_ticks_dropped` 的来源：行情突发时 tick 入口队列（1000）在毫秒级被打满；同一时刻现网与全部旁路容器同时出现丢弃，证明来自上游行情而非本进程故障。
 
-### 文档更正
+#### 文档更正
 
 - 1.0.0 发布说明里的"失败 stream 黑名单"、`MAX_STREAMS_PER_MSG` 订阅分批、重连抖动（jitter）三项在代码中并不存在，已在 1.0.0 条目中划线更正。
 

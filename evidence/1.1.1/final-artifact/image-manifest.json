@@ -1,0 +1,25 @@
+{
+  "tag": "md-server:1.1.1",
+  "id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "base": "md-server:1.0.0-rollback",
+  "base_id": "sha256:06907bdf7fd89c349780013fe8840f379097548f5f42e5a27b507fe2bab03089",
+  "source_commit": "a06fe2095e8fc58bff1e038a594b25e7002aff1b",
+  "binary_sha256": "3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d",
+  "config_sha256": "eb2507ed45224856347cdb8e169dc0d0cfe59d8e35d4b37fb2a8fa3b57d4185e",
+  "user": "md-user",
+  "cmd": [
+    "md-server",
+    "--config",
+    "/etc/md-server/config.yaml"
+  ],
+  "healthcheck": {
+    "Interval": 30000000000,
+    "Retries": 3,
+    "StartPeriod": 5000000000,
+    "Test": [
+      "CMD-SHELL",
+      "curl -f http://localhost:8081/health || exit 1"
+    ],
+    "Timeout": 10000000000
+  }
+}

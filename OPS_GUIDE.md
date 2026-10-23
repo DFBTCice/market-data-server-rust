@@ -8,12 +8,12 @@
 
 从代码 `crates/md-server/src/reload.rs`（重载逻辑）和 `main.rs` 的 `wait_for_signal()` 分析，**SIGHUP 热重载的实际能力如下**：
 
-> **规则一句话**：SIGHUP **只热更订阅列表**；其余所有配置项都"只在进程启动时读取"，文件里改了**不会生效**，必须重启。
+> **规则一句话**：SIGHUP **只热更订阅列表和日志级别**（`RUST_LOG` 优先）；其余配置项只在进程启动时读取，文件里改了不会生效，必须重启。
 >
 > 进程内部把「文件里的新配置」和「实际已应用配置」分开记录。每次 SIGHUP 都拿文件和**实际在运行的配置**对比：
 > 只要还有没生效的差异，**每一次** SIGHUP 都会继续点名提示（不会因为发过一次就"记成已应用"）；把文件改回原值，提示自动消失。
 > **只有日志里出现 `config reloaded and applied successfully`，才表示文件内容已全部生效。**
-> （1.1.0 / 1.1.1 的缺陷：只改 OKX Business 地址会误报成功；第二次 SIGHUP 会把未生效的地址当成已应用。已修复，见 `CHANGELOG.md`「未发布」。）
+> （1.1.0 及早期 1.1.1 候选的缺陷：只改 OKX Business 地址会误报成功；第二次 SIGHUP 会把未生效的地址当成已应用。修复已并入 1.1.1，见 `CHANGELOG.md`。）
 
 ### ✅ 真正支持热更（无需重启）
 
@@ -29,7 +29,7 @@ OKX K 线需 `okx.enabled` 且 `subscribe_klines` 非空；quote 需 `quotes_ena
 
 ### ❌ 不支持热更（修改后提示需要重启）
 
-除订阅列表外，**其余所有配置项**都归此类（新增配置项默认也归此类，代码里用穷尽解构强制分类）。常见项：
+除订阅列表和日志级别外，**其余配置项**都归此类（新增配置项默认也归此类，代码里用穷尽解构强制分类）。常见项：
 
 | 配置项 | 说明 |
 |--------|------|
@@ -44,7 +44,7 @@ OKX K 线需 `okx.enabled` 且 `subscribe_klines` 非空；quote 需 `quotes_ena
 
 ### 日志级别（`log_level`）怎么生效
 
-1.1.0 / 1.1.1 里 YAML 的 `log_level` **从未生效**（只是启动时打印一行，实际由环境变量 `RUST_LOG` 决定，没设就是 `info`）。现在它真正生效：
+1.1.0 及早期 1.1.1 候选里 YAML 的 `log_level` 从未生效（只打印，过滤器由 `RUST_LOG` 决定，没设就是 `info`）。最终 1.1.1 已修复：
 
 | 优先级 | 来源 | 说明 |
 |--------|------|------|
@@ -90,9 +90,9 @@ sudo systemctl kill -s HUP md-server
 
 **线上 198 使用 `RUST_LOG=warn`**：`config reloaded and applied successfully` 是 INFO，在该级别下看不到——**成功时日志是静默的**；
 只要出现任何 WARN / ERROR（`some config changes require connector restart ...`、`failed to reload config ...`），就说明有事要处理。
-198 上 YAML 写的是 `log_level: "info"`，而 `RUST_LOG=warn` 优先，所以**实际级别是 warn**，启动时会有一行 WARN 说明这件事；
-要换成"YAML 控制 + SIGHUP 热更"，见上面"日志级别"一节最后一条。
-（1.1.0 / 1.1.1 在该级别下，只改 OKX Business 地址再发 SIGHUP 是**完全没有任何输出**。）
+198 的 1.1.0 镜像 YAML 写 `log_level: "info"`，实际由 `RUST_LOG=warn` 控制。1.1.1 换版**保留 `RUST_LOG=warn`**，
+镜像内 YAML 同步改为 `log_level: "warn"`；本次不切换日志控制方式，也不会增加启动时的覆盖告警。
+（1.1.0 在该级别下，只改 OKX Business 地址再发 SIGHUP 完全没有输出；最终 1.1.1 会持续 WARN。）
 
 ### 与 Go 版热重载对比
 
@@ -357,11 +357,11 @@ Prometheus 告警示例（与 DEPLOYMENT §7 的 500MB 提示规则并存，这�
 
 ```yaml
 - alert: MdServerMemoryHigh
-  expr: process_resident_memory_bytes{job="md-server"} > 400 * 1024 * 1024
+  expr: process_resident_memory_bytes{job="md-server"} >= 400 * 1024 * 1024
   for: 10m
   labels: { severity: warning }
   annotations:
-    summary: "md-server RSS > 400MiB，请在低峰期重建容器（限额 512MiB）"
+    summary: "md-server RSS ≥ 400MiB，请安排低峰换版或重建容器（限额 512MiB）"
 - alert: MdWsClientStalled
   expr: increase(md_ws_kicked_write_timeout_total{job="md-server"}[10m]) > 0
   labels: { severity: info }

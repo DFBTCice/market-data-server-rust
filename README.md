@@ -67,6 +67,10 @@ cargo zigbuild -p md-server --release \
 #   ELF 64-bit x86-64, statically linked, stripped
 ```
 
+NAS 198 的 **1.1.1 发布必须同时启用 `md-server/jemalloc-stats`**，不能用上述默认分配器产物替代。
+固定源码、干净树、两次从零构建使用 `bash evidence/1.1.1/tools/build_final.sh`；最终产物复验与换版状态见
+[`evidence/1.1.1/final-artifact/REPORT.md`](evidence/1.1.1/final-artifact/REPORT.md)。
+
 ### Docker 部署
 
 ```bash

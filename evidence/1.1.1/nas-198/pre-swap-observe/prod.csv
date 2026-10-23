@@ -1,0 +1,6 @@
+ts_utc,rss_bytes,vsz_bytes,cpu_seconds,open_fds,uptime_s,ws_clients,ws_subscriptions_active,subs_total,subs_tick,subs_kline,subs_quote,ticks_processed,ticks_dropped,klines_processed,klines_dropped,quotes_processed,quotes_dropped,reconnect_okx,reconnect_okx_kline,reconnect_okx_quote,reconnect_binance,reconnect_binance_quote,connected_sum,ws_sent_tick,ws_sent_kline,ws_sent_quote,metrics_lines,tokio_alive_tasks,jemalloc_allocated,jemalloc_active,jemalloc_resident,jemalloc_retained,jemalloc_mapped
+2026-10-23T17:36:09Z,485621760,1379893248,3433.18,21,187133,2,,13,6,5,2,11893077,2034,1286638,0,11603504,73,11,11,10,5,2,5,7198753,7094,1187480,838,,,,,,
+2026-10-23T17:37:09Z,485621760,1379893248,3434.14,21,187193,2,,13,6,5,2,11895160,2034,1287055,0,11606749,73,11,11,10,5,2,5,7200836,7179,1188243,838,,,,,,
+2026-10-23T17:38:09Z,485883904,1379958784,3435.02,21,187253,2,,13,6,5,2,11897044,2034,1287504,0,11608700,73,11,11,10,5,2,5,7202720,7270,1188971,838,,,,,,
+2026-10-23T17:39:09Z,485883904,1379958784,3435.91,21,187313,2,,13,6,5,2,11898916,2034,1287923,0,11611899,73,11,11,10,5,2,5,7204592,7365,1189753,838,,,,,,
+2026-10-23T17:40:09Z,485883904,1379958784,3436.68,21,187373,2,,13,6,5,2,11900012,2034,1288266,0,11613930,73,11,11,10,5,2,5,7205688,7441,1190521,838,,,,,,

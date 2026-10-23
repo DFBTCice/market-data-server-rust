@@ -1,0 +1,21 @@
+2026-10-23T17:34:34.859Z start url=ws://192.168.1.198:28109/ws/v1/data secs=7260 ticks=6 quotes=2 klines=5 staticKlines=2 churnPool=3 churn=2/90s off=20s
+2026-10-23T17:35:34.897Z static: msgs=2556 dups=0 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:35:34.899Z churn: msgs=385 dups=2 acks=5 errors=0 reconnects=0 churn_cycles=0 wanted=5
+2026-10-23T17:36:04.896Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:36:24.900Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:36:34.896Z static: msgs=5374 dups=1 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:36:34.897Z churn: msgs=749 dups=2 acks=9 errors=0 reconnects=0 churn_cycles=1 wanted=5
+2026-10-23T17:37:34.898Z CHURN unsubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:37:34.899Z static: msgs=8597 dups=3 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:37:34.899Z churn: msgs=1193 dups=2 acks=9 errors=0 reconnects=0 churn_cycles=2 wanted=3
+2026-10-23T17:37:54.902Z CHURN resubscribe kline.5m.okx.BTC-USDT-SWAP,kline.5m.binance.BTCUSDT
+2026-10-23T17:38:34.899Z static: msgs=11119 dups=4 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:38:34.901Z churn: msgs=1585 dups=2 acks=13 errors=0 reconnects=0 churn_cycles=2 wanted=5
+2026-10-23T17:39:04.903Z CHURN unsubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:39:24.906Z CHURN resubscribe kline.5m.okx.ETH-USDT-SWAP,kline.5m.okx.BTC-USDT-SWAP
+2026-10-23T17:39:34.903Z static: msgs=13163 dups=4 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:39:34.904Z churn: msgs=1929 dups=2 acks=17 errors=0 reconnects=0 churn_cycles=3 wanted=5
+2026-10-23T17:40:34.902Z CHURN unsubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP
+2026-10-23T17:40:34.907Z static: msgs=15140 dups=5 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-23T17:40:34.908Z churn: msgs=2273 dups=4 acks=17 errors=0 reconnects=0 churn_cycles=4 wanted=3
+2026-10-23T17:40:54.914Z CHURN resubscribe kline.5m.binance.BTCUSDT,kline.5m.okx.ETH-USDT-SWAP

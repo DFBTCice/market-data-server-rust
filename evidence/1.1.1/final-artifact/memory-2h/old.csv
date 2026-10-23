@@ -1,0 +1,8 @@
+ts_utc,rss_bytes,vsz_bytes,cpu_seconds,open_fds,uptime_s,ws_clients,ws_subscriptions_active,subs_total,subs_tick,subs_kline,subs_quote,ticks_processed,ticks_dropped,klines_processed,klines_dropped,quotes_processed,quotes_dropped,reconnect_okx,reconnect_okx_kline,reconnect_okx_quote,reconnect_binance,reconnect_binance_quote,connected_sum,ws_sent_tick,ws_sent_kline,ws_sent_quote,metrics_lines,tokio_alive_tasks,jemalloc_allocated,jemalloc_active,jemalloc_resident,jemalloc_retained,jemalloc_mapped
+2026-10-23T17:34:34Z,17604608,28233728,0.5,22,32,0,,13,6,5,2,1051,0,209,0,1624,0,0,0,0,0,0,5,0,0,0,520,,,,,,
+2026-10-23T17:35:34Z,21405696,31924224,1.87,22,92,4,,13,6,5,2,2841,0,594,0,4580,0,0,0,0,0,0,5,5367,1155,1528,676,,,,,,
+2026-10-23T17:36:35Z,21405696,31989760,3.24,22,153,4,,13,6,5,2,4884,0,1014,0,8668,0,0,0,0,0,0,5,11496,2384,3108,676,,,,,,
+2026-10-23T17:37:34Z,21536768,32055296,4.58,22,212,4,,13,6,5,2,7364,0,1462,0,11234,0,0,0,0,0,0,5,18936,3903,4566,676,,,,,,
+2026-10-23T17:38:34Z,26648576,50143232,5.93,22,272,4,,13,6,5,2,9139,0,1914,0,13842,0,0,0,0,0,0,5,24261,5469,6044,676,,,,,,
+2026-10-23T17:39:34Z,26648576,50208768,6.75,20,332,2,,13,6,5,2,10388,0,2291,0,16022,0,0,0,0,0,0,5,25510,6096,6843,676,,,,,,
+2026-10-23T17:40:34Z,26779648,50208768,7.5,20,392,2,,13,6,5,2,11626,0,2635,0,18027,0,0,0,0,0,0,5,26748,6804,7583,676,,,,,,

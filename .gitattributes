@@ -1,0 +1,4 @@
+# 原始验证输出保留 Docker CRLF、cargo 末尾空行和 unified diff 的空白上下文。
+evidence/1.1.1/final-artifact/image-build.jsonl -whitespace
+evidence/1.1.1/final-artifact/config.diff -whitespace
+evidence/1.1.1/final-artifact/verify/*.log -whitespace

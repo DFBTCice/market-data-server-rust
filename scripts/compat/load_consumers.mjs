@@ -140,7 +140,7 @@ class Consumer {
 }
 
 const staticC = new Consumer('static', [...ticks, ...(WITH_QUOTE ? quotes : [])]);
-const churnC = new Consumer('churn', staticKlines);
+const churnC = new Consumer('churn', [...staticKlines, ...churnPool]);
 staticC.connect();
 churnC.connect();
 
@@ -152,10 +152,14 @@ const churnTimer = setInterval(() => {
   const batch = [];
   for (let i = 0; i < CHURN_N; i++) batch.push(churnPool[(cursor + i) % churnPool.length]);
   cursor = (cursor + CHURN_N) % churnPool.length;
-  // 先"订阅"这批（模拟 1stbotv3 开始用这几个周期），再在 CHURN_OFF 后退订
-  churnC.subscribe(batch);
+  // 初始已订阅全部 K 线，轮换执行退订 -> 等待 -> 重订。
+  churnC.unsubscribe(batch);
+  log(`CHURN unsubscribe ${batch.join(',')}`);
   cycles++;
-  setTimeout(() => churnC.unsubscribe(batch), CHURN_OFF);
+  setTimeout(() => {
+    churnC.subscribe(batch);
+    log(`CHURN resubscribe ${batch.join(',')}`);
+  }, CHURN_OFF);
 }, CHURN_PERIOD);
 
 const statTimer = setInterval(() => {

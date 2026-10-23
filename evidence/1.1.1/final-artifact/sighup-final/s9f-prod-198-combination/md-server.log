@@ -1,0 +1,9 @@
+2026-10-23T17:34:50.780Z 2026-10-23T17:34:50.729691Z  WARN md_server: config log_level "info" is overridden by RUST_LOG=warn: RUST_LOG takes precedence; unset RUST_LOG (and restart) to let log_level and SIGHUP control the log level
+2026-10-23T17:34:51.868Z [harness] ---- process ready ----
+2026-10-23T17:34:51.869Z [harness] ---- SIGHUP no change ----
+2026-10-23T17:34:53.625Z [harness] ---- SIGHUP yaml->debug #1 ----
+2026-10-23T17:34:53.751Z 2026-10-23T17:34:53.639946Z  WARN md_server:   log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)
+2026-10-23T17:34:53.751Z 2026-10-23T17:34:53.640039Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)
+2026-10-23T17:34:55.353Z [harness] ---- SIGHUP yaml->debug #2 ----
+2026-10-23T17:34:55.497Z 2026-10-23T17:34:55.383790Z  WARN md_server:   log_level changed: info -> debug (NOT applied, requires restart; RUST_LOG=warn takes precedence over log_level; unset RUST_LOG and restart to let log_level (and SIGHUP) control the log level)
+2026-10-23T17:34:55.497Z 2026-10-23T17:34:55.383848Z  WARN md_server: some config changes require connector restart -- please restart the service (1 pending: log_level)
