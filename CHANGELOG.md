@@ -4,7 +4,7 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [1.1.1] - 待换版（最终产物复验中；未打标签、未上现网）
+## [1.1.1] - 2026-10-24（NAS 已换版，24h 观察中；未打标签）
 
 本版同时包含 A1–A5、jemalloc 分配器和 SIGHUP/log_level 修复，不另发 1.1.2。
 最终源码 `a06fe20`，干净 worktree 固定构建时间、两次从零构建 SHA-256 一致：
@@ -15,7 +15,7 @@
 
 调查、复现与验证见 `evidence/sighup-reload-fix/REPORT.md`。**本节修复只涉及 SIGHUP 重载逻辑与日志级别**：行情数据路径（tick/kline/quote 输出）、
 REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更需要重启"的设计，**没有**引入连接器热重建。
-线上 1.1.0（SHA-256 `d73f7a4c…ba60`）与 1.1.1 分支 HEAD 均已复现下列缺陷。
+修复前的 1.1.0（SHA-256 `d73f7a4c…ba60`）与早期 1.1.1 候选均已复现下列缺陷；最终 1.1.1 已修复。
 
 #### 修复（Fixes）
 
@@ -27,7 +27,7 @@ REST/gRPC/WS、`/metrics`、配置文件格式均不变。仍然是"地址变更
   需重启的变更每次 SIGHUP 都继续点名，改回原值才消失。**Binance**（`binance.stream_base_url`、`binance.stream_base_url_public`）有同样缺陷，一并修复。
 - **自动重连不会应用新地址**（设计如此，现在文档与日志写明）：连接器只持有启动时的地址，断线重连不会重新读 YAML；改地址必须重启。重启后连接器连到新地址（已用端到端测试验证）。
 - **`log_level` 从未生效**：YAML 的 `log_level` 只被读出来打印一行，日志过滤器始终取自环境变量 `RUST_LOG`（没设就是 `info`）；
-  `main.rs` 里"可通过 RUST_LOG 或配置覆盖"的注释从未实现。1.1.0 / 1.1.1 上改 `log_level`、再发 SIGHUP，日志照旧，SIGHUP 还会写 `log_level: … (applied)` 谎称已应用。
+  `main.rs` 里"可通过 RUST_LOG 或配置覆盖"的注释从未实现。1.1.0 / 早期1.1.1候选上改 `log_level`、再发 SIGHUP，日志照旧，SIGHUP 还会写 `log_level: … (applied)` 谎称已应用。
   现在真正生效：**启动时按它初始化过滤器，SIGHUP 可热更（不重连、不重启）**。
   - 优先级：环境变量 `RUST_LOG`（已设置、非空、写法合法）＞ YAML `log_level`（环境变量 `LOG_LEVEL` 可覆盖它）＞ 默认 `info`。
     取"环境变量优先于配置文件"的通行约定：现网都设了 `RUST_LOG=warn`，这样升级后日志量不会被悄悄改变。

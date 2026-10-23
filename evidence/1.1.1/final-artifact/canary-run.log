@@ -1,3 +1,6 @@
 started md-exp-final-old-110 c28128a9bd6f md-server:1.1.0-quote-bnb http=28108 cpus=2 []
 started md-exp-final-new-111 f1e75b7ac5b5 md-server:1.1.1 http=28109 cpus=2 []
 240s compatibility completed: {'push-gateway': 0, 'push-legacy': 0, 'noquote-legacy': 0, 'subs': 0, 'metrics': 0, 'selftest': 0, 'quote_raw': 1}
+2h capture completed; run analyze_final_memory.py before any swap
+removed md-exp-final-old-110
+removed md-exp-final-new-111

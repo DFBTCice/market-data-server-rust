@@ -306,7 +306,7 @@ docker exec md-server tar -czf - /var/log/md-server > md-logs-backup.tar.gz
 | 容器启动后退出 | `docker logs md-server` | 检查 config.yaml 格式是否正确 |
 | 健康检查失败 | `curl -v http://localhost:8081/health` | 检查端口映射和防火墙 |
 | 无数据流入 | `docker logs md-server \| grep connector` | 检查网络连通性，Binance/OKX 是否可达 |
-| 内存过高 | `docker stats md-server` | 先看 [七、内存监控与客户端卡顿](#七内存监控与客户端卡顿111-起)：主因是 musl 自带分配器不向系统归还内存（RSS 只升不降），消费者卡顿 / 行情突发会推高水位；重建容器可清零，换用 jemalloc 构建（1.1.1 推荐镜像）才能让 RSS 随负载回落。调小 `broadcast_capacity` 不是根治 |
+| 内存过高 | `docker stats md-server` | 先看 [七、内存监控与客户端卡顿](#七内存监控与客户端卡顿111-起)：1.1.0调查的主因是 musl 分配器高水位，消费者卡顿 / 行情突发会推高水位；1.1.1发布必须使用jemalloc构建。调小 `broadcast_capacity` 不是根治 |
 | SIGHUP 无效 | `docker kill --signal=HUP md-server` | Docker 容器中 kill -HUP 可能需要 docker kill |
 
 ---
@@ -315,9 +315,11 @@ docker exec md-server tar -czf - /var/log/md-server > md-logs-backup.tar.gz
 
 ### 7.1 一句话结论（详见 `evidence/1.1.1/INVESTIGATION_REPORT.md`）
 
-现网 RSS"只升不降、呈台阶状"**不是逻辑泄漏**（存活堆只有 7~10 MiB），主因是 **musl 自带分配器的高水位**：
+此前1.1.0现网 RSS"只升不降、呈台阶状"（存活堆只有 7~10 MiB），主因是 **musl 自带分配器的高水位**；Gateway退订泄漏是另一个已修复的真实缺陷：
 内存一旦被申请过就不再还给系统，行情突发、连接器重连、消费者卡顿都会把水位推高，之后不回落（旁路等价负载下撤掉全部消费者后仍会缓慢上涨）。
 同样的代码、同样的负载，换 jemalloc 分配器后 RSS 持平（6 小时斜率 ≈ 0），卡顿结束后内存会回落。
+
+北京时间2026-10-24 03:53:15已换为最终jemalloc版1.1.1，立即补订阅12=12，十分钟及换后240秒兼容验收通过；完整24小时观察仍在进行。生产初始RSS约57MiB，状态以[`换版记录`](evidence/1.1.1/nas-198/post-swap-24h/DEPLOYMENT_RECORD.md)的实际采样为准。
 
 其中"消费者卡顿"这一类放大器有明确机制：客户端停止读 socket → 服务端该连接的写操作永久阻塞 → 处理协程不再 `recv`
 → 各主题 broadcast 环（容量 `broadcast_capacity`，默认 4096，单环满载约 2 MiB）里的事件无法被释放。
@@ -377,7 +379,7 @@ Prometheus 告警示例（与 DEPLOYMENT §7 的 500MB 提示规则并存，这�
 
 1. `curl :8081/metrics | grep -E 'md_ws_|process_resident|md_tokio'`：`md_ws_subscriptions_active` 是否异常大？`md_ws_kicked_write_timeout_total` 是否在涨？
 2. 看日志里 `kicked: write blocked longer than ws_write_wait`：谁在卡、多久一次。
-3. RSS 在"平台 + 台阶"形态（不是持续斜线）→ 分配器高水位，不是泄漏；重建容器可清零；根治靠 jemalloc 构建（1.1.1 候选 A），消费者别卡 + 写超时只是减少推高水位的因素。
+3. RSS 在"平台 + 台阶"形态时结合allocated与负载核对分配器高水位，不能只凭形状排除泄漏。1.1.1发布必须使用jemalloc构建；消费者及时读取与写超时保护可减少滞留。
 4. 需要区分"逻辑滞留 vs 分配器"时，用 jemalloc 构建（`--features md-connector/vendored-tls,md-server/jemalloc-stats`）看 `md_jemalloc_allocated_bytes`（存活堆，应持平在 7~12 MiB）与 `md_jemalloc_resident_bytes`（随负载起落、会回落）。默认构建不输出 `md_jemalloc_*`。
 5. 现网 cgroup 里 `anon_thp`/`thp_collapse_alloc` 非零（只读 `docker stats` 的 memory_stats.stats）是一个**未证实**的线索：内核把稀疏堆折叠成大页可能造成 RSS 单分钟跳升（调查报告 §D4）。
 6. `MD_DEBUG_FORCE_RECONNECT_SECS` / `MD_DEBUG_FORCE_RECONNECT_ONLY` 是**仅限旁路实验**的调试开关（强制周期性重连），不要在生产设置。

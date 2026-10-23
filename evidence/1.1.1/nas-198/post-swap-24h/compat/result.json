@@ -1,0 +1,17 @@
+{
+  "pass": true,
+  "capture_s": 240,
+  "topics": [
+    "tick.binance.BTCUSDT",
+    "kline.5m.binance.BTCUSDT",
+    "tick.binance.BNBUSDT",
+    "tick.binance.ETHUSDT",
+    "kline.5m.binance.ETHUSDT",
+    "kline.5m.okx.ETH-USDT-SWAP",
+    "kline.5m.okx.BTC-USDT-SWAP",
+    "tick.okx.ETH-USDT-SWAP",
+    "tick.okx.BTC-USDT-SWAP",
+    "tick.okx.BNB-USDT-SWAP"
+  ],
+  "prod_temporary_capture_clients": 2
+}

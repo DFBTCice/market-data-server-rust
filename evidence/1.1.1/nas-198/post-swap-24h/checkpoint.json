@@ -1,0 +1,11 @@
+{
+  "recorded_at_utc": "2026-10-23T20:06:37.936360+00:00",
+  "phase": "24h observation in progress",
+  "sample_count": 13,
+  "first_sample_utc": "2026-10-23T19:54:13Z",
+  "last_sample_utc": "2026-10-23T20:06:13Z",
+  "ten_minute_acceptance_passed": true,
+  "hourly_heartbeat": true,
+  "minute_sampling_continues": true,
+  "not_a_completed_24h_report": true
+}

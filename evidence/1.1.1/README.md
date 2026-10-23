@@ -8,7 +8,7 @@
 用户追加的同毫秒断线、static/churn重复计数说明见 [`final-artifact/anomalies/REPORT.md`](final-artifact/anomalies/REPORT.md)，包含原文、严格重复探针和旧版正对照；历史客户端进程停顿未证实。
 
 先看：[`INVESTIGATION_REPORT.md`](INVESTIGATION_REPORT.md)（调查报告：时间线、D1–D7 结论、增长构成、"5×"解释、准入条件自检、没做/没证明）。
-换版计划（仅计划，未执行）：[`nas-198/SWAP_PLAN_1.1.1.md`](nas-198/SWAP_PLAN_1.1.1.md)。
+两小时门禁报告：[`final-artifact/memory-2h/REPORT.md`](final-artifact/memory-2h/REPORT.md)。北京时间2026-10-24 03:53:15已换版，实际记录与24h观察进度见[`nas-198/post-swap-24h/DEPLOYMENT_RECORD.md`](nas-198/post-swap-24h/DEPLOYMENT_RECORD.md)；执行与回滚步骤见[`nas-198/SWAP_PLAN_1.1.1.md`](nas-198/SWAP_PLAN_1.1.1.md)。
 
 ## 目录
 
