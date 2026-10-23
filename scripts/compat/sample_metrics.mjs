@@ -44,6 +44,7 @@ const COLS = [
   'reconnect_okx', 'reconnect_okx_kline', 'reconnect_okx_quote', 'reconnect_binance', 'reconnect_binance_quote',
   'connected_sum', 'ws_sent_tick', 'ws_sent_kline', 'ws_sent_quote', 'metrics_lines',
   'tokio_alive_tasks', 'jemalloc_allocated', 'jemalloc_active', 'jemalloc_resident', 'jemalloc_retained', 'jemalloc_mapped',
+  'ws_kicked_write_timeout', 'ws_kicked_lagged', 'process_start_time_seconds',
 ];
 writeFileSync(out, COLS.join(',') + '\n');
 
@@ -89,6 +90,9 @@ while (true) {
     jemalloc_resident: m ? g(m, 'md_jemalloc_resident_bytes') : '',
     jemalloc_retained: m ? g(m, 'md_jemalloc_retained_bytes') : '',
     jemalloc_mapped: m ? g(m, 'md_jemalloc_mapped_bytes') : '',
+    ws_kicked_write_timeout: m ? g(m, 'md_ws_kicked_write_timeout_total') : '',
+    ws_kicked_lagged: m ? g(m, 'md_ws_kicked_lagged_total') : '',
+    process_start_time_seconds: m ? g(m, 'process_start_time_seconds') : '',
   };
   appendFileSync(out, COLS.map((c) => row[c]).join(',') + '\n');
 

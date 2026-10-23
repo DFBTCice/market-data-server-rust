@@ -24,6 +24,7 @@
 3. `python3 evidence/1.1.1/tools/final_canary.py`：两只 ≤256MiB/2CPU 的旁路，分别运行最终镜像和原版 1.1.0，灌同一份实时现网订阅，Gateway/Legacy 同窗口 240s，tick/kline/subs/metrics/noquote/selftest 均须 PASS。quote 原文独立留证，只豁免主审裁定的 Binance 数量配对噪声，不豁免结构或频率错误。
 4. 同一对旁路运行 ≥2h，两类消费者同负载，实际执行退订→等待20s→重订。`sample_metrics.mjs` 每分钟取样。`python3 evidence/1.1.1/tools/analyze_final_memory.py` 必须 exit 0：至少 2h，预热后至少 1h，RSS 回归斜率 ≤1MiB/h、存活堆持平、旧版同负载可见增长。失败或证据不足则继续验证，不能换版。两只旁路结束即删。
 5. 检查当前现网身份、镜像 SHA 和回滚容器名无冲突。用换版前**即时** GET 订阅集合，不能复用旁路启动时的快照（运行期订阅会变化）。
+6. 用户追加异常审计见 `../final-artifact/anomalies/REPORT.md` 与 `assessment.json`。粗键误计和严格重复已区分，最终镜像严格重复0、旧版订退正对照3715；历史同毫秒断线只证实连接写阻塞，客户端进程/网络具体根因未证明，须保留这一限制，不能写成已证实客户端卡顿。
 
 ## 3. 换版（全部门禁通过后）
 
@@ -67,6 +68,7 @@ node scripts/compat/sample_metrics.mjs http://192.168.1.198:8081 86400 60 eviden
 ```
 
 每分钟采样必须实际覆盖 24h；有休眠或网络缺口须如实记录，证据不足不宣布达标。预热 1h 后 RSS 斜率 ≤1MiB/h、`md_jemalloc_allocated_bytes` 持平、`md_ticks_dropped` 不再增长、`md_ws_kicked_write_timeout_total` 为 0 或有可验证解释、订阅数/连接数正常，OMS 与 1stbotv3 消费正常。保留进程 uptime 以识别自行重启。
+新启动的采样器CSV逐分钟增加 `ws_kicked_write_timeout`、`ws_kicked_lagged`、`process_start_time_seconds` 三列；旧的两小时采样不重启、不补造历史列。
 
 RSS ≥400MiB 是一般处置阈值，≥480MiB 紧急。本次等 1.1.1 的期间，按业务方补充只记录、不主动重启旧版。
 

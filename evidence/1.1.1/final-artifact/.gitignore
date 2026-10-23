@@ -4,3 +4,4 @@ canary/new-gateway/
 canary/old-legacy/
 canary/new-legacy/
 __pycache__/
+anomalies/mac-power-window.log

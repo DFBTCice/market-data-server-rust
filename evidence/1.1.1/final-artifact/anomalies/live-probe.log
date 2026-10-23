@@ -1,0 +1,163 @@
+{
+  "finished_at": "2026-10-23T18:11:29.876Z",
+  "seconds": 330,
+  "max_event_loop_delay_ms": 109.39433399998234,
+  "clients": [
+    {
+      "side": "old",
+      "mode": "control",
+      "msgs": 17420,
+      "coarse_duplicates": 4,
+      "same_ingest_repeat": 0,
+      "same_payload_new_ingest": 0,
+      "different_payload_same_coarse_key": 4,
+      "fields": {
+        "bid_qty,connector_receive_ts": 1,
+        "connector_receive_ts,is_closed": 2,
+        "bid_qty": 1
+      },
+      "by_topic": {
+        "quote.binance.BNBUSDT": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 2
+        },
+        "kline.5m.okx.ETH-USDT-SWAP": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        },
+        "kline.5m.okx.BTC-USDT-SWAP": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        }
+      },
+      "acks": 13,
+      "errors": [],
+      "closed": null,
+      "lastMsg": "2026-10-23T18:11:29.857Z"
+    },
+    {
+      "side": "old",
+      "mode": "churn",
+      "msgs": 21066,
+      "coarse_duplicates": 3719,
+      "same_ingest_repeat": 3715,
+      "same_payload_new_ingest": 0,
+      "different_payload_same_coarse_key": 4,
+      "fields": {
+        "identical_bytes": 3715,
+        "bid_qty,connector_receive_ts": 1,
+        "connector_receive_ts,is_closed": 2,
+        "bid_qty": 1
+      },
+      "by_topic": {
+        "kline.5m.binance.ETHUSDT": {
+          "same_ingest_repeat": 1004,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 0
+        },
+        "kline.1h.binance.ETHUSDT": {
+          "same_ingest_repeat": 901,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 0
+        },
+        "kline.5m.binance.BTCUSDT": {
+          "same_ingest_repeat": 826,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 0
+        },
+        "kline.5m.okx.ETH-USDT-SWAP": {
+          "same_ingest_repeat": 583,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        },
+        "kline.5m.okx.BTC-USDT-SWAP": {
+          "same_ingest_repeat": 401,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        },
+        "quote.binance.BNBUSDT": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 2
+        }
+      },
+      "acks": 45,
+      "errors": [],
+      "closed": null,
+      "lastMsg": "2026-10-23T18:11:29.857Z"
+    },
+    {
+      "side": "new",
+      "mode": "control",
+      "msgs": 17425,
+      "coarse_duplicates": 5,
+      "same_ingest_repeat": 0,
+      "same_payload_new_ingest": 0,
+      "different_payload_same_coarse_key": 5,
+      "fields": {
+        "bid_qty": 2,
+        "connector_receive_ts,is_closed": 2,
+        "bid_qty,connector_receive_ts": 1
+      },
+      "by_topic": {
+        "quote.binance.BNBUSDT": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 3
+        },
+        "kline.5m.okx.ETH-USDT-SWAP": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        },
+        "kline.5m.okx.BTC-USDT-SWAP": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        }
+      },
+      "acks": 13,
+      "errors": [],
+      "closed": null,
+      "lastMsg": "2026-10-23T18:11:29.862Z"
+    },
+    {
+      "side": "new",
+      "mode": "churn",
+      "msgs": 17356,
+      "coarse_duplicates": 5,
+      "same_ingest_repeat": 0,
+      "same_payload_new_ingest": 0,
+      "different_payload_same_coarse_key": 5,
+      "fields": {
+        "bid_qty": 2,
+        "connector_receive_ts,is_closed": 2,
+        "bid_qty,connector_receive_ts": 1
+      },
+      "by_topic": {
+        "quote.binance.BNBUSDT": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 3
+        },
+        "kline.5m.okx.ETH-USDT-SWAP": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        },
+        "kline.5m.okx.BTC-USDT-SWAP": {
+          "same_ingest_repeat": 0,
+          "same_payload_new_ingest": 0,
+          "different_payload_same_coarse_key": 1
+        }
+      },
+      "acks": 45,
+      "errors": [],
+      "closed": null,
+      "lastMsg": "2026-10-23T18:11:29.862Z"
+    }
+  ]
+}

@@ -2,3 +2,4 @@
 evidence/1.1.1/final-artifact/image-build.jsonl -whitespace
 evidence/1.1.1/final-artifact/config.diff -whitespace
 evidence/1.1.1/final-artifact/verify/*.log -whitespace
+evidence/1.1.1/final-artifact/anomalies/mac-power-relevant.log -whitespace

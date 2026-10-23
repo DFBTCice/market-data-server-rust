@@ -14,6 +14,7 @@
 | `baseline/` | 现网只读基线、限定字段 inspect、10-21 重启事件查询（0 条）及原因未确认记录 |
 | `canary/` | 原版与最终镜像同订阅、同窗口 240s，对比日志与门禁退出码；原始 WS 抓取留本机 |
 | `memory-2h/` | 两消费者同负载，每分钟采样、退订→20s→重订事件、预热后斜率与正对照；必须完成实际 2h 才能验收 |
+| `anomalies/REPORT.md`、`assessment.json`、`live-probe/` | 用户追加的断线/写超时与粗键重复审计；最终镜像严格重复0、旧版正对照3715；历史客户端进程停顿未证实 |
 | `../nas-198/pre-swap-observe/` | 等待期间现网只读监测；自行重启只记录，不主动处理 |
 
 复现：仓库根目录 `bash evidence/1.1.1/tools/build_final.sh`、`bash evidence/1.1.1/tools/verify_final.sh`；Docker E2E 命令见 REPORT。
