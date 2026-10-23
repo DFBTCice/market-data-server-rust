@@ -1,6 +1,6 @@
 # NAS 198 换版计划：1.1.0（quote-bnb）→ 1.1.1
 
-状态（2026-10-24）：换前所有门禁已通过，已按业务方授权在提前告知的北京时间03:53–04:05窗口内换版。03:53:15开始，健康恢复中断7.1秒；立即补订阅12=12，换后240s兼容与十分钟验收均通过。当前是完整24h观察阶段，**不得重复执行换版**。实际记录见[post-swap-24h/DEPLOYMENT_RECORD.md](post-swap-24h/DEPLOYMENT_RECORD.md)。等待期间遵守了不主动重启旧版的决定；主审内部消费者核对仍由业务方转交。
+状态（2026-10-24）：换前所有门禁已通过，已按业务方授权在提前告知的北京时间03:53–04:05窗口内换版。03:53:15开始，健康恢复中断7.1秒；立即补订阅12=12，换后240s兼容与十分钟验收均通过。1stbotv3主审docs/34已复核通过上述产物/门禁/换版及其消费者侧结果、接受三点异常说明。当前是完整24h观察阶段，**不得重复执行换版**。实际记录及正常订阅事件注释见[post-swap-24h/DEPLOYMENT_RECORD.md](post-swap-24h/DEPLOYMENT_RECORD.md)。等待期间遵守了不主动重启旧版的决定。
 
 仅操作 Portainer `192.168.1.198:9000` 的 endpoint 3（名称 local，unix socket）；不操作其它业务容器。JWT 仅放 `/tmp/pt_jwt`（600），密码不落盘。绝不打标签或合并 PR；阶段 3 仍须 24h 达标、主审复核和业务方选择币对。
 
@@ -46,7 +46,7 @@ node scripts/compat/restore_subs.mjs "$OUT/subscriptions.before.json" http://192
 
 - `/health` 200 且 Docker healthy；运行镜像 ID、容器内二进制 SHA、YAML 与本计划完全一致。
 - `restore_subs` 后重新 GET，`compare.mjs subs` 缺失 0、多出 0；有消费者同时增删时保留前后快照并解释来源，不能掩盖缺失。
-- `md_ws_active_clients` 约 15s 恢复到 2；读取 OMS healthy，消费者无持续重连。1stbotv3 的 reconnects 只多 1、duplicates_dropped 保持 0、K 线仍为 market_stream，由主审核对。
+- `md_ws_active_clients` 约 15s 恢复到 2；读取 OMS healthy，消费者无持续重连。1stbotv3 的 reconnects 只多 1、同样K线订退测试期间 duplicates_dropped **增量为0**（不是累计为0）、K线实时来源为market_stream，由主审核对。docs/34已通过：重订间隙一条tick_agg补位符合botd现有契约，随后恢复market_stream。
 - `/metrics` 出现六项 `md_jemalloc_*`、`md_ws_subscriptions_active`、`md_ws_kicked_write_timeout_total`。
 - 记录 10 分钟 RSS/CPU/订阅/重连/丢弃与写超时计数；再与原版旁路做同窗口 tick/kline/Legacy 比对，正对照用 compare selftest。
 
@@ -69,6 +69,8 @@ node scripts/compat/sample_metrics.mjs http://192.168.1.198:8081 86400 60 eviden
 
 每分钟采样必须实际覆盖 24h；有休眠或网络缺口须如实记录，证据不足不宣布达标。预热 1h 后 RSS 斜率 ≤1MiB/h、`md_jemalloc_allocated_bytes` 持平、`md_ticks_dropped` 不再增长、`md_ws_kicked_write_timeout_total` 为 0 或有可验证解释、订阅数/连接数正常，OMS 与 1stbotv3 消费正常。保留进程 uptime 以识别自行重启。
 新启动的采样器CSV逐分钟增加 `ws_kicked_write_timeout`、`ws_kicked_lagged`、`process_start_time_seconds` 三列；旧的两小时采样不重启、不补造历史列。
+
+主审已确认正常消费者事件：UTC10-23 17:55:51–17:59:58Z（换版前）与20:39:41–20:43:36Z（换版后），botd经正常K线浏览登记币安BNBUSDT 3m KLINE，闲置60秒后释放，订阅数临时+1后复原。换后原文为两轮SUB+/SUB-，是测试的退订/重订过程；保留原始采样，按事件来源注释，不当作泄漏。任何新写超时增长仍须单独解释，不能沿用历史旁路或上述正常订阅的归因。
 
 RSS ≥400MiB 是一般处置阈值，≥480MiB 紧急。本次等 1.1.1 的期间，按业务方补充只记录、不主动重启旧版。
 

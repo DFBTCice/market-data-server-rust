@@ -8,7 +8,7 @@
 - 新容器5d6996ca9dc0，md-server:1.1.1镜像ID sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010。
 - 实际运行容器中读回二进制SHA-256 3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d，与a06fe20干净树两次从零构建相同。运行配置逐字节等于final-artifact/config.final.yaml：阶段2配置仅log_level info→warn；容器RUST_LOG=warn保留。512MiB、swap共1GiB、2CPU、端口和unless-stopped均核对不变。
 - 执行前即时订阅12条，新进程初始10条；立刻补回binance BNBUSDT和okx BNB-USDT-SWAP两条TICK，恢复为12=12、缺失0、多出0。两小时旁路开始时13条中的ETHUSDT 1h在19:35Z已于换版前被移除（pre-swap-observe事件原文），因此恢复目标以即时12条为准。
-- 健康恢复后两个消费者已恢复，新容器healthy、RestartCount=0；OMS只读检查healthy。主审侧1stbotv3状态须由主审确认，不将服务端WS=2等同于已检查其内部去重/来源。
+- 健康恢复后两个消费者已恢复，新容器healthy、RestartCount=0；OMS只读检查healthy。1stbotv3侧由主审独立核对，2026-10-24确认通过，详见下方复核记录；该结论来自主审证据，不以服务端WS=2代替内部核对。
 - 24小时每分钟只读采样从19:54:13Z（北京时间03:54:13）开始，预计2026-10-25 03:54:13以后才可验收。采样进程PID40311，防空闲休眠；按真实样本跨度和连续性判断，不仅凭运行时长。
 
 ## 二、怎么验证的（命令与原文）
@@ -37,6 +37,17 @@ ws_active_clients=2, docker_health=healthy
 
 十分钟实际截止20:03:28.972Z（北京时间04:03:29），距即时检查600.068秒。38次主动检查及10个分钟样本通过；业务连接2、订阅仍12=12、缺失0、多出0、Docker healthy、RestartCount0、掉tick0、写超时0。RSS55.863MiB，CPU累计11.12秒/uptime606秒（单核等效平均约1.84%）。原文acceptance-10min.json、acceptance-checks.jsonl、subscriptions.after-10min.json。之后后台跟进改每小时，原每分钟采样继续。
 
+主审复核（2026-10-24，业务方转达，并只读核对1stbotv3仓库 `docs/34_主审复核结论_行情服务1.1.1最终产物与换版_2026-10-24.md`）：最终产物、两小时门禁、换版、十分钟验收和三点异常说明均接受。botd reconnects 146→147，仅换版增加1次；同样的K线订退测试 duplicates_dropped 130522→130522，增量0（旧版同测试+38），不是累计计数为0。测试50条K线中49条market_stream、1条在重订交易所流的间隙由tick_agg临时补位，符合botd既有契约并由主审接受；随后恢复market_stream。BNB两币对报价正常，quote_pairs=2、stale=false。
+
+主审正常浏览路径的订阅事件按以下口径注释，保留CSV与事件日志原文，不将临时+1判断为订阅泄漏或恢复缺失：
+
+| UTC 2026-10-23 时段（主审提供） | 归属与实际采样 | 解释 |
+|---|---|---|
+| 17:55:51–17:59:58Z | 换版前，不计入新版本24h；pre-swap-observe/prod.events.log于17:56:09记录SUB+、18:00:09记录SUB- | botd正常登记币安BNBUSDT 3m KLINE，闲置60秒后释放；分钟采样发现时间晚于实际事件 |
+| 20:39:41–20:43:36Z | 换版后24h内；prod.events.log于20:40:14 SUB+、20:41:13 SUB-、20:42:13 SUB+、20:43:13 SUB- | 同一订退测试包含重订，订阅12↔13，最后复原12；不是额外异常连接或持久滞留 |
+
+24h判据仍按SWAP_PLAN §6执行，不因本次主审复核而提前通过。如写超时计数增加，须为每次新增保留日志、时段、消费者/订阅变化和可验证解释，不能套用旁路17:51的解释或本次正常订阅事件。
+
 ## 三、没做什么与原因
 
 - 完整24小时尚未覆盖，未宣称观察达标；不得据十分钟健康直接打标签、合并PR或扩品种。
@@ -57,7 +68,7 @@ ws_active_clients=2, docker_health=healthy
 
 ## 五、需要对方做的事
 
-业务方转交本记录给主审。主审核对1stbotv3 reconnects仅增加1、duplicates_dropped保持0、K线仍为market_stream；OMS健康已只读核对。24h报告实际完成后，再由主审与业务方决定标签/合并与阶段3币对。
+主审已完成换版及1stbotv3侧核对，当前待办仅为SWAP_PLAN §6规定的完整24h报告及其后续复核。报告交业务方转主审，未经主审复核和业务方批准不打标签、不合并PR；阶段3仍暂停，币对由业务方决定。
 
 回滚命令（异常触发时按已授权流程执行并补订阅）：
 

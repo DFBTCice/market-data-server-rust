@@ -14,9 +14,9 @@
   "canary_started_utc": "2026-10-23T17:34:34Z",
   "canary_expected_finish_utc": "2026-10-23T19:35:34Z",
   "swap_executed": true,
-  "next_step": "\u6362\u7248\u3001\u5373\u65f6\u8865\u8ba2\u960512=12\u3001\u6362\u540e240s\u517c\u5bb9\u548c\u5341\u5206\u949f\u9a8c\u6536\u5df2\u901a\u8fc7\uff1b\u4e0d\u5f97\u91cd\u590d\u6362\u7248\u3002\u53ea\u8bfb\u9010\u5206\u949f\u91c7\u6837\u7ee7\u7eed\uff0c\u6bcf\u5c0f\u65f6\u8ddf\u8fdb\uff0c\u5b9e\u9645\u5b8c\u657424h\u540e\u4ea4\u4e3b\u5ba1\u590d\u6838\uff1b\u5185\u90e8\u6d88\u8d39\u8005\u6838\u5bf9\u5f85\u4e1a\u52a1\u65b9\u8f6c\u4e3b\u5ba1\u3002",
+  "next_step": "主审docs/34已复核通过换版前后门禁与消费者侧结果，三点异常说明接受。逐分钟采样不重启，每小时跟进；按SWAP_PLAN §6完成真实24h报告。BNBUSDT 3m正常订阅事件已注释；任何写超时增长单独取证解释。报告仍待主审复核和业务方批准，不打标签、不合并PR、不扩quote。",
   "two_hour_gate_passed": true,
-  "announced_swap_window_local": "2026-10-24 03:53\u201304:05 Asia/Shanghai",
+  "announced_swap_window_local": "2026-10-24 03:53–04:05 Asia/Shanghai",
   "swap_started_utc": "2026-10-23T19:53:15.074444+00:00",
   "new_container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
   "observer_exec_session": 71090,
@@ -25,5 +25,44 @@
   "observation_expected_finish_utc": "2026-10-24T19:54:13Z",
   "ten_minute_acceptance_passed": true,
   "post_swap_compatibility_passed": true,
-  "heartbeat_frequency": "hourly; minute sampling unchanged"
+  "heartbeat_frequency": "hourly; minute sampling unchanged",
+  "reviewer_confirmation": {
+    "date": "2026-10-24",
+    "source_repository": "1stbotv3",
+    "source_document": "34_主审复核结论_行情服务1.1.1最终产物与换版_2026-10-24.md",
+    "source_sha256": "3f6b4a57944b73fd3e956d1fd4692056f0a0214e30fe1e8dafa466925dae5ec4",
+    "confirmed_by_user_in_this_chat": true,
+    "final_artifact_two_hour_swap_ten_minute_accepted": true,
+    "anomaly_explanations_accepted": true,
+    "botd_reconnects_before": 146,
+    "botd_reconnects_after": 147,
+    "botd_duplicate_counter_churn_before": 130522,
+    "botd_duplicate_counter_churn_after": 130522,
+    "old_churn_duplicate_increment": 38,
+    "kline_sources": {
+      "market_stream": 49,
+      "tick_agg_on_resubscribe_gap": 1
+    },
+    "tick_agg_gap_accepted_as_existing_contract": true,
+    "bnb_quotes_normal": true,
+    "does_not_approve_tag_or_merge": true
+  },
+  "normal_subscription_event_annotations": [
+    {
+      "from_utc": "2026-10-23T17:55:51Z",
+      "through_utc": "2026-10-23T17:59:58Z",
+      "phase": "pre-swap; excluded from new 24h",
+      "topic": "kline.3m.binance.BNBUSDT",
+      "source": "reviewer botd normal K-line browse/churn",
+      "behavior": "register; idle 60s release; minute observations lag actual changes"
+    },
+    {
+      "from_utc": "2026-10-23T20:39:41Z",
+      "through_utc": "2026-10-23T20:43:36Z",
+      "phase": "post-swap 24h",
+      "topic": "kline.3m.binance.BNBUSDT",
+      "source": "reviewer botd normal K-line browse/churn",
+      "behavior": "two subscribe/release cycles observed; 12 to 13 and back to 12; retain raw rows"
+    }
+  ]
 }
