@@ -25,7 +25,7 @@
   "observation_expected_finish_utc": "2026-10-24T19:54:13Z",
   "ten_minute_acceptance_passed": true,
   "post_swap_compatibility_passed": true,
-  "heartbeat_frequency": "hourly; minute sampling unchanged",
+  "heartbeat_frequency": "deleted after completed observation report",
   "reviewer_confirmation": {
     "date": "2026-10-24",
     "source_repository": "1stbotv3",
@@ -124,5 +124,8 @@
   "observation_overall_pass": false,
   "observation_final_report": "evidence/1.1.1/nas-198/post-swap-24h/REPORT.md",
   "observation_analysis": "evidence/1.1.1/nas-198/post-swap-24h/analysis.json",
-  "automatic_observation_status": "completed; remove heartbeat after final report delivery"
+  "automatic_observation_status": "completed; report delivered; heartbeat deleted",
+  "heartbeat_deleted": true,
+  "heartbeat_deleted_utc": "2026-10-24T20:17:55Z",
+  "final_report_evidence_commit": "760b24b"
 }
