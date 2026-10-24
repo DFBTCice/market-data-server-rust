@@ -9,7 +9,7 @@
   "client_initiator_confirmed": false,
   "client_process_stall_proven": false,
   "criterion_satisfied": null,
-  "assessment_status": "pending client-side source confirmation; not a pass",
+  "assessment_status": "business reports other recent tests; specific test and client evidence remain unconfirmed; not a pass",
   "rollback_review_open": true,
   "rollback_now": false,
   "temporary_decision": "preserve evidence and request source confirmation for the single extra connection while business baseline is restored; this does not waive SWAP_PLAN §5",
@@ -22,5 +22,17 @@
   "backup_recreated_stopped": true,
   "backup_container_id": "9dbf93da4951fdf621a8d7642208c608d20b4f8710b124f454c9f40bfb653083",
   "other_two_earlier_backups_restored": false,
-  "active_production_deployment_mutated": false
+  "active_production_deployment_mutated": false,
+  "business_clarification": {
+    "other_tests_recently_reported": true,
+    "specific_test_initiator_known": false,
+    "this_timeout_confirmed_as_test": false,
+    "client_process_stall_proven": false,
+    "human_cleanup_confirmed": true,
+    "cleanup_time_identity_and_rule_known": false,
+    "does_not_waive_24h_criteria": true
+  },
+  "business_clarification_evidence": "business-clarification.json",
+  "backup_human_cleanup_confirmed": true,
+  "backup_cleanup_time_identity_and_rule_confirmed": false
 }

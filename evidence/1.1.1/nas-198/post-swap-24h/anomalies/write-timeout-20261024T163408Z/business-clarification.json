@@ -1,0 +1,15 @@
+{
+  "recorded_at_utc": "2026-10-24T17:53:42.862817+00:00",
+  "source": "business user replies in this chat, local date 2026-10-25",
+  "gateway_test_reply": "应该是，因为最近有其他测试，应该是你备注一下。但是具体是哪一个不太清楚。",
+  "stopped_container_cleanup_reply": "是有人清理过。",
+  "interpretation": {
+    "other_tests_recently_reported": true,
+    "specific_test_initiator_known": false,
+    "this_timeout_confirmed_as_test": false,
+    "client_process_stall_proven": false,
+    "human_cleanup_confirmed": true,
+    "cleanup_time_identity_and_rule_known": false,
+    "does_not_waive_24h_criteria": true
+  }
+}

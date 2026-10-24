@@ -41,7 +41,9 @@ ID sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010
 
 **24h新增写超时（UTC10-24 16:34:08.768）：0→1，独立归因尚未完成，未判通过。** 16:33分钟点WS2→3、接收端12→24，REST订阅仍12；16:34发送等待超过10秒被踢后WS回2、接收端回12，之后计数保持1。固定“client is not reading”文案不能证明客户端进程停顿。已请求业务方提供额外连接发起方及客户端日志，§5回滚评估未关闭；不以其后不再增长自动通过。17:22原采样1288/1288有效点、跨度77225秒、maxgap61秒、同一进程；预热后RSS+0.8543MiB/h、allocated持平，tick丢弃仍2460、lagged0，订阅12=12、健康正常。不能把换版后早先主审的消费者结论扩大为全天结论。
 
-**回滚准备异常：** 17:26Z原三个停止备份均不在，原1.1.0容器按ID亦404，清理时间/来源未确认；原镜像仍在。17:28:57Z通过endpoint3用精确旧镜像ID重建同名停止备份`md-server-1.1.0-quote-bnb-bak`（新ID`9dbf93da4951…`、created、restart=no），参数逐项核验，未启动它、未重启现网。仅恢复当前所需1.1.0回滚准备，其余两个旧备份仍缺失。已请求确认NAS清理规则；回滚前另存即时订阅，回滚后立即补回核验。证据与五段式记录：`evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/REPORT.md`。
+**回滚准备异常：** 17:26Z原三个停止备份均不在，原1.1.0容器按ID亦404，业务方已确认人工清理，具体时间/规则未知；原镜像仍在。17:28:57Z通过endpoint3用精确旧镜像ID重建同名停止备份`md-server-1.1.0-quote-bnb-bak`（新ID`9dbf93da4951…`、created、restart=no），参数逐项核验，未启动它、未重启现网。仅恢复当前所需1.1.0回滚准备，其余两个旧备份仍缺失。已请求确认NAS清理规则；回滚前另存即时订阅，回滚后立即补回核验。证据与五段式记录：`evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/REPORT.md`。
+
+业务方补充（北京时间2026-10-25）：近期有其他测试，认为这次写超时可能相关，但不清楚具体发起方；已备注为可能关联，仍无客户端独立证据，写超时项未判通过。停止备份已确认有人清理过，具体时间/规则未知；17:53Z核对重建停止备份仍在。原采样1320/1320有效点、span79145s、maxgap61s、无重启，RSS预热后+0.8968MiB/h、allocated持平，write1/tick2460均未再增长，连接2、订阅12=12、healthy。 该补充不构成24h判据豁免。原文：`evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/business-clarification.json`。
 
 复跑命令、原始输出与五段式报告：`evidence/1.1.1/final-artifact/REPORT.md`、README；构建条件：`evidence/1.1.1/build-logs/dist-sha256.txt`；步骤/回滚：`evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md`。
 

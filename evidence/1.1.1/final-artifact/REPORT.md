@@ -8,6 +8,8 @@
 
 新增16:34:08Z写超时0→1：与额外第三连接及12个接收端释放相关，发送超时机制已证实，客户端来源仍待确认，未判通过、§5回滚评估尚未关闭。原三个停止备份已不在，17:28Z用保留的原镜像重建同名停止回滚备份`9dbf93da4951…`，未启动或重启现网；其余两个更早备份仍缺失。见[独立记录](../nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/REPORT.md)。
 
+业务方补充（北京时间2026-10-25）：近期有其他测试，认为这次写超时可能相关，但不清楚具体发起方；已备注为可能关联，仍无客户端独立证据，写超时项未判通过。停止备份已确认有人清理过，具体时间/规则未知；17:53Z核对重建停止备份仍在。原采样1320/1320有效点、span79145s、maxgap61s、无重启，RSS预热后+0.8968MiB/h、allocated持平，write1/tick2460均未再增长，连接2、订阅12=12、healthy。 [回复原文与解释边界](../nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/business-clarification.json)。
+
 ## 一、做了什么
 
 - 固定源码 `a06fe20`、干净 worktree、`SOURCE_DATE_EPOCH=1792193713`、相同 target 路径，两次从零构建 vendored-tls + jemalloc 静态 x86_64 musl 二进制，SHA 完全一致。
