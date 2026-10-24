@@ -1,0 +1,14 @@
+{
+  "at_utc": "2026-10-24T15:24:04.354229+00:00",
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "healthy": "healthy",
+  "restart_count": 0,
+  "ticks_dropped": 2460.0,
+  "klines_dropped": 0.0,
+  "quotes_dropped": 0.0,
+  "write_timeouts": 0.0,
+  "lagged": 0.0,
+  "ws_clients": 2.0,
+  "subscriptions": 12,
+  "rss_mib": 68.68359375
+}

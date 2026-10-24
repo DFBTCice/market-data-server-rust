@@ -1,0 +1,79 @@
+{
+  "at_utc": "2026-10-24T10:13:58.208737+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 860,
+  "valid_samples": 860,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T10:13:16Z",
+  "span_s": 51543.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 42.20873689651489,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "post_warmup_span_s": 47943.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 65.37109375,
+    "min_mib": 55.30859375,
+    "max_mib": 65.43359375,
+    "slope_mib_h": 0.5581102316953341
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.278717041015625,
+    "min_mib": 4.188728332519531,
+    "max_mib": 4.351020812988281,
+    "slope_mib_h": 0.0008311325428581573
+  },
+  "rss_last_60min": {
+    "first_mib": 64.796875,
+    "last_mib": 65.37109375,
+    "min_mib": 64.33203125,
+    "max_mib": 65.43359375,
+    "slope_mib_h": 0.7557385312004231
+  },
+  "current": {
+    "rss_mib": 65.37109375,
+    "allocated_mib": 4.258125305175781,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0,
+    "write_timeouts": 0.0,
+    "lagged": 0.0,
+    "ticks_dropped": 0.0
+  },
+  "write_timeout_sample_max": 0.0,
+  "lagged_sample_max": 0.0,
+  "tick_drop_sample_max": 0.0,
+  "oms_readonly_health": {
+    "health": "healthy",
+    "running": true,
+    "started_at": "2026-10-23T21:23:42.881520537Z",
+    "restart_count": 0
+  },
+  "analysis_is_provisional": true,
+  "provisional_rss_target_exceeded": false,
+  "server_log_collection": {
+    "since_epoch": 1792833349,
+    "raw_bytes": 379,
+    "text_bytes": 363,
+    "level": "RUST_LOG=warn",
+    "tail_limit": 1000
+  },
+  "new_events": [
+    "2026-10-24T09:22:16.627Z RECONNECT md_connector_reconnect_total{exchange=\"okx\"} 2->3"
+  ],
+  "portainer_authentication": "initial HTTP401 Invalid JWT; renewed using previously authorized temporary account via hidden input, password not saved; JWT only /tmp/pt_jwt mode600; original sampling uninterrupted",
+  "interpretation": "全部预热后RSS回归+0.5581MiB/h仍在目标范围，allocated持平。Portainer会话失效后已按既有临时账号授权续期、只读检查恢复；原采样无缺失或重启。09:22的OKX重连独立留证，当前健康/连接/订阅正常，无写超时/lagged/掉tick增长；完整24h尚未完成。"
+}

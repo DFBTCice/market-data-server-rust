@@ -1,0 +1,32 @@
+{
+  "before_throttling": {
+    "periods": 653525,
+    "throttled_periods": 0,
+    "throttled_time": 0
+  },
+  "after_throttling": {
+    "periods": 654127,
+    "throttled_periods": 0,
+    "throttled_time": 0
+  },
+  "throttling_deltas": {
+    "periods": 602,
+    "throttled_periods": 0,
+    "throttled_time": 0
+  },
+  "memory_before": 73158656,
+  "memory_after": 73363456,
+  "memory_limit": 536870912,
+  "samples": 61,
+  "first_utc": "2026-10-24T15:17:56.647794+00:00",
+  "last_utc": "2026-10-24T15:18:56.895342+00:00",
+  "drop_first": 2460.0,
+  "drop_last": 2460.0,
+  "cpu_total_seconds_delta": 4.9500000000000455,
+  "max_cpu_seconds_1s_delta": 0.13000000000010914,
+  "task_counts": [
+    23.0,
+    25.0
+  ],
+  "runtime_queue_max": 0.0
+}

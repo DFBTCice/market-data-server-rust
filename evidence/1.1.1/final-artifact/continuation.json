@@ -14,7 +14,7 @@
   "canary_started_utc": "2026-10-23T17:34:34Z",
   "canary_expected_finish_utc": "2026-10-23T19:35:34Z",
   "swap_executed": true,
-  "next_step": "主审docs/34已复核通过换版前后门禁与消费者侧结果，三点异常说明接受。逐分钟采样不重启，每小时跟进；按SWAP_PLAN §6完成真实24h报告。BNBUSDT 3m正常订阅事件已注释；任何写超时增长单独取证解释。报告仍待主审复核和业务方批准，不打标签、不合并PR、不扩quote。",
+  "next_step": "继续原24h采样且不得覆盖或清零。新增tick入口丢弃0→1327→2460，SWAP_PLAN §6该项当前未通过；已保留现场并评估暂不回滚。按原判据如实交报告给主审，任何豁免/容量变更需明确后续决定；不打标签、不合并PR、不扩quote。",
   "two_hour_gate_passed": true,
   "announced_swap_window_local": "2026-10-24 03:53–04:05 Asia/Shanghai",
   "swap_started_utc": "2026-10-23T19:53:15.074444+00:00",
@@ -80,5 +80,16 @@
     "decision": "continue original sampling; provisional RSS warning recovered, not a complete 24h pass",
     "notification_reason": "recovery from previous provisional RSS target exceedance",
     "repeat_notification_policy": "stay quiet while healthy/unchanged; notify on material change, failure, completion or required action"
+  },
+  "hourly_readonly_check_tool": "python3 evidence/1.1.1/tools/check_post_swap.py --hour <new UTC YYYYMMDDTHHMMZ> --since <previous check UTC ISO>",
+  "latest_hourly_check": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1515Z/check.json",
+  "tick_drop_observation": {
+    "first_observed_utc": "2026-10-24T14:27:17Z",
+    "second_burst_utc": "2026-10-24T15:16:18Z",
+    "latest_counter": 2460,
+    "criterion_satisfied": false,
+    "assessment": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/tick-drop-20261024T1427Z/assessment.json",
+    "report": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/tick-drop-20261024T1427Z/REPORT.md",
+    "must_not_reset_baseline_or_claim_all_pass": true
   }
 }

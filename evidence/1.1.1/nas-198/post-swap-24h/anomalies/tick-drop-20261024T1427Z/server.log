@@ -1,0 +1,7 @@
+2026-10-24T14:27:17.178602581Z [2m2026-10-24T14:27:17.178301Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1)
+2026-10-24T14:27:17.197704613Z [2m2026-10-24T14:27:17.197397Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 907)
+2026-10-24T15:10:04.888944551Z [2m2026-10-24T15:10:04.888725Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-24T15:10:04.889012822Z [2m2026-10-24T15:10:04.888758Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance] disconnected, reconnecting in 5s
+2026-10-24T15:16:18.376201694Z [2m2026-10-24T15:16:18.375960Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx] tick channel full, dropped 1209 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1328)
+2026-10-24T15:16:18.405846556Z [2m2026-10-24T15:16:18.405600Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance] tick channel full, dropped 118 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1784)
+2026-10-24T15:16:25.333780698Z [2m2026-10-24T15:16:25.333552Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance] tick channel full, dropped 11 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1816)

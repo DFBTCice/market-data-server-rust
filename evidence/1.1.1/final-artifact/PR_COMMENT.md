@@ -36,6 +36,8 @@ ID sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010
 
 阶段性恢复（UTC10-23 23:10检查）：197/197有效样本、最大gap61s、无进程重启；**保留全部台阶样本**，预热后约136分钟RSS斜率现为−0.3184MiB/h，回到≤1目标范围，即时RSS55.71MiB，allocated持平。Docker/OMS healthy、连接2、订阅12=12，写超时/lagged/掉tick仍0。证据`hourly/20261023T2309Z/`；继续原每分钟采样，完整24h尚未结束，未提前判通过。
 
+**24h异常（UTC10-24 14:27/15:16）：tick入口真实丢弃累计0→1327→2460，SWAP_PLAN §6该项当前未通过。** 两家连接器日志均证实队列1000/1000；限频日志不能直接求和充当本次增量，counter为准。15:17:56起事后61点保持2460，cgroup CPU限流累计0；小时检查healthy、连接2、订阅12=12、写超时/lagged0，RSS斜率约+0.7073MiB/h、allocated持平。旧版基线beaac94也有相同try_send/1000槽机制，尚无证据表明回滚能改善，因此暂不回滚、继续原采样；不将历史机制当成准入豁免，不改缓冲区、不清零、不删样本。分钟数据无法证明输入微突发是唯一根因，保留调度等限制。五段式记录：`evidence/1.1.1/nas-198/post-swap-24h/anomalies/tick-drop-20261024T1427Z/REPORT.md`。最终报告如实交主审复核，不打标签、不合并PR、阶段3继续暂停。
+
 复跑命令、原始输出与五段式报告：`evidence/1.1.1/final-artifact/REPORT.md`、README；构建条件：`evidence/1.1.1/build-logs/dist-sha256.txt`；步骤/回滚：`evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md`。
 
 补充异常审计（用户追加三点）：`final-artifact/anomalies/REPORT.md`。17:51的日志只证明新版本一次send阻塞10s后踢除，不能从固定文案证实客户端进程停顿；共同客户端/链路原因仍未进一步定位。原dups为粗键命中，quote键漏数量、kline键漏is_closed；已有原文证实数量/闭K变化会误计。330秒追加对照：old control/churn严格同入站重复0/3715，new control/churn均0；new两连接各5个粗键命中全部为3次数量变化+2次is_closed变化，未发现退订修复残留。历史约100条static未留逐条原文，不声称已全部逐条还原。追加连接在预热期关闭，原两小时采样保持连续；后续24h CSV已补写超时/lagged/启动时间三列。

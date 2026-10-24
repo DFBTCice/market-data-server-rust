@@ -4,6 +4,8 @@
 最终 SHA-256：`3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d`。镜像 `md-server:1.1.1` = `sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010`。
 两小时已实际完成；24小时仍在进行，未提前写成通过。当前不需要重复决定分配器、日志优先级或版本归属。换后记录见 [`../nas-198/post-swap-24h/DEPLOYMENT_RECORD.md`](../nas-198/post-swap-24h/DEPLOYMENT_RECORD.md)。
 
+2026-10-24 14:27/15:16Z出现tick入口真实丢弃，累计0→1327→2460；当前SWAP_PLAN §6“掉tick不再增长”未通过，不能宣布24h全项达标。健康/订阅/写超时及内存指标保持正常，暂不回滚而继续原采样的依据与限制见[异常记录](../nas-198/post-swap-24h/anomalies/tick-drop-20261024T1427Z/REPORT.md)。不以旧版已知机制作为自动豁免。
+
 ## 一、做了什么
 
 - 固定源码 `a06fe20`、干净 worktree、`SOURCE_DATE_EPOCH=1792193713`、相同 target 路径，两次从零构建 vendored-tls + jemalloc 静态 x86_64 musl 二进制，SHA 完全一致。
