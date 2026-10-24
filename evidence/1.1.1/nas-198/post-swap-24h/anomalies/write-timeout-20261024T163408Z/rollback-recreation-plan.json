@@ -1,0 +1,51 @@
+{
+  "prepared_at_utc": "2026-10-24T17:28:55.579023+00:00",
+  "reason": "All prior stopped md-server backup names absent; original old container ID also404; retained original image verified",
+  "name": "md-server-1.1.0-quote-bnb-bak",
+  "image_id": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+  "env_keys": [
+    "RUST_LOG",
+    "TZ",
+    "PATH"
+  ],
+  "RUST_LOG": "warn",
+  "cmd": [
+    "md-server",
+    "--config",
+    "/etc/md-server/config.yaml"
+  ],
+  "entrypoint": [],
+  "user": "md-user",
+  "host_config": {
+    "PortBindings": {
+      "50051/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "50051"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "8081"
+        }
+      ]
+    },
+    "Memory": 536870912,
+    "MemorySwap": 1073741824,
+    "NanoCpus": 2000000000,
+    "NetworkMode": "bridge",
+    "LogConfig": {
+      "Config": {
+        "max-file": "5",
+        "max-size": "100m"
+      },
+      "Type": "json-file"
+    },
+    "RestartPolicy": {
+      "Name": "no"
+    }
+  },
+  "start_container": false,
+  "no_active_production_mutation": true
+}

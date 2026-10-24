@@ -1,0 +1,25 @@
+{
+  "at_utc": "2026-10-24T17:32:42.871355+00:00",
+  "production": {
+    "id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+    "image": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+    "health": "healthy",
+    "restart_count": 0,
+    "process_start": 1792785202.0,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "write_timeouts": 1.0,
+    "ticks_dropped": 2460.0,
+    "lagged": 0.0
+  },
+  "backup": {
+    "id": "9dbf93da4951fdf621a8d7642208c608d20b4f8710b124f454c9f40bfb653083",
+    "image": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+    "status": "created",
+    "running": false,
+    "restart_policy": {
+      "MaximumRetryCount": 0,
+      "Name": "no"
+    }
+  }
+}

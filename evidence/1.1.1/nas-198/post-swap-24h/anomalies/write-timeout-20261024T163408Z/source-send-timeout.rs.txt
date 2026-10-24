@@ -1,0 +1,38 @@
+
+/// 一次写入的结果
+enum SendResult {
+    Ok,
+    /// 对端已关闭 / 写失败
+    Closed,
+    /// 写入阻塞超过 `write_wait`（客户端停读或半死）
+    TimedOut,
+}
+
+/// 向客户端写一条文本消息；`write_wait` 为 `Some` 时给这次写入加超时。
+/// 超时后调用方必须关闭连接（被取消的 `send` 可能留下半帧）。
+async fn send_text<S>(sender: &mut S, text: String, write_wait: Option<Duration>) -> SendResult
+where
+    S: futures_util::Sink<Message> + Unpin,
+{
+    let fut = sender.send(Message::Text(text.into()));
+    match write_wait {
+        None => match fut.await {
+            Ok(()) => SendResult::Ok,
+            Err(_) => SendResult::Closed,
+        },
+        Some(d) => match tokio::time::timeout(d, fut).await {
+            Ok(Ok(())) => SendResult::Ok,
+            Ok(Err(_)) => SendResult::Closed,
+            Err(_) => SendResult::TimedOut,
+        },
+    }
+}
+
+fn kick_write_timeout(metrics: &md_processor::ProcessorMetrics, write_wait: Option<Duration>) {
+    metrics.ws_client_kicked_write_timeout();
+    warn!(
+        "Gateway WebSocket client kicked: write blocked longer than ws_write_wait ({:?}); \
+         client is not reading (stalled or half-open)",
+        write_wait.unwrap_or_default()
+    );
+}

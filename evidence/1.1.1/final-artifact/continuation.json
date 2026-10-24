@@ -14,7 +14,7 @@
   "canary_started_utc": "2026-10-23T17:34:34Z",
   "canary_expected_finish_utc": "2026-10-23T19:35:34Z",
   "swap_executed": true,
-  "next_step": "继续原24h采样且不得覆盖或清零。新增tick入口丢弃0→1327→2460，SWAP_PLAN §6该项当前未通过；已保留现场并评估暂不回滚。按原判据如实交报告给主审，任何豁免/容量变更需明确后续决定；不打标签、不合并PR、不扩quote。",
+  "next_step": "继续原24h采样，不覆盖/清零。tick2460增长事实使§6该项未通过；写超时0→1来源待确认，§5回滚评估未关闭，不自动判通过。需核对额外连接客户端证据与停止容器清理规则；每轮只读核对重建停止回滚备份仍在。按原判据如实报告，不打标签、不合并PR、不扩quote。",
   "two_hour_gate_passed": true,
   "announced_swap_window_local": "2026-10-24 03:53–04:05 Asia/Shanghai",
   "swap_started_utc": "2026-10-23T19:53:15.074444+00:00",
@@ -66,23 +66,21 @@
     }
   ],
   "latest_observation": {
-    "at_utc": "2026-10-23T23:10:46.190314+00:00",
-    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261023T2309Z/check.json",
-    "provisional_rss_target_exceeded": false,
-    "rss_slope_mib_h": -0.3183833050028898,
-    "post_warmup_span_s": 8161.0,
-    "rss_current_mib": 55.70703125,
+    "at_utc": "2026-10-24T17:22:03.767310+00:00",
+    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1721Z/check.json",
+    "sample_count": 1288,
+    "span_s": 77225.0,
+    "max_gap_s": 61.0,
+    "rss_slope_mib_h": 0.854311328783417,
     "allocated_plateau": true,
-    "write_timeouts": 0,
-    "ticks_dropped": 0,
+    "write_timeouts": 1,
+    "ticks_dropped": 2460,
     "healthy": true,
-    "rollback_threshold_exceeded": false,
-    "decision": "continue original sampling; provisional RSS warning recovered, not a complete 24h pass",
-    "notification_reason": "recovery from previous provisional RSS target exceedance",
-    "repeat_notification_policy": "stay quiet while healthy/unchanged; notify on material change, failure, completion or required action"
+    "decision": "continue unaltered sampling; tick criterion failed; write-timeout attribution and §5 review pending; not a complete 24h pass",
+    "notification_reason": "new individual write timeout and missing rollback containers; stopped rollback backup recreated"
   },
   "hourly_readonly_check_tool": "python3 evidence/1.1.1/tools/check_post_swap.py --hour <new UTC YYYYMMDDTHHMMZ> --since <previous check UTC ISO>",
-  "latest_hourly_check": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1515Z/check.json",
+  "latest_hourly_check": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1721Z/check.json",
   "tick_drop_observation": {
     "first_observed_utc": "2026-10-24T14:27:17Z",
     "second_burst_utc": "2026-10-24T15:16:18Z",
@@ -91,5 +89,27 @@
     "assessment": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/tick-drop-20261024T1427Z/assessment.json",
     "report": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/tick-drop-20261024T1427Z/REPORT.md",
     "must_not_reset_baseline_or_claim_all_pass": true
+  },
+  "write_timeout_observation": {
+    "event_utc": "2026-10-24T16:34:08.768080Z",
+    "latest_counter": 1,
+    "client_source_confirmed": false,
+    "client_stall_proven": false,
+    "criterion_satisfied": null,
+    "rollback_review_open": true,
+    "assessment": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/assessment.json",
+    "report": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/REPORT.md",
+    "must_not_reuse_historical_client_explanation": true
+  },
+  "rollback_backup_current": {
+    "name": "md-server-1.1.0-quote-bnb-bak",
+    "id": "9dbf93da4951fdf621a8d7642208c608d20b4f8710b124f454c9f40bfb653083",
+    "image_id": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+    "state": "created; stopped; restart=no",
+    "recreated_utc": "2026-10-24T17:28:57.574410+00:00",
+    "original_id_missing": true,
+    "other_two_earlier_backups_missing": true,
+    "cleanup_source_confirmed": false,
+    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/rollback-recreated.json"
   }
 }

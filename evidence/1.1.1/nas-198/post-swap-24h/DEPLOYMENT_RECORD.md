@@ -4,9 +4,11 @@
 
 **观察异常（UTC10-24 14:27、15:16）：tick入口真实丢弃0→1327→2460，SWAP_PLAN §6此项当前未通过。** 详见[异常五段式记录](anomalies/tick-drop-20261024T1427Z/REPORT.md)。原采样继续，不清零、不删样本、不放宽判据；暂不回滚的证据与限制均在该记录中，不能记为全项达标。
 
+**新增观察（UTC10-24 16:34:08）：写超时0→1，第三连接/12个接收端随后释放，客户端来源待确认，未判通过。** 17:26核对发现原三个停止备份均不在；17:28已用原镜像重建同名停止1.1.0回滚备份`9dbf93da4951…`，未启动、未重启现网，另两个旧备份仍缺失，清理来源待确认。详见[独立五段式记录](anomalies/write-timeout-20261024T163408Z/REPORT.md)。
+
 ## 一、做了什么
 
-- 仅操作Portainer endpoint3的md-server。旧容器1de7da0c7d2c改名md-server-1.1.0-quote-bnb-bak并停止、restart=no，保留旧镜像和原两个备份；latest仍指1.0.0。
+- 仅操作Portainer endpoint3的md-server。旧容器1de7da0c7d2c改名md-server-1.1.0-quote-bnb-bak并停止、restart=no，换版当时保留旧镜像和原两个备份；后续备份变化及重建见上方新增记录，latest未改。
 - 新容器5d6996ca9dc0，md-server:1.1.1镜像ID sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010。
 - 实际运行容器中读回二进制SHA-256 3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d，与a06fe20干净树两次从零构建相同。运行配置逐字节等于final-artifact/config.final.yaml：阶段2配置仅log_level info→warn；容器RUST_LOG=warn保留。512MiB、swap共1GiB、2CPU、端口和unless-stopped均核对不变。
 - 执行前即时订阅12条，新进程初始10条；立刻补回binance BNBUSDT和okx BNB-USDT-SWAP两条TICK，恢复为12=12、缺失0、多出0。两小时旁路开始时13条中的ETHUSDT 1h在19:35Z已于换版前被移除（pre-swap-observe事件原文），因此恢复目标以即时12条为准。
@@ -61,7 +63,7 @@ ws_active_clients=2, docker_health=healthy
 - 完整24小时尚未覆盖，未宣称观察达标；不得据十分钟健康直接打标签、合并PR或扩品种。
 - 2026-10-21重启原因仍未确证；等待最终产物期间未主动重启旧版，执行前RestartCount仍为1。未把疑OOM写成定论。
 - 用户追问的旁路写超时只能确认连接未排空，不能证实历史客户端进程卡顿；静态约100条粗键命中未留每条原文，不能逐条回溯。严格探针new重复0、old订退3715，细节与限制见../../final-artifact/anomalies/REPORT.md。
-- 未修改153、OMS、策略系统、1stbotv3；OMS仅做一次只读健康查询。未做会增加一次业务中断的生产回滚演练，保留可执行回滚路径。
+- 未修改153、OMS、策略系统、1stbotv3；OMS仅做只读健康查询。未做会增加一次业务中断的生产回滚演练，保留可执行回滚路径。
 
 ## 四、兼容性声明（docs/24 §三）
 
@@ -76,9 +78,9 @@ ws_active_clients=2, docker_health=healthy
 
 ## 五、需要对方做的事
 
-主审已完成换版及1stbotv3侧核对，当前待办仅为SWAP_PLAN §6规定的完整24h报告及其后续复核。报告交业务方转主审，未经主审复核和业务方批准不打标签、不合并PR；阶段3仍暂停，币对由业务方决定。
+主审已完成换版及当时1stbotv3侧核对；新增写超时需要客户端来源说明，停止备份消失需要核对清理规则。完整24h报告及后续复核仍按SWAP_PLAN §6交付。报告交业务方转主审，未经主审复核和业务方批准不打标签、不合并PR；阶段3仍暂停，币对由业务方决定。
 
-回滚命令（异常触发时按已授权流程执行并补订阅）：
+当前停止备份ID为`9dbf93da4951…`，名称不变。回滚前须另存当时即时非空订阅，回滚后立即按该即时快照补回并核验；下面的换版前快照仅为历史命令示例，不能覆盖后来业务变化。回滚命令（异常触发时按已授权流程执行并补订阅）：
 
 ```bash
 python3 evidence/1.1.0/nas-198/tools/pt_swap.py rollback md-server-1.1.0-quote-bnb-bak
