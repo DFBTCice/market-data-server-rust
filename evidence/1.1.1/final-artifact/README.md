@@ -16,7 +16,9 @@
 | `memory-2h/REPORT.md`、`analysis.json`、`steady-load-analysis.json` | 实际7261秒、每侧122有效样本，持续负载完整1h new RSS +0.0724、old +10.0034MiB/h；两小时门禁已通过 |
 | `anomalies/REPORT.md`、`assessment.json`、`live-probe/` | 用户追加的断线/写超时与粗键重复审计；最终镜像严格重复0、旧版正对照3715；历史客户端进程停顿未证实 |
 | `../nas-198/pre-swap-observe/` | 等待期间现网只读监测；自行重启只记录，不主动处理 |
-| `../nas-198/post-swap-24h/DEPLOYMENT_RECORD.md` | 03:53:15实际换版、即时12=12订阅恢复、换后240s兼容复验与真实24h逐分钟观察；最终观察尚未完成 |
+| `../nas-198/post-swap-24h/DEPLOYMENT_RECORD.md` | 03:53:15实际换版、即时12=12订阅恢复、换后240s兼容复验与真实24h逐分钟观察；已完整结束、整体验收未通过 |
+
+最终24h交付：[完整报告](../nas-198/post-swap-24h/REPORT.md)、[分析JSON](../nas-198/post-swap-24h/analysis.json)、[完整曲线](../nas-198/post-swap-24h/observation-24h.png)。1441点、86406秒；RSS+0.970764MiB/h，allocated持平；掉tick2460、写超时1次归因未充分，整体验收未通过。
 
 复现：仓库根目录 `bash evidence/1.1.1/tools/build_final.sh`、`bash evidence/1.1.1/tools/verify_final.sh`；Docker E2E 命令见 REPORT。
 NAS 工具只读取 `/tmp/pt_jwt`（600）。`build_release_image.py` 若目标标签已存在会拒绝覆盖；不要为复跑删除现网或回滚资源。

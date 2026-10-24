@@ -13,5 +13,10 @@
   "may_declare_full_24h_pass": false,
   "requires_reviewer_decision_for_any_exception": true,
   "log_query_since_utc": "2026-10-24T13:20:00+00:00",
-  "no_market_data_source_or_running_config_mutations": true
+  "no_market_data_source_or_running_config_mutations": true,
+  "final_window_ended_utc": "2026-10-24T19:54:19Z",
+  "final_ticks_dropped": 2460,
+  "final_write_timeouts": 1,
+  "full_24h_collection_complete": true,
+  "full_24h_overall_pass": false
 }

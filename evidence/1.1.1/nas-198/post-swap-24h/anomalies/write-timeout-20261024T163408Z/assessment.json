@@ -34,5 +34,12 @@
   },
   "business_clarification_evidence": "business-clarification.json",
   "backup_human_cleanup_confirmed": true,
-  "backup_cleanup_time_identity_and_rule_confirmed": false
+  "backup_cleanup_time_identity_and_rule_confirmed": false,
+  "final_window_ended_utc": "2026-10-24T19:54:19Z",
+  "final_ticks_dropped": 2460,
+  "final_write_timeouts": 1,
+  "full_24h_collection_complete": true,
+  "full_24h_overall_pass": false,
+  "final_criterion_satisfied": false,
+  "final_assessment": "unverified client/test attribution; no exception approved; submitted with final report"
 }

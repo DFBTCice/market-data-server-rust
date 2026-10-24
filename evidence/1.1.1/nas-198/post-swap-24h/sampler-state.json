@@ -3,5 +3,7 @@
   "started_at_utc": "2026-10-23T19:54:13.276697+00:00",
   "duration_s": 86400,
   "interval_s": 60,
-  "status": "running"
+  "status": "finished",
+  "exit_code": 0,
+  "finished_at_utc": "2026-10-24T19:54:19.148092+00:00"
 }

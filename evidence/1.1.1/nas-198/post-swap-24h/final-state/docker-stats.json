@@ -1,0 +1,70 @@
+{
+  "read": "2026-10-24T20:10:02.410767686Z",
+  "cpu_stats": {
+    "cpu_usage": {
+      "total_usage": 1678552606000,
+      "usage_in_kernelmode": 571686625000,
+      "usage_in_usermode": 1106865981000
+    },
+    "system_cpu_usage": 79519175250000000,
+    "online_cpus": 4,
+    "throttling_data": {
+      "periods": 822483,
+      "throttled_periods": 0,
+      "throttled_time": 0
+    }
+  },
+  "precpu_stats": {
+    "cpu_usage": {
+      "total_usage": 0,
+      "usage_in_kernelmode": 0,
+      "usage_in_usermode": 0
+    },
+    "throttling_data": {
+      "periods": 0,
+      "throttled_periods": 0,
+      "throttled_time": 0
+    }
+  },
+  "memory_stats": {
+    "usage": 84291584,
+    "stats": {
+      "active_anon": 12787712,
+      "active_file": 5787648,
+      "anon": 74326016,
+      "anon_thp": 56623104,
+      "file": 6889472,
+      "file_dirty": 0,
+      "file_mapped": 40960,
+      "file_writeback": 0,
+      "inactive_anon": 63893504,
+      "inactive_file": 1101824,
+      "kernel_stack": 49152,
+      "pgactivate": 4719,
+      "pgdeactivate": 1873,
+      "pgfault": 3273353,
+      "pglazyfree": 0,
+      "pglazyfreed": 0,
+      "pgmajfault": 109,
+      "pgrefill": 1873,
+      "pgscan": 18784,
+      "pgsteal": 293,
+      "shmem": 0,
+      "slab": 408448,
+      "slab_reclaimable": 213320,
+      "slab_unreclaimable": 195128,
+      "sock": 4096,
+      "thp_collapse_alloc": 42,
+      "thp_fault_alloc": 33,
+      "unevictable": 0,
+      "workingset_activate": 0,
+      "workingset_nodereclaim": 0,
+      "workingset_refault": 0
+    },
+    "limit": 536870912
+  },
+  "pids_stats": {
+    "current": 3,
+    "limit": 13991
+  }
+}

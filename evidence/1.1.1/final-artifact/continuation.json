@@ -14,7 +14,7 @@
   "canary_started_utc": "2026-10-23T17:34:34Z",
   "canary_expected_finish_utc": "2026-10-23T19:35:34Z",
   "swap_executed": true,
-  "next_step": "继续原24h采样，不覆盖/清零。tick2460增长事实使§6该项未通过；写超时1次已备注业务方认为可能与其他测试有关，具体测试/客户端证据未知，未判通过，§5评估仍按原计划。人工清理停止备份已确认，时间/规则未知；每轮只读核对重建停止回滚备份仍在。不打标签、不合并PR、不扩quote。",
+  "next_step": "完整24h采集和最终报告已完成，整体验收未通过。报告交业务方转主审决定后续处置；掉tick2460不豁免，单次写超时归因仍未充分。现网维持1.1.1，未打标签/未合并PR/未扩quote，阶段3暂停；删除本观察自动化，不擅自继续采样以凑PASS。",
   "two_hour_gate_passed": true,
   "announced_swap_window_local": "2026-10-24 03:53–04:05 Asia/Shanghai",
   "swap_started_utc": "2026-10-23T19:53:15.074444+00:00",
@@ -66,21 +66,21 @@
     }
   ],
   "latest_observation": {
-    "at_utc": "2026-10-24T17:53:42.862817+00:00",
-    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1753Z/check.json",
-    "sample_count": 1320,
-    "span_s": 79145.0,
+    "at_utc": "2026-10-24T20:10:02.447616+00:00",
+    "evidence": "evidence/1.1.1/nas-198/post-swap-24h/analysis.json",
+    "sample_count": 1441,
+    "span_s": 86406.0,
     "max_gap_s": 61.0,
-    "rss_slope_mib_h": 0.8968135381292687,
+    "rss_slope_mib_h": 0.9707640182550663,
     "allocated_plateau": true,
     "write_timeouts": 1,
     "ticks_dropped": 2460,
     "healthy": true,
-    "decision": "continue unaltered sampling; tick criterion failed; write-timeout attribution and §5 review pending; not a complete 24h pass",
-    "notification_reason": "user clarification: other recent tests possible, human cleanup confirmed; criteria unchanged"
+    "decision": "completed collection, overall acceptance failed; deliver for review; no tag/merge/phase3",
+    "notification_reason": "complete original 24h observation and final report"
   },
   "hourly_readonly_check_tool": "python3 evidence/1.1.1/tools/check_post_swap.py --hour <new UTC YYYYMMDDTHHMMZ> --since <previous check UTC ISO>",
-  "latest_hourly_check": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1753Z/check.json",
+  "latest_hourly_check": "evidence/1.1.1/nas-198/post-swap-24h/hourly/20261024T1925Z/check.json",
   "tick_drop_observation": {
     "first_observed_utc": "2026-10-24T14:27:17Z",
     "second_burst_utc": "2026-10-24T15:16:18Z",
@@ -102,7 +102,8 @@
     "must_not_reuse_historical_client_explanation": true,
     "business_reports_possible_other_test": true,
     "specific_test_confirmed": false,
-    "business_clarification": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/business-clarification.json"
+    "business_clarification": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/business-clarification.json",
+    "final_criterion_satisfied": false
   },
   "rollback_backup_current": {
     "name": "md-server-1.1.0-quote-bnb-bak",
@@ -116,6 +117,12 @@
     "evidence": "evidence/1.1.1/nas-198/post-swap-24h/anomalies/write-timeout-20261024T163408Z/rollback-recreated.json",
     "human_cleanup_confirmed": true,
     "cleanup_time_identity_and_rule_known": false,
-    "last_verified_utc": "2026-10-24T17:53:45.533205+00:00"
-  }
+    "last_verified_utc": "2026-10-24T20:10:02.447616+00:00"
+  },
+  "observation_finished_utc": "2026-10-24T19:54:19Z",
+  "observation_complete": true,
+  "observation_overall_pass": false,
+  "observation_final_report": "evidence/1.1.1/nas-198/post-swap-24h/REPORT.md",
+  "observation_analysis": "evidence/1.1.1/nas-198/post-swap-24h/analysis.json",
+  "automatic_observation_status": "completed; remove heartbeat after final report delivery"
 }
