@@ -1,0 +1,17 @@
+2026-10-10T09:02:19.656Z CONNECTED md_connector_connected{exchange="okx-quote"} 1->0
+2026-10-10T09:02:19.657Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 0->1
+2026-10-10T09:03:19.666Z CONNECTED md_connector_connected{exchange="okx-quote"} 0->1
+2026-10-10T09:12:19.693Z WS_CLIENTS 2->3
+2026-10-10T09:13:19.698Z WS_CLIENTS 3->2
+2026-10-10T09:38:19.801Z RECONNECT md_connector_reconnect_total{exchange="okx"} 0->1
+2026-10-10T09:51:19.892Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 0->1
+2026-10-10T10:31:20.015Z RECONNECT md_connector_reconnect_total{exchange="okx"} 1->2
+2026-10-10T10:36:20.096Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 1->2
+2026-10-10T12:15:20.327Z RECONNECT md_connector_reconnect_total{exchange="okx"} 2->3
+2026-10-10T12:15:20.327Z RECONNECT md_connector_reconnect_total{exchange="okx-quote"} 1->2
+2026-10-10T12:37:20.370Z RECONNECT md_connector_reconnect_total{exchange="okx"} 3->4
+2026-10-10T13:35:20.975Z RECONNECT md_connector_reconnect_total{exchange="okx"} 4->5
+2026-10-10T14:04:21.082Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 2->3
+2026-10-10T14:07:21.012Z CONNECTED md_connector_connected{exchange="okx"} 1->0
+2026-10-10T14:07:21.013Z RECONNECT md_connector_reconnect_total{exchange="okx"} 5->6
+2026-10-10T14:08:21.185Z CONNECTED md_connector_connected{exchange="okx"} 0->1

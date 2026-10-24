@@ -1,0 +1,14 @@
+   Compiling md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.98s
+     Running tests/unsubscribe_gateway.rs (target/debug/deps/unsubscribe_gateway-0abd922e940a315a)
+
+running 6 tests
+test partial_unsubscribe_keeps_other_streams_and_bytes ... ok
+test repeated_churn_still_one_copy_per_event ... ok
+test resubscribe_after_unsubscribe_delivers_exactly_one_copy ... ok
+test unsubscribe_on_one_connection_does_not_affect_another ... ok
+test no_events_after_unsubscribe ... ok
+test duplicate_subscribe_adds_no_extra_copy ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+

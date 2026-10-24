@@ -1,0 +1,6 @@
+{
+  "window_local": "2026-10-24 01:48–01:54 Asia/Shanghai",
+  "sleep_wake_events_found": 0,
+  "caffeinate_assertions_found": 4,
+  "limitation": "无休眠记录不能证明无网络停顿或无进程事件循环停顿；原负载未记录事件循环延迟。"
+}

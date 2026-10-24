@@ -1,0 +1,781 @@
+2026-10-10T10:33:23.821Z start url=ws://192.168.1.198:28126/ws/v1/data secs=23400 ticks=6 quotes=2 klines=31 staticKlines=15 churnPool=16 churn=4/90s off=20s
+2026-10-10T10:34:23.842Z static: msgs=1409 dups=1 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:34:23.843Z churn: msgs=1353 dups=0 acks=15 errors=0 reconnects=0 churn_cycles=0 wanted=15
+2026-10-10T10:35:23.843Z static: msgs=2781 dups=3 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:35:23.844Z churn: msgs=2739 dups=1 acks=23 errors=0 reconnects=0 churn_cycles=1 wanted=15
+2026-10-10T10:36:23.845Z static: msgs=4253 dups=3 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:36:23.846Z churn: msgs=3943 dups=1 acks=23 errors=0 reconnects=0 churn_cycles=2 wanted=19
+2026-10-10T10:37:23.846Z static: msgs=5544 dups=3 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:37:23.847Z churn: msgs=5157 dups=1 acks=31 errors=0 reconnects=0 churn_cycles=2 wanted=15
+2026-10-10T10:38:23.848Z static: msgs=6799 dups=5 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:38:23.849Z churn: msgs=6423 dups=2 acks=39 errors=0 reconnects=0 churn_cycles=3 wanted=15
+2026-10-10T10:39:23.849Z static: msgs=8006 dups=5 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:39:23.851Z churn: msgs=7456 dups=2 acks=39 errors=0 reconnects=0 churn_cycles=4 wanted=19
+2026-10-10T10:40:23.852Z static: msgs=9583 dups=5 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:40:23.853Z churn: msgs=8628 dups=3 acks=47 errors=0 reconnects=0 churn_cycles=4 wanted=15
+2026-10-10T10:41:23.853Z static: msgs=10733 dups=6 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:41:23.854Z churn: msgs=9774 dups=3 acks=55 errors=0 reconnects=0 churn_cycles=5 wanted=15
+2026-10-10T10:42:23.854Z static: msgs=11913 dups=6 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:42:23.858Z churn: msgs=10931 dups=3 acks=55 errors=0 reconnects=0 churn_cycles=6 wanted=19
+2026-10-10T10:43:23.857Z static: msgs=12912 dups=6 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:43:23.858Z churn: msgs=12023 dups=3 acks=63 errors=0 reconnects=0 churn_cycles=6 wanted=15
+2026-10-10T10:44:23.860Z static: msgs=14177 dups=7 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:44:23.861Z churn: msgs=13132 dups=4 acks=71 errors=0 reconnects=0 churn_cycles=7 wanted=15
+2026-10-10T10:45:23.860Z static: msgs=15836 dups=7 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:45:23.861Z churn: msgs=14379 dups=4 acks=71 errors=0 reconnects=0 churn_cycles=8 wanted=19
+2026-10-10T10:46:23.863Z static: msgs=17213 dups=7 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:46:23.864Z churn: msgs=15568 dups=4 acks=79 errors=0 reconnects=0 churn_cycles=8 wanted=15
+2026-10-10T10:47:23.863Z static: msgs=18473 dups=8 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:47:23.864Z churn: msgs=16889 dups=4 acks=87 errors=0 reconnects=0 churn_cycles=9 wanted=15
+2026-10-10T10:48:23.864Z static: msgs=19639 dups=8 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:48:23.865Z churn: msgs=17951 dups=4 acks=87 errors=0 reconnects=0 churn_cycles=10 wanted=19
+2026-10-10T10:49:23.865Z static: msgs=20717 dups=8 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:49:23.865Z churn: msgs=19106 dups=4 acks=95 errors=0 reconnects=0 churn_cycles=10 wanted=15
+2026-10-10T10:50:23.865Z static: msgs=21816 dups=9 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:50:23.866Z churn: msgs=20195 dups=5 acks=103 errors=0 reconnects=0 churn_cycles=11 wanted=15
+2026-10-10T10:51:23.866Z static: msgs=23629 dups=11 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:51:23.867Z churn: msgs=21499 dups=5 acks=103 errors=0 reconnects=0 churn_cycles=12 wanted=19
+2026-10-10T10:52:23.870Z static: msgs=25108 dups=13 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:52:23.870Z churn: msgs=22875 dups=6 acks=111 errors=0 reconnects=0 churn_cycles=12 wanted=15
+2026-10-10T10:53:23.872Z static: msgs=26721 dups=15 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:53:23.873Z churn: msgs=24268 dups=6 acks=119 errors=0 reconnects=0 churn_cycles=13 wanted=15
+2026-10-10T10:54:23.872Z static: msgs=28011 dups=17 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:54:23.873Z churn: msgs=25404 dups=6 acks=119 errors=0 reconnects=0 churn_cycles=14 wanted=19
+2026-10-10T10:55:23.873Z static: msgs=29168 dups=17 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:55:23.874Z churn: msgs=26570 dups=6 acks=127 errors=0 reconnects=0 churn_cycles=14 wanted=15
+2026-10-10T10:56:23.873Z static: msgs=30407 dups=18 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:56:23.874Z churn: msgs=27984 dups=7 acks=135 errors=0 reconnects=0 churn_cycles=15 wanted=15
+2026-10-10T10:57:23.872Z static: msgs=31734 dups=20 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:57:23.874Z churn: msgs=29150 dups=7 acks=135 errors=0 reconnects=0 churn_cycles=16 wanted=19
+2026-10-10T10:58:23.875Z static: msgs=32834 dups=22 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:58:23.875Z churn: msgs=30227 dups=7 acks=143 errors=0 reconnects=0 churn_cycles=16 wanted=15
+2026-10-10T10:59:23.878Z static: msgs=34078 dups=24 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T10:59:23.878Z churn: msgs=31215 dups=7 acks=151 errors=0 reconnects=0 churn_cycles=17 wanted=15
+2026-10-10T11:00:23.878Z static: msgs=35257 dups=25 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:00:23.879Z churn: msgs=32188 dups=7 acks=151 errors=0 reconnects=0 churn_cycles=18 wanted=19
+2026-10-10T11:01:23.880Z static: msgs=36613 dups=25 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:01:23.881Z churn: msgs=33243 dups=7 acks=159 errors=0 reconnects=0 churn_cycles=18 wanted=15
+2026-10-10T11:02:23.886Z static: msgs=38116 dups=25 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:02:23.888Z churn: msgs=34381 dups=8 acks=167 errors=0 reconnects=0 churn_cycles=19 wanted=15
+2026-10-10T11:03:23.886Z static: msgs=39450 dups=25 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:03:23.889Z churn: msgs=35461 dups=8 acks=168 errors=0 reconnects=0 churn_cycles=20 wanted=19
+2026-10-10T11:04:23.888Z static: msgs=41119 dups=25 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:04:23.890Z churn: msgs=36844 dups=9 acks=175 errors=0 reconnects=0 churn_cycles=20 wanted=15
+2026-10-10T11:05:23.889Z static: msgs=42535 dups=26 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:05:23.894Z churn: msgs=38126 dups=10 acks=183 errors=0 reconnects=0 churn_cycles=21 wanted=15
+2026-10-10T11:06:23.891Z static: msgs=43922 dups=26 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:06:23.892Z churn: msgs=39319 dups=10 acks=183 errors=0 reconnects=0 churn_cycles=22 wanted=19
+2026-10-10T11:07:23.892Z static: msgs=45179 dups=26 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:07:23.894Z churn: msgs=40472 dups=10 acks=191 errors=0 reconnects=0 churn_cycles=22 wanted=15
+2026-10-10T11:08:23.894Z static: msgs=46500 dups=26 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:08:23.895Z churn: msgs=41697 dups=11 acks=199 errors=0 reconnects=0 churn_cycles=23 wanted=15
+2026-10-10T11:09:23.898Z static: msgs=47781 dups=26 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:09:23.899Z churn: msgs=42833 dups=11 acks=199 errors=0 reconnects=0 churn_cycles=24 wanted=19
+2026-10-10T11:10:23.902Z static: msgs=49117 dups=27 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:10:23.903Z churn: msgs=44081 dups=12 acks=207 errors=0 reconnects=0 churn_cycles=24 wanted=15
+2026-10-10T11:11:23.903Z static: msgs=50729 dups=28 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:11:23.903Z churn: msgs=45370 dups=12 acks=215 errors=0 reconnects=0 churn_cycles=25 wanted=15
+2026-10-10T11:12:23.907Z static: msgs=52583 dups=28 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:12:23.909Z churn: msgs=46654 dups=12 acks=219 errors=0 reconnects=0 churn_cycles=26 wanted=19
+2026-10-10T11:13:23.908Z static: msgs=53757 dups=29 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:13:23.909Z churn: msgs=47915 dups=12 acks=223 errors=0 reconnects=0 churn_cycles=26 wanted=15
+2026-10-10T11:14:23.908Z static: msgs=55180 dups=29 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:14:23.909Z churn: msgs=49302 dups=13 acks=231 errors=0 reconnects=0 churn_cycles=27 wanted=15
+2026-10-10T11:15:23.910Z static: msgs=56666 dups=31 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:15:23.911Z churn: msgs=50493 dups=13 acks=231 errors=0 reconnects=0 churn_cycles=28 wanted=19
+2026-10-10T11:16:23.912Z static: msgs=58049 dups=31 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:16:23.912Z churn: msgs=51830 dups=13 acks=239 errors=0 reconnects=0 churn_cycles=28 wanted=15
+2026-10-10T11:17:23.914Z static: msgs=59379 dups=31 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:17:23.915Z churn: msgs=53178 dups=13 acks=247 errors=0 reconnects=0 churn_cycles=29 wanted=15
+2026-10-10T11:18:23.915Z static: msgs=61365 dups=31 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:18:23.915Z churn: msgs=54498 dups=13 acks=251 errors=0 reconnects=0 churn_cycles=30 wanted=19
+2026-10-10T11:19:23.915Z static: msgs=62758 dups=32 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:19:23.916Z churn: msgs=55695 dups=13 acks=255 errors=0 reconnects=0 churn_cycles=30 wanted=15
+2026-10-10T11:20:23.916Z static: msgs=63954 dups=32 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:20:23.917Z churn: msgs=56838 dups=14 acks=263 errors=0 reconnects=0 churn_cycles=31 wanted=15
+2026-10-10T11:21:23.917Z static: msgs=65636 dups=32 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:21:23.918Z churn: msgs=58050 dups=14 acks=267 errors=0 reconnects=0 churn_cycles=32 wanted=19
+2026-10-10T11:22:23.919Z static: msgs=66904 dups=33 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:22:23.920Z churn: msgs=59155 dups=15 acks=271 errors=0 reconnects=0 churn_cycles=32 wanted=15
+2026-10-10T11:23:23.920Z static: msgs=68005 dups=33 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:23:23.921Z churn: msgs=60255 dups=15 acks=279 errors=0 reconnects=0 churn_cycles=33 wanted=15
+2026-10-10T11:24:23.921Z static: msgs=69136 dups=33 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:24:23.922Z churn: msgs=61308 dups=15 acks=279 errors=0 reconnects=0 churn_cycles=34 wanted=19
+2026-10-10T11:25:23.922Z static: msgs=70208 dups=33 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:25:23.923Z churn: msgs=62411 dups=15 acks=287 errors=0 reconnects=0 churn_cycles=34 wanted=15
+2026-10-10T11:26:23.926Z static: msgs=71703 dups=33 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:26:23.928Z churn: msgs=63596 dups=16 acks=295 errors=0 reconnects=0 churn_cycles=35 wanted=15
+2026-10-10T11:27:23.927Z static: msgs=72969 dups=34 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:27:23.928Z churn: msgs=64666 dups=16 acks=299 errors=0 reconnects=0 churn_cycles=36 wanted=19
+2026-10-10T11:28:23.928Z static: msgs=74186 dups=34 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:28:23.930Z churn: msgs=65849 dups=17 acks=303 errors=0 reconnects=0 churn_cycles=36 wanted=15
+2026-10-10T11:29:23.930Z static: msgs=75392 dups=34 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:29:23.931Z churn: msgs=67032 dups=17 acks=311 errors=0 reconnects=0 churn_cycles=37 wanted=15
+2026-10-10T11:30:23.935Z static: msgs=76549 dups=35 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:30:23.956Z churn: msgs=68138 dups=17 acks=311 errors=0 reconnects=0 churn_cycles=38 wanted=19
+2026-10-10T11:31:23.939Z static: msgs=77849 dups=35 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:31:23.941Z churn: msgs=69363 dups=17 acks=319 errors=0 reconnects=0 churn_cycles=38 wanted=15
+2026-10-10T11:32:23.939Z static: msgs=79083 dups=35 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:32:23.940Z churn: msgs=70514 dups=18 acks=327 errors=0 reconnects=0 churn_cycles=39 wanted=15
+2026-10-10T11:33:23.941Z static: msgs=80283 dups=36 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:33:23.943Z churn: msgs=71618 dups=18 acks=327 errors=0 reconnects=0 churn_cycles=40 wanted=19
+2026-10-10T11:34:23.942Z static: msgs=81793 dups=36 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:34:23.945Z churn: msgs=72810 dups=19 acks=335 errors=0 reconnects=0 churn_cycles=40 wanted=15
+2026-10-10T11:35:23.944Z static: msgs=83004 dups=37 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:35:23.945Z churn: msgs=74092 dups=20 acks=343 errors=0 reconnects=0 churn_cycles=41 wanted=15
+2026-10-10T11:36:23.945Z static: msgs=84180 dups=39 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:36:23.947Z churn: msgs=75055 dups=20 acks=347 errors=0 reconnects=0 churn_cycles=42 wanted=19
+2026-10-10T11:37:23.947Z static: msgs=85779 dups=39 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:37:23.949Z churn: msgs=76117 dups=20 acks=351 errors=0 reconnects=0 churn_cycles=42 wanted=15
+2026-10-10T11:38:23.952Z static: msgs=86970 dups=39 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:38:23.954Z churn: msgs=77176 dups=21 acks=359 errors=0 reconnects=0 churn_cycles=43 wanted=15
+2026-10-10T11:39:23.953Z static: msgs=88553 dups=39 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:39:23.959Z churn: msgs=78158 dups=21 acks=363 errors=0 reconnects=0 churn_cycles=44 wanted=19
+2026-10-10T11:40:23.954Z static: msgs=90265 dups=43 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:40:23.956Z churn: msgs=79445 dups=22 acks=367 errors=0 reconnects=0 churn_cycles=44 wanted=15
+2026-10-10T11:41:23.956Z static: msgs=91878 dups=44 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:41:23.956Z churn: msgs=80735 dups=22 acks=375 errors=0 reconnects=0 churn_cycles=45 wanted=15
+2026-10-10T11:42:23.957Z static: msgs=93276 dups=44 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:42:23.958Z churn: msgs=81774 dups=22 acks=375 errors=0 reconnects=0 churn_cycles=46 wanted=19
+2026-10-10T11:43:23.957Z static: msgs=94408 dups=45 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:43:23.958Z churn: msgs=82944 dups=22 acks=383 errors=0 reconnects=0 churn_cycles=46 wanted=15
+2026-10-10T11:44:23.960Z static: msgs=96530 dups=46 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:44:23.961Z churn: msgs=84481 dups=23 acks=391 errors=0 reconnects=0 churn_cycles=47 wanted=15
+2026-10-10T11:45:23.961Z static: msgs=98539 dups=47 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:45:23.962Z churn: msgs=85782 dups=23 acks=395 errors=0 reconnects=0 churn_cycles=48 wanted=19
+2026-10-10T11:46:23.962Z static: msgs=100308 dups=47 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:46:23.963Z churn: msgs=87027 dups=23 acks=399 errors=0 reconnects=0 churn_cycles=48 wanted=15
+2026-10-10T11:47:23.964Z static: msgs=101781 dups=48 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:47:23.969Z churn: msgs=88203 dups=23 acks=407 errors=0 reconnects=0 churn_cycles=49 wanted=15
+2026-10-10T11:48:23.964Z static: msgs=102849 dups=49 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:48:23.966Z churn: msgs=89252 dups=23 acks=411 errors=0 reconnects=0 churn_cycles=50 wanted=19
+2026-10-10T11:49:23.964Z static: msgs=103909 dups=49 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:49:23.966Z churn: msgs=90290 dups=23 acks=415 errors=0 reconnects=0 churn_cycles=50 wanted=15
+2026-10-10T11:50:23.966Z static: msgs=105004 dups=51 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:50:23.971Z churn: msgs=91290 dups=24 acks=423 errors=0 reconnects=0 churn_cycles=51 wanted=15
+2026-10-10T11:51:23.967Z static: msgs=106101 dups=51 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:51:23.968Z churn: msgs=92204 dups=24 acks=423 errors=0 reconnects=0 churn_cycles=52 wanted=19
+2026-10-10T11:52:23.968Z static: msgs=107133 dups=53 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:52:23.969Z churn: msgs=93096 dups=25 acks=431 errors=0 reconnects=0 churn_cycles=52 wanted=15
+2026-10-10T11:53:23.969Z static: msgs=108335 dups=54 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:53:23.973Z churn: msgs=94091 dups=25 acks=439 errors=0 reconnects=0 churn_cycles=53 wanted=15
+2026-10-10T11:54:23.971Z static: msgs=109695 dups=54 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:54:23.972Z churn: msgs=95190 dups=25 acks=443 errors=0 reconnects=0 churn_cycles=54 wanted=19
+2026-10-10T11:55:23.972Z static: msgs=110827 dups=56 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:55:23.975Z churn: msgs=96351 dups=25 acks=447 errors=0 reconnects=0 churn_cycles=54 wanted=15
+2026-10-10T11:56:23.973Z static: msgs=112322 dups=56 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:56:23.975Z churn: msgs=97455 dups=26 acks=455 errors=0 reconnects=0 churn_cycles=55 wanted=15
+2026-10-10T11:57:23.974Z static: msgs=113712 dups=57 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:57:23.975Z churn: msgs=98597 dups=26 acks=459 errors=0 reconnects=0 churn_cycles=56 wanted=19
+2026-10-10T11:58:23.974Z static: msgs=114876 dups=61 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:58:23.976Z churn: msgs=99581 dups=27 acks=463 errors=0 reconnects=0 churn_cycles=56 wanted=15
+2026-10-10T11:59:23.976Z static: msgs=116652 dups=62 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T11:59:23.981Z churn: msgs=100826 dups=27 acks=471 errors=0 reconnects=0 churn_cycles=57 wanted=15
+2026-10-10T12:00:23.979Z static: msgs=118170 dups=62 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:00:23.980Z churn: msgs=102379 dups=27 acks=471 errors=0 reconnects=0 churn_cycles=58 wanted=19
+2026-10-10T12:01:23.981Z static: msgs=119811 dups=64 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:01:23.984Z churn: msgs=103881 dups=27 acks=479 errors=0 reconnects=0 churn_cycles=58 wanted=15
+2026-10-10T12:02:23.983Z static: msgs=122083 dups=64 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:02:23.985Z churn: msgs=105431 dups=28 acks=487 errors=0 reconnects=0 churn_cycles=59 wanted=15
+2026-10-10T12:03:23.983Z static: msgs=124138 dups=64 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:03:23.985Z churn: msgs=106967 dups=28 acks=491 errors=0 reconnects=0 churn_cycles=60 wanted=19
+2026-10-10T12:04:23.985Z static: msgs=125721 dups=65 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:04:23.987Z churn: msgs=108400 dups=29 acks=495 errors=0 reconnects=0 churn_cycles=60 wanted=15
+2026-10-10T12:05:23.987Z static: msgs=127249 dups=65 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:05:23.990Z churn: msgs=109801 dups=30 acks=503 errors=0 reconnects=0 churn_cycles=61 wanted=15
+2026-10-10T12:06:23.989Z static: msgs=128832 dups=65 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:06:23.990Z churn: msgs=110971 dups=30 acks=507 errors=0 reconnects=0 churn_cycles=62 wanted=19
+2026-10-10T12:07:23.990Z static: msgs=130127 dups=66 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:07:23.993Z churn: msgs=112213 dups=30 acks=511 errors=0 reconnects=0 churn_cycles=62 wanted=15
+2026-10-10T12:08:23.991Z static: msgs=131366 dups=67 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:08:24.001Z churn: msgs=113209 dups=31 acks=519 errors=0 reconnects=0 churn_cycles=63 wanted=15
+2026-10-10T12:09:23.991Z static: msgs=133784 dups=68 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:09:23.993Z churn: msgs=114361 dups=31 acks=519 errors=0 reconnects=0 churn_cycles=64 wanted=19
+2026-10-10T12:10:23.992Z static: msgs=135199 dups=68 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:10:23.994Z churn: msgs=115511 dups=31 acks=527 errors=0 reconnects=0 churn_cycles=64 wanted=15
+2026-10-10T12:11:23.993Z static: msgs=136493 dups=69 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:11:23.995Z churn: msgs=116679 dups=31 acks=535 errors=0 reconnects=0 churn_cycles=65 wanted=15
+2026-10-10T12:12:23.994Z static: msgs=137772 dups=69 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:12:23.995Z churn: msgs=117753 dups=31 acks=539 errors=0 reconnects=0 churn_cycles=66 wanted=19
+2026-10-10T12:13:23.995Z static: msgs=139966 dups=70 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:13:23.996Z churn: msgs=119078 dups=31 acks=543 errors=0 reconnects=0 churn_cycles=66 wanted=15
+2026-10-10T12:14:23.996Z static: msgs=141630 dups=70 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:14:23.997Z churn: msgs=120680 dups=32 acks=551 errors=0 reconnects=0 churn_cycles=67 wanted=15
+2026-10-10T12:15:24.035Z static: msgs=143556 dups=71 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:15:24.108Z churn: msgs=121824 dups=32 acks=551 errors=0 reconnects=0 churn_cycles=68 wanted=19
+2026-10-10T12:16:24.034Z static: msgs=145227 dups=73 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:16:24.036Z churn: msgs=122827 dups=32 acks=559 errors=0 reconnects=0 churn_cycles=68 wanted=15
+2026-10-10T12:17:24.037Z static: msgs=146677 dups=73 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:17:24.040Z churn: msgs=123985 dups=32 acks=567 errors=0 reconnects=0 churn_cycles=69 wanted=15
+2026-10-10T12:18:24.037Z static: msgs=148543 dups=73 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:18:24.037Z churn: msgs=124918 dups=32 acks=567 errors=0 reconnects=0 churn_cycles=70 wanted=19
+2026-10-10T12:19:24.038Z static: msgs=149697 dups=73 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:19:24.039Z churn: msgs=125746 dups=32 acks=575 errors=0 reconnects=0 churn_cycles=70 wanted=15
+2026-10-10T12:20:24.038Z static: msgs=151172 dups=74 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:20:24.040Z churn: msgs=126621 dups=33 acks=583 errors=0 reconnects=0 churn_cycles=71 wanted=15
+2026-10-10T12:21:24.038Z static: msgs=152315 dups=74 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:21:24.039Z churn: msgs=127544 dups=33 acks=587 errors=0 reconnects=0 churn_cycles=72 wanted=19
+2026-10-10T12:22:24.040Z static: msgs=153809 dups=74 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:22:24.041Z churn: msgs=129134 dups=34 acks=591 errors=0 reconnects=0 churn_cycles=72 wanted=15
+2026-10-10T12:23:24.042Z static: msgs=155113 dups=75 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:23:24.043Z churn: msgs=130714 dups=34 acks=599 errors=0 reconnects=0 churn_cycles=73 wanted=15
+2026-10-10T12:24:24.044Z static: msgs=156406 dups=75 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:24:24.045Z churn: msgs=132177 dups=34 acks=603 errors=0 reconnects=0 churn_cycles=74 wanted=19
+2026-10-10T12:25:24.045Z static: msgs=158075 dups=76 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:25:24.046Z churn: msgs=133696 dups=34 acks=607 errors=0 reconnects=0 churn_cycles=74 wanted=15
+2026-10-10T12:26:24.046Z static: msgs=159126 dups=76 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:26:24.047Z churn: msgs=134755 dups=35 acks=615 errors=0 reconnects=0 churn_cycles=75 wanted=15
+2026-10-10T12:27:24.048Z static: msgs=160225 dups=78 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:27:24.049Z churn: msgs=135734 dups=35 acks=615 errors=0 reconnects=0 churn_cycles=76 wanted=19
+2026-10-10T12:28:24.049Z static: msgs=161490 dups=78 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:28:24.050Z churn: msgs=136807 dups=35 acks=623 errors=0 reconnects=0 churn_cycles=76 wanted=15
+2026-10-10T12:29:24.051Z static: msgs=162776 dups=80 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:29:24.058Z churn: msgs=138020 dups=35 acks=631 errors=0 reconnects=0 churn_cycles=77 wanted=15
+2026-10-10T12:30:24.052Z static: msgs=164332 dups=80 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:30:24.053Z churn: msgs=138971 dups=35 acks=635 errors=0 reconnects=0 churn_cycles=78 wanted=19
+2026-10-10T12:31:24.054Z static: msgs=165480 dups=81 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:31:24.058Z churn: msgs=140120 dups=35 acks=639 errors=0 reconnects=0 churn_cycles=78 wanted=15
+2026-10-10T12:32:24.054Z static: msgs=166511 dups=81 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:32:24.056Z churn: msgs=141252 dups=36 acks=647 errors=0 reconnects=0 churn_cycles=79 wanted=15
+2026-10-10T12:33:24.056Z static: msgs=167676 dups=86 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:33:24.058Z churn: msgs=142725 dups=36 acks=651 errors=0 reconnects=0 churn_cycles=80 wanted=19
+2026-10-10T12:34:24.057Z static: msgs=168661 dups=86 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:34:24.059Z churn: msgs=143947 dups=37 acks=655 errors=0 reconnects=0 churn_cycles=80 wanted=15
+2026-10-10T12:35:24.059Z static: msgs=169750 dups=87 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:35:24.059Z churn: msgs=144927 dups=38 acks=663 errors=0 reconnects=0 churn_cycles=81 wanted=15
+2026-10-10T12:36:24.060Z static: msgs=170743 dups=87 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:36:24.061Z churn: msgs=145851 dups=38 acks=663 errors=0 reconnects=0 churn_cycles=82 wanted=19
+2026-10-10T12:37:24.062Z static: msgs=172582 dups=87 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:37:24.067Z churn: msgs=146961 dups=38 acks=671 errors=0 reconnects=0 churn_cycles=82 wanted=15
+2026-10-10T12:38:24.063Z static: msgs=173578 dups=87 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:38:24.064Z churn: msgs=147984 dups=39 acks=679 errors=0 reconnects=0 churn_cycles=83 wanted=15
+2026-10-10T12:39:24.065Z static: msgs=174753 dups=89 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:39:24.069Z churn: msgs=148824 dups=39 acks=683 errors=0 reconnects=0 churn_cycles=84 wanted=19
+2026-10-10T12:40:24.066Z static: msgs=176251 dups=90 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:40:24.067Z churn: msgs=149885 dups=39 acks=687 errors=0 reconnects=0 churn_cycles=84 wanted=15
+2026-10-10T12:41:24.067Z static: msgs=177524 dups=90 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:41:24.068Z churn: msgs=151107 dups=39 acks=695 errors=0 reconnects=0 churn_cycles=85 wanted=15
+2026-10-10T12:42:24.067Z static: msgs=178651 dups=90 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:42:24.068Z churn: msgs=152052 dups=39 acks=699 errors=0 reconnects=0 churn_cycles=86 wanted=19
+2026-10-10T12:43:24.069Z static: msgs=180357 dups=91 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:43:24.070Z churn: msgs=153315 dups=39 acks=703 errors=0 reconnects=0 churn_cycles=86 wanted=15
+2026-10-10T12:44:24.071Z static: msgs=181761 dups=91 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:44:24.073Z churn: msgs=154534 dups=40 acks=711 errors=0 reconnects=0 churn_cycles=87 wanted=15
+2026-10-10T12:45:24.074Z static: msgs=183575 dups=92 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:45:24.075Z churn: msgs=155366 dups=40 acks=711 errors=0 reconnects=0 churn_cycles=88 wanted=19
+2026-10-10T12:46:24.075Z static: msgs=185595 dups=92 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:46:24.078Z churn: msgs=156316 dups=41 acks=719 errors=0 reconnects=0 churn_cycles=88 wanted=15
+2026-10-10T12:47:24.075Z static: msgs=186847 dups=92 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:47:24.076Z churn: msgs=157587 dups=41 acks=727 errors=0 reconnects=0 churn_cycles=89 wanted=15
+2026-10-10T12:48:24.076Z static: msgs=188708 dups=93 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:48:24.079Z churn: msgs=158729 dups=41 acks=731 errors=0 reconnects=0 churn_cycles=90 wanted=19
+2026-10-10T12:49:24.079Z static: msgs=189854 dups=93 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:49:24.080Z churn: msgs=159824 dups=41 acks=735 errors=0 reconnects=0 churn_cycles=90 wanted=15
+2026-10-10T12:50:24.079Z static: msgs=190960 dups=93 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:50:24.081Z churn: msgs=160817 dups=42 acks=743 errors=0 reconnects=0 churn_cycles=91 wanted=15
+2026-10-10T12:51:24.085Z static: msgs=192033 dups=93 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:51:24.087Z churn: msgs=161733 dups=42 acks=747 errors=0 reconnects=0 churn_cycles=92 wanted=19
+2026-10-10T12:52:24.086Z static: msgs=193107 dups=94 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:52:24.090Z churn: msgs=162761 dups=43 acks=751 errors=0 reconnects=0 churn_cycles=92 wanted=15
+2026-10-10T12:53:24.087Z static: msgs=194235 dups=94 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:53:24.088Z churn: msgs=163864 dups=43 acks=759 errors=0 reconnects=0 churn_cycles=93 wanted=15
+2026-10-10T12:54:24.090Z static: msgs=195255 dups=95 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:54:24.127Z churn: msgs=164728 dups=43 acks=759 errors=0 reconnects=0 churn_cycles=94 wanted=19
+2026-10-10T12:55:24.089Z static: msgs=196389 dups=96 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:55:24.093Z churn: msgs=165763 dups=43 acks=767 errors=0 reconnects=0 churn_cycles=94 wanted=15
+2026-10-10T12:56:24.091Z static: msgs=197401 dups=96 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:56:24.092Z churn: msgs=166727 dups=44 acks=775 errors=0 reconnects=0 churn_cycles=95 wanted=15
+2026-10-10T12:57:24.092Z static: msgs=198441 dups=96 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:57:24.093Z churn: msgs=167564 dups=44 acks=779 errors=0 reconnects=0 churn_cycles=96 wanted=19
+2026-10-10T12:58:24.093Z static: msgs=199484 dups=96 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:58:24.097Z churn: msgs=168497 dups=45 acks=783 errors=0 reconnects=0 churn_cycles=96 wanted=15
+2026-10-10T12:59:24.096Z static: msgs=200783 dups=97 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T12:59:24.100Z churn: msgs=169476 dups=45 acks=791 errors=0 reconnects=0 churn_cycles=97 wanted=15
+2026-10-10T13:00:24.096Z static: msgs=201968 dups=97 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:00:24.097Z churn: msgs=170662 dups=45 acks=795 errors=0 reconnects=0 churn_cycles=98 wanted=19
+2026-10-10T13:01:24.097Z static: msgs=203123 dups=98 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:01:24.098Z churn: msgs=171784 dups=45 acks=799 errors=0 reconnects=0 churn_cycles=98 wanted=15
+2026-10-10T13:02:24.099Z static: msgs=204913 dups=98 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:02:24.100Z churn: msgs=173259 dups=46 acks=807 errors=0 reconnects=0 churn_cycles=99 wanted=15
+2026-10-10T13:03:24.100Z static: msgs=206549 dups=99 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:03:24.102Z churn: msgs=174666 dups=46 acks=807 errors=0 reconnects=0 churn_cycles=100 wanted=19
+2026-10-10T13:04:24.106Z static: msgs=207957 dups=99 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:04:24.109Z churn: msgs=176037 dups=46 acks=815 errors=0 reconnects=0 churn_cycles=100 wanted=15
+2026-10-10T13:05:24.108Z static: msgs=209420 dups=101 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:05:24.110Z churn: msgs=177362 dups=47 acks=823 errors=0 reconnects=0 churn_cycles=101 wanted=15
+2026-10-10T13:06:24.108Z static: msgs=211271 dups=102 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:06:24.110Z churn: msgs=179078 dups=47 acks=827 errors=0 reconnects=0 churn_cycles=102 wanted=19
+2026-10-10T13:07:24.111Z static: msgs=212875 dups=102 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:07:24.113Z churn: msgs=180508 dups=47 acks=831 errors=0 reconnects=0 churn_cycles=102 wanted=15
+2026-10-10T13:08:24.113Z static: msgs=214852 dups=102 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:08:24.114Z churn: msgs=181754 dups=48 acks=839 errors=0 reconnects=0 churn_cycles=103 wanted=15
+2026-10-10T13:09:24.115Z static: msgs=218673 dups=102 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:09:24.116Z churn: msgs=182841 dups=48 acks=843 errors=0 reconnects=0 churn_cycles=104 wanted=19
+2026-10-10T13:10:24.117Z static: msgs=222403 dups=103 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:10:24.118Z churn: msgs=183988 dups=48 acks=847 errors=0 reconnects=0 churn_cycles=104 wanted=15
+2026-10-10T13:11:24.118Z static: msgs=223575 dups=104 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:11:24.120Z churn: msgs=185216 dups=48 acks=855 errors=0 reconnects=0 churn_cycles=105 wanted=15
+2026-10-10T13:12:24.119Z static: msgs=225741 dups=104 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:12:24.121Z churn: msgs=186332 dups=48 acks=855 errors=0 reconnects=0 churn_cycles=106 wanted=19
+2026-10-10T13:13:24.120Z static: msgs=227004 dups=104 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:13:24.121Z churn: msgs=187507 dups=48 acks=863 errors=0 reconnects=0 churn_cycles=106 wanted=15
+2026-10-10T13:14:24.122Z static: msgs=229560 dups=106 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:14:24.123Z churn: msgs=188778 dups=49 acks=871 errors=0 reconnects=0 churn_cycles=107 wanted=15
+2026-10-10T13:15:24.124Z static: msgs=231454 dups=107 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:15:24.129Z churn: msgs=189836 dups=49 acks=875 errors=0 reconnects=0 churn_cycles=108 wanted=19
+2026-10-10T13:16:24.125Z static: msgs=233160 dups=107 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:16:24.127Z churn: msgs=191126 dups=49 acks=879 errors=0 reconnects=0 churn_cycles=108 wanted=15
+2026-10-10T13:17:24.125Z static: msgs=234373 dups=107 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:17:24.126Z churn: msgs=192329 dups=49 acks=887 errors=0 reconnects=0 churn_cycles=109 wanted=15
+2026-10-10T13:18:24.127Z static: msgs=235690 dups=108 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:18:24.129Z churn: msgs=193440 dups=49 acks=891 errors=0 reconnects=0 churn_cycles=110 wanted=19
+2026-10-10T13:19:24.128Z static: msgs=238122 dups=109 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:19:24.130Z churn: msgs=194801 dups=49 acks=895 errors=0 reconnects=0 churn_cycles=110 wanted=15
+2026-10-10T13:20:24.134Z static: msgs=239500 dups=109 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:20:24.135Z churn: msgs=196148 dups=50 acks=903 errors=0 reconnects=0 churn_cycles=111 wanted=15
+2026-10-10T13:21:24.135Z static: msgs=241260 dups=110 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:21:24.137Z churn: msgs=197408 dups=50 acks=903 errors=0 reconnects=0 churn_cycles=112 wanted=19
+2026-10-10T13:22:24.138Z static: msgs=242527 dups=113 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:22:24.139Z churn: msgs=198667 dups=51 acks=911 errors=0 reconnects=0 churn_cycles=112 wanted=15
+2026-10-10T13:23:24.144Z static: msgs=244388 dups=113 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:23:24.145Z churn: msgs=200162 dups=51 acks=919 errors=0 reconnects=0 churn_cycles=113 wanted=15
+2026-10-10T13:24:24.145Z static: msgs=245869 dups=115 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:24:24.148Z churn: msgs=201618 dups=51 acks=923 errors=0 reconnects=0 churn_cycles=114 wanted=19
+2026-10-10T13:25:24.146Z static: msgs=247414 dups=115 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:25:24.147Z churn: msgs=203059 dups=51 acks=927 errors=0 reconnects=0 churn_cycles=114 wanted=15
+2026-10-10T13:26:24.183Z static: msgs=248780 dups=115 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:26:24.225Z churn: msgs=204342 dups=52 acks=935 errors=0 reconnects=0 churn_cycles=115 wanted=15
+2026-10-10T13:27:24.157Z static: msgs=249970 dups=115 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:27:24.159Z churn: msgs=205662 dups=52 acks=939 errors=0 reconnects=0 churn_cycles=116 wanted=19
+2026-10-10T13:28:24.159Z static: msgs=251567 dups=116 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:28:24.160Z churn: msgs=207246 dups=53 acks=943 errors=0 reconnects=0 churn_cycles=116 wanted=15
+2026-10-10T13:29:24.160Z static: msgs=252713 dups=116 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:29:24.162Z churn: msgs=208411 dups=53 acks=951 errors=0 reconnects=0 churn_cycles=117 wanted=15
+2026-10-10T13:30:24.161Z static: msgs=253953 dups=117 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:30:24.162Z churn: msgs=209558 dups=53 acks=951 errors=0 reconnects=0 churn_cycles=118 wanted=19
+2026-10-10T13:31:24.161Z static: msgs=255362 dups=117 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:31:24.164Z churn: msgs=210653 dups=53 acks=959 errors=0 reconnects=0 churn_cycles=118 wanted=15
+2026-10-10T13:32:24.162Z static: msgs=256660 dups=121 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:32:24.163Z churn: msgs=211678 dups=54 acks=967 errors=0 reconnects=0 churn_cycles=119 wanted=15
+2026-10-10T13:33:24.163Z static: msgs=257981 dups=122 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:33:24.164Z churn: msgs=212611 dups=54 acks=971 errors=0 reconnects=0 churn_cycles=120 wanted=19
+2026-10-10T13:34:24.165Z static: msgs=259097 dups=123 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:34:24.166Z churn: msgs=213576 dups=55 acks=975 errors=0 reconnects=0 churn_cycles=120 wanted=15
+2026-10-10T13:35:24.166Z static: msgs=260475 dups=123 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:35:24.167Z churn: msgs=214543 dups=56 acks=983 errors=0 reconnects=0 churn_cycles=121 wanted=15
+2026-10-10T13:36:24.167Z static: msgs=261992 dups=123 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:36:24.170Z churn: msgs=215455 dups=56 acks=983 errors=0 reconnects=0 churn_cycles=121 wanted=15
+2026-10-10T13:37:24.169Z static: msgs=263406 dups=125 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:37:24.170Z churn: msgs=216509 dups=56 acks=991 errors=0 reconnects=0 churn_cycles=122 wanted=15
+2026-10-10T13:38:24.169Z static: msgs=264705 dups=125 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:38:24.170Z churn: msgs=217332 dups=57 acks=999 errors=0 reconnects=0 churn_cycles=123 wanted=15
+2026-10-10T13:39:24.171Z static: msgs=266445 dups=125 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:39:24.172Z churn: msgs=218196 dups=57 acks=999 errors=0 reconnects=0 churn_cycles=123 wanted=15
+2026-10-10T13:40:24.172Z static: msgs=267559 dups=127 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:40:24.179Z churn: msgs=219119 dups=58 acks=1007 errors=0 reconnects=0 churn_cycles=124 wanted=15
+2026-10-10T13:41:24.173Z static: msgs=268774 dups=127 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:41:24.174Z churn: msgs=220105 dups=58 acks=1015 errors=0 reconnects=0 churn_cycles=125 wanted=15
+2026-10-10T13:42:24.173Z static: msgs=270969 dups=128 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:42:24.174Z churn: msgs=221266 dups=58 acks=1015 errors=0 reconnects=0 churn_cycles=125 wanted=15
+2026-10-10T13:43:24.175Z static: msgs=272487 dups=130 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:43:24.177Z churn: msgs=222635 dups=58 acks=1023 errors=0 reconnects=0 churn_cycles=126 wanted=15
+2026-10-10T13:44:24.175Z static: msgs=274146 dups=130 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:44:24.178Z churn: msgs=223750 dups=59 acks=1031 errors=0 reconnects=0 churn_cycles=127 wanted=15
+2026-10-10T13:45:24.178Z static: msgs=275737 dups=130 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:45:24.183Z churn: msgs=224945 dups=59 acks=1031 errors=0 reconnects=0 churn_cycles=127 wanted=15
+2026-10-10T13:46:24.179Z static: msgs=277072 dups=130 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:46:24.181Z churn: msgs=226040 dups=59 acks=1039 errors=0 reconnects=0 churn_cycles=128 wanted=15
+2026-10-10T13:47:24.180Z static: msgs=278605 dups=131 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:47:24.180Z churn: msgs=227205 dups=59 acks=1047 errors=0 reconnects=0 churn_cycles=129 wanted=15
+2026-10-10T13:48:24.180Z static: msgs=279851 dups=131 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:48:24.183Z churn: msgs=228069 dups=59 acks=1047 errors=0 reconnects=0 churn_cycles=129 wanted=15
+2026-10-10T13:49:24.185Z static: msgs=281190 dups=133 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:49:24.186Z churn: msgs=229262 dups=59 acks=1055 errors=0 reconnects=0 churn_cycles=130 wanted=15
+2026-10-10T13:50:24.186Z static: msgs=282777 dups=134 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:50:24.190Z churn: msgs=230602 dups=60 acks=1063 errors=0 reconnects=0 churn_cycles=131 wanted=15
+2026-10-10T13:51:24.196Z static: msgs=284058 dups=135 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:51:24.197Z churn: msgs=231518 dups=60 acks=1063 errors=0 reconnects=0 churn_cycles=131 wanted=15
+2026-10-10T13:52:24.197Z static: msgs=285483 dups=135 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:52:24.199Z churn: msgs=233047 dups=61 acks=1071 errors=0 reconnects=0 churn_cycles=132 wanted=15
+2026-10-10T13:53:24.198Z static: msgs=287086 dups=136 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:53:24.199Z churn: msgs=234124 dups=61 acks=1079 errors=0 reconnects=0 churn_cycles=133 wanted=15
+2026-10-10T13:54:24.200Z static: msgs=288432 dups=136 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:54:24.213Z churn: msgs=234995 dups=61 acks=1079 errors=0 reconnects=0 churn_cycles=133 wanted=15
+2026-10-10T13:55:24.204Z static: msgs=289601 dups=137 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:55:24.213Z churn: msgs=235946 dups=61 acks=1087 errors=0 reconnects=0 churn_cycles=134 wanted=15
+2026-10-10T13:56:24.202Z static: msgs=290556 dups=138 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:56:24.203Z churn: msgs=236840 dups=62 acks=1095 errors=0 reconnects=0 churn_cycles=135 wanted=15
+2026-10-10T13:57:24.203Z static: msgs=291571 dups=140 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:57:24.205Z churn: msgs=237664 dups=62 acks=1095 errors=0 reconnects=0 churn_cycles=135 wanted=15
+2026-10-10T13:58:24.206Z static: msgs=292926 dups=140 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:58:24.216Z churn: msgs=238553 dups=62 acks=1103 errors=0 reconnects=0 churn_cycles=136 wanted=15
+2026-10-10T13:59:24.205Z static: msgs=294065 dups=141 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T13:59:24.207Z churn: msgs=239614 dups=62 acks=1111 errors=0 reconnects=0 churn_cycles=137 wanted=15
+2026-10-10T14:00:24.210Z static: msgs=295259 dups=142 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:00:24.212Z churn: msgs=240678 dups=62 acks=1111 errors=0 reconnects=0 churn_cycles=137 wanted=15
+2026-10-10T14:01:24.211Z static: msgs=297190 dups=143 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:01:24.218Z churn: msgs=241903 dups=62 acks=1119 errors=0 reconnects=0 churn_cycles=138 wanted=15
+2026-10-10T14:02:24.213Z static: msgs=299029 dups=144 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:02:24.214Z churn: msgs=243184 dups=63 acks=1127 errors=0 reconnects=0 churn_cycles=139 wanted=15
+2026-10-10T14:03:24.215Z static: msgs=300354 dups=144 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:03:24.221Z churn: msgs=244236 dups=63 acks=1127 errors=0 reconnects=0 churn_cycles=139 wanted=15
+2026-10-10T14:04:24.215Z static: msgs=301893 dups=144 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:04:24.218Z churn: msgs=245813 dups=63 acks=1135 errors=0 reconnects=0 churn_cycles=140 wanted=15
+2026-10-10T14:05:24.216Z static: msgs=304397 dups=145 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:05:24.218Z churn: msgs=247285 dups=64 acks=1143 errors=0 reconnects=0 churn_cycles=141 wanted=15
+2026-10-10T14:06:24.217Z static: msgs=305791 dups=147 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:06:24.222Z churn: msgs=248675 dups=64 acks=1143 errors=0 reconnects=0 churn_cycles=141 wanted=15
+2026-10-10T14:07:24.218Z static: msgs=307344 dups=148 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:07:24.220Z churn: msgs=249826 dups=64 acks=1151 errors=0 reconnects=0 churn_cycles=142 wanted=15
+2026-10-10T14:08:24.218Z static: msgs=308486 dups=149 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:08:24.219Z churn: msgs=250867 dups=65 acks=1159 errors=0 reconnects=0 churn_cycles=143 wanted=15
+2026-10-10T14:09:24.221Z static: msgs=309587 dups=150 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:09:24.223Z churn: msgs=251772 dups=65 acks=1159 errors=0 reconnects=0 churn_cycles=143 wanted=15
+2026-10-10T14:10:24.223Z static: msgs=310788 dups=152 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:10:24.230Z churn: msgs=252794 dups=65 acks=1167 errors=0 reconnects=0 churn_cycles=144 wanted=15
+2026-10-10T14:11:24.222Z static: msgs=312175 dups=154 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:11:24.225Z churn: msgs=253980 dups=65 acks=1175 errors=0 reconnects=0 churn_cycles=145 wanted=15
+2026-10-10T14:12:24.224Z static: msgs=314160 dups=154 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:12:24.225Z churn: msgs=255306 dups=65 acks=1175 errors=0 reconnects=0 churn_cycles=145 wanted=15
+2026-10-10T14:13:24.225Z static: msgs=315484 dups=154 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:13:24.227Z churn: msgs=256340 dups=65 acks=1183 errors=0 reconnects=0 churn_cycles=146 wanted=15
+2026-10-10T14:14:24.230Z static: msgs=316635 dups=155 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:14:24.233Z churn: msgs=257383 dups=66 acks=1191 errors=0 reconnects=0 churn_cycles=147 wanted=15
+2026-10-10T14:15:24.229Z static: msgs=317970 dups=155 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:15:24.230Z churn: msgs=258319 dups=66 acks=1191 errors=0 reconnects=0 churn_cycles=147 wanted=15
+2026-10-10T14:16:24.232Z static: msgs=319526 dups=156 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:16:24.236Z churn: msgs=259412 dups=66 acks=1199 errors=0 reconnects=0 churn_cycles=148 wanted=15
+2026-10-10T14:17:24.247Z static: msgs=321012 dups=157 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:17:24.249Z churn: msgs=260487 dups=66 acks=1207 errors=0 reconnects=0 churn_cycles=149 wanted=15
+2026-10-10T14:18:24.248Z static: msgs=322351 dups=157 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:18:24.249Z churn: msgs=261475 dups=66 acks=1207 errors=0 reconnects=0 churn_cycles=149 wanted=15
+2026-10-10T14:19:24.250Z static: msgs=323865 dups=157 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:19:24.255Z churn: msgs=262749 dups=66 acks=1215 errors=0 reconnects=0 churn_cycles=150 wanted=15
+2026-10-10T14:20:24.259Z static: msgs=326431 dups=158 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:20:24.287Z churn: msgs=263864 dups=67 acks=1223 errors=0 reconnects=0 churn_cycles=151 wanted=15
+2026-10-10T14:21:24.253Z static: msgs=327802 dups=160 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:21:24.255Z churn: msgs=264909 dups=67 acks=1223 errors=0 reconnects=0 churn_cycles=151 wanted=15
+2026-10-10T14:22:24.255Z static: msgs=329136 dups=161 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:22:24.258Z churn: msgs=265938 dups=68 acks=1231 errors=0 reconnects=0 churn_cycles=152 wanted=15
+2026-10-10T14:23:24.256Z static: msgs=330738 dups=162 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:23:24.258Z churn: msgs=266992 dups=68 acks=1239 errors=0 reconnects=0 churn_cycles=153 wanted=15
+2026-10-10T14:24:24.258Z static: msgs=331992 dups=164 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:24:24.259Z churn: msgs=268000 dups=68 acks=1239 errors=0 reconnects=0 churn_cycles=153 wanted=15
+2026-10-10T14:25:24.259Z static: msgs=333303 dups=164 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:25:24.261Z churn: msgs=269065 dups=68 acks=1247 errors=0 reconnects=0 churn_cycles=154 wanted=15
+2026-10-10T14:26:24.261Z static: msgs=336435 dups=167 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:26:24.266Z churn: msgs=270468 dups=69 acks=1255 errors=0 reconnects=0 churn_cycles=155 wanted=15
+2026-10-10T14:27:24.262Z static: msgs=338946 dups=169 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:27:24.267Z churn: msgs=272341 dups=69 acks=1255 errors=0 reconnects=0 churn_cycles=155 wanted=15
+2026-10-10T14:28:24.264Z static: msgs=348783 dups=171 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:28:24.265Z churn: msgs=274546 dups=70 acks=1263 errors=0 reconnects=0 churn_cycles=156 wanted=15
+2026-10-10T14:29:24.265Z static: msgs=352632 dups=176 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:29:24.271Z churn: msgs=276771 dups=70 acks=1271 errors=0 reconnects=0 churn_cycles=157 wanted=15
+2026-10-10T14:30:24.267Z static: msgs=366091 dups=183 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:30:24.269Z churn: msgs=279246 dups=70 acks=1271 errors=0 reconnects=0 churn_cycles=157 wanted=15
+2026-10-10T14:31:24.267Z static: msgs=371249 dups=183 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:31:24.268Z churn: msgs=281567 dups=70 acks=1279 errors=0 reconnects=0 churn_cycles=158 wanted=15
+2026-10-10T14:32:24.268Z static: msgs=376462 dups=184 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:32:24.269Z churn: msgs=283611 dups=71 acks=1287 errors=0 reconnects=0 churn_cycles=159 wanted=15
+2026-10-10T14:33:24.294Z static: msgs=379994 dups=187 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:33:24.302Z churn: msgs=285427 dups=71 acks=1287 errors=0 reconnects=0 churn_cycles=159 wanted=15
+2026-10-10T14:34:24.296Z static: msgs=383718 dups=191 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:34:24.298Z churn: msgs=287226 dups=72 acks=1295 errors=0 reconnects=0 churn_cycles=160 wanted=15
+2026-10-10T14:35:24.296Z static: msgs=388299 dups=192 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:35:24.298Z churn: msgs=289395 dups=72 acks=1303 errors=0 reconnects=0 churn_cycles=161 wanted=15
+2026-10-10T14:36:24.297Z static: msgs=392651 dups=192 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:36:24.298Z churn: msgs=291421 dups=72 acks=1303 errors=0 reconnects=0 churn_cycles=161 wanted=15
+2026-10-10T14:37:24.298Z static: msgs=396062 dups=192 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:37:24.301Z churn: msgs=293526 dups=72 acks=1311 errors=0 reconnects=0 churn_cycles=162 wanted=15
+2026-10-10T14:38:24.300Z static: msgs=410996 dups=196 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:38:24.301Z churn: msgs=296237 dups=73 acks=1319 errors=0 reconnects=0 churn_cycles=163 wanted=15
+2026-10-10T14:39:24.302Z static: msgs=416813 dups=197 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:39:24.305Z churn: msgs=298511 dups=73 acks=1319 errors=0 reconnects=0 churn_cycles=163 wanted=15
+2026-10-10T14:40:24.304Z static: msgs=428047 dups=198 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:40:24.311Z churn: msgs=301127 dups=73 acks=1327 errors=0 reconnects=0 churn_cycles=164 wanted=15
+2026-10-10T14:41:24.305Z static: msgs=436930 dups=199 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:41:24.309Z churn: msgs=303711 dups=73 acks=1335 errors=0 reconnects=0 churn_cycles=165 wanted=15
+2026-10-10T14:42:24.306Z static: msgs=442930 dups=199 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:42:24.306Z churn: msgs=305909 dups=73 acks=1335 errors=0 reconnects=0 churn_cycles=165 wanted=15
+2026-10-10T14:43:24.307Z static: msgs=451386 dups=199 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:43:24.308Z churn: msgs=308086 dups=73 acks=1343 errors=0 reconnects=0 churn_cycles=166 wanted=15
+2026-10-10T14:44:24.308Z static: msgs=456725 dups=200 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:44:24.309Z churn: msgs=310087 dups=74 acks=1351 errors=0 reconnects=0 churn_cycles=167 wanted=15
+2026-10-10T14:45:24.308Z static: msgs=459323 dups=201 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:45:24.309Z churn: msgs=311914 dups=74 acks=1351 errors=0 reconnects=0 churn_cycles=167 wanted=15
+2026-10-10T14:46:24.310Z static: msgs=461702 dups=203 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:46:24.311Z churn: msgs=313805 dups=75 acks=1359 errors=0 reconnects=0 churn_cycles=168 wanted=15
+2026-10-10T14:47:24.311Z static: msgs=465215 dups=204 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:47:24.313Z churn: msgs=315972 dups=75 acks=1367 errors=0 reconnects=0 churn_cycles=169 wanted=15
+2026-10-10T14:48:24.312Z static: msgs=468622 dups=206 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:48:24.313Z churn: msgs=318150 dups=75 acks=1367 errors=0 reconnects=0 churn_cycles=169 wanted=15
+2026-10-10T14:49:24.312Z static: msgs=472895 dups=206 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:49:24.314Z churn: msgs=320265 dups=75 acks=1375 errors=0 reconnects=0 churn_cycles=170 wanted=15
+2026-10-10T14:50:24.313Z static: msgs=477327 dups=207 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:50:24.314Z churn: msgs=322290 dups=76 acks=1383 errors=0 reconnects=0 churn_cycles=171 wanted=15
+2026-10-10T14:51:24.315Z static: msgs=480621 dups=210 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:51:24.316Z churn: msgs=324016 dups=76 acks=1383 errors=0 reconnects=0 churn_cycles=171 wanted=15
+2026-10-10T14:52:24.316Z static: msgs=484966 dups=210 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:52:24.317Z churn: msgs=325790 dups=77 acks=1391 errors=0 reconnects=0 churn_cycles=172 wanted=15
+2026-10-10T14:53:24.316Z static: msgs=488246 dups=211 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:53:24.317Z churn: msgs=327327 dups=77 acks=1399 errors=0 reconnects=0 churn_cycles=173 wanted=15
+2026-10-10T14:54:24.317Z static: msgs=490913 dups=213 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:54:24.331Z churn: msgs=329131 dups=77 acks=1399 errors=0 reconnects=0 churn_cycles=173 wanted=15
+2026-10-10T14:55:24.317Z static: msgs=492789 dups=214 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:55:24.319Z churn: msgs=331115 dups=77 acks=1407 errors=0 reconnects=0 churn_cycles=174 wanted=15
+2026-10-10T14:56:24.320Z static: msgs=495578 dups=214 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:56:24.322Z churn: msgs=332832 dups=78 acks=1415 errors=0 reconnects=0 churn_cycles=175 wanted=15
+2026-10-10T14:57:24.320Z static: msgs=498050 dups=214 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:57:24.322Z churn: msgs=334175 dups=78 acks=1415 errors=0 reconnects=0 churn_cycles=175 wanted=15
+2026-10-10T14:58:24.322Z static: msgs=499606 dups=214 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:58:24.323Z churn: msgs=335551 dups=78 acks=1423 errors=0 reconnects=0 churn_cycles=176 wanted=15
+2026-10-10T14:59:24.323Z static: msgs=501219 dups=214 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T14:59:24.325Z churn: msgs=337086 dups=78 acks=1431 errors=0 reconnects=0 churn_cycles=177 wanted=15
+2026-10-10T15:00:24.324Z static: msgs=503718 dups=214 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:00:24.326Z churn: msgs=338778 dups=78 acks=1431 errors=0 reconnects=0 churn_cycles=177 wanted=15
+2026-10-10T15:01:24.324Z static: msgs=505808 dups=215 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:01:24.326Z churn: msgs=340396 dups=78 acks=1439 errors=0 reconnects=0 churn_cycles=178 wanted=15
+2026-10-10T15:02:24.325Z static: msgs=508159 dups=215 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:02:24.325Z churn: msgs=342151 dups=79 acks=1447 errors=0 reconnects=0 churn_cycles=179 wanted=15
+2026-10-10T15:03:24.325Z static: msgs=510153 dups=216 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:03:24.328Z churn: msgs=343926 dups=79 acks=1447 errors=0 reconnects=0 churn_cycles=179 wanted=15
+2026-10-10T15:04:24.327Z static: msgs=512396 dups=217 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:04:24.329Z churn: msgs=346082 dups=79 acks=1455 errors=0 reconnects=0 churn_cycles=180 wanted=15
+2026-10-10T15:05:24.332Z static: msgs=515304 dups=218 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:05:24.332Z churn: msgs=348175 dups=80 acks=1463 errors=0 reconnects=0 churn_cycles=181 wanted=15
+2026-10-10T15:06:24.334Z static: msgs=517798 dups=220 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:06:24.335Z churn: msgs=350118 dups=80 acks=1463 errors=0 reconnects=0 churn_cycles=181 wanted=15
+2026-10-10T15:07:24.335Z static: msgs=519950 dups=221 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:07:24.335Z churn: msgs=352074 dups=80 acks=1471 errors=0 reconnects=0 churn_cycles=182 wanted=15
+2026-10-10T15:08:24.337Z static: msgs=523297 dups=223 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:08:24.338Z churn: msgs=354109 dups=81 acks=1479 errors=0 reconnects=0 churn_cycles=183 wanted=15
+2026-10-10T15:09:24.338Z static: msgs=525986 dups=225 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:09:24.339Z churn: msgs=355979 dups=81 acks=1479 errors=0 reconnects=0 churn_cycles=183 wanted=15
+2026-10-10T15:10:24.339Z static: msgs=528338 dups=226 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:10:24.341Z churn: msgs=357769 dups=82 acks=1487 errors=0 reconnects=0 churn_cycles=184 wanted=15
+2026-10-10T15:11:24.339Z static: msgs=530479 dups=226 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:11:24.341Z churn: msgs=359618 dups=82 acks=1495 errors=0 reconnects=0 churn_cycles=185 wanted=15
+2026-10-10T15:12:24.341Z static: msgs=532614 dups=226 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:12:24.343Z churn: msgs=361571 dups=82 acks=1495 errors=0 reconnects=0 churn_cycles=185 wanted=15
+2026-10-10T15:13:24.341Z static: msgs=534686 dups=226 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:13:24.344Z churn: msgs=363476 dups=82 acks=1503 errors=0 reconnects=0 churn_cycles=186 wanted=15
+2026-10-10T15:14:24.343Z static: msgs=537019 dups=229 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:14:24.345Z churn: msgs=365312 dups=83 acks=1511 errors=0 reconnects=0 churn_cycles=187 wanted=15
+2026-10-10T15:15:24.343Z static: msgs=538946 dups=229 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:15:24.351Z churn: msgs=366993 dups=83 acks=1511 errors=0 reconnects=0 churn_cycles=187 wanted=15
+2026-10-10T15:16:24.343Z static: msgs=540956 dups=230 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:16:24.344Z churn: msgs=368923 dups=83 acks=1519 errors=0 reconnects=0 churn_cycles=188 wanted=15
+2026-10-10T15:17:24.344Z static: msgs=543285 dups=232 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:17:24.345Z churn: msgs=370748 dups=83 acks=1527 errors=0 reconnects=0 churn_cycles=189 wanted=15
+2026-10-10T15:18:24.346Z static: msgs=545007 dups=232 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:18:24.348Z churn: msgs=372156 dups=83 acks=1527 errors=0 reconnects=0 churn_cycles=189 wanted=15
+2026-10-10T15:19:24.347Z static: msgs=547189 dups=232 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:19:24.348Z churn: msgs=373659 dups=83 acks=1535 errors=0 reconnects=0 churn_cycles=190 wanted=15
+2026-10-10T15:20:24.348Z static: msgs=548883 dups=234 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:20:24.349Z churn: msgs=375061 dups=84 acks=1543 errors=0 reconnects=0 churn_cycles=191 wanted=15
+2026-10-10T15:21:24.349Z static: msgs=550498 dups=235 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:21:24.350Z churn: msgs=376458 dups=84 acks=1543 errors=0 reconnects=0 churn_cycles=191 wanted=15
+2026-10-10T15:22:24.351Z static: msgs=552223 dups=236 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:22:24.352Z churn: msgs=378214 dups=85 acks=1551 errors=0 reconnects=0 churn_cycles=192 wanted=15
+2026-10-10T15:23:24.354Z static: msgs=554402 dups=241 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:23:24.356Z churn: msgs=379763 dups=85 acks=1559 errors=0 reconnects=0 churn_cycles=193 wanted=15
+2026-10-10T15:24:24.355Z static: msgs=556428 dups=244 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:24:24.356Z churn: msgs=381227 dups=85 acks=1559 errors=0 reconnects=0 churn_cycles=193 wanted=15
+2026-10-10T15:25:24.356Z static: msgs=558011 dups=245 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:25:24.357Z churn: msgs=382672 dups=85 acks=1567 errors=0 reconnects=0 churn_cycles=194 wanted=15
+2026-10-10T15:26:24.358Z static: msgs=559656 dups=247 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:26:24.360Z churn: msgs=384162 dups=86 acks=1575 errors=0 reconnects=0 churn_cycles=195 wanted=15
+2026-10-10T15:27:24.359Z static: msgs=561187 dups=249 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:27:24.360Z churn: msgs=385347 dups=86 acks=1575 errors=0 reconnects=0 churn_cycles=195 wanted=15
+2026-10-10T15:28:24.361Z static: msgs=562365 dups=253 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:28:24.362Z churn: msgs=386419 dups=86 acks=1583 errors=0 reconnects=0 churn_cycles=196 wanted=15
+2026-10-10T15:29:24.362Z static: msgs=563548 dups=253 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:29:24.364Z churn: msgs=387683 dups=86 acks=1591 errors=0 reconnects=0 churn_cycles=197 wanted=15
+2026-10-10T15:30:24.365Z static: msgs=565126 dups=258 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:30:24.371Z churn: msgs=388756 dups=86 acks=1591 errors=0 reconnects=0 churn_cycles=197 wanted=15
+2026-10-10T15:31:24.367Z static: msgs=567086 dups=261 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:31:24.368Z churn: msgs=390248 dups=86 acks=1599 errors=0 reconnects=0 churn_cycles=198 wanted=15
+2026-10-10T15:32:24.374Z static: msgs=570701 dups=261 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:32:24.375Z churn: msgs=392031 dups=87 acks=1607 errors=0 reconnects=0 churn_cycles=199 wanted=15
+2026-10-10T15:33:24.370Z static: msgs=572819 dups=263 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:33:24.372Z churn: msgs=393514 dups=87 acks=1607 errors=0 reconnects=0 churn_cycles=199 wanted=15
+2026-10-10T15:34:24.372Z static: msgs=574515 dups=264 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:34:24.374Z churn: msgs=394720 dups=88 acks=1615 errors=0 reconnects=0 churn_cycles=200 wanted=15
+2026-10-10T15:35:24.373Z static: msgs=575935 dups=265 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:35:24.374Z churn: msgs=396004 dups=89 acks=1623 errors=0 reconnects=0 churn_cycles=201 wanted=15
+2026-10-10T15:36:24.374Z static: msgs=577253 dups=266 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:36:24.375Z churn: msgs=397187 dups=89 acks=1623 errors=0 reconnects=0 churn_cycles=201 wanted=15
+2026-10-10T15:37:24.373Z static: msgs=578889 dups=268 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:37:24.375Z churn: msgs=398554 dups=89 acks=1631 errors=0 reconnects=0 churn_cycles=202 wanted=15
+2026-10-10T15:38:24.375Z static: msgs=580431 dups=271 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:38:24.376Z churn: msgs=399884 dups=90 acks=1639 errors=0 reconnects=0 churn_cycles=203 wanted=15
+2026-10-10T15:39:24.376Z static: msgs=581768 dups=271 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:39:24.377Z churn: msgs=401067 dups=90 acks=1639 errors=0 reconnects=0 churn_cycles=203 wanted=15
+2026-10-10T15:40:24.377Z static: msgs=583175 dups=273 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:40:24.378Z churn: msgs=402234 dups=90 acks=1647 errors=0 reconnects=0 churn_cycles=204 wanted=15
+2026-10-10T15:41:24.377Z static: msgs=584671 dups=275 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:41:24.378Z churn: msgs=403498 dups=90 acks=1655 errors=0 reconnects=0 churn_cycles=205 wanted=15
+2026-10-10T15:42:24.378Z static: msgs=585895 dups=279 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:42:24.379Z churn: msgs=404614 dups=90 acks=1655 errors=0 reconnects=0 churn_cycles=205 wanted=15
+2026-10-10T15:43:24.378Z static: msgs=587188 dups=280 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:43:24.379Z churn: msgs=405857 dups=90 acks=1663 errors=0 reconnects=0 churn_cycles=206 wanted=15
+2026-10-10T15:44:24.379Z static: msgs=588845 dups=282 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:44:24.383Z churn: msgs=407356 dups=91 acks=1671 errors=0 reconnects=0 churn_cycles=207 wanted=15
+2026-10-10T15:45:24.380Z static: msgs=590448 dups=287 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:45:24.383Z churn: msgs=408627 dups=91 acks=1671 errors=0 reconnects=0 churn_cycles=207 wanted=15
+2026-10-10T15:46:24.381Z static: msgs=593454 dups=288 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:46:24.383Z churn: msgs=410273 dups=92 acks=1679 errors=0 reconnects=0 churn_cycles=208 wanted=15
+2026-10-10T15:47:24.382Z static: msgs=595152 dups=288 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:47:24.384Z churn: msgs=411853 dups=92 acks=1687 errors=0 reconnects=0 churn_cycles=209 wanted=15
+2026-10-10T15:48:24.382Z static: msgs=596684 dups=290 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:48:24.383Z churn: msgs=413158 dups=92 acks=1687 errors=0 reconnects=0 churn_cycles=209 wanted=15
+2026-10-10T15:49:24.383Z static: msgs=598300 dups=291 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:49:24.385Z churn: msgs=414657 dups=92 acks=1695 errors=0 reconnects=0 churn_cycles=210 wanted=15
+2026-10-10T15:50:24.384Z static: msgs=600083 dups=292 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:50:24.386Z churn: msgs=416266 dups=93 acks=1703 errors=0 reconnects=0 churn_cycles=211 wanted=15
+2026-10-10T15:51:24.385Z static: msgs=601571 dups=292 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:51:24.393Z churn: msgs=417598 dups=93 acks=1703 errors=0 reconnects=0 churn_cycles=211 wanted=15
+2026-10-10T15:52:24.388Z static: msgs=603030 dups=293 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:52:24.390Z churn: msgs=418957 dups=94 acks=1711 errors=0 reconnects=0 churn_cycles=212 wanted=15
+2026-10-10T15:53:24.388Z static: msgs=605000 dups=294 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:53:24.389Z churn: msgs=420381 dups=94 acks=1719 errors=0 reconnects=0 churn_cycles=213 wanted=15
+2026-10-10T15:54:24.389Z static: msgs=606782 dups=295 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:54:24.391Z churn: msgs=421866 dups=94 acks=1719 errors=0 reconnects=0 churn_cycles=213 wanted=15
+2026-10-10T15:55:24.389Z static: msgs=609097 dups=295 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:55:24.390Z churn: msgs=423362 dups=94 acks=1727 errors=0 reconnects=0 churn_cycles=214 wanted=15
+2026-10-10T15:56:24.391Z static: msgs=614160 dups=297 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:56:24.392Z churn: msgs=424948 dups=95 acks=1735 errors=0 reconnects=0 churn_cycles=215 wanted=15
+2026-10-10T15:57:24.392Z static: msgs=615638 dups=297 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:57:24.393Z churn: msgs=426270 dups=95 acks=1735 errors=0 reconnects=0 churn_cycles=215 wanted=15
+2026-10-10T15:58:24.393Z static: msgs=616824 dups=297 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:58:24.395Z churn: msgs=427380 dups=96 acks=1743 errors=0 reconnects=0 churn_cycles=216 wanted=15
+2026-10-10T15:59:24.395Z static: msgs=618831 dups=298 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T15:59:24.398Z churn: msgs=428462 dups=96 acks=1751 errors=0 reconnects=0 churn_cycles=217 wanted=15
+2026-10-10T16:00:24.400Z static: msgs=621768 dups=299 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:00:24.402Z churn: msgs=430179 dups=96 acks=1751 errors=0 reconnects=0 churn_cycles=217 wanted=15
+2026-10-10T16:01:24.400Z static: msgs=624129 dups=301 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:01:24.401Z churn: msgs=431938 dups=96 acks=1759 errors=0 reconnects=0 churn_cycles=218 wanted=15
+2026-10-10T16:02:24.401Z static: msgs=626134 dups=302 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:02:24.403Z churn: msgs=433760 dups=97 acks=1767 errors=0 reconnects=0 churn_cycles=219 wanted=15
+2026-10-10T16:03:24.403Z static: msgs=627944 dups=302 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:03:24.404Z churn: msgs=435395 dups=97 acks=1767 errors=0 reconnects=0 churn_cycles=219 wanted=15
+2026-10-10T16:04:24.404Z static: msgs=630268 dups=303 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:04:24.411Z churn: msgs=437098 dups=97 acks=1775 errors=0 reconnects=0 churn_cycles=220 wanted=15
+2026-10-10T16:05:24.405Z static: msgs=633921 dups=305 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:05:24.406Z churn: msgs=438837 dups=98 acks=1783 errors=0 reconnects=0 churn_cycles=221 wanted=15
+2026-10-10T16:06:24.406Z static: msgs=636644 dups=306 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:06:24.406Z churn: msgs=440428 dups=98 acks=1783 errors=0 reconnects=0 churn_cycles=221 wanted=15
+2026-10-10T16:07:24.407Z static: msgs=638525 dups=307 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:07:24.414Z churn: msgs=441934 dups=98 acks=1791 errors=0 reconnects=0 churn_cycles=222 wanted=15
+2026-10-10T16:08:24.409Z static: msgs=642040 dups=307 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:08:24.412Z churn: msgs=443590 dups=99 acks=1799 errors=0 reconnects=0 churn_cycles=223 wanted=15
+2026-10-10T16:09:24.410Z static: msgs=643948 dups=307 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:09:24.413Z churn: msgs=445071 dups=99 acks=1799 errors=0 reconnects=0 churn_cycles=223 wanted=15
+2026-10-10T16:10:24.427Z static: msgs=645439 dups=307 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:10:24.433Z churn: msgs=446498 dups=99 acks=1807 errors=0 reconnects=0 churn_cycles=224 wanted=15
+2026-10-10T16:11:24.429Z static: msgs=647038 dups=310 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:11:24.430Z churn: msgs=447973 dups=99 acks=1815 errors=0 reconnects=0 churn_cycles=225 wanted=15
+2026-10-10T16:12:24.430Z static: msgs=648866 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:12:24.432Z churn: msgs=449434 dups=99 acks=1815 errors=0 reconnects=0 churn_cycles=225 wanted=15
+2026-10-10T16:13:24.432Z static: msgs=650565 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:13:24.434Z churn: msgs=450949 dups=99 acks=1823 errors=0 reconnects=0 churn_cycles=226 wanted=15
+2026-10-10T16:14:24.433Z static: msgs=652289 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:14:24.434Z churn: msgs=452374 dups=100 acks=1831 errors=0 reconnects=0 churn_cycles=227 wanted=15
+2026-10-10T16:15:24.434Z static: msgs=653752 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:15:24.435Z churn: msgs=453621 dups=100 acks=1831 errors=0 reconnects=0 churn_cycles=227 wanted=15
+2026-10-10T16:16:24.434Z static: msgs=655108 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:16:24.438Z churn: msgs=454971 dups=100 acks=1839 errors=0 reconnects=0 churn_cycles=228 wanted=15
+2026-10-10T16:17:24.435Z static: msgs=656913 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:17:24.436Z churn: msgs=456575 dups=100 acks=1847 errors=0 reconnects=0 churn_cycles=229 wanted=15
+2026-10-10T16:18:24.436Z static: msgs=658598 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:18:24.437Z churn: msgs=457984 dups=100 acks=1847 errors=0 reconnects=0 churn_cycles=229 wanted=15
+2026-10-10T16:19:24.437Z static: msgs=659971 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:19:24.443Z churn: msgs=459479 dups=100 acks=1855 errors=0 reconnects=0 churn_cycles=230 wanted=15
+2026-10-10T16:20:24.437Z static: msgs=661556 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:20:24.452Z churn: msgs=460951 dups=101 acks=1863 errors=0 reconnects=0 churn_cycles=231 wanted=15
+2026-10-10T16:21:24.440Z static: msgs=662918 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:21:24.447Z churn: msgs=462330 dups=101 acks=1863 errors=0 reconnects=0 churn_cycles=231 wanted=15
+2026-10-10T16:22:24.440Z static: msgs=665861 dups=311 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:22:24.441Z churn: msgs=463915 dups=102 acks=1871 errors=0 reconnects=0 churn_cycles=232 wanted=15
+2026-10-10T16:23:24.442Z static: msgs=667533 dups=313 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:23:24.443Z churn: msgs=465484 dups=102 acks=1879 errors=0 reconnects=0 churn_cycles=233 wanted=15
+2026-10-10T16:24:24.443Z static: msgs=668792 dups=314 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:24:24.444Z churn: msgs=466856 dups=102 acks=1879 errors=0 reconnects=0 churn_cycles=233 wanted=15
+2026-10-10T16:25:24.444Z static: msgs=670366 dups=315 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:25:24.445Z churn: msgs=468220 dups=102 acks=1887 errors=0 reconnects=0 churn_cycles=234 wanted=15
+2026-10-10T16:26:24.445Z static: msgs=671952 dups=317 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:26:24.445Z churn: msgs=469740 dups=103 acks=1895 errors=0 reconnects=0 churn_cycles=235 wanted=15
+2026-10-10T16:27:24.446Z static: msgs=673209 dups=319 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:27:24.447Z churn: msgs=470951 dups=103 acks=1895 errors=0 reconnects=0 churn_cycles=235 wanted=15
+2026-10-10T16:28:24.447Z static: msgs=674543 dups=320 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:28:24.448Z churn: msgs=472157 dups=104 acks=1903 errors=0 reconnects=0 churn_cycles=236 wanted=15
+2026-10-10T16:29:24.447Z static: msgs=677768 dups=321 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:29:24.449Z churn: msgs=473881 dups=104 acks=1911 errors=0 reconnects=0 churn_cycles=237 wanted=15
+2026-10-10T16:30:24.450Z static: msgs=679672 dups=321 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:30:24.452Z churn: msgs=475396 dups=104 acks=1911 errors=0 reconnects=0 churn_cycles=237 wanted=15
+2026-10-10T16:31:24.450Z static: msgs=681630 dups=323 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:31:24.452Z churn: msgs=476715 dups=104 acks=1919 errors=0 reconnects=0 churn_cycles=238 wanted=15
+2026-10-10T16:32:24.450Z static: msgs=683120 dups=324 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:32:24.452Z churn: msgs=478074 dups=105 acks=1927 errors=0 reconnects=0 churn_cycles=239 wanted=15
+2026-10-10T16:33:24.452Z static: msgs=684747 dups=325 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:33:24.453Z churn: msgs=479340 dups=105 acks=1927 errors=0 reconnects=0 churn_cycles=239 wanted=15
+2026-10-10T16:34:24.452Z static: msgs=686310 dups=326 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:34:24.454Z churn: msgs=480629 dups=106 acks=1935 errors=0 reconnects=0 churn_cycles=240 wanted=15
+2026-10-10T16:35:24.456Z static: msgs=687980 dups=327 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:35:24.457Z churn: msgs=481848 dups=107 acks=1943 errors=0 reconnects=0 churn_cycles=241 wanted=15
+2026-10-10T16:36:24.458Z static: msgs=689428 dups=327 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:36:24.461Z churn: msgs=482866 dups=107 acks=1943 errors=0 reconnects=0 churn_cycles=241 wanted=15
+2026-10-10T16:37:24.462Z static: msgs=691057 dups=327 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:37:24.463Z churn: msgs=484166 dups=107 acks=1951 errors=0 reconnects=0 churn_cycles=242 wanted=15
+2026-10-10T16:38:24.462Z static: msgs=692377 dups=328 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:38:24.463Z churn: msgs=485235 dups=108 acks=1959 errors=0 reconnects=0 churn_cycles=243 wanted=15
+2026-10-10T16:39:24.466Z static: msgs=693637 dups=328 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:39:24.468Z churn: msgs=486146 dups=108 acks=1959 errors=0 reconnects=0 churn_cycles=243 wanted=15
+2026-10-10T16:40:24.467Z static: msgs=694982 dups=328 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:40:24.468Z churn: msgs=487242 dups=109 acks=1967 errors=0 reconnects=0 churn_cycles=244 wanted=15
+2026-10-10T16:41:24.472Z static: msgs=696642 dups=329 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:41:24.474Z churn: msgs=488576 dups=109 acks=1975 errors=0 reconnects=0 churn_cycles=245 wanted=15
+2026-10-10T16:42:24.473Z static: msgs=697945 dups=330 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:42:24.475Z churn: msgs=489774 dups=109 acks=1975 errors=0 reconnects=0 churn_cycles=245 wanted=15
+2026-10-10T16:43:24.475Z static: msgs=699814 dups=330 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:43:24.476Z churn: msgs=491130 dups=109 acks=1983 errors=0 reconnects=0 churn_cycles=246 wanted=15
+2026-10-10T16:44:24.476Z static: msgs=700928 dups=330 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:44:24.477Z churn: msgs=492203 dups=110 acks=1991 errors=0 reconnects=0 churn_cycles=247 wanted=15
+2026-10-10T16:45:24.477Z static: msgs=702241 dups=331 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:45:24.479Z churn: msgs=493233 dups=110 acks=1991 errors=0 reconnects=0 churn_cycles=247 wanted=15
+2026-10-10T16:46:24.480Z static: msgs=703466 dups=332 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:46:24.483Z churn: msgs=494370 dups=111 acks=1999 errors=0 reconnects=0 churn_cycles=248 wanted=15
+2026-10-10T16:47:24.480Z static: msgs=704761 dups=333 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:47:24.482Z churn: msgs=495498 dups=111 acks=2007 errors=0 reconnects=0 churn_cycles=249 wanted=15
+2026-10-10T16:48:24.483Z static: msgs=705849 dups=333 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:48:24.484Z churn: msgs=496513 dups=111 acks=2007 errors=0 reconnects=0 churn_cycles=249 wanted=15
+2026-10-10T16:49:24.484Z static: msgs=707159 dups=333 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:49:24.486Z churn: msgs=497623 dups=111 acks=2015 errors=0 reconnects=0 churn_cycles=250 wanted=15
+2026-10-10T16:50:24.485Z static: msgs=708250 dups=334 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:50:24.487Z churn: msgs=498629 dups=112 acks=2023 errors=0 reconnects=0 churn_cycles=251 wanted=15
+2026-10-10T16:51:24.487Z static: msgs=709423 dups=334 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:51:24.488Z churn: msgs=499570 dups=112 acks=2023 errors=0 reconnects=0 churn_cycles=251 wanted=15
+2026-10-10T16:52:24.489Z static: msgs=710552 dups=338 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:52:24.491Z churn: msgs=500577 dups=113 acks=2031 errors=0 reconnects=0 churn_cycles=252 wanted=15
+2026-10-10T16:53:24.491Z static: msgs=711700 dups=340 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:53:24.493Z churn: msgs=501603 dups=113 acks=2039 errors=0 reconnects=0 churn_cycles=253 wanted=15
+2026-10-10T16:54:24.493Z static: msgs=712873 dups=344 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:54:24.494Z churn: msgs=502612 dups=113 acks=2039 errors=0 reconnects=0 churn_cycles=253 wanted=15
+2026-10-10T16:55:24.495Z static: msgs=714165 dups=346 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:55:24.496Z churn: msgs=503727 dups=113 acks=2047 errors=0 reconnects=0 churn_cycles=254 wanted=15
+2026-10-10T16:56:24.494Z static: msgs=716008 dups=347 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:56:24.495Z churn: msgs=505059 dups=114 acks=2055 errors=0 reconnects=0 churn_cycles=255 wanted=15
+2026-10-10T16:57:24.496Z static: msgs=717991 dups=347 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:57:24.498Z churn: msgs=506412 dups=114 acks=2055 errors=0 reconnects=0 churn_cycles=255 wanted=15
+2026-10-10T16:58:24.497Z static: msgs=719901 dups=348 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:58:24.498Z churn: msgs=507704 dups=115 acks=2063 errors=0 reconnects=0 churn_cycles=256 wanted=15
+2026-10-10T16:59:24.504Z static: msgs=721149 dups=349 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T16:59:24.506Z churn: msgs=508878 dups=115 acks=2071 errors=0 reconnects=0 churn_cycles=257 wanted=15
+2026-10-10T17:00:24.506Z static: msgs=722771 dups=350 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T17:00:24.507Z churn: msgs=510007 dups=115 acks=2071 errors=0 reconnects=0 churn_cycles=257 wanted=15
+2026-10-10T17:01:24.508Z static: msgs=724392 dups=350 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T17:01:24.509Z churn: msgs=511298 dups=115 acks=2079 errors=0 reconnects=0 churn_cycles=258 wanted=15
+2026-10-10T17:02:24.509Z static: msgs=726383 dups=350 acks=8 errors=0 reconnects=0 wanted=8
+2026-10-10T17:02:24.511Z churn: msgs=512955 dups=116 acks=2087 errors=0 reconnects=0 churn_cycles=259 wanted=15
+2026-10-10T17:03:23.994Z FINAL static: msgs=729251 dups=351 acks=8 errors=0 reconnects=0
+2026-10-10T17:03:23.995Z FINAL churn: msgs=514514 dups=116 acks=2087 errors=0 reconnects=0

@@ -1,0 +1,401 @@
+{
+  "generated_at_utc": "2026-10-24T20:11:27.760746+00:00",
+  "source_csv": "prod.csv",
+  "source_csv_sha256": "ffa999702735c59fb47ad131a471d06bcb78679f614b6a44154ce94b79cf26fa",
+  "sampler_state": {
+    "pid": 40311,
+    "started_at_utc": "2026-10-23T19:54:13.276697+00:00",
+    "duration_s": 86400,
+    "interval_s": 60,
+    "status": "finished",
+    "exit_code": 0,
+    "finished_at_utc": "2026-10-24T19:54:19.148092+00:00"
+  },
+  "sample_count": 1441,
+  "valid_samples": 1441,
+  "missing_cells_by_column": {
+    "ts_utc": 0,
+    "rss_bytes": 0,
+    "vsz_bytes": 0,
+    "cpu_seconds": 0,
+    "open_fds": 0,
+    "uptime_s": 0,
+    "ws_clients": 0,
+    "ws_subscriptions_active": 0,
+    "subs_total": 0,
+    "subs_tick": 0,
+    "subs_kline": 0,
+    "subs_quote": 0,
+    "ticks_processed": 0,
+    "ticks_dropped": 0,
+    "klines_processed": 0,
+    "klines_dropped": 0,
+    "quotes_processed": 0,
+    "quotes_dropped": 0,
+    "reconnect_okx": 0,
+    "reconnect_okx_kline": 0,
+    "reconnect_okx_quote": 0,
+    "reconnect_binance": 0,
+    "reconnect_binance_quote": 0,
+    "connected_sum": 0,
+    "ws_sent_tick": 0,
+    "ws_sent_kline": 0,
+    "ws_sent_quote": 0,
+    "metrics_lines": 0,
+    "tokio_alive_tasks": 0,
+    "jemalloc_allocated": 0,
+    "jemalloc_active": 0,
+    "jemalloc_resident": 0,
+    "jemalloc_retained": 0,
+    "jemalloc_mapped": 0,
+    "ws_kicked_write_timeout": 0,
+    "ws_kicked_lagged": 0,
+    "process_start_time_seconds": 0
+  },
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T19:54:19Z",
+  "span_s": 86406.0,
+  "gap_histogram_s": {
+    "60.0": 1338,
+    "61.0": 54,
+    "59.0": 48
+  },
+  "max_gap_s": 61.0,
+  "gaps_above_61s": 0,
+  "process_start_values": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "rss_whole_window": {
+    "n": 1441,
+    "first_utc": "2026-10-23T19:54:13Z",
+    "last_utc": "2026-10-24T19:54:19Z",
+    "span_s": 86406.0,
+    "first_mib": 57.25390625,
+    "last_mib": 78.27734375,
+    "min_mib": 55.30859375,
+    "max_mib": 79.12890625,
+    "delta_mib": 21.0234375,
+    "slope_mib_h": 0.9407443091313022,
+    "intercept_mib": 52.9248133755647
+  },
+  "rss_post_warmup": {
+    "n": 1381,
+    "first_utc": "2026-10-23T20:54:13Z",
+    "last_utc": "2026-10-24T19:54:19Z",
+    "span_s": 82806.0,
+    "first_mib": 56.03515625,
+    "last_mib": 78.27734375,
+    "min_mib": 55.30859375,
+    "max_mib": 79.12890625,
+    "delta_mib": 22.2421875,
+    "slope_mib_h": 0.9707640182550663,
+    "intercept_mib": 53.410320663821715
+  },
+  "allocated_post_warmup": {
+    "n": 1381,
+    "first_utc": "2026-10-23T20:54:13Z",
+    "last_utc": "2026-10-24T19:54:19Z",
+    "span_s": 82806.0,
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.228996276855469,
+    "min_mib": 4.188728332519531,
+    "max_mib": 4.360542297363281,
+    "delta_mib": -0.10334014892578125,
+    "slope_mib_h": -0.0006545657940974059,
+    "intercept_mib": 4.245322905776226
+  },
+  "largest_rss_positive_steps": [
+    {
+      "at_utc": "2026-10-24T16:14:18Z",
+      "delta_mib": 8.125
+    },
+    {
+      "at_utc": "2026-10-24T09:11:16Z",
+      "delta_mib": 4.375
+    },
+    {
+      "at_utc": "2026-10-24T00:04:14Z",
+      "delta_mib": 3.77734375
+    },
+    {
+      "at_utc": "2026-10-24T19:08:18Z",
+      "delta_mib": 1.4921875
+    },
+    {
+      "at_utc": "2026-10-24T16:15:18Z",
+      "delta_mib": 1.25
+    },
+    {
+      "at_utc": "2026-10-24T19:09:18Z",
+      "delta_mib": 1.0
+    },
+    {
+      "at_utc": "2026-10-24T16:16:18Z",
+      "delta_mib": 0.9453125
+    },
+    {
+      "at_utc": "2026-10-24T15:16:17Z",
+      "delta_mib": 0.78515625
+    },
+    {
+      "at_utc": "2026-10-23T21:40:14Z",
+      "delta_mib": 0.625
+    },
+    {
+      "at_utc": "2026-10-23T21:41:14Z",
+      "delta_mib": 0.5
+    }
+  ],
+  "counters": {
+    "ticks_processed": {
+      "first": 1165.0,
+      "last": 4666327.0,
+      "delta": 4665162.0,
+      "resets": 0
+    },
+    "ticks_dropped": {
+      "first": 0.0,
+      "last": 2460.0,
+      "delta": 2460.0,
+      "resets": 0
+    },
+    "klines_processed": {
+      "first": 246.0,
+      "last": 523329.0,
+      "delta": 523083.0,
+      "resets": 0
+    },
+    "klines_dropped": {
+      "first": 0.0,
+      "last": 0.0,
+      "delta": 0.0,
+      "resets": 0
+    },
+    "quotes_processed": {
+      "first": 2816.0,
+      "last": 4911772.0,
+      "delta": 4908956.0,
+      "resets": 0
+    },
+    "quotes_dropped": {
+      "first": 0.0,
+      "last": 0.0,
+      "delta": 0.0,
+      "resets": 0
+    },
+    "ws_kicked_write_timeout": {
+      "first": 0.0,
+      "last": 1.0,
+      "delta": 1.0,
+      "resets": 0
+    },
+    "ws_kicked_lagged": {
+      "first": 0.0,
+      "last": 0.0,
+      "delta": 0.0,
+      "resets": 0
+    },
+    "reconnect_okx": {
+      "first": 0.0,
+      "last": 5.0,
+      "delta": 5.0,
+      "resets": 0
+    },
+    "reconnect_okx_kline": {
+      "first": 0.0,
+      "last": 2.0,
+      "delta": 2.0,
+      "resets": 0
+    },
+    "reconnect_okx_quote": {
+      "first": 0.0,
+      "last": 3.0,
+      "delta": 3.0,
+      "resets": 0
+    },
+    "reconnect_binance": {
+      "first": 0.0,
+      "last": 1.0,
+      "delta": 1.0,
+      "resets": 0
+    },
+    "reconnect_binance_quote": {
+      "first": 0.0,
+      "last": 1.0,
+      "delta": 1.0,
+      "resets": 0
+    },
+    "ws_sent_tick": {
+      "first": 1100.0,
+      "last": 4682011.0,
+      "delta": 4680911.0,
+      "resets": 0
+    },
+    "ws_sent_kline": {
+      "first": 0.0,
+      "last": 2509.0,
+      "delta": 2509.0,
+      "resets": 0
+    },
+    "ws_sent_quote": {
+      "first": 599.0,
+      "last": 1085656.0,
+      "delta": 1085057.0,
+      "resets": 0
+    }
+  },
+  "tick_drop_changes": [
+    {
+      "at_utc": "2026-10-24T14:27:17Z",
+      "before": 0.0,
+      "after": 1327.0,
+      "delta": 1327.0
+    },
+    {
+      "at_utc": "2026-10-24T15:17:17Z",
+      "before": 1327.0,
+      "after": 2460.0,
+      "delta": 1133.0
+    }
+  ],
+  "write_timeout_changes": [
+    {
+      "at_utc": "2026-10-24T16:34:18Z",
+      "before": 0.0,
+      "after": 1.0,
+      "delta": 1.0
+    }
+  ],
+  "ws_histogram": {
+    "2": 1419,
+    "4": 4,
+    "1": 17,
+    "3": 1
+  },
+  "ws_one_client_samples": [
+    "2026-10-23T21:06:14Z",
+    "2026-10-23T21:25:14Z",
+    "2026-10-23T22:56:14Z",
+    "2026-10-24T00:27:14Z",
+    "2026-10-24T01:58:15Z",
+    "2026-10-24T03:29:15Z",
+    "2026-10-24T04:16:15Z",
+    "2026-10-24T05:47:15Z",
+    "2026-10-24T07:18:16Z",
+    "2026-10-24T08:49:16Z",
+    "2026-10-24T10:20:16Z",
+    "2026-10-24T11:51:17Z",
+    "2026-10-24T13:22:17Z",
+    "2026-10-24T14:53:17Z",
+    "2026-10-24T16:24:18Z",
+    "2026-10-24T17:11:18Z",
+    "2026-10-24T19:29:18Z"
+  ],
+  "subscription_count_histogram": {
+    "12": 1439,
+    "13": 2
+  },
+  "subscription_changes": [
+    {
+      "at_utc": "2026-10-23T20:40:14Z",
+      "before": 12.0,
+      "after": 13.0,
+      "delta": 1.0
+    },
+    {
+      "at_utc": "2026-10-23T20:41:13Z",
+      "before": 13.0,
+      "after": 12.0,
+      "delta": -1.0
+    },
+    {
+      "at_utc": "2026-10-23T20:42:13Z",
+      "before": 12.0,
+      "after": 13.0,
+      "delta": 1.0
+    },
+    {
+      "at_utc": "2026-10-23T20:43:13Z",
+      "before": 13.0,
+      "after": 12.0,
+      "delta": -1.0
+    }
+  ],
+  "connector_count_histogram": {
+    "5": 1439,
+    "4": 2
+  },
+  "cpu_delta_s": 1535.5300000000002,
+  "single_core_equivalent_cpu_pct": 1.7771103858528345,
+  "post_window_state": {
+    "collected_at_utc": "2026-10-24T20:10:02.447616+00:00",
+    "observation_data_ended_utc": "2026-10-24T19:54:19Z",
+    "this_is_post_window_readonly_state": true,
+    "production": {
+      "id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+      "image": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+      "started_at": "2026-10-23T19:53:21.256218768Z",
+      "health": "healthy",
+      "running": true,
+      "restart_count": 0,
+      "memory_limit": 536870912,
+      "memory_swap_limit": 1073741824,
+      "nano_cpus": 2000000000,
+      "restart_policy": {
+        "MaximumRetryCount": 0,
+        "Name": "unless-stopped"
+      }
+    },
+    "rollback_backup": {
+      "id": "9dbf93da4951fdf621a8d7642208c608d20b4f8710b124f454c9f40bfb653083",
+      "image": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+      "name": "/md-server-1.1.0-quote-bnb-bak",
+      "state": "created",
+      "running": false,
+      "restart_policy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      }
+    },
+    "latest_image_id": "sha256:06907bdf7fd89c349780013fe8840f379097548f5f42e5a27b507fe2bab03089",
+    "old_image_id": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+    "oms_readonly": {
+      "running": true,
+      "health": "healthy",
+      "started_at": "2026-10-24T17:50:43.614534949Z",
+      "restart_count": 0
+    }
+  },
+  "post_window_metrics": {
+    "process_start_time_seconds": 1792785202.0,
+    "md_ws_active_clients": 2.0,
+    "md_ticks_dropped": 2460.0,
+    "md_ws_kicked_write_timeout_total": 1.0,
+    "md_ws_kicked_lagged_total": 0.0
+  },
+  "post_window_subscriptions": {
+    "count": 12,
+    "missing_vs_swap": [],
+    "extra_vs_swap": []
+  },
+  "criteria": {
+    "complete_24h_samples": true,
+    "rss_slope_lte_1_mib_h": true,
+    "allocated_plateau": true,
+    "allocated_plateau_evidence": "full post-warmup range, delta and regression above; no new numerical threshold invented",
+    "ticks_dropped_no_growth": false,
+    "write_timeout_zero_or_verified_explanation": false,
+    "final_health_and_subscriptions": true,
+    "consumer_behavior_fully_explained_for_24h": null,
+    "overall_pass": false
+  },
+  "limitations": [
+    "17 isolated one-minute WS=1 samples recovered in the next sample; client identities and sub-minute durations unavailable",
+    "early reviewer consumer checks cover their test window, not all 24h internal botd counters",
+    "single write timeout may relate to other tests per business user; exact test and client evidence unconfirmed",
+    "minute throughput and post-event stats cannot prove the unique root cause of ingress drops",
+    "post-window live health is separately timestamped and is not an extension of the 24h CSV"
+  ],
+  "analysis_execution": "exit 0 means analysis completed; consult criteria.overall_pass for acceptance"
+}

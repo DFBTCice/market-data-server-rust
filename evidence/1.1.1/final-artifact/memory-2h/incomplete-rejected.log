@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/lihao/Desktop/web3/rust/rest重构/evidence/1.1.1/tools/analyze_final_memory.py", line 41, in <module>
+    new, old = analyze("new"), analyze("old")
+  File "/Users/lihao/Desktop/web3/rust/rest重构/evidence/1.1.1/tools/analyze_final_memory.py", line 22, in analyze
+    assert len(warm) >= 2, "尚未完成 1h 预热"
+AssertionError: 尚未完成 1h 预热

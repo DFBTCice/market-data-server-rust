@@ -1,0 +1,22 @@
+{
+  "at_utc": "2026-10-24T15:22:38.467458+00:00",
+  "criterion": "SWAP_PLAN §6 md_ticks_dropped does not grow",
+  "criterion_satisfied": false,
+  "ticks_dropped_baseline": 0,
+  "ticks_dropped_observed": 2460,
+  "proven_mechanism": "1000/1000 ingress queue full, try_send drops before processor",
+  "root_cause_limitations": "minute throughput and post-event stats do not resolve millisecond arrival distribution or scheduling; no same-window old control",
+  "old_baseline_same_drop_path": true,
+  "rollback_now": false,
+  "rollback_reason": "other rollback triggers not observed; old baseline retains same queue/drop mechanism, no demonstrated rollback benefit",
+  "continue_original_sampling": true,
+  "may_declare_full_24h_pass": false,
+  "requires_reviewer_decision_for_any_exception": true,
+  "log_query_since_utc": "2026-10-24T13:20:00+00:00",
+  "no_market_data_source_or_running_config_mutations": true,
+  "final_window_ended_utc": "2026-10-24T19:54:19Z",
+  "final_ticks_dropped": 2460,
+  "final_write_timeouts": 1,
+  "full_24h_collection_complete": true,
+  "full_24h_overall_pass": false
+}

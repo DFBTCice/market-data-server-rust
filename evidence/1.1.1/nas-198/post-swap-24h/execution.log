@@ -1,0 +1,16 @@
+{
+  "status": "immediate_checks_passed",
+  "started_at_utc": "2026-10-23T19:53:15.074444+00:00",
+  "checked_at_utc": "2026-10-23T19:53:28.837763+00:00",
+  "old_container_id": "1de7da0c7d2cf9b4c4b6a2154d9464c0895e6480066c97fbb64ffc7e1126f83f",
+  "new_container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "new_image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "binary_sha256": "3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d",
+  "backup_name": "md-server-1.1.0-quote-bnb-bak",
+  "subscriptions_before": 12,
+  "subscriptions_after": 12,
+  "ws_active_clients": 2,
+  "docker_health": "healthy",
+  "ten_minute_acceptance": "pending",
+  "observation_24h": "pending"
+}

@@ -1,0 +1,17 @@
+{
+  "completed_at_utc": "2026-10-24T17:28:57.574410+00:00",
+  "name": "md-server-1.1.0-quote-bnb-bak",
+  "new_backup_container_id": "9dbf93da4951fdf621a8d7642208c608d20b4f8710b124f454c9f40bfb653083",
+  "original_deleted_container_id": "1de7da0c7d2cf9b4c4b6a2154d9464c0895e6480066c97fbb64ffc7e1126f83f",
+  "image_id": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+  "state": "created",
+  "running": false,
+  "restart_policy": {
+    "MaximumRetryCount": 0,
+    "Name": "no"
+  },
+  "runtime_parameters_match": true,
+  "production_container_unchanged": true,
+  "production_health": "healthy",
+  "note": "Stopped rollback container recreated from retained exact image and verified copied runtime parameters; original container identity/logs cannot be recovered; no container start/stop issued"
+}

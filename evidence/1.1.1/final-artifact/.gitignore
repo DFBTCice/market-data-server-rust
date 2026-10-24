@@ -1,0 +1,7 @@
+# 推送原文保留本机供主审复跑；摘要、对比日志与哈希清单入库。
+canary/old-gateway/
+canary/new-gateway/
+canary/old-legacy/
+canary/new-legacy/
+__pycache__/
+anomalies/mac-power-window.log

@@ -1,0 +1,19 @@
+{
+  "pass": true,
+  "checked_at_utc": "2026-10-23T20:03:28.971810+00:00",
+  "seconds_since_immediate_checks": 600.0676968097687,
+  "active_check_count": 38,
+  "minute_samples": 10,
+  "ws_active_clients": 2.0,
+  "subscriptions_before": 12,
+  "subscriptions_after": 12,
+  "missing": 0,
+  "extra": 0,
+  "ticks_dropped": 0.0,
+  "write_timeouts": 0.0,
+  "rss_mib": 55.86328125,
+  "cpu_seconds": 11.12,
+  "uptime_s": 606.0,
+  "compatibility_pass": true,
+  "observation_24h": "running; not yet complete"
+}

@@ -1,0 +1,6 @@
+2026-10-24T10:27:15.616925465Z [2m2026-10-24T10:27:15.616626Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-24T10:27:15.617007585Z [2m2026-10-24T10:27:15.616682Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx] disconnected, reconnecting in 10s
+2026-10-24T10:34:18.939757428Z [2m2026-10-24T10:34:18.939472Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-24T10:34:18.939846208Z [2m2026-10-24T10:34:18.939534Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx-quote] disconnected, reconnecting in 10s
+2026-10-24T10:46:37.829128728Z [2m2026-10-24T10:46:37.828859Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-24T10:46:37.829234623Z [2m2026-10-24T10:46:37.828919Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [okx] disconnected, reconnecting in 10s

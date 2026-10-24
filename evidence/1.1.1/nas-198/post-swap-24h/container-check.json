@@ -1,0 +1,17 @@
+{
+  "checked_at_utc": "2026-10-23T19:55:01.573809+00:00",
+  "new_container": {
+    "id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+    "image": "md-server:1.1.1",
+    "restart_count": 0,
+    "started_at": "2026-10-23T19:53:21.256218768Z",
+    "healthy": "healthy"
+  },
+  "backup": {
+    "id": "1de7da0c7d2cf9b4c4b6a2154d9464c0895e6480066c97fbb64ffc7e1126f83f",
+    "running": false,
+    "restart_policy": "no",
+    "restart_count": 1
+  },
+  "oms_health": "healthy"
+}

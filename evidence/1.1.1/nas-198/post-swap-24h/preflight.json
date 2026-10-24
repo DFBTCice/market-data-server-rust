@@ -1,0 +1,38 @@
+{
+  "checked_at_utc": "2026-10-23T19:49:02.338308+00:00",
+  "container_id": "1de7da0c7d2cf9b4c4b6a2154d9464c0895e6480066c97fbb64ffc7e1126f83f",
+  "current_image": "md-server:1.1.0-quote-bnb",
+  "image_id": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+  "restart_count": 1,
+  "started_at": "2026-10-21T13:37:15.272916238Z",
+  "new_image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "latest_id": "sha256:06907bdf7fd89c349780013fe8840f379097548f5f42e5a27b507fe2bab03089",
+  "backup_name_free": true,
+  "saved_backups": [
+    "md-server-1.1.0-bak",
+    "md-server-1.0.0-bak"
+  ],
+  "resource_limits": {
+    "Memory": 536870912,
+    "MemorySwap": 1073741824,
+    "NanoCpus": 2000000000,
+    "RestartPolicy": {
+      "MaximumRetryCount": 0,
+      "Name": "unless-stopped"
+    },
+    "PortBindings": {
+      "50051/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "50051"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "8081"
+        }
+      ]
+    }
+  }
+}
