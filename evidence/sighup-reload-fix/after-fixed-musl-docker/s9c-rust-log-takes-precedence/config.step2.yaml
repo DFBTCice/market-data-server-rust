@@ -1,0 +1,36 @@
+log_level: "warn"
+grpc_server:
+  enabled: true
+  listen_address: "127.0.0.1:63701"
+admin_server:
+  listen_address: "127.0.0.1:63702"
+api_gateway:
+  enabled: true
+  listen_address: "127.0.0.1:63703"
+processor:
+  tick_channel_buffer: 1000
+  kline_channel_buffer: 1000
+  broadcast_capacity: 4096
+connectors:
+  binance:
+    enabled: true
+    stream_base_url: "ws://host.docker.internal:63693/ws"
+    stream_base_url_public: "ws://host.docker.internal:63695/ws"
+    rest_base_url: "http://127.0.0.1:1"
+    subscribe_ticks: ["BTCUSDT"]
+    subscribe_klines: { "1m": ["BTCUSDT"] }
+    reconnect_delay: "1s"
+    ping_interval: "30s"
+    quotes_enabled: true
+    subscribe_quotes: ["BNBUSDT"]
+  okx:
+    enabled: true
+    stream_base_url_public: "ws://host.docker.internal:63697/ws"
+    stream_base_url_business: "ws://host.docker.internal:63699/ws"
+    rest_base_url: "http://127.0.0.1:1"
+    subscribe_ticks: ["BTC-USDT-SWAP"]
+    subscribe_klines: { "1m": ["BTC-USDT-SWAP"] }
+    reconnect_delay: "1s"
+    ping_interval: "25s"
+    quotes_enabled: true
+    subscribe_quotes: ["BNB-USDT-SWAP"]

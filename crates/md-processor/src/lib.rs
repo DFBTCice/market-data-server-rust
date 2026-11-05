@@ -165,8 +165,14 @@ pub struct ProcessorMetrics {
     // ---- 网关 / WebSocket 指标 ----
     /// 当前活跃 WebSocket 连接数（gateway + legacy 合计）
     pub ws_active_clients: AtomicU64,
+    /// 当前所有 WS 连接（gateway + legacy）合计持有的 broadcast 接收端数量（1.1.1 新增）。
+    /// 正常情况下应等于"各连接已订阅 stream 数之和"；退订/断线后必须回落——
+    /// 若只增不减即说明存在接收端泄漏。
+    pub ws_subscriptions_active: AtomicU64,
     /// 因 broadcast lagged 累计达到阈值被踢出的客户端总数
     pub ws_kicked_lagged_total: AtomicU64,
+    /// 1.1.1：因写超时（`ws_write_wait`）被踢出的 Gateway 客户端累计数
+    pub ws_kicked_write_timeout_total: AtomicU64,
     /// 网关推送总条数（每条 WS 消息 +1，按 topic_kind 区分）
     pub ws_messages_sent_tick: AtomicU64,
     pub ws_messages_sent_kline: AtomicU64,
@@ -192,7 +198,9 @@ impl Default for ProcessorMetrics {
             ingestion_latency: DashMap::new(),
             ingestion_e2e_latency: DashMap::new(),
             ws_active_clients: AtomicU64::new(0),
+            ws_subscriptions_active: AtomicU64::new(0),
             ws_kicked_lagged_total: AtomicU64::new(0),
+            ws_kicked_write_timeout_total: AtomicU64::new(0),
             ws_messages_sent_tick: AtomicU64::new(0),
             ws_messages_sent_kline: AtomicU64::new(0),
             ws_messages_sent_quote: AtomicU64::new(0),
@@ -282,7 +290,11 @@ impl ProcessorMetrics {
             ingestion_series,
             ingestion_e2e_series,
             ws_active_clients: self.ws_active_clients.load(Ordering::Relaxed),
+            ws_subscriptions_active: self.ws_subscriptions_active.load(Ordering::Relaxed),
             ws_kicked_lagged_total: self.ws_kicked_lagged_total.load(Ordering::Relaxed),
+            ws_kicked_write_timeout_total: self
+                .ws_kicked_write_timeout_total
+                .load(Ordering::Relaxed),
             ws_messages_sent_tick: self.ws_messages_sent_tick.load(Ordering::Relaxed),
             ws_messages_sent_kline: self.ws_messages_sent_kline.load(Ordering::Relaxed),
             ws_messages_sent_quote: self.ws_messages_sent_quote.load(Ordering::Relaxed),
@@ -383,6 +395,12 @@ impl ProcessorMetrics {
         self.ws_kicked_lagged_total.fetch_add(1, Ordering::Relaxed);
     }
 
+    /// 因写超时（客户端停读、发送缓冲塞满）主动踢出客户端
+    pub fn ws_client_kicked_write_timeout(&self) {
+        self.ws_kicked_write_timeout_total
+            .fetch_add(1, Ordering::Relaxed);
+    }
+
     /// 网关成功推送一条消息
     pub fn ws_message_sent(&self, kind: &str) {
         match kind {
@@ -438,11 +456,59 @@ pub struct MetricsSnapshot {
     /// 端到端延迟序列（recv−T，仅 tick）
     pub ingestion_e2e_series: Vec<SeriesSnapshot>,
     pub ws_active_clients: u64,
+    pub ws_subscriptions_active: u64,
     pub ws_kicked_lagged_total: u64,
+    pub ws_kicked_write_timeout_total: u64,
     pub ws_messages_sent_tick: u64,
     pub ws_messages_sent_kline: u64,
     pub ws_messages_sent_quote: u64,
     pub gateway_series: Vec<GatewaySeriesSnapshot>,
+}
+
+/// 单个 WS 连接对 `md_ws_subscriptions_active` 的份额守卫（RAII）。
+///
+/// 连接在每次订阅集合变化后调用 [`WsSubscriptionGuard::sync`] 报告自己当前持有的接收端数；
+/// 无论连接以何种方式结束（正常关闭 / 被踢 / 任务被取消 / panic），`Drop` 都会把份额扣回，
+/// 因此全局 gauge 不会因异常路径而漂移。
+pub struct WsSubscriptionGuard {
+    metrics: Arc<ProcessorMetrics>,
+    held: u64,
+}
+
+impl WsSubscriptionGuard {
+    pub fn new(metrics: Arc<ProcessorMetrics>) -> Self {
+        Self { metrics, held: 0 }
+    }
+
+    /// 报告本连接当前持有的接收端总数（绝对值），内部按差值更新全局 gauge
+    pub fn sync(&mut self, now: usize) {
+        let now = now as u64;
+        if now > self.held {
+            self.metrics
+                .ws_subscriptions_active
+                .fetch_add(now - self.held, Ordering::Relaxed);
+        } else if now < self.held {
+            let delta = self.held - now;
+            // 饱和减法，防止异常调用造成下溢
+            let _ = self.metrics.ws_subscriptions_active.fetch_update(
+                Ordering::Relaxed,
+                Ordering::Relaxed,
+                |v| Some(v.saturating_sub(delta)),
+            );
+        }
+        self.held = now;
+    }
+
+    /// 本连接当前持有的接收端数
+    pub fn held(&self) -> u64 {
+        self.held
+    }
+}
+
+impl Drop for WsSubscriptionGuard {
+    fn drop(&mut self) {
+        self.sync(0);
+    }
 }
 
 // ---- Subscriber ----
@@ -1420,5 +1486,45 @@ mod tests {
         // 不污染 tick/kline 计数
         assert_eq!(snap.ws_messages_sent_tick, 0);
         assert_eq!(snap.broadcast_lagged_tick, 0);
+    }
+}
+
+#[cfg(test)]
+mod ws_subscription_guard_tests {
+    use super::*;
+
+    fn gauge(m: &ProcessorMetrics) -> u64 {
+        m.ws_subscriptions_active.load(Ordering::Relaxed)
+    }
+
+    #[test]
+    fn guard_tracks_delta_and_releases_on_drop() {
+        let m = Arc::new(ProcessorMetrics::default());
+        let mut a = WsSubscriptionGuard::new(m.clone());
+        let mut b = WsSubscriptionGuard::new(m.clone());
+        a.sync(3);
+        b.sync(2);
+        assert_eq!(gauge(&m), 5);
+        a.sync(1); // 退订 2 个
+        assert_eq!(gauge(&m), 3);
+        a.sync(1); // 重复 sync 幂等
+        assert_eq!(gauge(&m), 3);
+        drop(b); // 连接断开：份额扣回
+        assert_eq!(gauge(&m), 1);
+        drop(a);
+        assert_eq!(gauge(&m), 0);
+    }
+
+    #[test]
+    fn guard_releases_even_if_task_panics() {
+        let m = Arc::new(ProcessorMetrics::default());
+        let m2 = m.clone();
+        let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
+            let mut g = WsSubscriptionGuard::new(m2);
+            g.sync(4);
+            panic!("boom");
+        }));
+        assert!(r.is_err());
+        assert_eq!(gauge(&m), 0, "panic 展开时 Drop 仍应归还份额");
     }
 }

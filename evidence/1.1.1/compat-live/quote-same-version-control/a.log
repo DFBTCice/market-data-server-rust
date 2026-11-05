@@ -1,0 +1,1 @@
+{"mode":"gateway","url":"ws://192.168.1.198:28108/ws/v1/data","seconds":120,"reason":"timer","started_at_ms":1791617862406,"other_messages":0,"topics":{"quote.binance.BNBUSDT":{"count":886,"max_gap_ms":889,"min_gap_ms":0,"gaps_over_2000ms":0,"gaps_over_10000ms":0},"quote.okx.BNB-USDT-SWAP":{"count":627,"max_gap_ms":863,"min_gap_ms":0,"gaps_over_2000ms":0,"gaps_over_10000ms":0}}}

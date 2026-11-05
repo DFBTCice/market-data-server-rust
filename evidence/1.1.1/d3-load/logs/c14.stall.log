@@ -1,0 +1,33 @@
+2026-10-10T10:12:55.887Z handshake ok (HTTP/1.1 101 Switchi), subscribing 39 streams, then STOP READING for 1800s
+2026-10-10T10:12:57.395Z socket paused; bytes read so far=34159
+2026-10-10T10:13:55.879Z holding... bytes read=34159 open
+2026-10-10T10:14:55.883Z holding... bytes read=34159 open
+2026-10-10T10:15:55.887Z holding... bytes read=34159 open
+2026-10-10T10:16:55.889Z holding... bytes read=34159 open
+2026-10-10T10:17:55.892Z holding... bytes read=34159 open
+2026-10-10T10:18:55.897Z holding... bytes read=34159 open
+2026-10-10T10:19:55.900Z holding... bytes read=34159 open
+2026-10-10T10:20:55.902Z holding... bytes read=34159 open
+2026-10-10T10:21:55.905Z holding... bytes read=34159 open
+2026-10-10T10:22:55.907Z holding... bytes read=34159 open
+2026-10-10T10:23:55.911Z holding... bytes read=34159 open
+2026-10-10T10:24:55.914Z holding... bytes read=34159 open
+2026-10-10T10:25:55.916Z holding... bytes read=34159 open
+2026-10-10T10:26:55.919Z holding... bytes read=34159 open
+2026-10-10T10:27:55.922Z holding... bytes read=34159 open
+2026-10-10T10:28:55.923Z holding... bytes read=34159 open
+2026-10-10T10:29:55.926Z holding... bytes read=34159 open
+2026-10-10T10:30:55.927Z holding... bytes read=34159 open
+2026-10-10T10:31:55.930Z holding... bytes read=34159 open
+2026-10-10T10:32:55.931Z holding... bytes read=34159 open
+2026-10-10T10:33:55.932Z holding... bytes read=34159 open
+2026-10-10T10:34:55.934Z holding... bytes read=34159 open
+2026-10-10T10:35:55.936Z holding... bytes read=34159 open
+2026-10-10T10:36:55.938Z holding... bytes read=34159 open
+2026-10-10T10:37:55.941Z holding... bytes read=34159 open
+2026-10-10T10:38:55.944Z holding... bytes read=34159 open
+2026-10-10T10:39:55.947Z holding... bytes read=34159 open
+2026-10-10T10:40:55.949Z holding... bytes read=34159 open
+2026-10-10T10:41:55.951Z holding... bytes read=34159 open
+2026-10-10T10:42:55.892Z hold finished -> closing connection
+2026-10-10T10:42:55.895Z socket closed

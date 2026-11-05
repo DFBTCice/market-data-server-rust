@@ -1,0 +1,25 @@
+2026-10-10T08:56:46.762998782Z 2026-10-10T08:56:46.762772Z  WARN md_connector::base: [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T08:56:46.763065416Z 2026-10-10T08:56:46.762864Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T08:58:26.356131557Z 2026-10-10T08:58:26.355885Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T08:58:26.356235845Z 2026-10-10T08:58:26.355924Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T09:03:21.937140424Z 2026-10-10T09:03:21.936860Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T09:03:21.937250727Z 2026-10-10T09:03:21.936926Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T09:37:51.528737400Z 2026-10-10T09:37:51.528504Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T09:37:51.528832350Z 2026-10-10T09:37:51.528547Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T09:54:57.012904027Z 2026-10-10T09:54:57.012729Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T09:54:57.012972702Z 2026-10-10T09:54:57.012762Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:18:17.736532428Z 2026-10-10T12:18:17.736239Z  WARN md_connector::base: [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:18:17.771972082Z 2026-10-10T12:18:17.736297Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T12:24:21.229781156Z 2026-10-10T12:24:21.229412Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:24:21.229871809Z 2026-10-10T12:24:21.229509Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:34:13.709330363Z 2026-10-10T12:34:13.708858Z  WARN md_connector::base: [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:34:13.709393885Z 2026-10-10T12:34:13.708907Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T12:43:08.850321698Z 2026-10-10T12:43:08.850145Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:43:08.850427706Z 2026-10-10T12:43:08.850170Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:06:33.247214681Z 2026-10-10T14:06:33.246494Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T14:06:33.258797215Z 2026-10-10T14:06:33.246551Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:27:57.062912592Z 2026-10-10T14:27:57.057976Z  WARN md_connector::base: [okx] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1)
+2026-10-10T14:29:45.866669998Z 2026-10-10T14:29:45.865049Z  WARN md_connector::base: [okx] tick channel full, dropped 126 tick(s) since last log (ingress queue depth 1000/1000, total dropped 127)
+2026-10-10T14:29:45.891321261Z 2026-10-10T14:29:45.890854Z  WARN md_connector::base: [binance] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 938)
+2026-10-10T14:40:03.698968499Z 2026-10-10T14:40:03.658915Z  WARN md_connector::base: [okx] tick channel full, dropped 811 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1004)
+2026-10-10T14:40:03.722360310Z 2026-10-10T14:40:03.719881Z  WARN md_connector::base: [binance] tick channel full, dropped 66 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1607)

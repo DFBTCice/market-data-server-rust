@@ -1,0 +1,426 @@
+{
+  "old": [
+    {
+      "file": "old-gateway/kline.5m.okx.BTC-USDT-SWAP.raw.jsonl",
+      "messages": 274,
+      "coarse_key_duplicates": 1,
+      "changed_fields": {
+        "connector_receive_ts,is_closed": 1
+      },
+      "samples": {
+        "connector_receive_ts,is_closed": {
+          "before": {
+            "type": "kline",
+            "topic": "kline.5m.okx.BTC-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "BTC-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "81603.5",
+              "high": "81647.0",
+              "low": "81560.0",
+              "close": "81609.7",
+              "volume": "10145.50",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "101.4550",
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900264
+            }
+          },
+          "after": {
+            "type": "kline",
+            "topic": "kline.5m.okx.BTC-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "BTC-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "81603.5",
+              "high": "81647.0",
+              "low": "81560.0",
+              "close": "81609.7",
+              "volume": "10145.50",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "101.4550",
+              "is_closed": true,
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900777
+            }
+          }
+        }
+      }
+    },
+    {
+      "file": "old-gateway/kline.5m.okx.ETH-USDT-SWAP.raw.jsonl",
+      "messages": 244,
+      "coarse_key_duplicates": 1,
+      "changed_fields": {
+        "connector_receive_ts,is_closed": 1
+      },
+      "samples": {
+        "connector_receive_ts,is_closed": {
+          "before": {
+            "type": "kline",
+            "topic": "kline.5m.okx.ETH-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "ETH-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "2406.85",
+              "high": "2408.72",
+              "low": "2405.02",
+              "close": "2407.09",
+              "volume": "24407.54",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "2440.754",
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900148
+            }
+          },
+          "after": {
+            "type": "kline",
+            "topic": "kline.5m.okx.ETH-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "ETH-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "2406.85",
+              "high": "2408.72",
+              "low": "2405.02",
+              "close": "2407.09",
+              "volume": "24407.54",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "2440.754",
+              "is_closed": true,
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900376
+            }
+          }
+        }
+      }
+    },
+    {
+      "file": "old-gateway/quote.binance.BNBUSDT.raw.jsonl",
+      "messages": 1700,
+      "coarse_key_duplicates": 4,
+      "changed_fields": {
+        "ask_qty": 2,
+        "ask_qty,connector_receive_ts": 1,
+        "ask_qty,bid_qty,connector_receive_ts": 1
+      },
+      "samples": {
+        "ask_qty": {
+          "before": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.460",
+              "bid_qty": "13.59",
+              "ask_price": "746.470",
+              "ask_qty": "17.68",
+              "last_price": "",
+              "timestamp": 1792776895732,
+              "connector_receive_ts": 1792776895790
+            }
+          },
+          "after": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.460",
+              "bid_qty": "13.59",
+              "ask_price": "746.470",
+              "ask_qty": "17.75",
+              "last_price": "",
+              "timestamp": 1792776895732,
+              "connector_receive_ts": 1792776895790
+            }
+          }
+        },
+        "ask_qty,connector_receive_ts": {
+          "before": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.300",
+              "bid_qty": "1.10",
+              "ask_price": "746.310",
+              "ask_qty": "4.47",
+              "last_price": "",
+              "timestamp": 1792777020075,
+              "connector_receive_ts": 1792777020185
+            }
+          },
+          "after": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.300",
+              "bid_qty": "1.10",
+              "ask_price": "746.310",
+              "ask_qty": "45.86",
+              "last_price": "",
+              "timestamp": 1792777020075,
+              "connector_receive_ts": 1792777020319
+            }
+          }
+        },
+        "ask_qty,bid_qty,connector_receive_ts": {
+          "before": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.220",
+              "bid_qty": "0.89",
+              "ask_price": "746.230",
+              "ask_qty": "36.43",
+              "last_price": "",
+              "timestamp": 1792777110651,
+              "connector_receive_ts": 1792777110774
+            }
+          },
+          "after": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.220",
+              "bid_qty": "0.85",
+              "ask_price": "746.230",
+              "ask_qty": "35.09",
+              "last_price": "",
+              "timestamp": 1792777110651,
+              "connector_receive_ts": 1792777110846
+            }
+          }
+        }
+      }
+    }
+  ],
+  "new": [
+    {
+      "file": "new-gateway/kline.5m.okx.BTC-USDT-SWAP.raw.jsonl",
+      "messages": 274,
+      "coarse_key_duplicates": 1,
+      "changed_fields": {
+        "connector_receive_ts,is_closed": 1
+      },
+      "samples": {
+        "connector_receive_ts,is_closed": {
+          "before": {
+            "type": "kline",
+            "topic": "kline.5m.okx.BTC-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "BTC-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "81603.5",
+              "high": "81647.0",
+              "low": "81560.0",
+              "close": "81609.7",
+              "volume": "10145.50",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "101.4550",
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900279
+            }
+          },
+          "after": {
+            "type": "kline",
+            "topic": "kline.5m.okx.BTC-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "BTC-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "81603.5",
+              "high": "81647.0",
+              "low": "81560.0",
+              "close": "81609.7",
+              "volume": "10145.50",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "101.4550",
+              "is_closed": true,
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900787
+            }
+          }
+        }
+      }
+    },
+    {
+      "file": "new-gateway/kline.5m.okx.ETH-USDT-SWAP.raw.jsonl",
+      "messages": 244,
+      "coarse_key_duplicates": 1,
+      "changed_fields": {
+        "connector_receive_ts,is_closed": 1
+      },
+      "samples": {
+        "connector_receive_ts,is_closed": {
+          "before": {
+            "type": "kline",
+            "topic": "kline.5m.okx.ETH-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "ETH-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "2406.85",
+              "high": "2408.72",
+              "low": "2405.02",
+              "close": "2407.09",
+              "volume": "24407.54",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "2440.754",
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900160
+            }
+          },
+          "after": {
+            "type": "kline",
+            "topic": "kline.5m.okx.ETH-USDT-SWAP",
+            "data": {
+              "exchange": "okx",
+              "symbol": "ETH-USDT-SWAP",
+              "interval": "5m",
+              "open_time": 1792776600000,
+              "open": "2406.85",
+              "high": "2408.72",
+              "low": "2405.02",
+              "close": "2407.09",
+              "volume": "24407.54",
+              "close_time": 1792776899999,
+              "quote_asset_volume": "2440.754",
+              "is_closed": true,
+              "exchange_event_ts": 1792776600000,
+              "connector_receive_ts": 1792776900374
+            }
+          }
+        }
+      }
+    },
+    {
+      "file": "new-gateway/quote.binance.BNBUSDT.raw.jsonl",
+      "messages": 1706,
+      "coarse_key_duplicates": 4,
+      "changed_fields": {
+        "ask_qty": 2,
+        "ask_qty,connector_receive_ts": 1,
+        "bid_qty,connector_receive_ts": 1
+      },
+      "samples": {
+        "ask_qty": {
+          "before": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.110",
+              "bid_qty": "0.85",
+              "ask_price": "746.120",
+              "ask_qty": "66.82",
+              "last_price": "",
+              "timestamp": 1792776945451,
+              "connector_receive_ts": 1792776945510
+            }
+          },
+          "after": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.110",
+              "bid_qty": "0.85",
+              "ask_price": "746.120",
+              "ask_qty": "67.92",
+              "last_price": "",
+              "timestamp": 1792776945451,
+              "connector_receive_ts": 1792776945510
+            }
+          }
+        },
+        "ask_qty,connector_receive_ts": {
+          "before": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.130",
+              "bid_qty": "22.86",
+              "ask_price": "746.140",
+              "ask_qty": "26.49",
+              "last_price": "",
+              "timestamp": 1792777040796,
+              "connector_receive_ts": 1792777040855
+            }
+          },
+          "after": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.130",
+              "bid_qty": "22.86",
+              "ask_price": "746.140",
+              "ask_qty": "26.52",
+              "last_price": "",
+              "timestamp": 1792777040796,
+              "connector_receive_ts": 1792777040877
+            }
+          }
+        },
+        "bid_qty,connector_receive_ts": {
+          "before": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.270",
+              "bid_qty": "1.12",
+              "ask_price": "746.280",
+              "ask_qty": "104.80",
+              "last_price": "",
+              "timestamp": 1792777108544,
+              "connector_receive_ts": 1792777108603
+            }
+          },
+          "after": {
+            "type": "quote",
+            "topic": "quote.binance.BNBUSDT",
+            "data": {
+              "exchange": "binance",
+              "symbol": "BNBUSDT",
+              "bid_price": "746.270",
+              "bid_qty": "0.51",
+              "ask_price": "746.280",
+              "ask_qty": "104.80",
+              "last_price": "",
+              "timestamp": 1792777108544,
+              "connector_receive_ts": 1792777108737
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1761 @@
+
+
+=============== M1 把文件配置整体记为已应用（即原 `current_cfg = new_cfg;`） ===============
+
+running 42 tests
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... FAILED
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... FAILED
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... FAILED
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... FAILED
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... FAILED
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... FAILED
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... FAILED
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload' (4065555) panicked at crates/md-server/src/reload.rs:1424:9:
+assertion `left == right` failed
+  left: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
+ right: ["BTC-USDT-SWAP"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::missing_connector_keeps_group_pending_until_reverted stdout ----
+
+thread 'reload::tests::missing_connector_keeps_group_pending_until_reverted' (4065562) panicked at crates/md-server/src/reload.rs:1393:13:
+assertion failed: state.applied().connectors.okx.subscribe_klines.is_empty()
+
+---- reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert' (4065554) panicked at crates/md-server/src/reload.rs:1187:17:
+assertion `left == right` failed: connectors.okx.stream_base_url_public: 已应用配置不得记录未生效的 URL
+  left: "wss://changed.test/ws"
+ right: "wss://okx.test/public"
+
+---- reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload' (4065559) panicked at crates/md-server/src/reload.rs:1703:9:
+assertion `left == right` failed: 失败时保持旧级别
+  left: "debug"
+ right: "info"
+
+---- reload::tests::pending_restart_items_accumulate_and_stay_visible stdout ----
+
+thread 'reload::tests::pending_restart_items_accumulate_and_stay_visible' (4065565) panicked at crates/md-server/src/reload.rs:1236:13:
+assertion `left == right` failed
+  left: 0
+ right: 3
+
+---- reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert' (4065567) panicked at crates/md-server/src/reload.rs:1674:13:
+assertion `left == right` failed: 未生效的值不得写进已应用配置
+  left: "debug"
+ right: "info"
+
+---- reload::tests::subscription_hot_update_coexists_with_pending_url_change stdout ----
+
+thread 'reload::tests::subscription_hot_update_coexists_with_pending_url_change' (4065571) panicked at crates/md-server/src/reload.rs:1339:9:
+assertion failed: report.has_pending("connectors.okx.stream_base_url_business")
+
+
+failures:
+    reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert
+    reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload
+    reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload
+    reload::tests::missing_connector_keeps_group_pending_until_reverted
+    reload::tests::pending_restart_items_accumulate_and_stay_visible
+    reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert
+    reload::tests::subscription_hot_update_coexists_with_pending_url_change
+
+test result: FAILED. 35 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.61s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M2 漏掉 OKX Business 地址检测 ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... FAILED
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... FAILED
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... FAILED
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... FAILED
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... FAILED
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... FAILED
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::every_restart_only_field_is_detected_individually stdout ----
+
+thread 'reload::tests::every_restart_only_field_is_detected_individually' (4065977) panicked at crates/md-server/src/reload.rs:1110:9:
+assertion `left == right` failed: 测试表必须覆盖 restart_only_fields 的每个字段
+  left: 35
+ right: 34
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert' (4065978) panicked at crates/md-server/src/reload.rs:1177:17:
+connectors.okx.stream_base_url_business: 第 1 次 SIGHUP 不得报告成功
+
+---- reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update stdout ----
+
+thread 'reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update' (4065984) panicked at crates/md-server/src/reload.rs:1720:9:
+assertion `left == right` failed: 只剩地址变更待重启: []
+  left: 0
+ right: 1
+
+---- reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success stdout ----
+
+thread 'reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success' (4065988) panicked at crates/md-server/src/reload.rs:1156:9:
+不得报告全部应用成功
+
+---- reload::tests::subscription_hot_update_coexists_with_pending_url_change stdout ----
+
+thread 'reload::tests::subscription_hot_update_coexists_with_pending_url_change' (4065995) panicked at crates/md-server/src/reload.rs:1323:9:
+assertion failed: !report.fully_applied()
+
+---- reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address stdout ----
+
+thread 'reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address' (4065999) panicked at crates/md-server/src/reload.rs:1205:13:
+assertion `left == right` failed
+  left: 0
+ right: 1
+
+
+failures:
+    reload::tests::every_restart_only_field_is_detected_individually
+    reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert
+    reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update
+    reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success
+    reload::tests::subscription_hot_update_coexists_with_pending_url_change
+    reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address
+
+test result: FAILED. 36 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: unused variable: `okx_stream_url_business`
+   --> crates/md-server/src/reload.rs:281:51
+    |
+281 |                         stream_base_url_business: okx_stream_url_business,
+    |                                                   ^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_okx_stream_url_business`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning (run `cargo fix --bin "md-server" -p md-server --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.51s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M3 连接器缺失时仍视为已应用（静默吞掉） ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... FAILED
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... FAILED
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::missing_connector_keeps_group_pending_until_reverted stdout ----
+
+thread 'reload::tests::missing_connector_keeps_group_pending_until_reverted' (4066526) panicked at crates/md-server/src/reload.rs:1379:13:
+第 1 次不得报成功
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::quote_group_noop_when_lists_equal_or_connector_missing stdout ----
+
+thread 'reload::tests::quote_group_noop_when_lists_equal_or_connector_missing' (4066530) panicked at crates/md-server/src/reload.rs:1571:9:
+assertion `left == right` failed
+  left: Applied
+ right: NotRunning
+
+
+failures:
+    reload::tests::missing_connector_keeps_group_pending_until_reverted
+    reload::tests::quote_group_noop_when_lists_equal_or_connector_missing
+
+test result: FAILED. 40 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.80s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M4 订阅下发失败仍视为已应用（报成功、不重试） ===============
+
+running 42 tests
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... FAILED
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload' (4066950) panicked at crates/md-server/src/reload.rs:1415:9:
+下发失败不得报告成功
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: variant `Failed` is never constructed
+   --> crates/md-server/src/reload.rs:620:5
+    |
+612 | pub(crate) enum GroupOutcome {
+    |                 ------------ variant in this enum
+...
+620 |     Failed(String),
+    |     ^^^^^^
+    |
+    = note: `GroupOutcome` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.36s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M5 订阅热更成功后不推进已应用列表（每次 SIGHUP 重复下发） ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... FAILED
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... FAILED
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... FAILED
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload' (4067410) panicked at crates/md-server/src/reload.rs:1437:9:
+assertion `left == right` failed
+  left: ["BTC-USDT-SWAP"]
+ right: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists stdout ----
+
+thread 'reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists' (4067425) panicked at crates/md-server/src/reload.rs:1285:9:
+assertion `left == right` failed
+  left: ["BTC-USDT-SWAP"]
+ right: ["ETH-USDT-SWAP"]
+
+---- reload::tests::subscription_hot_update_coexists_with_pending_url_change stdout ----
+
+thread 'reload::tests::subscription_hot_update_coexists_with_pending_url_change' (4067426) panicked at crates/md-server/src/reload.rs:1338:9:
+assertion `left == right` failed: 订阅不得重复下发
+  left: 2
+ right: 1
+
+
+failures:
+    reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload
+    reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists
+    reload::tests::subscription_hot_update_coexists_with_pending_url_change
+
+test result: FAILED. 39 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: method `adopt` is never used
+   --> crates/md-server/src/reload.rs:490:8
+    |
+415 | impl SubGroup {
+    | ------------- method in this implementation
+...
+490 |     fn adopt(self, applied: &mut Config, file: &Config) {
+    |        ^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.34s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== M6 启动接线错误：OKX Business 连接器被接到 Public 地址 ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... FAILED
+
+failures:
+
+---- tests::start_connectors_connects_each_connector_to_its_configured_url stdout ----
+
+thread 'tests::start_connectors_connects_each_connector_to_its_configured_url' (4067870) panicked at crates/md-server/src/main.rs:1169:17:
+okx-business 应收到含 "channel":"candle1m" 的订阅帧，实际: 
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::start_connectors_connects_each_connector_to_its_configured_url
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.99s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L1 RUST_LOG 覆盖时仍把文件里的 log_level 记为已应用（提示一次就消失） ===============
+
+running 42 tests
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... FAILED
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert' (4070069) panicked at crates/md-server/src/reload.rs:1675:13:
+assertion `left == right` failed: 未生效的值不得写进已应用配置
+  left: "debug"
+ right: "info"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.22s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L2 log_level 变更时不真正切换过滤器，却记为已应用 ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... FAILED
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... FAILED
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... FAILED
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... FAILED
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::log_level_change_is_hot_applied_once_and_adopted stdout ----
+
+thread 'reload::tests::log_level_change_is_hot_applied_once_and_adopted' (4070598) panicked at crates/md-server/src/reload.rs:1606:9:
+assertion `left == right` failed
+  left: []
+ right: ["debug"]
+
+---- reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload' (4070599) panicked at crates/md-server/src/reload.rs:1696:9:
+assertion failed: !report.fully_applied()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update stdout ----
+
+thread 'reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update' (4070600) panicked at crates/md-server/src/reload.rs:1731:9:
+assertion `left == right` failed: 日志级别照常热更
+  left: []
+ right: ["debug"]
+
+---- reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling stdout ----
+
+thread 'reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling' (4070608) panicked at crates/md-server/src/reload.rs:1804:9:
+assertion `left == right` failed: WARNING 应规范成 warn 再交给过滤器
+  left: []
+ right: ["warn"]
+
+
+failures:
+    reload::tests::log_level_change_is_hot_applied_once_and_adopted
+    reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload
+    reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update
+    reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling
+
+test result: FAILED. 38 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.43s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L3 过滤器切换失败仍记为已应用（不再重试） ===============
+
+running 42 tests
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... FAILED
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload stdout ----
+
+thread 'reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload' (4071082) panicked at crates/md-server/src/reload.rs:1704:9:
+assertion `left == right` failed: 失败时保持旧级别
+  left: "debug"
+ right: "info"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.74s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L4 log_level 没变也每次 SIGHUP 都去切换过滤器 ===============
+
+running 42 tests
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... FAILED
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... FAILED
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... FAILED
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::log_level_change_is_hot_applied_once_and_adopted stdout ----
+
+thread 'reload::tests::log_level_change_is_hot_applied_once_and_adopted' (4071616) panicked at crates/md-server/src/reload.rs:1616:9:
+assertion `left == right` failed: 不得重复应用同一个级别
+  left: ["debug", "debug"]
+ right: ["debug"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert' (4071625) panicked at crates/md-server/src/reload.rs:1683:9:
+assertion failed: report.fully_applied()
+
+---- reload::tests::unchanged_log_level_never_touches_the_filter stdout ----
+
+thread 'reload::tests::unchanged_log_level_never_touches_the_filter' (4071632) panicked at crates/md-server/src/reload.rs:1636:9:
+assertion failed: lv.applied().is_empty()
+
+
+failures:
+    reload::tests::log_level_change_is_hot_applied_once_and_adopted
+    reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert
+    reload::tests::unchanged_log_level_never_touches_the_filter
+
+test result: FAILED. 39 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.61s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L5 不检查 RUST_LOG 是否覆盖，直接尝试切换过滤器 ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... FAILED
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert stdout ----
+
+thread 'reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert' (4072369) panicked at crates/md-server/src/reload.rs:1649:13:
+第 1 次：RUST_LOG 优先时不得报告 log_level 已生效
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.58s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L6 生效配置里的 log_level 不做规范化（INFO / warning 等写法与运行值比较出假变更） ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... FAILED
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... FAILED
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- reload::tests::effective_config_canonicalizes_log_level_spellings stdout ----
+
+thread 'reload::tests::effective_config_canonicalizes_log_level_spellings' (4072831) panicked at crates/md-server/src/reload.rs:1746:13:
+assertion `left == right` failed: 写法 "INFO"
+  left: "INFO"
+ right: "info"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling stdout ----
+
+thread 'reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling' (4072848) panicked at crates/md-server/src/reload.rs:1803:9:
+assertion `left == right` failed: WARNING 应规范成 warn 再交给过滤器
+  left: ["WARNING"]
+ right: ["warn"]
+
+
+failures:
+    reload::tests::effective_config_canonicalizes_log_level_spellings
+    reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling
+
+test result: FAILED. 40 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.61s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L7 启动时忽略 RUST_LOG（环境变量不再优先） ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... FAILED
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... FAILED
+test logging::tests::rust_log_takes_precedence_over_config ... FAILED
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... FAILED
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- logging::tests::plain_rust_log_that_agrees_with_config_is_quiet stdout ----
+
+thread 'logging::tests::plain_rust_log_that_agrees_with_config_is_quiet' (4073621) panicked at crates/md-server/src/logging.rs:230:13:
+assertion `left == right` failed
+  left: Config
+ right: RustLog("warn")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- logging::tests::invalid_rust_log_falls_back_to_config_and_says_so stdout ----
+
+thread 'logging::tests::invalid_rust_log_falls_back_to_config_and_says_so' (4073620) panicked at crates/md-server/src/logging.rs:239:9:
+assertion `left == right` failed: []
+  left: 0
+ right: 1
+
+---- logging::tests::rust_log_takes_precedence_over_config stdout ----
+
+thread 'logging::tests::rust_log_takes_precedence_over_config' (4073624) panicked at crates/md-server/src/logging.rs:199:9:
+assertion `left == right` failed
+  left: "info"
+ right: "warn,md_connector=debug"
+
+---- logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly stdout ----
+
+thread 'logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly' (4073622) panicked at crates/md-server/src/logging.rs:213:9:
+assertion `left == right` failed
+  left: "info"
+ right: "warn"
+
+
+failures:
+    logging::tests::invalid_rust_log_falls_back_to_config_and_says_so
+    logging::tests::plain_rust_log_that_agrees_with_config_is_quiet
+    logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly
+    logging::tests::rust_log_takes_precedence_over_config
+
+test result: FAILED. 38 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: unused variable: `rust_log`
+  --> crates/md-server/src/logging.rs:54:40
+   |
+54 | pub(crate) fn plan(config_level: &str, rust_log: Option<&str>) -> Plan {
+   |                                        ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_rust_log`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning (run `cargo fix --bin "md-server" -p md-server --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.79s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L8 启动时忽略 YAML 的 log_level（永远用 info） ===============
+
+running 42 tests
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... FAILED
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... FAILED
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank stdout ----
+
+thread 'logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank' (4074555) panicked at crates/md-server/src/logging.rs:189:13:
+assertion `left == right` failed: rust_log=None
+  left: "info"
+ right: "warn"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- logging::tests::invalid_rust_log_falls_back_to_config_and_says_so stdout ----
+
+thread 'logging::tests::invalid_rust_log_falls_back_to_config_and_says_so' (4074560) panicked at crates/md-server/src/logging.rs:237:9:
+assertion `left == right` failed
+  left: "info"
+ right: "warn"
+
+
+failures:
+    logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank
+    logging::tests::invalid_rust_log_falls_back_to_config_and_says_so
+
+test result: FAILED. 40 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.21s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L9 RUST_LOG 与 YAML 的 log_level 不一致时不再告警 ===============
+
+running 42 tests
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... FAILED
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly stdout ----
+
+thread 'logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly' (4075320) panicked at crates/md-server/src/logging.rs:215:9:
+assertion `left == right` failed: []
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: unused variable: `plain`
+  --> crates/md-server/src/logging.rs:79:17
+   |
+79 |     if let Some(plain) = plain {
+   |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_plain`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-server` (bin "md-server" test) generated 1 warning (run `cargo fix --bin "md-server" -p md-server --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.08s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L10 热更时不检查 RUST_LOG 覆盖（会改动用户用环境变量固定的过滤器） ===============
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... FAILED
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- logging::tests::rust_log_overrides_and_is_never_touched_by_apply stdout ----
+
+thread 'logging::tests::rust_log_overrides_and_is_never_touched_by_apply' (4075860) panicked at crates/md-server/src/logging.rs:340:22:
+RUST_LOG 优先时 apply 必须拒绝，实际 Applied
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    logging::tests::rust_log_overrides_and_is_never_touched_by_apply
+
+test result: FAILED. 41 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.40s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L11 热更时只返回成功、不真正重载过滤器 ===============
+
+running 42 tests
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... FAILED
+test process_metrics::tests::render_produces_all_metrics ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... FAILED
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... FAILED
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+failures:
+
+---- logging::tests::current_filter_reflects_last_applied_level stdout ----
+
+thread 'logging::tests::current_filter_reflects_last_applied_level' (4076752) panicked at crates/md-server/src/logging.rs:331:9:
+assertion `left == right` failed
+  left: "info"
+ right: "warn"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked stdout ----
+
+thread 'logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked' (4076750) panicked at crates/md-server/src/logging.rs:362:9:
+assertion failed: matches!(ctl.apply("warn"), LevelOutcome::Rejected(_))
+
+---- logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber stdout ----
+
+thread 'logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber' (4076754) panicked at crates/md-server/src/logging.rs:315:9:
+assertion `left == right` failed
+  left: ["lc1-info-before", "lc1-info-after-lower", "lc1-warn-after-lower", "lc1-warn-after-error-level", "lc1-error-after-error-level"]
+ right: ["lc1-info-before", "lc1-debug-after-raise", "lc1-warn-after-lower", "lc1-error-after-error-level"]
+
+
+failures:
+    logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked
+    logging::tests::current_filter_reflects_last_applied_level
+    logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber
+
+test result: FAILED. 39 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.95s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+error: test failed, to rerun pass `-p md-server --bin md-server`
+
+
+=============== L12 YAML 里的非法 log_level 不再被校验拒绝 ===============
+
+running 14 tests
+test tests::normalize_log_level_rejects_everything_else ... ok
+test tests::normalize_log_level_accepts_standard_names_case_insensitively ... ok
+test tests::missing_fields_use_defaults ... ok
+test tests::env_var_override ... ok
+test tests::field_order_matches_go ... ok
+test tests::load_default_config ... ok
+test tests::legacy_config_without_quote_keys_defaults_off ... ok
+test tests::okx_enabled_without_url_fails ... ok
+test tests::binance_enabled_without_url_fails ... ok
+test tests::quote_channel_buffer_zero_rejected ... ok
+test tests::invalid_log_level_in_yaml_is_a_validation_error ... FAILED
+test tests::load_config_from_yaml_string ... ok
+test tests::quote_keys_parse ... ok
+test tests::valid_log_level_spellings_load ... ok
+
+failures:
+
+---- tests::invalid_log_level_in_yaml_is_a_validation_error stdout ----
+
+thread 'tests::invalid_log_level_in_yaml_is_a_validation_error' (4077112) panicked at crates/md-config/src/lib.rs:802:75:
+called `Result::unwrap_err()` on an `Ok` value: Config { log_level: "verbose", grpc_server: GRPCConfig { listen_address: ":50051", enabled: true, read_timeout: 10s, write_timeout: 10s }, ws_server: WebSocketConfig { listen_address: ":8080", enabled: true, read_timeout: 60s, write_timeout: 10s, path: "/ws" }, connectors: ConnectorConfigs { binance: BinanceConfig { enabled: true, stream_base_url: "wss://fstream.binance.com/market/stream", rest_base_url: "https://fapi.binance.com", subscribe_ticks: ["BTCUSDT", "ETHUSDT"], subscribe_klines: {"5m": ["BTCUSDT", "ETHUSDT"]}, reconnect_delay: 5s, ping_interval: 180s, quotes_enabled: false, subscribe_quotes: [], stream_base_url_public: "wss://fstream.binance.com/public/stream" }, okx: OkxConfig { enabled: true, stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public", stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business", rest_base_url: "https://www.okx.com", subscribe_ticks: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"], subscribe_klines: {"5m": ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]}, reconnect_delay: 10s, ping_interval: 25s, quotes_enabled: false, subscribe_quotes: [] } }, processor: ProcessorConfig { tick_channel_buffer: 1000, kline_channel_buffer: 1000, broadcast_capacity: 4096, quote_channel_buffer: 1000 }, api_gateway: ApiGatewayConfig { enabled: true, listen_address: ":8081", market_data_grpc_target: "localhost:50051", admin_grpc_target: "localhost:50052", ws_ping_period: 30s, ws_write_wait: 10s, ws_max_message_size: 1024 }, admin_server: AdminServerConfig { listen_address: ":50052" } }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::invalid_log_level_in_yaml_is_a_validation_error
+
+test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling md-config v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-config)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.79s
+     Running unittests src/lib.rs (target/debug/deps/md_config-3b4189568062f6fa)
+error: test failed, to rerun pass `-p md-config --lib`
+
+
+=============== L13 任何拼写都被当成合法级别（`fatal`、`verbose` 悄悄变成 info） ===============
+
+running 14 tests
+test tests::normalize_log_level_accepts_standard_names_case_insensitively ... ok
+test tests::env_var_override ... ok
+test tests::normalize_log_level_rejects_everything_else ... FAILED
+test tests::field_order_matches_go ... ok
+test tests::missing_fields_use_defaults ... ok
+test tests::legacy_config_without_quote_keys_defaults_off ... ok
+test tests::binance_enabled_without_url_fails ... ok
+test tests::load_config_from_yaml_string ... ok
+test tests::okx_enabled_without_url_fails ... ok
+test tests::load_default_config ... ok
+test tests::invalid_log_level_in_yaml_is_a_validation_error ... FAILED
+test tests::quote_channel_buffer_zero_rejected ... ok
+test tests::quote_keys_parse ... ok
+test tests::valid_log_level_spellings_load ... ok
+
+failures:
+
+---- tests::normalize_log_level_rejects_everything_else stdout ----
+
+thread 'tests::normalize_log_level_rejects_everything_else' (4077475) panicked at crates/md-config/src/lib.rs:777:13:
+assertion `left == right` failed: raw=""
+  left: Some("info")
+ right: None
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- tests::invalid_log_level_in_yaml_is_a_validation_error stdout ----
+
+thread 'tests::invalid_log_level_in_yaml_is_a_validation_error' (4077469) panicked at crates/md-config/src/lib.rs:802:75:
+called `Result::unwrap_err()` on an `Ok` value: Config { log_level: "verbose", grpc_server: GRPCConfig { listen_address: ":50051", enabled: true, read_timeout: 10s, write_timeout: 10s }, ws_server: WebSocketConfig { listen_address: ":8080", enabled: true, read_timeout: 60s, write_timeout: 10s, path: "/ws" }, connectors: ConnectorConfigs { binance: BinanceConfig { enabled: true, stream_base_url: "wss://fstream.binance.com/market/stream", rest_base_url: "https://fapi.binance.com", subscribe_ticks: ["BTCUSDT", "ETHUSDT"], subscribe_klines: {"5m": ["BTCUSDT", "ETHUSDT"]}, reconnect_delay: 5s, ping_interval: 180s, quotes_enabled: false, subscribe_quotes: [], stream_base_url_public: "wss://fstream.binance.com/public/stream" }, okx: OkxConfig { enabled: true, stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public", stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business", rest_base_url: "https://www.okx.com", subscribe_ticks: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"], subscribe_klines: {"5m": ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]}, reconnect_delay: 10s, ping_interval: 25s, quotes_enabled: false, subscribe_quotes: [] } }, processor: ProcessorConfig { tick_channel_buffer: 1000, kline_channel_buffer: 1000, broadcast_capacity: 4096, quote_channel_buffer: 1000 }, api_gateway: ApiGatewayConfig { enabled: true, listen_address: ":8081", market_data_grpc_target: "localhost:50051", admin_grpc_target: "localhost:50052", ws_ping_period: 30s, ws_write_wait: 10s, ws_max_message_size: 1024 }, admin_server: AdminServerConfig { listen_address: ":50052" } }
+
+
+failures:
+    tests::invalid_log_level_in_yaml_is_a_validation_error
+    tests::normalize_log_level_rejects_everything_else
+
+test result: FAILED. 12 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Compiling md-config v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-config)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running unittests src/lib.rs (target/debug/deps/md_config-3b4189568062f6fa)
+error: test failed, to rerun pass `-p md-config --lib`
+
+
+=============== B1 `logging::init` 不使用启动方案，过滤器永远是 info（等于旧版本行为） ===============
+[build]
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.32s
+
+[unit]
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.63s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+
+[e2e]
+runner=native bin=target/debug/md-server out=/var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/mut-bak-9o8ljul0/e2e-B1 scenarios=6
+
+== s9a-log-level-hot-apply  log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启
+  PASS  启动日志说明过滤器来自配置的 log_level
+  PASS  info→warn：点名 log_level 变更并开始应用
+  PASS  warn 级别：无变更 SIGHUP 没有任何 INFO 输出（INFO 已被过滤）
+  PASS  warn 级别：WARN 仍可见（待重启提示照常输出）
+  PASS  error 级别：同样的待重启情形不再输出 WARN（对照上一步 warn 级别可见）
+  PASS  error 级别：ERROR 仍可见（YAML 解析失败照常报错）
+  PASS  error→info：确认已应用
+  PASS  error→info：此后报成功（地址已改回，无待处理项）
+  PASS  info 恢复：无变更 SIGHUP 的 INFO 日志重新可见
+  PASS  全程没有重连 / 断线（热更，不重启）
+
+== s9b-log-level-from-config-at-startup  启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志
+  FAIL  启动阶段没有任何 INFO 日志（旧版本这里会输出全部 INFO）
+        2026-10-16T23:25:29.534387Z  INFO md_connector::base: [okx] connected and synced
+        2026-10-16T23:25:29.534392Z  INFO md_connector::base: [binance-quote] subscription sync complete
+        2026-10-16T23:25:29.534400Z  INFO md_connector::base: [binance-quote] connected and synced
+        2026-10-16T23:25:29.534491Z  INFO md_connector::base: [binance] subscribing to 2 streams
+        2026-10-16T23:25:29.534515Z  INFO md_connector::base: [binance] subscription sync complete
+        2026-10-16T23:25:29.534521Z  INFO md_connector::base: [binance] connected and synced
+  PASS  连接器照常连上（只是日志安静）
+  FAIL  无变更 SIGHUP：安静
+        [harness] ---- SIGHUP no change ----
+        2026-10-16T23:25:30.625354Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9b-log-level-from-config-at-startup-krKGRn/config.yaml
+        2026-10-16T23:25:30.626347Z  INFO md_server: config reloaded and applied successfully
+  PASS  warn→info：确认已应用
+  PASS  warn→info：此后 INFO 可见（结论行报成功）
+
+== s9c-rust-log-takes-precedence  RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效
+  PASS  启动：WARN 点名 YAML 的 log_level 被 RUST_LOG 覆盖
+  PASS  启动：实际生效的是 RUST_LOG（有 INFO、没有 DEBUG）
+  PASS  第1次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖
+  PASS  第1次：给出"需要重启"的结论，不报成功
+  PASS  第1次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）
+  PASS  第2次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖
+  PASS  第2次：给出"需要重启"的结论，不报成功
+  PASS  第2次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）
+  PASS  改回启动时的值：待处理项消失，报成功
+
+== s9d-invalid-log-level-rejected  非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变
+  PASS  启动：进程自己退出，退出码为 1（不是跑到超时被杀）
+  PASS  启动：报错点名 log_level 和错误值
+  PASS  重载：明确报错并点名 log_level
+  PASS  重载：声明保留运行配置
+  PASS  重载：不报成功
+  PASS  重载：进程仍在运行
+  PASS  修好后：报成功，且 INFO 仍可见（运行中的日志级别没有被坏配置改动）
+
+== s9e-log-level-env-override  环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报
+  FAIL  启动：按 LOG_LEVEL=warn 生效（没有 INFO 日志）
+        2026-10-16T23:25:43.548203Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+        2026-10-16T23:25:43.548208Z  INFO md_connector::base: [okx] subscribing to 1 streams
+        2026-10-16T23:25:43.548230Z  INFO md_connector::base: [okx-quote] subscription sync complete
+        2026-10-16T23:25:43.548237Z  INFO md_connector::base: [okx-quote] connected and synced
+        2026-10-16T23:25:43.548254Z  INFO md_connector::base: [okx] subscription sync complete
+        2026-10-16T23:25:43.548263Z  INFO md_connector::base: [okx] connected and synced
+  FAIL  无变更 SIGHUP：安静，不误报 log_level 变更
+        [harness] ---- SIGHUP no change ----
+        2026-10-16T23:25:44.643609Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9e-log-level-env-override-3Bo4oG/config.yaml
+        2026-10-16T23:25:44.644604Z  INFO md_server: config reloaded and applied successfully
+  FAIL  YAML 改动被环境变量覆盖：生效配置不变，不输出任何 INFO/WARN/ERROR
+        [harness] ---- SIGHUP yaml->debug ----
+        2026-10-16T23:25:46.245479Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9e-log-level-env-override-3Bo4oG/config.yaml
+        2026-10-16T23:25:46.246143Z  INFO md_server: config reloaded and applied successfully
+
+== s9f-prod-198-combination  线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn
+  FAIL  启动：生效的仍是 RUST_LOG=warn（没有 INFO 日志，行为与升级前一致）
+        2026-10-16T23:25:49.864297Z  INFO md_connector::base: [binance-quote] connected and synced
+        2026-10-16T23:25:49.864263Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+        2026-10-16T23:25:49.864302Z  INFO md_connector::base: [binance] subscription sync complete
+        2026-10-16T23:25:49.864308Z  INFO md_connector::base: [binance] connected and synced
+        2026-10-16T23:25:49.864332Z  INFO md_connector::base: [okx-quote] subscription sync complete
+        2026-10-16T23:25:49.864339Z  INFO md_connector::base: [okx-quote] connected and synced
+  PASS  启动：WARN 明确说明 YAML 的 log_level 被 RUST_LOG 覆盖
+  FAIL  无变更 SIGHUP：安静
+        [harness] ---- SIGHUP no change ----
+        2026-10-16T23:25:50.960747Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9f-prod-198-combination-JMbo1u/config.yaml
+        2026-10-16T23:25:50.962202Z  INFO md_server: config reloaded and applied successfully
+  PASS  第1次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先
+  PASS  第1次：给出"需要重启"的结论
+  PASS  第2次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先
+  PASS  第2次：给出"需要重启"的结论
+
+==== 汇总: 34/41 PASS, 7 FAIL  -> /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/mut-bak-9o8ljul0/e2e-B1/results.md
+
+
+=============== B2 `main` 初始化日志时传错级别（不用配置里的 log_level） ===============
+[build]
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.58s
+
+[unit]
+
+running 42 tests
+test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
+test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::every_plan_produces_a_valid_env_filter ... ok
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
+test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::current_filter_reflects_last_applied_level ... ok
+test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
+test process_metrics::tests::render_produces_all_metrics ... ok
+test reload::tests::diff_quote_targets_add_and_remove ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
+test reload::tests::every_restart_only_field_is_detected_individually ... ok
+test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
+test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
+test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
+test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
+test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
+test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
+test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
+test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
+test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
+test tests::metrics_handler_exposes_quote_metrics ... ok
+test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
+test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test tests::metrics_handler_includes_all_dashboard_metrics ... ok
+test reload::tests::url_changes_explain_that_reconnect_keeps_the_startup_address ... ok
+test tests::start_connectors_connects_each_connector_to_its_configured_url ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+   Compiling md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.48s
+     Running unittests src/main.rs (target/debug/deps/md_server-aa857acd75d044e1)
+
+[e2e]
+runner=native bin=target/debug/md-server out=/var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/mut-bak-9o8ljul0/e2e-B2 scenarios=6
+
+== s9a-log-level-hot-apply  log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启
+  PASS  启动日志说明过滤器来自配置的 log_level
+  PASS  info→warn：点名 log_level 变更并开始应用
+  PASS  warn 级别：无变更 SIGHUP 没有任何 INFO 输出（INFO 已被过滤）
+  PASS  warn 级别：WARN 仍可见（待重启提示照常输出）
+  PASS  error 级别：同样的待重启情形不再输出 WARN（对照上一步 warn 级别可见）
+  PASS  error 级别：ERROR 仍可见（YAML 解析失败照常报错）
+  PASS  error→info：确认已应用
+  PASS  error→info：此后报成功（地址已改回，无待处理项）
+  PASS  info 恢复：无变更 SIGHUP 的 INFO 日志重新可见
+  PASS  全程没有重连 / 断线（热更，不重启）
+
+== s9b-log-level-from-config-at-startup  启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志
+  FAIL  启动阶段没有任何 INFO 日志（旧版本这里会输出全部 INFO）
+        2026-10-16T23:26:19.531524Z  INFO md_connector::base: [okx] subscribing to 1 streams
+        2026-10-16T23:26:19.531551Z  INFO md_connector::base: [okx] subscription sync complete
+        2026-10-16T23:26:19.531557Z  INFO md_connector::base: [okx] connected and synced
+        2026-10-16T23:26:19.531848Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+        2026-10-16T23:26:19.531874Z  INFO md_connector::base: [okx-quote] subscription sync complete
+        2026-10-16T23:26:19.531880Z  INFO md_connector::base: [okx-quote] connected and synced
+  PASS  连接器照常连上（只是日志安静）
+  FAIL  无变更 SIGHUP：安静
+        [harness] ---- SIGHUP no change ----
+        2026-10-16T23:26:20.626408Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9b-log-level-from-config-at-startup-ce72hs/config.yaml
+        2026-10-16T23:26:20.627665Z  INFO md_server: config reloaded and applied successfully
+  PASS  warn→info：确认已应用
+  PASS  warn→info：此后 INFO 可见（结论行报成功）
+
+== s9c-rust-log-takes-precedence  RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效
+  FAIL  启动：WARN 点名 YAML 的 log_level 被 RUST_LOG 覆盖
+        2026-10-16T23:26:24.747816Z  INFO md_connector::base: [binance-quote] subscription sync complete
+        2026-10-16T23:26:24.747823Z  INFO md_connector::base: [binance-quote] connected and synced
+        2026-10-16T23:26:24.747853Z  INFO md_connector::base: [okx-quote] subscribing to 1 streams
+        2026-10-16T23:26:24.747880Z  INFO md_connector::base: [okx-quote] subscription sync complete
+        2026-10-16T23:26:24.747889Z  INFO md_connector::base: [okx-quote] connected and synced
+        [harness] ---- process ready ----
+  PASS  启动：实际生效的是 RUST_LOG（有 INFO、没有 DEBUG）
+  PASS  第1次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖
+  PASS  第1次：给出"需要重启"的结论，不报成功
+  PASS  第1次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）
+  PASS  第2次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖
+  PASS  第2次：给出"需要重启"的结论，不报成功
+  PASS  第2次：过滤器没有被改动（INFO 仍可见，也没有"开始应用"）
+  PASS  改回启动时的值：待处理项消失，报成功
+
+== s9d-invalid-log-level-rejected  非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变
+  PASS  启动：进程自己退出，退出码为 1（不是跑到超时被杀）
+  PASS  启动：报错点名 log_level 和错误值
+  PASS  重载：明确报错并点名 log_level
+  PASS  重载：声明保留运行配置
+  PASS  重载：不报成功
+  PASS  重载：进程仍在运行
+  PASS  修好后：报成功，且 INFO 仍可见（运行中的日志级别没有被坏配置改动）
+
+== s9e-log-level-env-override  环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报
+  FAIL  启动：按 LOG_LEVEL=warn 生效（没有 INFO 日志）
+        2026-10-16T23:26:33.500943Z  INFO md_connector::base: [okx-quote] connected and synced
+        2026-10-16T23:26:33.500944Z  INFO md_connector::base: [binance] subscribing to 2 streams
+        2026-10-16T23:26:33.500959Z  INFO md_connector::base: [okx] subscription sync complete
+        2026-10-16T23:26:33.500965Z  INFO md_connector::base: [okx] connected and synced
+        2026-10-16T23:26:33.500970Z  INFO md_connector::base: [binance] subscription sync complete
+        2026-10-16T23:26:33.500976Z  INFO md_connector::base: [binance] connected and synced
+  FAIL  无变更 SIGHUP：安静，不误报 log_level 变更
+        [harness] ---- SIGHUP no change ----
+        2026-10-16T23:26:34.593782Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9e-log-level-env-override-APGxUx/config.yaml
+        2026-10-16T23:26:34.595031Z  INFO md_server: config reloaded and applied successfully
+  FAIL  YAML 改动被环境变量覆盖：生效配置不变，不输出任何 INFO/WARN/ERROR
+        [harness] ---- SIGHUP yaml->debug ----
+        2026-10-16T23:26:36.194037Z  INFO md_server: received SIGHUP, reloading config from /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/sighup-s9e-log-level-env-override-APGxUx/config.yaml
+        2026-10-16T23:26:36.194676Z  INFO md_server: config reloaded and applied successfully
+
+== s9f-prod-198-combination  线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn
+  PASS  启动：生效的仍是 RUST_LOG=warn（没有 INFO 日志，行为与升级前一致）
+  PASS  启动：WARN 明确说明 YAML 的 log_level 被 RUST_LOG 覆盖
+  PASS  无变更 SIGHUP：安静
+  PASS  第1次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先
+  PASS  第1次：给出"需要重启"的结论
+  PASS  第2次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先
+  PASS  第2次：给出"需要重启"的结论
+
+==== 汇总: 35/41 PASS, 6 FAIL  -> /var/folders/29/5kp2s02d5t3ft__lf9f_3qsh0000gn/T/mut-bak-9o8ljul0/e2e-B2/results.md

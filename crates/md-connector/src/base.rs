@@ -38,6 +38,58 @@ pub struct BaseConnector<A: ExchangeAdapter> {
     connected: Option<Arc<AtomicU64>>,
     reconnect_total: Option<Arc<AtomicU64>>,
     subscribe_failed_total: Option<Arc<AtomicU64>>,
+    /// 丢弃日志限频器（1.1.1）：mpsc 满丢弃时按 1 次/秒输出 warn（带丢弃条数与队列深度）
+    tick_drop_log: DropLogLimiter,
+    kline_drop_log: DropLogLimiter,
+    quote_drop_log: DropLogLimiter,
+    /// 仅诊断：每隔固定时间主动断开重连（环境变量 `MD_DEBUG_FORCE_RECONNECT_SECS`，默认关闭）
+    debug_force_reconnect: Option<Duration>,
+}
+
+/// 丢弃日志限频间隔
+const DROP_LOG_INTERVAL: Duration = Duration::from_secs(1);
+
+/// 丢弃日志限频器：同一类事件在 `interval` 内最多输出一条日志，
+/// 但被抑制的丢弃条数会累计，在下一条日志里一并报告，因此日志总和 == 实际丢弃总数。
+struct DropLogLimiter {
+    epoch: std::time::Instant,
+    /// 上次输出日志的时间（距 epoch 的毫秒数）；`u64::MAX` 表示从未输出
+    last_log_ms: AtomicU64,
+    /// 自上次输出日志以来累计的丢弃条数
+    pending: AtomicU64,
+}
+
+impl DropLogLimiter {
+    const NEVER: u64 = u64::MAX;
+
+    fn new() -> Self {
+        Self {
+            epoch: std::time::Instant::now(),
+            last_log_ms: AtomicU64::new(Self::NEVER),
+            pending: AtomicU64::new(0),
+        }
+    }
+
+    /// 登记一次丢弃；若本次应输出日志，返回"自上次日志以来的丢弃条数（含本次）"
+    fn on_drop(&self) -> Option<u64> {
+        self.on_drop_at(self.epoch.elapsed().as_millis() as u64)
+    }
+
+    fn on_drop_at(&self, now_ms: u64) -> Option<u64> {
+        self.pending.fetch_add(1, Ordering::Relaxed);
+        let last = self.last_log_ms.load(Ordering::Relaxed);
+        let due = last == Self::NEVER
+            || now_ms.saturating_sub(last) >= DROP_LOG_INTERVAL.as_millis() as u64;
+        if due
+            && self
+                .last_log_ms
+                .compare_exchange(last, now_ms, Ordering::Relaxed, Ordering::Relaxed)
+                .is_ok()
+        {
+            return Some(self.pending.swap(0, Ordering::Relaxed));
+        }
+        None
+    }
 }
 
 struct ConnectorState {
@@ -59,6 +111,25 @@ struct ConnectorState {
 enum PendingOp {
     Subscribe,
     Unsubscribe,
+}
+
+/// 读取诊断开关 `MD_DEBUG_FORCE_RECONNECT_SECS`（秒，>0 生效）。
+/// 仅用于旁路压测容器复现"周期性重连"；生产环境不设置该变量，行为与 1.1.0 完全一致。
+/// 可选 `MD_DEBUG_FORCE_RECONNECT_ONLY=okx` 限定只对名字以该前缀开头的连接器生效（见 `debug_force_for`）。
+fn debug_force_reconnect_from_env() -> Option<Duration> {
+    std::env::var("MD_DEBUG_FORCE_RECONNECT_SECS")
+        .ok()
+        .and_then(|v| v.trim().parse::<u64>().ok())
+        .filter(|n| *n > 0)
+        .map(Duration::from_secs)
+}
+
+/// 诊断开关是否对该连接器名生效（未设置 ONLY 时对所有连接器生效）
+fn debug_force_for(adapter_name: &str) -> bool {
+    match std::env::var("MD_DEBUG_FORCE_RECONNECT_ONLY") {
+        Ok(prefix) if !prefix.trim().is_empty() => adapter_name.starts_with(prefix.trim()),
+        _ => true,
+    }
 }
 
 impl<A: ExchangeAdapter> BaseConnector<A> {
@@ -89,6 +160,10 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             connected: None,
             reconnect_total: None,
             subscribe_failed_total: None,
+            tick_drop_log: DropLogLimiter::new(),
+            kline_drop_log: DropLogLimiter::new(),
+            quote_drop_log: DropLogLimiter::new(),
+            debug_force_reconnect: debug_force_reconnect_from_env(),
         }
     }
 
@@ -367,9 +442,18 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
     {
         let mut shutdown_rx = self.state.shutdown_tx.subscribe();
         let adapter_name = self.adapter.name().to_string();
+        // 仅诊断：周期性主动断开（默认关闭，生产不设置环境变量）
+        let mut force_timer = self
+            .debug_force_reconnect
+            .filter(|_| debug_force_for(&adapter_name))
+            .map(|d| Box::pin(tokio::time::sleep(d)));
 
         loop {
             tokio::select! {
+                _ = async { force_timer.as_mut().unwrap().await }, if force_timer.is_some() => {
+                    warn!("[{}] DEBUG: forced reconnect (MD_DEBUG_FORCE_RECONNECT_SECS)", adapter_name);
+                    return ReadResult::Disconnected;
+                }
                 msg = read.next() => {
                     match msg {
                         Some(Ok(Message::Text(text))) => {
@@ -465,7 +549,19 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             DataEvent::Tick(tick) => {
                 let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     if self.tick_tx.try_send(tick).is_err() {
-                        warn!("[{}] tick channel full, dropping", adapter_name);
+                        if let Some(n) = self.tick_drop_log.on_drop() {
+                            warn!(
+                                "[{}] tick channel full, dropped {} tick(s) since last log (ingress queue depth {}/{}, total dropped {})",
+                                adapter_name,
+                                n,
+                                self.tick_tx.max_capacity() - self.tick_tx.capacity(),
+                                self.tick_tx.max_capacity(),
+                                self.ticks_dropped
+                                    .as_ref()
+                                    .map(|c| c.load(Ordering::Relaxed) + 1)
+                                    .unwrap_or(0)
+                            );
+                        }
                         return true; // tick dropped
                     }
                     false
@@ -485,7 +581,19 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             DataEvent::Kline(kline) => {
                 let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     if self.kline_tx.try_send(kline).is_err() {
-                        warn!("[{}] kline channel full, dropping", adapter_name);
+                        if let Some(n) = self.kline_drop_log.on_drop() {
+                            warn!(
+                                "[{}] kline channel full, dropped {} kline(s) since last log (ingress queue depth {}/{}, total dropped {})",
+                                adapter_name,
+                                n,
+                                self.kline_tx.max_capacity() - self.kline_tx.capacity(),
+                                self.kline_tx.max_capacity(),
+                                self.klines_dropped
+                                    .as_ref()
+                                    .map(|c| c.load(Ordering::Relaxed) + 1)
+                                    .unwrap_or(0)
+                            );
+                        }
                         return true; // kline dropped
                     }
                     false
@@ -505,7 +613,19 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             DataEvent::Quote(quote) => match self.quote_tx.as_ref() {
                 Some(tx) => {
                     if tx.try_send(quote).is_err() {
-                        warn!("[{}] quote channel full, dropping", adapter_name);
+                        if let Some(n) = self.quote_drop_log.on_drop() {
+                            warn!(
+                                "[{}] quote channel full, dropped {} quote(s) since last log (ingress queue depth {}/{}, total dropped {})",
+                                adapter_name,
+                                n,
+                                tx.max_capacity() - tx.capacity(),
+                                tx.max_capacity(),
+                                self.quotes_dropped
+                                    .as_ref()
+                                    .map(|c| c.load(Ordering::Relaxed) + 1)
+                                    .unwrap_or(0)
+                            );
+                        }
                         if let Some(ref counter) = self.quotes_dropped {
                             counter.fetch_add(1, Ordering::Relaxed);
                         }
@@ -750,5 +870,71 @@ impl<A: ExchangeAdapter> Connector for BaseConnector<A> {
             Ok(desired) => desired.iter().cloned().collect(),
             Err(_) => Vec::new(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 限频：首次丢弃立即出日志；同一秒内后续丢弃被抑制并累计；下一个窗口一次性报告累计条数
+    #[test]
+    fn drop_log_limiter_rate_limits_and_accumulates() {
+        let l = DropLogLimiter::new();
+        // 第 1 条丢弃：立即报告 1
+        assert_eq!(l.on_drop_at(10), Some(1));
+        // 1000ms 窗口内的 492 条：全部抑制
+        for i in 0..492u64 {
+            assert_eq!(l.on_drop_at(11 + i), None, "i={i}");
+        }
+        // 窗口过后的下一条：报告抑制期间累计的 492 + 本条 = 493
+        assert_eq!(l.on_drop_at(1010), Some(493));
+        // 之后又进入新的抑制窗口
+        assert_eq!(l.on_drop_at(1011), None);
+        assert_eq!(l.on_drop_at(2010), Some(2));
+    }
+
+    /// 日志总和必须等于实际丢弃总数（不允许因限频而"丢账"）
+    #[test]
+    fn drop_log_limiter_total_equals_drops() {
+        let l = DropLogLimiter::new();
+        let mut reported = 0u64;
+        let mut now = 0u64;
+        for i in 0..10_000u64 {
+            now += i % 7; // 不规则间隔
+            if let Some(n) = l.on_drop_at(now) {
+                reported += n;
+            }
+        }
+        // 尾部未报告的部分仍在 pending 中
+        let tail = l.pending.load(Ordering::Relaxed);
+        assert_eq!(reported + tail, 10_000);
+    }
+
+    /// 突发 > 缓冲区时 try_send 必然丢弃（1.1.0 现网 md_ticks_dropped=493 的机制复现：
+    /// 单次 ~14ms 内灌入超过队列容量的 tick，消费端来不及取走）
+    #[tokio::test]
+    async fn burst_larger_than_buffer_drops_exactly_the_excess() {
+        let (tx, mut rx) = mpsc::channel::<u32>(1000);
+        let mut dropped = 0u32;
+        for i in 0..1493u32 {
+            if tx.try_send(i).is_err() {
+                dropped += 1;
+            }
+        }
+        assert_eq!(
+            dropped, 493,
+            "容量 1000 的队列在无消费时灌入 1493 条，恰好丢 493"
+        );
+        assert_eq!(
+            tx.max_capacity() - tx.capacity(),
+            1000,
+            "队列深度读数应为 1000/1000"
+        );
+        // 消费端取走后可继续接收
+        for _ in 0..1000 {
+            rx.recv().await.unwrap();
+        }
+        assert!(tx.try_send(0).is_ok());
     }
 }

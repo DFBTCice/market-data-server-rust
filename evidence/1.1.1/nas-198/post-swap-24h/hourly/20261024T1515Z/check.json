@@ -1,0 +1,81 @@
+{
+  "at_utc": "2026-10-24T15:16:26.025379+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 1163,
+  "valid_samples": 1163,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T15:16:17Z",
+  "span_s": 69724.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 9.025378942489624,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "post_warmup_span_s": 66124.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 70.046875,
+    "min_mib": 55.30859375,
+    "max_mib": 70.046875,
+    "slope_mib_h": 0.7072986142809746
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.200531005859375,
+    "min_mib": 4.188728332519531,
+    "max_mib": 4.360542297363281,
+    "slope_mib_h": -0.00023099043027900205
+  },
+  "rss_last_60min": {
+    "first_mib": 67.52734375,
+    "last_mib": 70.046875,
+    "min_mib": 67.52734375,
+    "max_mib": 70.046875,
+    "slope_mib_h": 1.5905646813855108
+  },
+  "current": {
+    "rss_mib": 69.13671875,
+    "allocated_mib": 4.233238220214844,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0,
+    "write_timeouts": 0.0,
+    "lagged": 0.0,
+    "ticks_dropped": 2460.0
+  },
+  "write_timeout_sample_max": 0.0,
+  "lagged_sample_max": 0.0,
+  "tick_drop_sample_max": 1327.0,
+  "oms_readonly_health": {
+    "health": "healthy",
+    "running": true,
+    "started_at": "2026-10-23T21:23:42.881520537Z",
+    "restart_count": 0
+  },
+  "analysis_is_provisional": true,
+  "provisional_rss_target_exceeded": false,
+  "server_log_collection": {
+    "since_epoch": 1792851376,
+    "raw_bytes": 1580,
+    "text_bytes": 1524,
+    "level": "RUST_LOG=warn",
+    "tail_limit": 1000
+  },
+  "new_events": [
+    "2026-10-24T14:27:17.605Z TICKS_DROPPED 0->1327",
+    "2026-10-24T14:53:17.694Z WS_CLIENTS 2->1",
+    "2026-10-24T14:54:17.854Z WS_CLIENTS 1->2",
+    "2026-10-24T15:10:17.865Z RECONNECT md_connector_reconnect_total{exchange=\"binance\"} 0->1"
+  ],
+  "interpretation": "真实tick入口丢弃0→1327→2460，SWAP_PLAN §6该项当前未通过。该检查内分钟CSV最后1327而实时GET已2460，两个不同取样时刻均如实保留。其他健康/连续性/订阅/写超时/allocated指标正常；暂不回滚而继续取证的依据与限制见anomalies/tick-drop-20261024T1427Z/。不得重设基线或自行豁免后宣布全通过。"
+}

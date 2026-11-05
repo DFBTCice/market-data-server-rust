@@ -1,0 +1,76 @@
+{
+  "at_utc": "2026-10-24T00:11:38.367080+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 258,
+  "valid_samples": 258,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T00:11:14Z",
+  "span_s": 15421.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 24.367676973342896,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "post_warmup_span_s": 11821.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 59.89453125,
+    "min_mib": 55.30859375,
+    "max_mib": 59.9375,
+    "slope_mib_h": 0.07210450821115956
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.2536468505859375,
+    "min_mib": 4.189552307128906,
+    "max_mib": 4.33233642578125,
+    "slope_mib_h": -0.008764224201571873
+  },
+  "rss_last_60min": {
+    "first_mib": 55.83203125,
+    "last_mib": 59.89453125,
+    "min_mib": 55.67578125,
+    "max_mib": 59.9375,
+    "slope_mib_h": 2.7316113446541075
+  },
+  "current": {
+    "rss_mib": 59.89453125,
+    "allocated_mib": 4.20855712890625,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0,
+    "write_timeouts": 0.0,
+    "lagged": 0.0,
+    "ticks_dropped": 0.0
+  },
+  "write_timeout_sample_max": 0.0,
+  "tick_drop_sample_max": 0.0,
+  "lagged_sample_max": 0.0,
+  "oms_readonly_health": {
+    "health": "healthy",
+    "running": true,
+    "started_at": "2026-10-23T21:23:42.881520537Z",
+    "restart_count": 0
+  },
+  "analysis_is_provisional": true,
+  "provisional_rss_target_exceeded": false,
+  "server_log_collection": {
+    "since_epoch": 1792797046,
+    "raw_bytes": 0,
+    "text_bytes": 0,
+    "level": "RUST_LOG=warn",
+    "tail_limit": 1000
+  },
+  "new_events": "no new subscription/WS/reconnect event since previous hourly check",
+  "interpretation": "全部预热后11821秒RSS回归+0.0721MiB/h仍在目标范围，allocated持平。最近60分钟RSS+2.7316MiB/h、当前59.895MiB，作为短窗口上行线索单独保留，未越过计划3MiB/h回滚评估阈值；不删高点、不用短窗替代完整预热后回归，继续观察，24h尚未完成。"
+}

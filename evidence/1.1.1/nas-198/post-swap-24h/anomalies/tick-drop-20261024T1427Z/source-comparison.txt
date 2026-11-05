@@ -1,0 +1,63 @@
+Old baseline beaac94:
+    async fn dispatch_event(&self, event: DataEvent) {
+        let adapter_name = self.adapter.name();
+        match event {
+            DataEvent::Tick(tick) => {
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    if self.tick_tx.try_send(tick).is_err() {
+                        warn!("[{}] tick channel full, dropping", adapter_name);
+                        return true; // tick dropped
+                    }
+                    false
+                }));
+                match result {
+                    Ok(true) => {
+                        if let Some(ref counter) = self.ticks_dropped {
+                            counter.fetch_add(1, Ordering::Relaxed);
+                        }
+                    }
+                    Ok(false) => {}
+                    Err(_) => {
+                        error!("[{}] panic in dispatch_event (tick)", adapter_name);
+                    }
+                }
+            }
+
+Final artifact a06fe20:
+    async fn dispatch_event(&self, event: DataEvent) {
+        let adapter_name = self.adapter.name();
+        match event {
+            DataEvent::Tick(tick) => {
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    if self.tick_tx.try_send(tick).is_err() {
+                        if let Some(n) = self.tick_drop_log.on_drop() {
+                            warn!(
+                                "[{}] tick channel full, dropped {} tick(s) since last log (ingress queue depth {}/{}, total dropped {})",
+                                adapter_name,
+                                n,
+                                self.tick_tx.max_capacity() - self.tick_tx.capacity(),
+                                self.tick_tx.max_capacity(),
+                                self.ticks_dropped
+                                    .as_ref()
+                                    .map(|c| c.load(Ordering::Relaxed) + 1)
+                                    .unwrap_or(0)
+                            );
+                        }
+                        return true; // tick dropped
+                    }
+                    false
+                }));
+                match result {
+                    Ok(true) => {
+                        if let Some(ref counter) = self.ticks_dropped {
+                            counter.fetch_add(1, Ordering::Relaxed);
+                        }
+                    }
+                    Ok(false) => {}
+                    Err(_) => {
+                        error!("[{}] panic in dispatch_event (tick)", adapter_name);
+                    }
+                }
+            }
+
+Config unchanged: processor.tick_channel_buffer=1000; final config differs only log_level info to warn.

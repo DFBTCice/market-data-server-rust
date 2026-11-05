@@ -1,0 +1,92 @@
+    Checking md-config v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-config)
+    Checking md-connector v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-connector)
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-connector/src/base.rs:293:57
+    |
+293 | ...                   if write.send(Message::Text(msg.into())).await.is_err() {
+    |                                                   ^^^^^^^^^^ help: consider removing `.into()`: `msg`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+    = note: `#[warn(clippy::useless_conversion)]` on by default
+
+warning: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> crates/md-connector/src/base.rs:702:62
+    |
+702 |                 let msg = self.adapter.build_unsubscribe_msg(&[stream.clone()]);
+    |                                                              ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(stream)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#cloned_ref_to_slice_refs
+    = note: `#[warn(clippy::cloned_ref_to_slice_refs)]` on by default
+
+warning: `md-connector` (lib) generated 2 warnings (1 duplicate) (run `cargo clippy --fix --lib -p md-connector -- ` to apply 1 suggestion)
+    Checking md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+    Checking md-grpc v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-grpc)
+warning: `md-connector` (lib test) generated 2 warnings (1 duplicate)
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-gateway/src/ws.rs:278:41
+    |
+278 |     let fut = sender.send(Message::Text(text.into()));
+    |                                         ^^^^^^^^^^^ help: consider removing `.into()`: `text`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+    = note: `#[warn(clippy::useless_conversion)]` on by default
+
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-gateway/src/ws.rs:489:75
+    |
+489 | ...                   let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+    |                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider removing `.into()`: `serde_json::to_string(&ack).unwrap()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-gateway/src/ws.rs:500:75
+    |
+500 | ...                   let _ = sender.send(Message::Text(serde_json::to_string(&ack).unwrap().into())).await;
+    |                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider removing `.into()`: `serde_json::to_string(&ack).unwrap()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-gateway/src/ws.rs:504:75
+    |
+504 | ...                   let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+    |                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider removing `.into()`: `serde_json::to_string(&err).unwrap()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-gateway/src/ws.rs:510:67
+    |
+510 | ...                   let _ = sender.send(Message::Text(serde_json::to_string(&err).unwrap().into())).await;
+    |                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider removing `.into()`: `serde_json::to_string(&err).unwrap()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+
+warning: useless conversion to the same type: `std::string::String`
+   --> crates/md-gateway/src/ws.rs:530:54
+    |
+530 |                         if sender.send(Message::Text(json.into())).await.is_err() {
+    |                                                      ^^^^^^^^^^^ help: consider removing `.into()`: `json`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#useless_conversion
+
+warning: writing `&mut Vec` instead of `&mut [_]` involves a new object where a slice will do
+   --> crates/md-gateway/src/ws.rs:562:20
+    |
+562 |     subscriptions: &mut Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>>,
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#ptr_arg
+    = note: `#[warn(clippy::ptr_arg)]` on by default
+help: change this to
+    |
+562 -     subscriptions: &mut Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>>,
+562 +     subscriptions: &mut [tokio::sync::broadcast::Receiver<BroadcastEvent>],
+    |
+
+warning: `md-gateway` (lib) generated 7 warnings (run `cargo clippy --fix --lib -p md-gateway -- ` to apply 6 suggestions)
+    Checking md-server v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-server)
+warning: `md-gateway` (lib test) generated 7 warnings (7 duplicates)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.98s
+clippy exit=0

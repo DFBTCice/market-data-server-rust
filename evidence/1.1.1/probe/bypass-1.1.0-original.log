@@ -1,0 +1,54 @@
+{
+  "url": "ws://192.168.1.198:28108/ws/v1/data",
+  "topics": [
+    "tick.binance.BNBUSDT",
+    "kline.1m.binance.BNBUSDT"
+  ],
+  "window": {
+    "fromSec": 12,
+    "lenSec": 52
+  },
+  "control": {
+    "name": "control",
+    "total": 160,
+    "byType": {
+      "kline": 61,
+      "tick": 99
+    },
+    "unique": 160,
+    "duplicates": 0,
+    "dupRatio": 0,
+    "multiplicity": {
+      "1": 160
+    },
+    "acks": [
+      "0.1s subscribe:tick.binance.BNBUSDT",
+      "0.1s subscribe:kline.1m.binance.BNBUSDT"
+    ],
+    "errors": []
+  },
+  "churn": {
+    "name": "churn",
+    "total": 320,
+    "byType": {
+      "kline": 122,
+      "tick": 198
+    },
+    "unique": 160,
+    "duplicates": 160,
+    "dupRatio": 0.5,
+    "multiplicity": {
+      "2": 160
+    },
+    "acks": [
+      "0.0s subscribe:tick.binance.BNBUSDT",
+      "0.0s subscribe:kline.1m.binance.BNBUSDT",
+      "4.1s unsubscribe:tick.binance.BNBUSDT",
+      "4.1s unsubscribe:kline.1m.binance.BNBUSDT",
+      "7.0s subscribe:tick.binance.BNBUSDT",
+      "7.0s subscribe:kline.1m.binance.BNBUSDT"
+    ],
+    "errors": []
+  }
+}
+VERDICT: DUPLICATES FOUND

@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/Users/lihao/Desktop/web3/rust/rest重构/evidence/1.1.1/tools/thp_sampler.py", line 44, in <module>
+    time.sleep(max(0.0, every - (time.time() - t0)))
+KeyboardInterrupt

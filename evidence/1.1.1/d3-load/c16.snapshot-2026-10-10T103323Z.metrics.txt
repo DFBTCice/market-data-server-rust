@@ -1,0 +1,554 @@
+# HELP md_ticks_processed Total ticks processed (global)
+# TYPE md_ticks_processed counter
+md_ticks_processed 311
+# HELP md_klines_processed Total klines processed (global)
+# TYPE md_klines_processed counter
+md_klines_processed 128
+# HELP md_ticks_dropped Total ticks dropped (mpsc channel full)
+# TYPE md_ticks_dropped counter
+md_ticks_dropped 0
+# HELP md_klines_dropped Total klines dropped (mpsc channel full)
+# TYPE md_klines_dropped counter
+md_klines_dropped 0
+# HELP md_quotes_processed Total quotes processed (global)
+# TYPE md_quotes_processed counter
+md_quotes_processed 468
+# HELP md_quotes_dropped Total quotes dropped (mpsc channel full)
+# TYPE md_quotes_dropped counter
+md_quotes_dropped 0
+# HELP md_ingestion_latency_ms Arrival latency: exchange push event(E)->local receive (ms), by exchange/type/symbol/interval
+# TYPE md_ingestion_latency_ms histogram
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m",le="+Inf"} 1
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m"} 203812
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="15m"} 1
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="75"} 27
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="100"} 29
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="150"} 30
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="250"} 31
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="500"} 31
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="1000"} 31
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="2500"} 31
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="5000"} 31
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="+Inf"} 31
+md_ingestion_latency_ms_sum{exchange="binance",type="tick",symbol="ETHUSDT",interval=""} 2109
+md_ingestion_latency_ms_count{exchange="binance",type="tick",symbol="ETHUSDT",interval=""} 31
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc",le="+Inf"} 1
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc"} 16403820
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="6Hutc"} 1
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="75"} 289
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="100"} 309
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="150"} 312
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="250"} 321
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="500"} 322
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="1000"} 322
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="2500"} 322
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="5000"} 322
+md_ingestion_latency_ms_bucket{exchange="binance",type="quote",symbol="BNBUSDT",interval="",le="+Inf"} 322
+md_ingestion_latency_ms_sum{exchange="binance",type="quote",symbol="BNBUSDT",interval=""} 21804
+md_ingestion_latency_ms_count{exchange="binance",type="quote",symbol="BNBUSDT",interval=""} 322
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H",le="+Inf"} 1
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H"} 2003836
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="2H"} 1
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="75"} 48
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="100"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="150"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="250"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="500"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="1000"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="2500"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="5000"} 82
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="+Inf"} 82
+md_ingestion_latency_ms_sum{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval=""} 6207
+md_ingestion_latency_ms_count{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval=""} 82
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="75"} 50
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="100"} 52
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="150"} 53
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="250"} 53
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="500"} 53
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="1000"} 53
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="2500"} 53
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="5000"} 53
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m",le="+Inf"} 53
+md_ingestion_latency_ms_sum{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m"} 3501
+md_ingestion_latency_ms_count{exchange="binance",type="kline",symbol="BTCUSDT",interval="5m"} 53
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m",le="+Inf"} 1
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m"} 23815
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="3m"} 1
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc",le="+Inf"} 1
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc"} 815603825
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1Mutc"} 1
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="75"} 25
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="100"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="150"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="250"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="500"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="1000"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="2500"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="5000"} 49
+md_ingestion_latency_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="+Inf"} 49
+md_ingestion_latency_ms_sum{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval=""} 3698
+md_ingestion_latency_ms_count{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval=""} 49
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="75"} 143
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="100"} 147
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="150"} 149
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="250"} 149
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="500"} 149
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="1000"} 149
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="2500"} 149
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="5000"} 149
+md_ingestion_latency_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="+Inf"} 149
+md_ingestion_latency_ms_sum{exchange="binance",type="tick",symbol="BTCUSDT",interval=""} 8948
+md_ingestion_latency_ms_count{exchange="binance",type="tick",symbol="BTCUSDT",interval=""} 149
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="75"} 5
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="100"} 39
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="150"} 54
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="250"} 145
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="500"} 146
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="1000"} 146
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="2500"} 146
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="5000"} 146
+md_ingestion_latency_ms_bucket{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval="",le="+Inf"} 146
+md_ingestion_latency_ms_sum{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval=""} 20467
+md_ingestion_latency_ms_count{exchange="okx",type="quote",symbol="BNB-USDT-SWAP",interval=""} 146
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="75"} 19
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="100"} 21
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="150"} 21
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="250"} 21
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="500"} 22
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="1000"} 22
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="2500"} 22
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="5000"} 22
+md_ingestion_latency_ms_bucket{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m",le="+Inf"} 22
+md_ingestion_latency_ms_sum{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m"} 1774
+md_ingestion_latency_ms_count{exchange="binance",type="kline",symbol="ETHUSDT",interval="5m"} 22
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m",le="+Inf"} 18
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m"} 3408970
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="5m"} 18
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H",le="+Inf"} 1
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H"} 2003829
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="ETH-USDT-SWAP",interval="1H"} 1
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="1"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="2"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="3"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="5"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="8"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="12"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="16"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="20"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="25"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="30"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="40"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="50"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="75"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="100"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="150"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="250"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="1000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="2500"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="5000"} 0
+md_ingestion_latency_ms_bucket{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m",le="+Inf"} 29
+md_ingestion_latency_ms_sum{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m"} 5539599
+md_ingestion_latency_ms_count{exchange="okx",type="kline",symbol="BTC-USDT-SWAP",interval="5m"} 29
+# HELP md_ingestion_latency_e2e_ms End-to-end latency: exchange trade time(T)->local receive (ms), includes exchange-side aggregation delay
+# TYPE md_ingestion_latency_e2e_ms histogram
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="1"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="2"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="3"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="5"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="8"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="12"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="16"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="20"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="25"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="30"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="40"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="50"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="75"} 48
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="100"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="150"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="250"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="500"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="1000"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="2500"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="5000"} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval="",le="+Inf"} 82
+md_ingestion_latency_e2e_ms_sum{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval=""} 6207
+md_ingestion_latency_e2e_ms_count{exchange="okx",type="tick",symbol="BTC-USDT-SWAP",interval=""} 82
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="1"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="2"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="3"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="5"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="8"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="12"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="16"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="20"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="25"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="30"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="40"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="50"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="75"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="100"} 1
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="150"} 3
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="250"} 29
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="500"} 31
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="1000"} 31
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="2500"} 31
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="5000"} 31
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="ETHUSDT",interval="",le="+Inf"} 31
+md_ingestion_latency_e2e_ms_sum{exchange="binance",type="tick",symbol="ETHUSDT",interval=""} 6414
+md_ingestion_latency_e2e_ms_count{exchange="binance",type="tick",symbol="ETHUSDT",interval=""} 31
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="1"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="2"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="3"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="5"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="8"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="12"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="16"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="20"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="25"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="30"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="40"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="50"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="75"} 25
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="100"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="150"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="250"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="500"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="1000"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="2500"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="5000"} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval="",le="+Inf"} 49
+md_ingestion_latency_e2e_ms_sum{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval=""} 3698
+md_ingestion_latency_e2e_ms_count{exchange="okx",type="tick",symbol="ETH-USDT-SWAP",interval=""} 49
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="1"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="2"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="3"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="5"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="8"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="12"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="16"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="20"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="25"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="30"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="40"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="50"} 0
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="75"} 62
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="100"} 64
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="150"} 71
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="250"} 149
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="500"} 149
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="1000"} 149
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="2500"} 149
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="5000"} 149
+md_ingestion_latency_e2e_ms_bucket{exchange="binance",type="tick",symbol="BTCUSDT",interval="",le="+Inf"} 149
+md_ingestion_latency_e2e_ms_sum{exchange="binance",type="tick",symbol="BTCUSDT",interval=""} 20504
+md_ingestion_latency_e2e_ms_count{exchange="binance",type="tick",symbol="BTCUSDT",interval=""} 149
+# HELP md_connector_connected Connector connected state (0/1)
+# TYPE md_connector_connected gauge
+md_connector_connected{exchange="okx-quote"} 1
+md_connector_connected{exchange="binance-quote"} 1
+md_connector_connected{exchange="okx"} 1
+md_connector_connected{exchange="okx-kline"} 1
+md_connector_connected{exchange="binance"} 1
+# HELP md_connector_reconnect_total Total connector reconnections
+# TYPE md_connector_reconnect_total counter
+md_connector_reconnect_total{exchange="okx-quote"} 0
+md_connector_reconnect_total{exchange="binance-quote"} 0
+md_connector_reconnect_total{exchange="okx"} 0
+md_connector_reconnect_total{exchange="okx-kline"} 0
+md_connector_reconnect_total{exchange="binance"} 0
+# HELP md_connector_subscribe_failed_total Total subscribe failures
+# TYPE md_connector_subscribe_failed_total counter
+md_connector_subscribe_failed_total{exchange="okx-quote"} 0
+md_connector_subscribe_failed_total{exchange="binance-quote"} 0
+md_connector_subscribe_failed_total{exchange="okx"} 0
+md_connector_subscribe_failed_total{exchange="okx-kline"} 0
+md_connector_subscribe_failed_total{exchange="binance"} 0
+# HELP md_ws_active_clients Currently active WebSocket clients (gateway + legacy)
+# TYPE md_ws_active_clients gauge
+md_ws_active_clients 0
+# HELP md_ws_subscriptions_active Broadcast receivers currently held by all WebSocket connections (gateway + legacy)
+# TYPE md_ws_subscriptions_active gauge
+md_ws_subscriptions_active 0
+# HELP md_ws_kicked_lagged_total Total WebSocket clients kicked due to consecutive broadcast lagged
+# TYPE md_ws_kicked_lagged_total counter
+md_ws_kicked_lagged_total 0
+# HELP md_ws_messages_sent_total Total WebSocket / gRPC messages successfully delivered to clients
+# TYPE md_ws_messages_sent_total counter
+md_ws_messages_sent_total{kind="tick"} 0
+md_ws_messages_sent_total{kind="kline"} 0
+md_ws_messages_sent_total{kind="quote"} 0
+# HELP md_broadcast_lagged_total Total broadcast lagged events (subscriber fell behind)
+# TYPE md_broadcast_lagged_total counter
+md_broadcast_lagged_total{topic_kind="tick"} 0
+md_broadcast_lagged_total{topic_kind="kline"} 0
+md_broadcast_lagged_total{topic_kind="quote"} 0
+# HELP md_gateway_internal_latency_ms Gateway forward latency publish->client send (ms), by topic
+# TYPE md_gateway_internal_latency_ms histogram
+# HELP md_tokio_alive_tasks Tasks currently alive in the tokio runtime
+# TYPE md_tokio_alive_tasks gauge
+md_tokio_alive_tasks 20
+# HELP md_tokio_workers Tokio runtime worker threads
+# TYPE md_tokio_workers gauge
+md_tokio_workers 2
+# HELP md_tokio_global_queue_depth Tasks waiting in the tokio global queue
+# TYPE md_tokio_global_queue_depth gauge
+md_tokio_global_queue_depth 0
+# HELP process_resident_memory_bytes Resident memory size (RSS) in bytes
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 17149952
+# HELP process_virtual_memory_bytes Virtual memory size in bytes
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 27615232
+# HELP process_cpu_seconds_total Total user + system CPU time spent (seconds)
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.31
+# HELP process_open_fds Number of open file descriptors
+# TYPE process_open_fds gauge
+process_open_fds 18
+# HELP process_max_fds Maximum number of open file descriptors
+# TYPE process_max_fds gauge
+process_max_fds 1048576
+# HELP process_start_time_seconds Start time of the process since unix epoch (seconds)
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1791628376
+# HELP process_uptime_seconds Uptime of the process (seconds)
+# TYPE process_uptime_seconds gauge
+process_uptime_seconds 27

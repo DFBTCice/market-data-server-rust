@@ -1,0 +1,85 @@
+
+== tick.binance.BTCUSDT
+   条数: old=2815 new=2815
+   OK   字段名/顺序: 全部 2815 条与基线 key 顺序一致 [exchange,symbol,timestamp,price,quantity,trade_id,is_buyer_maker,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"tick.binance.BTCUSDT","data":)
+   OK   逐字节: 对应记录 2815 条（去掉 connector_receive_ts 后）完全相同
+   OK   覆盖: 公共窗口内两侧成交集合一致（无丢失/无多出）
+   OK   频率: new/old=1.00（容差 ±563 条）, 最大间隔 old=3079ms new=3074ms
+
+== tick.binance.ETHUSDT
+   条数: old=700 new=701
+   OK   字段名/顺序: 全部 701 条与基线 key 顺序一致 [exchange,symbol,timestamp,price,quantity,trade_id,is_buyer_maker,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"tick.binance.ETHUSDT","data":)
+   OK   逐字节: 对应记录 700 条（去掉 connector_receive_ts 后）完全相同
+   OK   覆盖: 公共窗口内两侧成交集合一致（无丢失/无多出）
+   OK   频率: new/old=1.00（容差 ±140 条）, 最大间隔 old=3292ms new=3287ms
+
+== tick.binance.BNBUSDT
+   条数: old=298 new=298
+   OK   字段名/顺序: 全部 298 条与基线 key 顺序一致 [exchange,symbol,timestamp,price,quantity,trade_id,is_buyer_maker,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"tick.binance.BNBUSDT","data":)
+   OK   逐字节: 对应记录 298 条（去掉 connector_receive_ts 后）完全相同
+   OK   覆盖: 公共窗口内两侧成交集合一致（无丢失/无多出）
+   OK   频率: new/old=1.00（容差 ±60 条）, 最大间隔 old=7678ms new=7668ms
+
+== tick.okx.BTC-USDT-SWAP
+   条数: old=2660 new=2660
+   OK   字段名/顺序: 全部 2660 条与基线 key 顺序一致 [exchange,symbol,timestamp,price,quantity,trade_id,is_buyer_maker,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"tick.okx.BTC-USDT-SWAP","data":)
+   OK   逐字节: 对应记录 2660 条（去掉 connector_receive_ts 后）完全相同
+   OK   覆盖: 公共窗口内两侧成交集合一致（无丢失/无多出）
+   OK   频率: new/old=1.00（容差 ±532 条）, 最大间隔 old=4137ms new=4139ms
+
+== tick.okx.ETH-USDT-SWAP
+   条数: old=1015 new=1015
+   OK   字段名/顺序: 全部 1015 条与基线 key 顺序一致 [exchange,symbol,timestamp,price,quantity,trade_id,is_buyer_maker,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"tick.okx.ETH-USDT-SWAP","data":)
+   OK   逐字节: 对应记录 1015 条（去掉 connector_receive_ts 后）完全相同
+   OK   覆盖: 公共窗口内两侧成交集合一致（无丢失/无多出）
+   OK   频率: new/old=1.00（容差 ±203 条）, 最大间隔 old=5620ms new=5617ms
+
+== tick.okx.BNB-USDT-SWAP
+   条数: old=29 new=29
+   OK   字段名/顺序: 全部 29 条与基线 key 顺序一致 [exchange,symbol,timestamp,price,quantity,trade_id,is_buyer_maker,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"tick.okx.BNB-USDT-SWAP","data":)
+   OK   逐字节: 对应记录 29 条（去掉 connector_receive_ts 后）完全相同
+   OK   覆盖: 公共窗口内两侧成交集合一致（无丢失/无多出）
+   OK   频率: new/old=1.00（容差 ±6 条）, 最大间隔 old=60162ms new=60157ms
+
+== kline.1m.binance.BNBUSDT
+   条数: old=187 new=187
+   OK   字段名/顺序: 全部 187 条与基线 key 顺序一致 [exchange,symbol,interval,open_time,open,high,low,close,volume,close_time,quote_asset_volume,number_of_trades,is_closed,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"kline.1m.binance.BNBUSDT","data":)
+   OK   逐字节: 对应记录 184 条（去掉 connector_receive_ts 后）完全相同
+   OK   频率: new/old=1.00（容差 ±37 条）, 最大间隔 old=7716ms new=7695ms
+
+== kline.5m.binance.BTCUSDT
+   条数: old=455 new=455
+   OK   字段名/顺序: 全部 455 条与基线 key 顺序一致 [exchange,symbol,interval,open_time,open,high,low,close,volume,close_time,quote_asset_volume,number_of_trades,is_closed,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"kline.5m.binance.BTCUSDT","data":)
+   OK   逐字节: 对应记录 455 条（去掉 connector_receive_ts 后）完全相同
+   OK   频率: new/old=1.00（容差 ±91 条）, 最大间隔 old=3066ms new=3068ms
+
+== kline.1m.okx.ETH-USDT-SWAP
+   条数: old=257 new=257
+   OK   字段名/顺序: 全部 257 条与基线 key 顺序一致 [exchange,symbol,interval,open_time,open,high,low,close,volume,close_time,quote_asset_volume,is_closed,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"kline.1m.okx.ETH-USDT-SWAP","data":)
+   OK   逐字节: 对应记录 253 条（去掉 connector_receive_ts 后）完全相同
+   OK   频率: new/old=1.00（容差 ±51 条）, 最大间隔 old=5913ms new=5895ms
+
+== kline.5m.okx.ETH-USDT-SWAP
+   条数: old=253 new=253
+   OK   字段名/顺序: 全部 253 条与基线 key 顺序一致 [exchange,symbol,interval,open_time,open,high,low,close,volume,close_time,quote_asset_volume,is_closed,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"kline.5m.okx.ETH-USDT-SWAP","data":)
+   OK   逐字节: 对应记录 252 条（去掉 connector_receive_ts 后）完全相同
+   OK   频率: new/old=1.00（容差 ±51 条）, 最大间隔 old=5914ms new=5906ms
+
+== kline.1H.okx.ETH-USDT-SWAP
+   条数: old=252 new=252
+   OK   字段名/顺序: 全部 252 条与基线 key 顺序一致 [exchange,symbol,interval,open_time,open,high,low,close,volume,close_time,quote_asset_volume,exchange_event_ts,connector_receive_ts]
+   OK   外层结构: 外层前缀与基线一致 ({"topic":"kline.1H.okx.ETH-USDT-SWAP","data":)
+   OK   逐字节: 对应记录 252 条（去掉 connector_receive_ts 后）完全相同
+   OK   频率: new/old=1.00（容差 ±50 条）, 最大间隔 old=5914ms new=5909ms
+
+RESULT: PASS

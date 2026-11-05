@@ -1,0 +1,21 @@
+   Compiling md-processor v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-processor)
+   Compiling md-connector v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-connector)
+   Compiling md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.08s
+     Running tests/compat_1_0_0.rs (target/debug/deps/compat_1_0_0-8e790e4cad025c5b)
+
+running 5 tests
+test positive_control_comparison_detects_field_reorder_and_format_change ... ok
+gateway tick.okx.BNB-USDT-SWAP 逐字节一致: 14 行
+test gateway_tick_okx_matches_1_0_0_byte_for_byte ... ok
+legacy /ws tick.binance.BNBUSDT 逐字节一致: 47 行
+legacy /ws tick.okx.BNB-USDT-SWAP 逐字节一致: 13 行
+test legacy_ws_tick_matches_1_0_0_byte_for_byte ... ok
+gateway kline.1m.binance.BNBUSDT 逐字节一致: 79 行
+gateway tick.binance.BNBUSDT 逐字节一致: 100 行
+test gateway_kline_matches_1_0_0_byte_for_byte ... ok
+test gateway_tick_binance_matches_1_0_0_byte_for_byte ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+exit=0

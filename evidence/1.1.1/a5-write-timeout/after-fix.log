@@ -1,0 +1,11 @@
+   Compiling md-gateway v0.1.0 (/Users/lihao/Desktop/web3/rust/rest重构/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.10s
+     Running tests/write_timeout_gateway.rs (target/debug/deps/write_timeout_gateway-b35580f3be620c16)
+
+running 3 tests
+test healthy_client_is_not_affected_by_write_wait ... ok
+test stalled_client_is_kicked_after_write_wait ... ok
+test without_write_wait_stalled_client_pins_the_connection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.48s
+

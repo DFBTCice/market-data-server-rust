@@ -1,0 +1,29 @@
+{
+  "at_utc": "2026-10-24T17:26:39.459262+00:00",
+  "md_container_inventory": [
+    {
+      "Id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+      "Names": [
+        "/md-server"
+      ],
+      "Image": "md-server:1.1.1",
+      "ImageID": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+      "State": "running",
+      "Status": "Up 22 hours (healthy)"
+    }
+  ],
+  "old_container_exists_by_id": false,
+  "old_container_response": {
+    "Id": null,
+    "Name": null,
+    "message": "No such container: 1de7da0c7d2cf9b4c4b6a2154d9464c0895e6480066c97fbb64ffc7e1126f83f"
+  },
+  "old_image_exists": true,
+  "old_image": {
+    "Id": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+    "RepoTags": [
+      "md-server:1.1.0-quote-bnb"
+    ],
+    "message": null
+  }
+}

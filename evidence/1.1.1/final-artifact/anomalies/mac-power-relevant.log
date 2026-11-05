@@ -1,0 +1,4 @@
+2026-10-24 01:53:26 +0800 Assertions          	PID 84478(caffeinate) Summary PreventUserIdleSystemSleep "caffeinate command-line tool" 00:17:17  id:0x0x10000a6c3 [System: PrevIdle PrevSleep DeclUser IntPrevDisp kCPU kDisp]          
+2026-10-24 01:53:26 +0800 Assertions          	PID 80086(caffeinate) Summary PreventUserIdleSystemSleep "caffeinate command-line tool" 00:19:27  id:0x0x10000a69d [System: PrevIdle PrevSleep DeclUser IntPrevDisp kCPU kDisp]          
+2026-10-24 01:53:26 +0800 Assertions          	PID 84478(caffeinate) Summary PreventSystemSleep "caffeinate command-line tool" 00:17:17  id:0x0x70000a6c4 [System: PrevIdle PrevSleep DeclUser IntPrevDisp kCPU kDisp]          
+2026-10-24 01:53:26 +0800 Assertions          	PID 80086(caffeinate) Summary PreventSystemSleep "caffeinate command-line tool" 00:19:27  id:0x0x70000a69e [System: PrevIdle PrevSleep DeclUser IntPrevDisp kCPU kDisp]          

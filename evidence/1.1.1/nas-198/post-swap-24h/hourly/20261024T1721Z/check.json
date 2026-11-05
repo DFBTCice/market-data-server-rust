@@ -1,0 +1,82 @@
+{
+  "at_utc": "2026-10-24T17:22:03.767310+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 1288,
+  "valid_samples": 1288,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T17:21:18Z",
+  "span_s": 77225.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 45.76730990409851,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "post_warmup_span_s": 73625.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 78.69921875,
+    "min_mib": 55.30859375,
+    "max_mib": 79.02734375,
+    "slope_mib_h": 0.854311328783417
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.20965576171875,
+    "min_mib": 4.188728332519531,
+    "max_mib": 4.360542297363281,
+    "slope_mib_h": -0.0005748319682405617
+  },
+  "rss_last_60min": {
+    "first_mib": 78.8984375,
+    "last_mib": 78.69921875,
+    "min_mib": 78.515625,
+    "max_mib": 79.02734375,
+    "slope_mib_h": -0.2155109730301428
+  },
+  "current": {
+    "rss_mib": 78.82421875,
+    "allocated_mib": 4.264900207519531,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0,
+    "write_timeouts": 1.0,
+    "lagged": 0.0,
+    "ticks_dropped": 2460.0
+  },
+  "write_timeout_sample_max": 1.0,
+  "lagged_sample_max": 0.0,
+  "tick_drop_sample_max": 2460.0,
+  "oms_readonly_health": {
+    "health": "healthy",
+    "running": true,
+    "started_at": "2026-10-23T21:23:42.881520537Z",
+    "restart_count": 0
+  },
+  "analysis_is_provisional": true,
+  "provisional_rss_target_exceeded": false,
+  "server_log_collection": {
+    "since_epoch": 1792858358,
+    "raw_bytes": 247,
+    "text_bytes": 239,
+    "level": "RUST_LOG=warn",
+    "tail_limit": 1000
+  },
+  "new_events": [
+    "2026-10-24T16:24:18.113Z WS_CLIENTS 2->1",
+    "2026-10-24T16:25:18.121Z WS_CLIENTS 1->2",
+    "2026-10-24T16:33:18.151Z WS_CLIENTS 2->3",
+    "2026-10-24T16:34:18.156Z WS_CLIENTS 3->2",
+    "2026-10-24T17:11:18.293Z WS_CLIENTS 2->1",
+    "2026-10-24T17:12:18.294Z WS_CLIENTS 1->2"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "at_utc": "2026-10-24T18:22:03.005328+00:00",
+  "initial_endpoint_read_http_status": 401,
+  "session_renewed_with_previously_authorized_ai_account": true,
+  "jwt_path": "/tmp/pt_jwt",
+  "jwt_permissions": "600",
+  "password_persisted": false,
+  "sampling_affected": false,
+  "subsequent_readonly_check_passed": true
+}

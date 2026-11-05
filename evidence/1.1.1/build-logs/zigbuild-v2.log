@@ -1,0 +1,6 @@
+   Compiling tikv-jemalloc-sys v0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+   Compiling paste v1.0.15
+   Compiling tikv-jemalloc-ctl v0.6.1
+   Compiling tikv-jemallocator v0.6.1
+   Compiling md-server v0.1.0 (/private/tmp/md-wt-v0/crates/md-server)
+    Finished `release` profile [optimized] target(s) in 1m 34s

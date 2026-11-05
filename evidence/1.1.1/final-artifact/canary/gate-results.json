@@ -1,0 +1,9 @@
+{
+  "push-gateway": 0,
+  "push-legacy": 0,
+  "noquote-legacy": 0,
+  "subs": 0,
+  "metrics": 0,
+  "selftest": 0,
+  "quote_raw": 1
+}

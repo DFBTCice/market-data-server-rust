@@ -1,0 +1,5 @@
+# 原始推送本机留存；对比日志、摘要、文件哈希入库。
+compat/old-gateway/
+compat/new-gateway/
+compat/old-legacy/
+compat/new-legacy/

@@ -6,6 +6,7 @@ use md_connector::Connector;
 use md_processor::Processor;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::RwLock;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -21,6 +22,9 @@ pub struct GatewayConfig {
 pub struct Gateway {
     pub processor: Arc<Processor>,
     pub connectors: Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
+    /// Gateway WS（`/ws/v1/data`）单次写超时；`None` = 不限（1.0.0/1.1.0 的行为）。
+    /// 由 `api_gateway.ws_write_wait` 配置；Legacy `/ws` 不使用。
+    ws_write_wait: Option<Duration>,
 }
 
 impl Gateway {
@@ -31,7 +35,20 @@ impl Gateway {
         Self {
             processor,
             connectors,
+            ws_write_wait: None,
         }
+    }
+
+    /// 设置 Gateway WS 的单次写超时（对应配置 `api_gateway.ws_write_wait`）。
+    /// 客户端停读/半死导致一次写入阻塞超过该时长，连接会被主动断开并释放其全部 broadcast 接收端。
+    /// `Duration::ZERO` 表示关闭（不限时）。
+    pub fn with_ws_write_wait(mut self, write_wait: Duration) -> Self {
+        self.ws_write_wait = if write_wait.is_zero() {
+            None
+        } else {
+            Some(write_wait)
+        };
+        self
     }
 
     /// 构建 axum Router
@@ -46,7 +63,10 @@ impl Gateway {
                 self.processor.clone(),
                 self.connectors.clone(),
             ))
-            .merge(ws::routes(self.processor.clone()))
+            .merge(ws::routes_with_write_wait(
+                self.processor.clone(),
+                self.ws_write_wait,
+            ))
             .layer(cors)
     }
 }

@@ -1,0 +1,10 @@
+{
+  "automation_id": "1-1-1",
+  "deleted_at_utc": "2026-10-24T20:17:55Z",
+  "tool_confirmed_status": "deleted",
+  "reason": "Original complete 24h observation and final report delivered; acceptance failed, awaiting reviewer/business decision rather than extending observation",
+  "report_evidence_commit": "760b24b",
+  "pr_comment_id": 6371055873,
+  "original_sampler_already_finished_exit_code": 0,
+  "running_production_unchanged": true
+}

@@ -1,0 +1,79 @@
+{
+  "at_utc": "2026-10-24T02:13:07.240071+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 379,
+  "valid_samples": 379,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T02:12:15Z",
+  "span_s": 22682.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 52.24082899093628,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "post_warmup_span_s": 19082.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 59.859375,
+    "min_mib": 55.30859375,
+    "max_mib": 60.0859375,
+    "slope_mib_h": 0.9503250398871529
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.199562072753906,
+    "min_mib": 4.189552307128906,
+    "max_mib": 4.3419036865234375,
+    "slope_mib_h": -0.0016483599814913505
+  },
+  "rss_last_60min": {
+    "first_mib": 59.72265625,
+    "last_mib": 59.859375,
+    "min_mib": 59.56640625,
+    "max_mib": 60.0859375,
+    "slope_mib_h": 0.08323968799576945
+  },
+  "current": {
+    "rss_mib": 59.85546875,
+    "allocated_mib": 4.253273010253906,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0,
+    "write_timeouts": 0.0,
+    "lagged": 0.0,
+    "ticks_dropped": 0.0
+  },
+  "write_timeout_sample_max": 0.0,
+  "tick_drop_sample_max": 0.0,
+  "lagged_sample_max": 0.0,
+  "oms_readonly_health": {
+    "health": "healthy",
+    "running": true,
+    "started_at": "2026-10-23T21:23:42.881520537Z",
+    "restart_count": 0
+  },
+  "analysis_is_provisional": true,
+  "provisional_rss_target_exceeded": false,
+  "server_log_collection": {
+    "since_epoch": 1792804165,
+    "raw_bytes": 0,
+    "text_bytes": 0,
+    "level": "RUST_LOG=warn",
+    "tail_limit": 1000
+  },
+  "new_events": [
+    "01:58:15Z WS clients sampled at1; recovered2 at01:59:15Z, no write-timeout/lagged/drop increment; client identity and exact cause not established"
+  ],
+  "portainer_authentication": "initial HTTP401 Invalid JWT; renewed using previously authorized temporary account with hidden input, no password file; JWT only /tmp/pt_jwt mode600; no sampling restart",
+  "interpretation": "Portainer会话到期已按既有临时账号授权续期，Docker/OMS只读检查恢复，采样未中断。全部预热后19082秒RSS斜率+0.9503MiB/h仍在目标范围，最近60分钟+0.0832MiB/h，allocated持平。当前不触发生产处置；24h尚未完成，继续原每分钟采样。"
+}

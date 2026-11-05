@@ -1,0 +1,905 @@
+[
+  {
+    "scenario": "s00-noop",
+    "title": "无变更 SIGHUP：应成功，无重启提示",
+    "name": "报告成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:35:45.123579Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:45.126351Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s00-noop",
+    "title": "无变更 SIGHUP：应成功，无重启提示",
+    "name": "无重启提示",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:35:45.123579Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:45.126351Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "第1次：检测到 OKX Public 地址变更并点名",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:35:50.010218Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:50.011696Z  WARN md_server:   okx.stream_base_url_public changed (requires restart)\n2026-10-23T17:35:50.011814Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "第1次：给出\"需要重启\"的结论",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:35:50.010218Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:50.011696Z  WARN md_server:   okx.stream_base_url_public changed (requires restart)\n2026-10-23T17:35:50.011814Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "第1次：不得报告\"已成功应用\"",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:35:50.010218Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:50.011696Z  WARN md_server:   okx.stream_base_url_public changed (requires restart)\n2026-10-23T17:35:50.011814Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "第2次：检测到 OKX Public 地址变更并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:35:50.644336Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:50.645287Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "第2次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:35:50.644336Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:50.645287Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "第2次：不得报告\"已成功应用\"",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:35:50.644336Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:50.645287Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxPublic",
+    "title": "仅修改 OKX Public 地址，连续两次 SIGHUP",
+    "name": "旧上游连接保持、新上游无连接（地址未被热切换）",
+    "ok": true,
+    "detail": "connects(B)=0 active(A)=2"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "第1次：检测到 OKX Business 地址变更并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:35:55.526536Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:55.528673Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "第1次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:35:55.526536Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:55.528673Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "第1次：不得报告\"已成功应用\"",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:35:55.526536Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:55.528673Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "第2次：检测到 OKX Business 地址变更并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:35:56.172195Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:56.173246Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "第2次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:35:56.172195Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:56.173246Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "第2次：不得报告\"已成功应用\"",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:35:56.172195Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:35:56.173246Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-okxBusiness",
+    "title": "仅修改 OKX Business 地址，连续两次 SIGHUP",
+    "name": "旧上游连接保持、新上游无连接（地址未被热切换）",
+    "ok": true,
+    "detail": "connects(B)=0 active(A)=1"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "第1次：检测到 Binance Market(tick/kline) 地址变更并点名",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:01.060348Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:01.062083Z  WARN md_server:   binance.stream_base_url changed (requires restart)\n2026-10-23T17:36:01.062307Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "第1次：给出\"需要重启\"的结论",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:01.060348Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:01.062083Z  WARN md_server:   binance.stream_base_url changed (requires restart)\n2026-10-23T17:36:01.062307Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "第1次：不得报告\"已成功应用\"",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:01.060348Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:01.062083Z  WARN md_server:   binance.stream_base_url changed (requires restart)\n2026-10-23T17:36:01.062307Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "第2次：检测到 Binance Market(tick/kline) 地址变更并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:01.690656Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:01.691295Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "第2次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:01.690656Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:01.691295Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "第2次：不得报告\"已成功应用\"",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:01.690656Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:01.691295Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-binanceMarket",
+    "title": "仅修改 Binance Market(tick/kline) 地址，连续两次 SIGHUP",
+    "name": "旧上游连接保持、新上游无连接（地址未被热切换）",
+    "ok": true,
+    "detail": "connects(B)=0 active(A)=1"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "第1次：检测到 Binance Public(quote) 地址变更并点名",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:06.500625Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:06.502362Z  WARN md_server:   binance.stream_base_url_public changed (requires restart)\n2026-10-23T17:36:06.502432Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "第1次：给出\"需要重启\"的结论",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:06.500625Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:06.502362Z  WARN md_server:   binance.stream_base_url_public changed (requires restart)\n2026-10-23T17:36:06.502432Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "第1次：不得报告\"已成功应用\"",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:06.500625Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:06.502362Z  WARN md_server:   binance.stream_base_url_public changed (requires restart)\n2026-10-23T17:36:06.502432Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "第2次：检测到 Binance Public(quote) 地址变更并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:07.132453Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:07.133092Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "第2次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:07.132453Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:07.133092Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "第2次：不得报告\"已成功应用\"",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:07.132453Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:07.133092Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s1-url-binancePublic",
+    "title": "仅修改 Binance Public(quote) 地址，连续两次 SIGHUP",
+    "name": "旧上游连接保持、新上游无连接（地址未被热切换）",
+    "ok": true,
+    "detail": "connects(B)=0 active(A)=1"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "SIGHUP 给出\"需要重启\"，且不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:36:11.878760Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:11.881290Z  WARN md_server:   binance.stream_base_url changed (requires restart)\n2026-10-23T17:36:11.881357Z  WARN md_server:   okx.stream_base_url_public changed (requires restart)\n2026-10-23T17:36:11.881372Z  WARN md_server:   binance.stream_base_url_public changed (requires restart)\n2026-10-23T17:36:11.881488Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "OKX Public：重连回旧地址",
+    "ok": true,
+    "detail": "connects(A) 2 -> 4"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "OKX Public：新地址仍无连接",
+    "ok": true,
+    "detail": "connects(B)=0"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "OKX Business：重连回旧地址",
+    "ok": true,
+    "detail": "connects(A) 1 -> 2"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "OKX Business：新地址仍无连接",
+    "ok": true,
+    "detail": "connects(B)=0"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "Binance Market(tick/kline)：重连回旧地址",
+    "ok": true,
+    "detail": "connects(A) 1 -> 2"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "Binance Market(tick/kline)：新地址仍无连接",
+    "ok": true,
+    "detail": "connects(B)=0"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "Binance Public(quote)：重连回旧地址",
+    "ok": true,
+    "detail": "connects(A) 1 -> 2"
+  },
+  {
+    "scenario": "s2-reconnect-keeps-startup-urls",
+    "title": "改地址后上游断线：自动重连仍用启动时地址（需重启才换）",
+    "name": "Binance Public(quote)：新地址仍无连接",
+    "ok": true,
+    "detail": "connects(B)=0"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "OKX Public：新进程连到新地址",
+    "ok": true,
+    "detail": "connects(B)=2"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "OKX Public：新进程不再连旧地址",
+    "ok": true,
+    "detail": "connects(A) 2 -> 2"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "OKX Business：新进程连到新地址",
+    "ok": true,
+    "detail": "connects(B)=1"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "OKX Business：新进程不再连旧地址",
+    "ok": true,
+    "detail": "connects(A) 1 -> 1"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "Binance Market(tick/kline)：新进程连到新地址",
+    "ok": true,
+    "detail": "connects(B)=1"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "Binance Market(tick/kline)：新进程不再连旧地址",
+    "ok": true,
+    "detail": "connects(A) 1 -> 1"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "Binance Public(quote)：新进程连到新地址",
+    "ok": true,
+    "detail": "connects(B)=1"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "Binance Public(quote)：新进程不再连旧地址",
+    "ok": true,
+    "detail": "connects(A) 1 -> 1"
+  },
+  {
+    "scenario": "s3-restart-picks-new-urls",
+    "title": "改四个地址后重启：连接器连到新地址",
+    "name": "重启后文件与运行配置一致：SIGHUP 报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP after restart ----\n2026-10-23T17:36:25.311676Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:25.313274Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "OKX 逐笔：新增 ETH 订阅帧已发出",
+    "ok": true,
+    "detail": "{\"args\":[{\"channel\":\"trades\",\"instId\":\"ETH-USDT-SWAP\"}],\"op\":\"subscribe\"}\n{\"args\":[{\"channel\":\"trades\",\"instId\":\"BTC-USDT-SWAP\"}],\"op\":\"unsubscribe\"}"
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "OKX 逐笔：BTC 取消订阅帧已发出",
+    "ok": true,
+    "detail": "{\"args\":[{\"channel\":\"trades\",\"instId\":\"ETH-USDT-SWAP\"}],\"op\":\"subscribe\"}\n{\"args\":[{\"channel\":\"trades\",\"instId\":\"BTC-USDT-SWAP\"}],\"op\":\"unsubscribe\"}"
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "Binance：新增 ethusdt@aggTrade 订阅帧已发出",
+    "ok": true,
+    "detail": "{\"id\":1,\"method\":\"SUBSCRIBE\",\"params\":[\"ethusdt@aggTrade\"]}"
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "OKX K 线：新增 ETH 订阅帧已发出",
+    "ok": true,
+    "detail": "{\"args\":[{\"channel\":\"candle1m\",\"instId\":\"ETH-USDT-SWAP\"}],\"op\":\"subscribe\"}"
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "地址变更仍被点名为待重启，不报成功",
+    "ok": false,
+    "detail": "2026-10-23T17:36:30.390977Z  INFO md_server:   subscription lists changed, applying...\n2026-10-23T17:36:30.392224Z  INFO md_server:   binance: adding 1 subscriptions\n2026-10-23T17:36:30.393641Z  INFO md_server:   okx: adding 1 tick subscriptions\n2026-10-23T17:36:30.394170Z  INFO md_server:   okx: removing 1 tick subscriptions\n2026-10-23T17:36:30.395660Z  INFO md_server:   okx-kline: adding 1 kline subscriptions\n2026-10-23T17:36:30.396288Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "第二次 SIGHUP 不重复下发订阅帧",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s4-subs-hot-update-with-pending-url",
+    "title": "订阅列表热更新不受影响（同时有待重启的地址变更）",
+    "name": "第二次 SIGHUP 仍提示待重启，不报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:31.167499Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:31.169309Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "语法错误：明确报错",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-23T17:36:35.991246Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:35.993512Z  WARN md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "语法错误：声明保留运行配置",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-23T17:36:35.991246Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:35.993512Z  WARN md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "语法错误：不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 语法错误 ----\n2026-10-23T17:36:35.991246Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:35.993512Z  WARN md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 10, while parsing a flow sequence at line 1 column 13, keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "语法错误：进程仍在运行",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "语法错误：没有任何订阅动作",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "校验失败(okx.enabled 但 business 地址为空)：明确报错",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-23T17:36:36.757529Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:36.758879Z  WARN md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "校验失败(okx.enabled 但 business 地址为空)：声明保留运行配置",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-23T17:36:36.757529Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:36.758879Z  WARN md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "校验失败(okx.enabled 但 business 地址为空)：不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 校验失败(okx.enabled 但 business 地址为空) ----\n2026-10-23T17:36:36.757529Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:36.758879Z  WARN md_server: failed to reload config: Validation error: okx 连接器已启用但未配置 stream_base_url_business, keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "校验失败(okx.enabled 但 business 地址为空)：进程仍在运行",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "校验失败(okx.enabled 但 business 地址为空)：没有任何订阅动作",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "文件不存在：明确报错",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-23T17:36:37.565703Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:37.566669Z  WARN md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "文件不存在：声明保留运行配置",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-23T17:36:37.565703Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:37.566669Z  WARN md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "文件不存在：不报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP 文件不存在 ----\n2026-10-23T17:36:37.565703Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:37.566669Z  WARN md_server: failed to reload config: IO error: /cfg/config.yaml: No such file or directory (os error 2), keeping current config"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "文件不存在：进程仍在运行",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "文件不存在：没有任何订阅动作",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "恢复后：订阅热更新生效",
+    "ok": true,
+    "detail": "{\"args\":[{\"channel\":\"trades\",\"instId\":\"ETH-USDT-SWAP\"}],\"op\":\"subscribe\"}"
+  },
+  {
+    "scenario": "s5-invalid-yaml-keeps-running-config",
+    "title": "YAML 坏了：保留运行配置并报错，修好后恢复",
+    "name": "恢复后：报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP recover ----\n2026-10-23T17:36:38.322835Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:38.324290Z  INFO md_server:   subscription lists changed, applying...\n2026-10-23T17:36:38.325032Z  INFO md_server:   okx: adding 1 tick subscriptions\n2026-10-23T17:36:38.326049Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s6-port-offset-no-false-positive",
+    "title": "--port-offset：配置没改，SIGHUP 不得误报监听地址变更",
+    "name": "不误报 listen_address 变更",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:36:43.196832Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:43.198355Z  WARN md_server:   grpc_server.listen_address changed: 127.0.0.1:26408 -> 127.0.0.1:26398 (requires restart)\n2026-10-23T17:36:43.198402Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:24108 -> 127.0.0.1:24098 (requires restart)\n2026-10-23T17:36:43.199133Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s6-port-offset-no-false-positive",
+    "title": "--port-offset：配置没改，SIGHUP 不得误报监听地址变更",
+    "name": "报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:36:43.196832Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:43.198355Z  WARN md_server:   grpc_server.listen_address changed: 127.0.0.1:26408 -> 127.0.0.1:26398 (requires restart)\n2026-10-23T17:36:43.198402Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:24108 -> 127.0.0.1:24098 (requires restart)\n2026-10-23T17:36:43.199133Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s7-env-override-no-false-positive",
+    "title": "环境变量覆盖监听地址：配置没改，SIGHUP 不得误报",
+    "name": "不误报 api_gateway.listen_address 变更",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:36:47.969408Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:47.970268Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:64415 -> 127.0.0.1:64414 (requires restart)\n2026-10-23T17:36:47.971224Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s7-env-override-no-false-positive",
+    "title": "环境变量覆盖监听地址：配置没改，SIGHUP 不得误报",
+    "name": "报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP  ----\n2026-10-23T17:36:47.969408Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:47.970268Z  WARN md_server:   api_gateway.listen_address changed: 127.0.0.1:64415 -> 127.0.0.1:64414 (requires restart)\n2026-10-23T17:36:47.971224Z  WARN md_server: some config changes require connector restart -- please restart the service"
+  },
+  {
+    "scenario": "s8-absent-connectors",
+    "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
+    "name": "第1次：点名 okx.subscribe_klines 未能应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:52.970137Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:52.972292Z  INFO md_server:   subscription lists changed, applying...\n2026-10-23T17:36:52.973281Z  WARN md_server:   okx: subscribe_quotes changed but quote connector is not running (quotes_enabled=false or list was empty at startup) -- requires restart\n2026-10-23T17:36:52.973376Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s8-absent-connectors",
+    "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
+    "name": "第1次：点名 okx.subscribe_quotes 未能应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:52.970137Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:52.972292Z  INFO md_server:   subscription lists changed, applying...\n2026-10-23T17:36:52.973281Z  WARN md_server:   okx: subscribe_quotes changed but quote connector is not running (quotes_enabled=false or list was empty at startup) -- requires restart\n2026-10-23T17:36:52.973376Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s8-absent-connectors",
+    "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
+    "name": "第1次：给出\"需要重启\"，不报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:36:52.970137Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:52.972292Z  INFO md_server:   subscription lists changed, applying...\n2026-10-23T17:36:52.973281Z  WARN md_server:   okx: subscribe_quotes changed but quote connector is not running (quotes_enabled=false or list was empty at startup) -- requires restart\n2026-10-23T17:36:52.973376Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s8-absent-connectors",
+    "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
+    "name": "第2次：点名 okx.subscribe_klines 未能应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:53.617290Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:53.619425Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s8-absent-connectors",
+    "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
+    "name": "第2次：点名 okx.subscribe_quotes 未能应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:53.617290Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:53.619425Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s8-absent-connectors",
+    "title": "连接器未运行时订阅变更：每次 SIGHUP 都明确提示，不报成功",
+    "name": "第2次：给出\"需要重启\"，不报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:36:53.617290Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:53.619425Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "启动日志说明过滤器来自配置的 log_level",
+    "ok": false,
+    "detail": "2026-10-23T17:36:57.347992Z  INFO md_connector::base: [binance] connected and synced\n2026-10-23T17:36:57.348011Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:36:57.348042Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-23T17:36:57.348073Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:36:57.348097Z  INFO md_connector::base: [okx-quote] connected and synced\n[harness] ---- process ready ----"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "info→warn：点名 log_level 变更并开始应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP info->warn ----\n2026-10-23T17:36:58.380027Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:36:58.381055Z  INFO md_server:   log_level: info -> warn (applied)\n2026-10-23T17:36:58.381672Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "warn 级别：无变更 SIGHUP 没有任何 INFO 输出（INFO 已被过滤）",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP warn, no change ----\n2026-10-23T17:37:00.115733Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:00.116649Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "warn 级别：WARN 仍可见（待重启提示照常输出）",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP warn, url pending ----\n2026-10-23T17:37:01.869781Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:01.871120Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error 级别：同样的待重启情形不再输出 WARN（对照上一步 warn 级别可见）",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP warn->error ----\n2026-10-23T17:37:03.609244Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:03.610100Z  INFO md_server:   log_level: warn -> error (applied)\n2026-10-23T17:37:03.610129Z  INFO md_server: config reloaded and applied successfully[harness] ---- SIGHUP error, same url pending ----\n2026-10-23T17:37:05.354824Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:05.355740Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error 级别：ERROR 仍可见（YAML 解析失败照常报错）",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP error, bad yaml ----\n2026-10-23T17:37:07.108999Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:07.111619Z  WARN md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current config"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error→info：确认已应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP error->info ----\n2026-10-23T17:37:08.848475Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:08.849289Z  INFO md_server:   log_level: error -> info (applied)\n2026-10-23T17:37:08.849335Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "error→info：此后报成功（地址已改回，无待处理项）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP error->info ----\n2026-10-23T17:37:08.848475Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:08.849289Z  INFO md_server:   log_level: error -> info (applied)\n2026-10-23T17:37:08.849335Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "info 恢复：无变更 SIGHUP 的 INFO 日志重新可见",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP info, no change ----\n2026-10-23T17:37:09.487971Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:09.488665Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9a-log-level-hot-apply",
+    "title": "log_level 热更（RUST_LOG 未设置）：info → warn → error → info，不重连、不重启",
+    "name": "全程没有重连 / 断线（热更，不重启）",
+    "ok": true,
+    "detail": "connects=0 closes=0"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "启动阶段没有任何 INFO 日志（旧版本这里会输出全部 INFO）",
+    "ok": false,
+    "detail": "2026-10-23T17:37:13.346217Z  INFO md_connector::base: [okx-quote] subscription sync complete\n2026-10-23T17:37:13.346403Z  INFO md_connector::base: [binance] connected and synced\n2026-10-23T17:37:13.346418Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:37:13.346461Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-23T17:37:13.346506Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:37:13.346551Z  INFO md_connector::base: [okx-quote] connected and synced"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "连接器照常连上（只是日志安静）",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "无变更 SIGHUP：安静",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP no change ----\n2026-10-23T17:37:14.390046Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:14.391709Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "warn→info：确认已应用",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP warn->info ----\n2026-10-23T17:37:16.141190Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:16.142384Z  INFO md_server:   log_level: warn -> info (applied)\n2026-10-23T17:37:16.142407Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9b-log-level-from-config-at-startup",
+    "title": "启动时按 YAML 的 log_level 生效（RUST_LOG 未设置）：warn 时没有 INFO 日志",
+    "name": "warn→info：此后 INFO 可见（结论行报成功）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP warn->info ----\n2026-10-23T17:37:16.141190Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:16.142384Z  INFO md_server:   log_level: warn -> info (applied)\n2026-10-23T17:37:16.142407Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "启动：WARN 点名 YAML 的 log_level 被 RUST_LOG 覆盖",
+    "ok": false,
+    "detail": "2026-10-23T17:37:19.845494Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:37:19.845515Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-23T17:37:19.845544Z  INFO md_connector::base: [binance] connected and synced\n2026-10-23T17:37:19.845594Z  INFO md_connector::base: [okx-quote] connected and synced\n2026-10-23T17:37:19.845633Z  INFO md_connector::base: [okx] connected and synced\n[harness] ---- process ready ----"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "启动：实际生效的是 RUST_LOG（有 INFO、没有 DEBUG）",
+    "ok": true,
+    "detail": "2026-10-23T17:37:19.845494Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:37:19.845515Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-23T17:37:19.845544Z  INFO md_connector::base: [binance] connected and synced\n2026-10-23T17:37:19.845594Z  INFO md_connector::base: [okx-quote] connected and synced\n2026-10-23T17:37:19.845633Z  INFO md_connector::base: [okx] connected and synced\n[harness] ---- process ready ----"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第1次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:37:20.904448Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:20.905806Z  INFO md_server:   log_level: debug -> warn (applied)\n2026-10-23T17:37:20.906773Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第1次：给出\"需要重启\"的结论，不报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:37:20.904448Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:20.905806Z  INFO md_server:   log_level: debug -> warn (applied)\n2026-10-23T17:37:20.906773Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第1次：过滤器没有被改动（INFO 仍可见，也没有\"开始应用\"）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #1 ----\n2026-10-23T17:37:20.904448Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:20.905806Z  INFO md_server:   log_level: debug -> warn (applied)\n2026-10-23T17:37:20.906773Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第2次：点名 log_level 未生效，并说明被 RUST_LOG 覆盖",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:37:21.543673Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:21.544276Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第2次：给出\"需要重启\"的结论，不报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:37:21.543673Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:21.544276Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "第2次：过滤器没有被改动（INFO 仍可见，也没有\"开始应用\"）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP #2 ----\n2026-10-23T17:37:21.543673Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:21.544276Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9c-rust-log-takes-precedence",
+    "title": "RUST_LOG 优先于 YAML：启动提示被覆盖，SIGHUP 改 log_level 每次都明确提示未生效",
+    "name": "改回启动时的值：待处理项消失，报成功",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP revert ----\n2026-10-23T17:37:22.181258Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:22.182602Z  INFO md_server:   log_level: warn -> debug (applied)\n2026-10-23T17:37:22.182625Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "启动：进程自己退出，退出码为 1（不是跑到超时被杀）",
+    "ok": false,
+    "detail": "code=null timedOut=true"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "启动：报错点名 log_level 和错误值",
+    "ok": false,
+    "detail": "2026-10-23T17:37:25.784146Z  INFO md_server: loading config from /cfg/config.yaml\n2026-10-23T17:37:25.800301Z  INFO md_server: log_level: verbose\n2026-10-23T17:37:25.800326Z  INFO md_server: gRPC: 127.0.0.1:64547\n2026-10-23T17:37:25.800543Z  INFO md_server: API Gateway: 127.0.0.1:64549\n2026-10-23T17:37:25.801699Z  INFO md_server: starting Binance connector\n2026-10-23T17:37:25.805065Z  INFO md_server: starting OKX Public connector (trades)\n2026-10-23T17:37:25.806815Z  INFO md_server: starting OKX Business connector (candles)\n2026-10-23T17:37:25.806680Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:64539/ws\n2026-10-23T17:37:25.808347Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:64543/ws\n2026-10-23T17:37:25.808988Z  INFO md_server: starting Binance quote connector (bookTicker) -> ws://host.docker.internal:64541/ws\n2026-10-23T17:37:25.809689Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:64545/ws\n2026-10-23T17:37:25.812370Z  INFO md_server: starting OKX quote connector (tickers) -> ws://host.docker.internal:64543/ws\n2026-10-23T17:37:25.813183Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:64541/ws\n2026-10-23T17:37:25.817343Z  INFO md_connector::base: [okx-quote] connecting to ws://host.docker.internal:64543/ws\n2026-10-23T17:37:25.823419Z  INFO md_processor: processor dispatch loop started\n2026-10-23T17:37:25.824650Z  INFO md_server: gRPC server listening on 127.0.0.1:64547\n2026-10-23T17:37:25.917318Z  INFO md_server: API Gateway listening on 127.0.0.1:64549\n2026-10-23T17:37:40.825570Z  WARN md_connector::base: [binance-quote] connection timeout (15s), retrying in 1s\n2026-10-23T17:37:40.826530Z  WARN md_connector::base: [okx-quote] connection timeout (15s), retrying in 1s\n2026-10-23T17:37:40.826455Z  WARN md_connector::base: [okx] connection timeout (15s), retrying in 1s\n2026-10-23T17:37:40.826573Z  WARN md_connector::base: [okx] connection timeout (15s), retrying in 1s\n2026-10-23T17:37:40.826595Z  WARN md_connector::base: [binance] connection timeout (15s), retrying in 1s\n2026-10-23T17:37:41.834898Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:64543/ws\n2026-10-23T17:37:41.835305Z  INFO md_connector::base: [okx-quote] connecting to ws://host.docker.internal:64543/ws\n2026-10-23T17:37:41.834861Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:64545/ws\n2026-10-23T17:37:41.837900Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:64539/ws\n2026-10-23T17:37:41.838248Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:64541/ws\n"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：明确报错并点名 log_level",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP bad level ----\n2026-10-23T17:37:47.463100Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:47.464687Z  INFO md_server:   log_level: info -> verbose (applied)\n2026-10-23T17:37:47.465265Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：声明保留运行配置",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP bad level ----\n2026-10-23T17:37:47.463100Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:47.464687Z  INFO md_server:   log_level: info -> verbose (applied)\n2026-10-23T17:37:47.465265Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：不报成功",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP bad level ----\n2026-10-23T17:37:47.463100Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:47.464687Z  INFO md_server:   log_level: info -> verbose (applied)\n2026-10-23T17:37:47.465265Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "重载：进程仍在运行",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9d-invalid-log-level-rejected",
+    "title": "非法 log_level：启动失败；重载时保留运行配置并报错，运行中的日志级别不变",
+    "name": "修好后：报成功，且 INFO 仍可见（运行中的日志级别没有被坏配置改动）",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP restore ----\n2026-10-23T17:37:48.236084Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:48.237714Z  INFO md_server:   log_level: verbose -> info (applied)\n2026-10-23T17:37:48.237765Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9e-log-level-env-override",
+    "title": "环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报",
+    "name": "启动：按 LOG_LEVEL=warn 生效（没有 INFO 日志）",
+    "ok": false,
+    "detail": "2026-10-23T17:37:52.864286Z  INFO md_connector::base: [okx-quote] subscription sync complete\n2026-10-23T17:37:52.864469Z  INFO md_connector::base: [binance-quote] connected and synced\n2026-10-23T17:37:52.864497Z  INFO md_connector::base: [binance] connected and synced\n2026-10-23T17:37:52.864523Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:37:52.864558Z  INFO md_connector::base: [okx] connected and synced\n2026-10-23T17:37:52.864593Z  INFO md_connector::base: [okx-quote] connected and synced"
+  },
+  {
+    "scenario": "s9e-log-level-env-override",
+    "title": "环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报",
+    "name": "无变更 SIGHUP：安静，不误报 log_level 变更",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP no change ----\n2026-10-23T17:37:53.912602Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:53.913960Z  INFO md_server:   log_level: warn -> info (applied)\n2026-10-23T17:37:53.914635Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9e-log-level-env-override",
+    "title": "环境变量 LOG_LEVEL 覆盖 YAML：启动按它生效；SIGHUP 不因 YAML 与它不一致而误报",
+    "name": "YAML 改动被环境变量覆盖：生效配置不变，不输出任何 INFO/WARN/ERROR",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP yaml->debug ----\n2026-10-23T17:37:55.656190Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml\n2026-10-23T17:37:55.657608Z  INFO md_server:   log_level: info -> debug (applied)\n2026-10-23T17:37:55.657654Z  INFO md_server: config reloaded and applied successfully"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "启动：生效的仍是 RUST_LOG=warn（没有 INFO 日志，行为与升级前一致）",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "启动：WARN 明确说明 YAML 的 log_level 被 RUST_LOG 覆盖",
+    "ok": false,
+    "detail": ""
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "无变更 SIGHUP：安静",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP no change ----"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第1次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP yaml->debug #1 ----"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第1次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP yaml->debug #1 ----"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第2次：WARN 级别可见，点名 log_level 未生效并说明 RUST_LOG=warn 优先",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP yaml->debug #2 ----"
+  },
+  {
+    "scenario": "s9f-prod-198-combination",
+    "title": "线上 198 的真实组合：YAML log_level=info + 环境变量 RUST_LOG=warn",
+    "name": "第2次：给出\"需要重启\"的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP yaml->debug #2 ----"
+  },
+  {
+    "scenario": "s10-prod-log-level-warn",
+    "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
+    "name": "无变更：没有 WARN/ERROR 输出",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP no change ----"
+  },
+  {
+    "scenario": "s10-prod-log-level-warn",
+    "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
+    "name": "仅改 OKX Business 地址，第1次：WARN 级别可见并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP business url #1 ----"
+  },
+  {
+    "scenario": "s10-prod-log-level-warn",
+    "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
+    "name": "仅改 OKX Business 地址，第1次：WARN 级别给出需要重启的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP business url #1 ----"
+  },
+  {
+    "scenario": "s10-prod-log-level-warn",
+    "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
+    "name": "仅改 OKX Business 地址，第2次：WARN 级别可见并点名",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP business url #2 ----"
+  },
+  {
+    "scenario": "s10-prod-log-level-warn",
+    "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
+    "name": "仅改 OKX Business 地址，第2次：WARN 级别给出需要重启的结论",
+    "ok": false,
+    "detail": "[harness] ---- SIGHUP business url #2 ----"
+  },
+  {
+    "scenario": "s10-prod-log-level-warn",
+    "title": "RUST_LOG=warn（线上同款）：待重启/失败提示可见，无变更时安静",
+    "name": "YAML 解析失败：WARN/ERROR 级别可见",
+    "ok": true,
+    "detail": "[harness] ---- SIGHUP bad yaml ----\n2026-10-23T17:38:16.725480Z  WARN md_server: failed to reload config: Parse error: did not find expected ',' or ']' at line 2 column 1, while parsing a flow sequence at line 1 column 13, keeping current config"
+  }
+]

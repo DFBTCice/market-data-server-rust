@@ -1,0 +1,16 @@
+{
+  "samples": 2,
+  "ws_kicked_write_timeout": [
+    "1",
+    "1"
+  ],
+  "ws_kicked_lagged": [
+    "0",
+    "0"
+  ],
+  "process_start_time_seconds": [
+    "1792776844",
+    "1792776844"
+  ],
+  "pass": true
+}

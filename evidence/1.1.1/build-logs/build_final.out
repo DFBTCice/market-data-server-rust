@@ -1,0 +1,9 @@
+commit: bbc1e50175a96d84bb95a66ccfea0fcae3a5e99b dirty=       2
+dist/md-server-1.1.1-linux-x86_64 write_timeout=1 subs_gauge=3 jemalloc=3
+dist/md-server-1.1.1-default-alloc-linux-x86_64 write_timeout=1 subs_gauge=3 jemalloc=0
+fa7be337453d83fcec83b689574dbf212495eccf9107e16d73ec4512d0e15b70  dist/md-server-1.1.1-linux-x86_64
+61f7907bd08831b5c28f13b8fbbf297645bbbd20bc90f498ef7bd996dc27f47e  dist/md-server-1.1.1-default-alloc-linux-x86_64
+--- 旁路实验二进制（对照）
+fa7be337453d83fcec83b689574dbf212495eccf9107e16d73ec4512d0e15b70  /tmp/md-variants/md-server-v5
+61f7907bd08831b5c28f13b8fbbf297645bbbd20bc90f498ef7bd996dc27f47e  /tmp/md-variants/md-server-v4
+dist/md-server-1.1.1-linux-x86_64: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped

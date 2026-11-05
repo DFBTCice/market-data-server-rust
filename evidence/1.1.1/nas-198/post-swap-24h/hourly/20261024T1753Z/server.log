@@ -1,0 +1,2 @@
+2026-10-24T17:34:48.375724818Z [2m2026-10-24T17:34:48.375302Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance-quote] pong timeout (90s), reconnecting
+2026-10-24T17:34:48.375789011Z [2m2026-10-24T17:34:48.375586Z[0m [33m WARN[0m [2mmd_connector::base[0m[2m:[0m [binance-quote] disconnected, reconnecting in 5s
