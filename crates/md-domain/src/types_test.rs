@@ -31,6 +31,7 @@ mod tick_json_compat {
             best_ask_quantity: "2.0".into(),
             exchange_event_ts: 1711929600001,
             connector_receive_ts: 1711929600002,
+            exchange_trade_ts: 1711929600001,
         };
         let json = serde_json::to_string(&tick).unwrap();
         // 所有字段都有值，全部输出
@@ -63,6 +64,7 @@ mod tick_json_compat {
             best_ask_quantity: String::new(),
             exchange_event_ts: 0,
             connector_receive_ts: 0,
+            exchange_trade_ts: 0,
         };
         let json = serde_json::to_string(&tick).unwrap();
 
@@ -103,6 +105,7 @@ mod tick_json_compat {
             best_ask_quantity: "20".into(),
             exchange_event_ts: 101,
             connector_receive_ts: 102,
+            exchange_trade_ts: 101,
         };
         let json = serde_json::to_string(&tick).unwrap();
 
@@ -173,5 +176,61 @@ mod kline_json_compat {
         assert!(!json.contains("\"high\""));
         assert!(!json.contains("\"is_closed\""));
         assert!(!json.contains("\"close_time\""));
+    }
+}
+
+#[cfg(test)]
+mod quote_json {
+    use crate::types::Quote;
+
+    fn sample() -> Quote {
+        Quote {
+            exchange: "binance".into(),
+            symbol: "BNBUSDT".into(),
+            bid_price: "743.90".into(),
+            bid_qty: "12.3".into(),
+            ask_price: "743.91".into(),
+            ask_qty: "8.1".into(),
+            last_price: "743.91".into(),
+            timestamp: 1791531605419,
+            connector_receive_ts: 1791531605962,
+        }
+    }
+
+    /// 任务书 §二给出的样例：字段名、字段顺序、数值字符串/时间戳整数，逐字节一致
+    #[test]
+    fn matches_spec_example_byte_for_byte() {
+        let json = serde_json::to_string(&sample()).unwrap();
+        assert_eq!(
+            json,
+            r#"{"exchange":"binance","symbol":"BNBUSDT","bid_price":"743.90","bid_qty":"12.3","ask_price":"743.91","ask_qty":"8.1","last_price":"743.91","timestamp":1791531605419,"connector_receive_ts":1791531605962}"#
+        );
+    }
+
+    /// 币安 bookTicker 无 last：last_price 为空串且仍然输出（不是缺字段，不能 omitempty）
+    #[test]
+    fn empty_last_price_is_still_emitted() {
+        let mut q = sample();
+        q.last_price = String::new();
+        let json = serde_json::to_string(&q).unwrap();
+        assert!(json.contains(r#""last_price":"""#), "got: {}", json);
+    }
+
+    #[test]
+    fn numbers_are_strings_and_timestamps_are_integers() {
+        let v: serde_json::Value = serde_json::to_value(sample()).unwrap();
+        for k in ["bid_price", "bid_qty", "ask_price", "ask_qty", "last_price"] {
+            assert!(v[k].is_string(), "{} must be string", k);
+        }
+        for k in ["timestamp", "connector_receive_ts"] {
+            assert!(v[k].is_i64(), "{} must be integer", k);
+        }
+    }
+
+    #[test]
+    fn roundtrip() {
+        let q = sample();
+        let back: Quote = serde_json::from_str(&serde_json::to_string(&q).unwrap()).unwrap();
+        assert_eq!(back, q);
     }
 }

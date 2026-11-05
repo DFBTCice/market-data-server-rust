@@ -1,0 +1,92 @@
+{
+  "captured_at": "2026-10-23T17:29:40.299513+00:00",
+  "Id": "1de7da0c7d2cf9b4c4b6a2154d9464c0895e6480066c97fbb64ffc7e1126f83f",
+  "Created": "2026-10-09T09:19:43.700123717Z",
+  "Image": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+  "RestartCount": 1,
+  "State": {
+    "Dead": false,
+    "Error": "",
+    "ExitCode": 0,
+    "FinishedAt": "2026-10-21T13:37:14.846284377Z",
+    "Health": {
+      "FailingStreak": 0,
+      "Log": [
+        {
+          "End": "2026-10-24T01:27:30.482669932+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  45962      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-10-24T01:27:30.228525842+08:00"
+        },
+        {
+          "End": "2026-10-24T01:28:00.571107631+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  52932      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-10-24T01:28:00.483638637+08:00"
+        },
+        {
+          "End": "2026-10-24T01:28:30.650756418+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  56231      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-10-24T01:28:30.572542602+08:00"
+        },
+        {
+          "End": "2026-10-24T01:29:00.729862008+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  51388      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-10-24T01:29:00.652050678+08:00"
+        },
+        {
+          "End": "2026-10-24T01:29:30.806658109+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  55306      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-10-24T01:29:30.731377264+08:00"
+        }
+      ],
+      "Status": "healthy"
+    },
+    "OOMKilled": false,
+    "Paused": false,
+    "Pid": 2123589,
+    "Restarting": false,
+    "Running": true,
+    "StartedAt": "2026-10-21T13:37:15.272916238Z",
+    "Status": "running"
+  },
+  "Config": {
+    "Image": "md-server:1.1.0-quote-bnb",
+    "Env": [
+      "RUST_LOG=warn",
+      "TZ=Asia/Shanghai"
+    ],
+    "Cmd": [
+      "md-server",
+      "--config",
+      "/etc/md-server/config.yaml"
+    ]
+  },
+  "HostConfig": {
+    "Memory": 536870912,
+    "MemorySwap": 1073741824,
+    "NanoCpus": 2000000000,
+    "RestartPolicy": {
+      "MaximumRetryCount": 0,
+      "Name": "unless-stopped"
+    },
+    "PortBindings": {
+      "50051/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "50051"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "8081"
+        }
+      ]
+    }
+  },
+  "Mounts": []
+}

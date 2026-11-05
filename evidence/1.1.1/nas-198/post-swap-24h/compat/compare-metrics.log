@@ -1,0 +1,6 @@
+   old 样本 570, new 样本 605; 删除=0, 新增=35
+   old 指标族 23, new 指标族 34; TYPE 变更/删除=0, HELP 变更/删除=0
+   新增指标族: md_ws_subscriptions_active, md_ws_kicked_write_timeout_total, md_tokio_alive_tasks, md_tokio_workers, md_tokio_global_queue_depth, md_jemalloc_allocated_bytes, md_jemalloc_active_bytes, md_jemalloc_resident_bytes, md_jemalloc_retained_bytes, md_jemalloc_mapped_bytes, md_jemalloc_metadata_bytes
+   新增样本(前 12 条): md_ws_subscriptions_active ; md_ws_kicked_write_timeout_total ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="1"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="2"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="5"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="10"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="25"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="50"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="100"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="250"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="500"} ; md_gateway_internal_latency_ms_bucket{topic="quote.binance.BNBUSDT",le="+Inf"}
+
+RESULT: PASS

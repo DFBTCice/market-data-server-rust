@@ -1,0 +1,2 @@
+2026-10-10T14:40:42.686Z TICKS_DROPPED 2307->3161
+2026-10-10T15:00:42.784Z RECONNECT md_connector_reconnect_total{exchange="okx-kline"} 2->3

@@ -1,0 +1,24 @@
+
+### 1.1.1-v1 vs 1.1.0 (compat-live, 07:33Z)
+  quote.binance.BNBUSDT        A= 1394 B= 1396 对应= 1241 不同= 7 (0.56%) 不同字段={'bid_qty': 4, 'ask_qty': 5} 同键多条(A侧/B侧 多出条数)=5/5
+  quote.okx.BNB-USDT-SWAP      A= 1211 B= 1212 对应= 1206 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=0/0
+
+### 1.1.1-v4 vs 1.1.0 (compat-final)
+  quote.binance.BNBUSDT        A= 1296 B= 1302 对应= 1200 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=1/1
+  quote.okx.BNB-USDT-SWAP      A= 1196 B= 1191 对应= 1190 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=0/0
+
+### 1.1.1-v5 vs 1.1.0 (attempt1, 17:10Z)
+  quote.binance.BNBUSDT        A= 1295 B= 1292 对应= 1204 不同= 2 (0.17%) 不同字段={'bid_qty': 2} 同键多条(A侧/B侧 多出条数)=4/3
+  quote.okx.BNB-USDT-SWAP      A= 1252 B= 1251 对应= 1250 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=0/0
+
+### 1.1.1-v5 vs 1.1.0 (rerun, 17:18Z)
+  quote.binance.BNBUSDT        A= 1253 B= 1252 对应= 1171 不同= 1 (0.09%) 不同字段={'ask_qty': 1} 同键多条(A侧/B侧 多出条数)=2/2
+  quote.okx.BNB-USDT-SWAP      A= 1138 B= 1199 对应= 1137 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=0/0
+
+### CONTROL 1.1.0 vs 1.1.0-instr (compat-live/quote-same-version-control)
+  quote.binance.BNBUSDT        A=  886 B=  872 对应=  639 不同= 5 (0.78%) 不同字段={'bid_qty': 1, 'ask_qty': 4} 同键多条(A侧/B侧 多出条数)=2/4
+  quote.okx.BNB-USDT-SWAP      A=  627 B=  610 对应=  604 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=0/0
+
+### CONTROL 1.1.0 vs 1.1.0 (17:23Z)
+  quote.binance.BNBUSDT        A= 1130 B= 1128 对应= 1072 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=2/3
+  quote.okx.BNB-USDT-SWAP      A= 1187 B= 1088 对应= 1088 不同= 0 (0.00%) 不同字段={} 同键多条(A侧/B侧 多出条数)=0/0

@@ -41,6 +41,8 @@ pub fn tick_from_proto(tick: &md_proto::Tick) -> md_domain::types::Tick {
         best_ask_quantity: tick.best_ask_quantity.clone(),
         exchange_event_ts: tick.exchange_event_ts,
         connector_receive_ts: tick.connector_receive_ts,
+        // proto 不传输成交时间 T（端到端延迟仅在连接器→处理器在进程内统计）
+        exchange_trade_ts: 0,
     }
 }
 
@@ -91,6 +93,7 @@ pub fn data_type_to_proto(dt: md_connector::DataType) -> md_proto::DataType {
     match dt {
         md_connector::DataType::Tick => md_proto::DataType::Tick,
         md_connector::DataType::Kline => md_proto::DataType::Kline,
+        md_connector::DataType::Quote => md_proto::DataType::Quote,
     }
 }
 
@@ -99,6 +102,7 @@ pub fn data_type_from_proto(dt: md_proto::DataType) -> Option<md_connector::Data
     match dt {
         md_proto::DataType::Tick => Some(md_connector::DataType::Tick),
         md_proto::DataType::Kline => Some(md_connector::DataType::Kline),
+        md_proto::DataType::Quote => Some(md_connector::DataType::Quote),
         _ => None,
     }
 }
@@ -123,6 +127,8 @@ mod tests {
             best_ask_quantity: "2.0".into(),
             exchange_event_ts: 1711929600001,
             connector_receive_ts: 1711929600002,
+            // proto 不传输成交时间 T，roundtrip 后必为 0，这里同步置 0 以便断言相等
+            exchange_trade_ts: 0,
         };
 
         let proto_tick = tick_to_proto(&domain_tick);
@@ -177,5 +183,22 @@ mod tests {
             Some(md_connector::DataType::Tick)
         );
         assert_eq!(data_type_from_proto(md_proto::DataType::Unknown), None);
+    }
+
+    /// 既有枚举数值不变（TICK=1、KLINE=2），QUOTE 只能是新值 3（任务书 §三-2、§三-4）
+    #[test]
+    fn data_type_numeric_values_stable_and_quote_is_new() {
+        assert_eq!(md_proto::DataType::Unknown as i32, 0);
+        assert_eq!(md_proto::DataType::Tick as i32, 1);
+        assert_eq!(md_proto::DataType::Kline as i32, 2);
+        assert_eq!(md_proto::DataType::Quote as i32, 3);
+        assert_eq!(
+            data_type_to_proto(md_connector::DataType::Quote),
+            md_proto::DataType::Quote
+        );
+        assert_eq!(
+            data_type_from_proto(md_proto::DataType::Quote),
+            Some(md_connector::DataType::Quote)
+        );
     }
 }

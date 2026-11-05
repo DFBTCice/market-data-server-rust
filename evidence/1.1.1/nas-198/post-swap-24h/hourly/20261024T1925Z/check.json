@@ -1,0 +1,75 @@
+{
+  "at_utc": "2026-10-24T19:26:20.938698+00:00",
+  "phase": "running; not a complete 24h result",
+  "healthy": "healthy",
+  "health_response": {
+    "service": "md-server",
+    "status": "ok"
+  },
+  "restart_count": 0,
+  "container_id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "sample_count": 1413,
+  "valid_samples": 1413,
+  "first_utc": "2026-10-23T19:54:13Z",
+  "last_utc": "2026-10-24T19:26:18Z",
+  "span_s": 84725.0,
+  "max_gap_s": 61.0,
+  "sample_age_s": 2.9386980533599854,
+  "process_starts": [
+    "1792785202"
+  ],
+  "uptime_resets": 0,
+  "post_warmup_span_s": 81125.0,
+  "rss_post_warmup": {
+    "first_mib": 56.03515625,
+    "last_mib": 78.3828125,
+    "min_mib": 55.30859375,
+    "max_mib": 79.12890625,
+    "slope_mib_h": 0.9548489996130343
+  },
+  "allocated_post_warmup": {
+    "first_mib": 4.33233642578125,
+    "last_mib": 4.27923583984375,
+    "min_mib": 4.188728332519531,
+    "max_mib": 4.360542297363281,
+    "slope_mib_h": -0.0006799016145416819
+  },
+  "rss_last_60min": {
+    "first_mib": 76.52734375,
+    "last_mib": 78.3828125,
+    "min_mib": 76.05859375,
+    "max_mib": 78.9453125,
+    "slope_mib_h": 2.4813824186839715
+  },
+  "current": {
+    "rss_mib": 78.3828125,
+    "allocated_mib": 4.3732452392578125,
+    "ws_clients": 2.0,
+    "subscriptions": 12,
+    "missing_vs_swap": 0,
+    "extra_vs_swap": 0,
+    "write_timeouts": 1.0,
+    "lagged": 0.0,
+    "ticks_dropped": 2460.0
+  },
+  "write_timeout_sample_max": 1.0,
+  "lagged_sample_max": 0.0,
+  "tick_drop_sample_max": 2460.0,
+  "oms_readonly_health": {
+    "health": "healthy",
+    "running": true,
+    "started_at": "2026-10-24T17:50:43.614534949Z",
+    "restart_count": 0
+  },
+  "analysis_is_provisional": true,
+  "provisional_rss_target_exceeded": false,
+  "server_log_collection": {
+    "since_epoch": 1792866081,
+    "raw_bytes": 0,
+    "text_bytes": 0,
+    "level": "RUST_LOG=warn",
+    "tail_limit": 1000
+  },
+  "new_events": []
+}

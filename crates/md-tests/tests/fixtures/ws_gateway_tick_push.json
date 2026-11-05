@@ -1,0 +1,14 @@
+{
+    "type": "tick",
+    "topic": "tick.binance.BNBUSDT",
+    "data": {
+        "exchange": "binance",
+        "symbol": "BNBUSDT",
+        "timestamp": 1791532727547,
+        "price": "744.870",
+        "quantity": "0.02",
+        "trade_id": 873742875,
+        "exchange_event_ts": 1791532727547,
+        "connector_receive_ts": 1791532727611
+    }
+}

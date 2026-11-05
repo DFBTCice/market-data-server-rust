@@ -1,0 +1,29 @@
+2026-10-10T09:02:19.574673009Z 2026-10-10T09:02:19.574513Z  WARN md_connector::base: [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T09:02:19.574728812Z 2026-10-10T09:02:19.574553Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T09:37:25.104013250Z 2026-10-10T09:37:25.103848Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T09:37:25.104097232Z 2026-10-10T09:37:25.103880Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T09:50:51.550185475Z 2026-10-10T09:50:51.550000Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T09:50:51.550265124Z 2026-10-10T09:50:51.550043Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T10:31:04.128507816Z 2026-10-10T10:31:04.128363Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T10:31:04.135422880Z 2026-10-10T10:31:04.128388Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T10:35:36.032986013Z 2026-10-10T10:35:36.032708Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T10:35:36.033074206Z 2026-10-10T10:35:36.032767Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:14:53.683253349Z 2026-10-10T12:14:53.683065Z  WARN md_connector::base: [okx-quote] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:14:53.728180067Z 2026-10-10T12:14:53.683111Z  WARN md_connector::base: [okx-quote] disconnected, reconnecting in 10s
+2026-10-10T12:14:59.544106065Z 2026-10-10T12:14:59.543970Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:14:59.544146421Z 2026-10-10T12:14:59.543995Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T12:36:48.756709246Z 2026-10-10T12:36:48.756550Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T12:36:48.756757170Z 2026-10-10T12:36:48.756585Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T13:34:41.047683891Z 2026-10-10T13:34:41.047532Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T13:34:41.094608124Z 2026-10-10T13:34:41.047574Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:03:48.369900131Z 2026-10-10T14:03:48.369750Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T14:03:48.388975781Z 2026-10-10T14:03:48.369774Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:07:11.636878441Z 2026-10-10T14:07:11.636711Z  WARN md_connector::base: [okx] read error: WebSocket protocol error: Connection reset without closing handshake
+2026-10-10T14:07:11.637020731Z 2026-10-10T14:07:11.636753Z  WARN md_connector::base: [okx] disconnected, reconnecting in 10s
+2026-10-10T14:27:57.199980101Z 2026-10-10T14:27:57.174376Z  WARN md_connector::base: [okx] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1)
+2026-10-10T14:27:57.200043824Z 2026-10-10T14:27:57.199771Z  WARN md_connector::base: [binance] tick channel full, dropped 1 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1334)
+2026-10-10T14:29:45.877942783Z 2026-10-10T14:29:45.867622Z  WARN md_connector::base: [okx] tick channel full, dropped 1333 tick(s) since last log (ingress queue depth 1000/1000, total dropped 1389)
+2026-10-10T14:29:45.887357857Z 2026-10-10T14:29:45.887021Z  WARN md_connector::base: [binance] tick channel full, dropped 55 tick(s) since last log (ingress queue depth 1000/1000, total dropped 2282)
+2026-10-10T14:37:40.572264858Z 2026-10-10T14:37:40.567584Z  WARN md_connector::base: [okx] tick channel full, dropped 893 tick(s) since last log (ingress queue depth 1000/1000, total dropped 2315)
+2026-10-10T14:40:03.698805363Z 2026-10-10T14:40:03.666327Z  WARN md_connector::base: [okx] tick channel full, dropped 406 tick(s) since last log (ingress queue depth 1000/1000, total dropped 2721)
+2026-10-10T14:40:03.722247742Z 2026-10-10T14:40:03.720625Z  WARN md_connector::base: [binance] tick channel full, dropped 33 tick(s) since last log (ingress queue depth 1000/1000, total dropped 3697)

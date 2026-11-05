@@ -1,0 +1,11 @@
+{
+  "at_utc": "2026-10-24T19:26:23.284077+00:00",
+  "id": "9dbf93da4951fdf621a8d7642208c608d20b4f8710b124f454c9f40bfb653083",
+  "image": "sha256:a46c88d0aa72bcd34380a3800c77d6fcad07b76810abeb491e464c18915d2e97",
+  "status": "created",
+  "running": false,
+  "restart_policy": {
+    "MaximumRetryCount": 0,
+    "Name": "no"
+  }
+}

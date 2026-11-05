@@ -1,0 +1,51 @@
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.645446Z  INFO md_server: log filter: info (from RUST_LOG; config log_level "info" is ignored while RUST_LOG is set)
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.646811Z  INFO md_server: loaded config from /cfg/config.yaml
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.646829Z  INFO md_server: gRPC: 127.0.0.1:63596
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.646840Z  INFO md_server: API Gateway: 127.0.0.1:63598
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.648386Z  INFO md_server: starting Binance connector
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.652309Z  INFO md_server: starting OKX Public connector (trades)
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.653917Z  INFO md_connector::base: [binance] connecting to ws://host.docker.internal:63588/ws
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.654688Z  INFO md_server: starting Binance quote connector (bookTicker) -> ws://host.docker.internal:63590/ws
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.655429Z  INFO md_connector::base: [okx] connecting to ws://host.docker.internal:63592/ws
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.657666Z  INFO md_connector::base: [binance-quote] connecting to ws://host.docker.internal:63590/ws
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.657524Z  WARN md_server: okx.quotes_enabled=true 但 subscribe_quotes 为空，quote 连接器不会启动（补充列表后需重启）
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.662466Z  INFO md_processor: processor dispatch loop started
+2026-10-16T23:15:14.711Z 2026-10-16T23:15:14.664673Z  INFO md_server: gRPC server listening on 127.0.0.1:63596
+2026-10-16T23:15:14.736Z 2026-10-16T23:15:14.735112Z  INFO md_server: API Gateway listening on 127.0.0.1:63598
+2026-10-16T23:15:14.762Z 2026-10-16T23:15:14.761283Z  INFO md_connector::base: [binance-quote] subscribing to 1 streams
+2026-10-16T23:15:14.762Z 2026-10-16T23:15:14.761285Z  INFO md_connector::base: [binance] subscribing to 2 streams
+2026-10-16T23:15:14.762Z 2026-10-16T23:15:14.761319Z  INFO md_connector::base: [okx] subscribing to 1 streams
+2026-10-16T23:15:14.769Z 2026-10-16T23:15:14.768356Z  INFO md_connector::base: [binance] subscription sync complete
+2026-10-16T23:15:14.769Z 2026-10-16T23:15:14.768423Z  INFO md_connector::base: [binance] connected and synced
+2026-10-16T23:15:14.769Z 2026-10-16T23:15:14.768342Z  INFO md_connector::base: [binance-quote] subscription sync complete
+2026-10-16T23:15:14.769Z 2026-10-16T23:15:14.768450Z  INFO md_connector::base: [binance-quote] connected and synced
+2026-10-16T23:15:14.769Z 2026-10-16T23:15:14.768382Z  INFO md_connector::base: [okx] subscription sync complete
+2026-10-16T23:15:14.769Z 2026-10-16T23:15:14.768476Z  INFO md_connector::base: [okx] connected and synced
+2026-10-16T23:15:15.786Z [harness] ---- process ready ----
+2026-10-16T23:15:15.786Z [harness] ---- SIGHUP #1 ----
+2026-10-16T23:15:15.926Z 2026-10-16T23:15:15.820379Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml
+2026-10-16T23:15:15.926Z 2026-10-16T23:15:15.823316Z  INFO md_server:   subscription lists changed, applying...
+2026-10-16T23:15:15.926Z 2026-10-16T23:15:15.824598Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart
+2026-10-16T23:15:15.926Z 2026-10-16T23:15:15.824624Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart
+2026-10-16T23:15:15.926Z 2026-10-16T23:15:15.824755Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)
+2026-10-16T23:15:16.428Z [harness] ---- SIGHUP #2 ----
+2026-10-16T23:15:16.566Z 2026-10-16T23:15:16.461464Z  INFO md_server: received SIGHUP, reloading config from /cfg/config.yaml
+2026-10-16T23:15:16.566Z 2026-10-16T23:15:16.462656Z  INFO md_server:   subscription lists changed, applying...
+2026-10-16T23:15:16.566Z 2026-10-16T23:15:16.462709Z  WARN md_server:   connectors.okx.subscribe_klines: subscription list changed but the okx-kline connector is not running (okx.enabled=false or subscribe_klines was empty at startup) -- NOT applied, requires restart
+2026-10-16T23:15:16.566Z 2026-10-16T23:15:16.462714Z  WARN md_server:   connectors.okx.subscribe_quotes: subscription list changed but the okx-quote connector is not running (quotes_enabled=false or list was empty at startup) -- NOT applied, requires restart
+2026-10-16T23:15:16.566Z 2026-10-16T23:15:16.462717Z  WARN md_server: some config changes require connector restart -- please restart the service (2 pending: connectors.okx.subscribe_klines, connectors.okx.subscribe_quotes)
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.105348Z  INFO md_server: received SIGTERM
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.105496Z  INFO md_server: received shutdown signal, shutting down
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.105539Z  INFO md_server: stopping connector: okx
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.106849Z  INFO md_connector::base: [okx] stopping connector
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.107212Z  INFO md_server: gRPC server shutting down
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.108055Z  INFO md_server: stopping connector: binance-quote
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.109296Z  INFO md_connector::base: [binance-quote] stopping connector
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.109331Z  INFO md_server: stopping connector: binance
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.109334Z  INFO md_connector::base: [binance] stopping connector
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.111153Z  INFO md_connector::base: [okx] shutdown signal received
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.111209Z  INFO md_connector::base: [binance-quote] shutdown signal received
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:17.111367Z  INFO md_connector::base: [binance] shutdown signal received
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:19.114534Z  INFO md_server: shutdown complete
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:19.115627Z  INFO md_processor: processor shutdown signal received
+2026-10-16T23:15:19.346Z 2026-10-16T23:15:19.115859Z  INFO md_processor: processor dispatch loop stopped

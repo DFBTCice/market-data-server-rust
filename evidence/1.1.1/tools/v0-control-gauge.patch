@@ -1,0 +1,30 @@
+diff --git a/crates/md-gateway/src/ws.rs b/crates/md-gateway/src/ws.rs
+index d7da33c..c5566a2 100644
+--- a/crates/md-gateway/src/ws.rs
++++ b/crates/md-gateway/src/ws.rs
+@@ -4,7 +4,7 @@ use axum::response::IntoResponse;
+ use axum::Router;
+ use futures_util::{SinkExt, StreamExt};
+ use md_domain::types::{WsGatewayMessage, WsLegacyMessage};
+-use md_processor::{BroadcastEvent, Processor};
++use md_processor::{BroadcastEvent, Processor, WsSubscriptionGuard};
+ use serde::{Deserialize, Serialize};
+ use std::collections::HashSet;
+ use std::sync::Arc;
+@@ -105,6 +105,8 @@ async fn handle_gateway_ws(
+     let mut subscriptions: Vec<tokio::sync::broadcast::Receiver<BroadcastEvent>> = Vec::new();
+     let mut topics: HashSet<String> = HashSet::new();
+     let mut lagged_count: u32 = 0;
++    // 对照版（V0/V2）：1.1.0 网关逻辑原样 + 仅把 Vec<Receiver> 长度计入 md_ws_subscriptions_active
++    let mut sub_guard = WsSubscriptionGuard::new(metrics.clone());
+ 
+     metrics.ws_client_connected();
+     info!(
+@@ -128,6 +130,7 @@ async fn handle_gateway_ws(
+                                             if topics.insert(stream.clone()) {
+                                                 let sub = processor.subscribe(stream);
+                                                 subscriptions.push(sub.rx);
++                                                sub_guard.sync(subscriptions.len());
+                                                 let ack = GatewayAck {
+                                                     action: "subscribe".into(),
+                                                     status: "success".into(),

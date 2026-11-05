@@ -3,15 +3,19 @@ pub mod binance;
 pub mod okx;
 
 use async_trait::async_trait;
-use md_domain::types::{Tick, Kline};
+use md_domain::types::{Kline, Quote, Tick};
+use std::collections::HashMap;
 use std::fmt;
+use std::sync::Arc;
 use std::time::Duration;
 
-/// 数据事件 -- 从交易所解析出的 Tick/Kline
+/// 数据事件 -- 从交易所解析出的 Tick/Kline/Quote
 #[derive(Debug, Clone)]
 pub enum DataEvent {
     Tick(Tick),
     Kline(Kline),
+    /// 买一卖一报价（1.1.0 新增；仅 quote 专用连接器会产生）
+    Quote(Quote),
     /// 订阅错误事件 -- 交易所返回的订阅失败响应
     SubscribeError(SubscribeErrorInfo),
 }
@@ -40,6 +44,8 @@ pub struct SubscriptionTarget {
 pub enum DataType {
     Tick,
     Kline,
+    /// 买一卖一报价（1.1.0 新增）
+    Quote,
 }
 
 impl fmt::Display for DataType {
@@ -47,7 +53,29 @@ impl fmt::Display for DataType {
         match self {
             DataType::Tick => write!(f, "TICK"),
             DataType::Kline => write!(f, "KLINE"),
+            DataType::Quote => write!(f, "QUOTE"),
         }
+    }
+}
+
+/// 订阅管理（REST / gRPC Admin）的连接器路由。`exchange_key` 须已小写。
+///
+/// - TICK  → `"{ex}"`
+/// - KLINE → `"{ex}-kline"`，缺失时回退 `"{ex}"`（OKX 双连接；Binance 单连接）—— 与 1.0.0 一致
+/// - QUOTE → `"{ex}-quote"`，**严格匹配、不回退**：quote 必须走专用 Public 连接
+///   （币安 bookTicker 在 market 连接上订阅成功但不推送），回退到 tick 连接会静默拿不到数据。
+///   开关关闭时该连接器不存在，返回 None。
+pub fn find_connector<'a>(
+    connectors: &'a HashMap<String, Arc<dyn Connector>>,
+    exchange_key: &str,
+    data_type: DataType,
+) -> Option<&'a Arc<dyn Connector>> {
+    match data_type {
+        DataType::Tick => connectors.get(exchange_key),
+        DataType::Kline => connectors
+            .get(&format!("{}-kline", exchange_key))
+            .or_else(|| connectors.get(exchange_key)),
+        DataType::Quote => connectors.get(&format!("{}-quote", exchange_key)),
     }
 }
 
@@ -65,8 +93,14 @@ pub trait Connector: Send + Sync {
     fn name(&self) -> &str;
     async fn start(&self) -> Result<(), ConnectorError>;
     async fn stop(&self) -> Result<(), ConnectorError>;
-    async fn add_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError>;
-    async fn remove_subscriptions(&self, targets: Vec<SubscriptionTarget>) -> Result<(), ConnectorError>;
+    async fn add_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError>;
+    async fn remove_subscriptions(
+        &self,
+        targets: Vec<SubscriptionTarget>,
+    ) -> Result<(), ConnectorError>;
     fn current_subscriptions(&self) -> Vec<SubscriptionTarget>;
 }
 
@@ -132,3 +166,99 @@ impl fmt::Display for ParseError {
 }
 
 impl std::error::Error for ParseError {}
+
+#[cfg(test)]
+mod routing_tests {
+    use super::*;
+
+    struct Dummy(&'static str);
+
+    #[async_trait]
+    impl Connector for Dummy {
+        fn name(&self) -> &str {
+            self.0
+        }
+        async fn start(&self) -> Result<(), ConnectorError> {
+            Ok(())
+        }
+        async fn stop(&self) -> Result<(), ConnectorError> {
+            Ok(())
+        }
+        async fn add_subscriptions(
+            &self,
+            _: Vec<SubscriptionTarget>,
+        ) -> Result<(), ConnectorError> {
+            Ok(())
+        }
+        async fn remove_subscriptions(
+            &self,
+            _: Vec<SubscriptionTarget>,
+        ) -> Result<(), ConnectorError> {
+            Ok(())
+        }
+        fn current_subscriptions(&self) -> Vec<SubscriptionTarget> {
+            Vec::new()
+        }
+    }
+
+    fn map(keys: &[&'static str]) -> HashMap<String, Arc<dyn Connector>> {
+        keys.iter()
+            .map(|k| (k.to_string(), Arc::new(Dummy(k)) as Arc<dyn Connector>))
+            .collect()
+    }
+
+    /// 1.0.0 路由：TICK→ex；KLINE→ex-kline，缺失回退 ex
+    #[test]
+    fn tick_and_kline_routing_unchanged() {
+        let m = map(&["binance", "okx", "okx-kline"]);
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Tick)
+                .unwrap()
+                .name(),
+            "binance"
+        );
+        assert_eq!(
+            find_connector(&m, "okx", DataType::Tick).unwrap().name(),
+            "okx"
+        );
+        assert_eq!(
+            find_connector(&m, "okx", DataType::Kline).unwrap().name(),
+            "okx-kline"
+        );
+        // binance 无 -kline 连接器 → 回退到 binance
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Kline)
+                .unwrap()
+                .name(),
+            "binance"
+        );
+        assert!(find_connector(&m, "bybit", DataType::Tick).is_none());
+    }
+
+    #[test]
+    fn quote_routing_is_strict_no_fallback() {
+        // 开关关闭：没有 -quote 连接器，绝不能回退到 tick 连接器
+        let m = map(&["binance", "okx", "okx-kline"]);
+        assert!(find_connector(&m, "binance", DataType::Quote).is_none());
+        assert!(find_connector(&m, "okx", DataType::Quote).is_none());
+        // 开关开启
+        let m = map(&["binance", "binance-quote", "okx", "okx-quote"]);
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Quote)
+                .unwrap()
+                .name(),
+            "binance-quote"
+        );
+        assert_eq!(
+            find_connector(&m, "okx", DataType::Quote).unwrap().name(),
+            "okx-quote"
+        );
+        // 开启 quote 后 tick 路由不受影响
+        assert_eq!(
+            find_connector(&m, "binance", DataType::Tick)
+                .unwrap()
+                .name(),
+            "binance"
+        );
+    }
+}

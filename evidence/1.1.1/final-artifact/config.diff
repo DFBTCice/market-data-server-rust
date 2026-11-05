@@ -1,0 +1,9 @@
+--- config.running.yaml
++++ config.final.yaml
+@@ -1,5 +1,5 @@
+ # 日志级别: "debug", "info", "warn", "error"
+-log_level: "info"
++log_level: "warn"
+ 
+ # gRPC 服务器配置
+ grpc_server:

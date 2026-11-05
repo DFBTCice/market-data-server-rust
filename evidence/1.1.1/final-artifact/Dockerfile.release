@@ -1,0 +1,4 @@
+FROM md-server:1.0.0-rollback
+COPY md-server /usr/local/bin/md-server
+COPY config.yaml /etc/md-server/config.yaml
+LABEL org.opencontainers.image.revision="a06fe2095e8fc58bff1e038a594b25e7002aff1b" md-server.binary.sha256="3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d"
