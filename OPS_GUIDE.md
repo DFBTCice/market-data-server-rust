@@ -2,6 +2,8 @@
 
 > 本文档补充 `DEPLOYMENT.md`，聚焦 Docker 生产部署、热重载真实能力和 CI/CD 实践。
 
+> **NAS 198 现网约束（2026-11-05）**：只使用已验收本机镜像 `md-server:1.1.1`，并核对镜像 ID `sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010` 和二进制 SHA-256 `3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d`。不得从任何 `latest` 部署；GitHub Release/GHCR 的同版本 CI 产物也不是验收产物。身份、两次自动发布和 jemalloc 核对见 [DEPLOYMENT §0](DEPLOYMENT.md#0-nas-198-现网产物约束2026-11-05-更正)。本次只更正文档，不访问或操作 198。
+
 ---
 
 ## 一、热重载（SIGHUP）真实能力清单
@@ -112,21 +114,15 @@ sudo systemctl kill -s HUP md-server
 
 ### 2.1 构建生产镜像
 
-项目已包含 `Dockerfile`（多阶段构建）：
-
-```bash
-# 本地构建
-docker build -t market-data-server-rust:latest .
-
-# 验证镜像大小
-docker images market-data-server-rust:latest
-# 预期: ~80-120MB（debian:bookworm-slim 基础）
-```
+现网只复用已验收的本机镜像，按上方不可变 ID 核对；本机缺失或 ID 不匹配即停止。默认 `Dockerfile` 只执行 `cargo build --release`，没有启用 jemalloc，不能替换现网 1.1.1。
+复现候选构建必须使用 `--features md-connector/vendored-tls,md-server/jemalloc-stats` 并重新独立验收；版本号相同不表示产物相同。
 
 ### 2.2 快速启动（单容器）
 
+仅用于已获批准、运行参数另行核对的部署；禁止自动拉取。本次文档更正不执行以下命令。
+
 ```bash
-docker run -d \
+docker run --pull=never -d \
   --name md-server \
   --restart unless-stopped \
   -p 8081:8081 \
@@ -136,7 +132,7 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   --memory=512m \
   --cpus=2 \
-  ghcr.io/dfbtcice/market-data-server-rust:latest
+  sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010
 ```
 
 > `-e RUST_LOG=warn` 会把日志级别固定为 warn，YAML 的 `log_level` 与 SIGHUP 对它不起作用（见第一节"日志级别"）。
@@ -144,27 +140,8 @@ docker run -d \
 
 ### 2.3 生产编排（Docker Compose + 监控）
 
-使用 `docker-compose.prod.yml`：
-
-```bash
-# 1. 准备目录
-mkdir -p /opt/md-server && cd /opt/md-server
-
-# 2. 拉取 compose 文件和配置
-curl -L -o docker-compose.prod.yml \
-  https://raw.githubusercontent.com/DFBTCice/market-data-server-rust/main/docker-compose.prod.yml
-
-# 3. 创建配置文件（按需修改）
-cp /path/to/your/config.yaml ./config.yaml
-
-# 4. 拉取最新镜像并启动
-docker-compose -f docker-compose.prod.yml pull
-docker-compose -f docker-compose.prod.yml up -d
-
-# 5. 验证
-curl http://localhost:8081/health
-curl http://localhost:8081/metrics | head -20
-```
+仓库 `docker-compose.prod.yml` 当前引用 GHCR `latest`，**不能直接用于 NAS 198 现网，也不要执行其 `pull` / `up` 作为升级方式**。本次不修改该模板。
+今后如另行采用 Compose，须先固定为已验收本机镜像 ID、禁止拉取/重建并独立验收整套编排；当前现网仍按 [已验收换版计划](evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md) 复制运行参数、留备份和即时补订阅。
 
 启动后访问：
 - REST API: `http://<host>:8081`
@@ -173,19 +150,7 @@ curl http://localhost:8081/metrics | head -20
 
 ### 2.4 自动化部署脚本
 
-使用 `deploy.sh`：
-
-```bash
-# 部署最新版本
-chmod +x deploy.sh
-./deploy.sh latest
-
-# 部署指定版本
-./deploy.sh v1.2.3
-
-# 使用本地构建的镜像
-./deploy.sh latest --local
-```
+现有 `deploy.sh` 默认拉取 GHCR `latest`，指定版本时也会把镜像重标为 `latest`；`--local` 分支同样不核对验收镜像 ID。**该脚本不是 NAS 198 的现网部署入口，不能直接执行。** 本次只说明现有行为，不修改脚本或生产配置。
 
 ---
 
@@ -230,10 +195,12 @@ strip = true
 
 **阶段**：
 1. **Build & Push Docker Image**: 构建 amd64 镜像，推送至 GHCR (`ghcr.io/dfbtcice/market-data-server-rust`)
-   - 自动打标签：`v1.2.3`、`1.2`、`1`、`<sha>`
+   - 自动写入去掉 `v` 的版本标签（如 `1.1.1`）、`1.1`、`1`、源码短 SHA 和 `latest`；不同版本的运行会覆盖共享别名
    - 使用 Docker layer cache (`type=gha`) 加速
-2. **Build Release Binary**: 构建 `x86_64-unknown-linux-gnu` 和 `aarch64-unknown-linux-gnu` 两个架构的二进制
+2. **Build Release Binary**: Ubuntu runner 上执行 `cargo build --release`，打包 `md-server-linux-amd64.tar.gz`；当前不是双架构构建
 3. **Create GitHub Release**: 自动创建 Release，附带二进制压缩包
+
+2026-11-05 的 [42017971662（v1.1.1）](https://github.com/DFBTCice/market-data-server-rust/actions/runs/42017971662) 与 [42017972062（v1.1.0）](https://github.com/DFBTCice/market-data-server-rust/actions/runs/42017972062) 均已完成以上发布；业务方决定保留，不删除或覆盖。两次正式二进制及默认 Dockerfile 构建都没有启用 jemalloc。测试步骤的 `--all-features` 不会被后续 `cargo build --release` 继承，不能据此把 CI 产物认作已验收现网二进制。
 
 ### 4.3 使用流程
 
@@ -241,32 +208,21 @@ strip = true
 # 1. 开发完成，合并到 main
 # CI 自动跑测试和检查
 
-# 2. 打标签触发发布
+# 2. 打标签即触发发布，必须事先明确批准 CI 的外部发布副作用
 git tag v1.0.0
 git push origin v1.0.0
 
 # 3. GitHub Actions 自动:
 #    - 构建 Docker 镜像并推送到 ghcr.io
-#    - 构建多架构二进制并创建 Release
+#    - 构建 amd64 二进制并创建 Release、上传资产
 
-# 4. 服务器上部署最新版本
-ssh your-server
-./deploy.sh v1.0.0
+# 4. 发布完成不等于产物已通过现网验收，不自动部署
+#    NAS 198 只使用已验收的本机镜像 ID；不从 latest 或同版本 CI 标签部署
 ```
 
 ### 4.4 回滚流程
 
-```bash
-# 紧急回滚到上一个版本
-./deploy.sh v0.9.0
-
-# 或直接用 Docker
-docker-compose -f docker-compose.prod.yml down
-docker pull ghcr.io/dfbtcice/market-data-server-rust:v0.9.0
-docker tag ghcr.io/dfbtcice/market-data-server-rust:v0.9.0 \
-            ghcr.io/dfbtcice/market-data-server-rust:latest
-docker-compose -f docker-compose.prod.yml up -d
-```
+NAS 198 回滚使用已保留、已核对身份的本机旧镜像/停止备份容器，不从 GHCR 拉取并重标 `latest`。按 [SWAP_PLAN §5](evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md#5-回滚已授权换版的恢复步骤) 先保存即时非空订阅、保留失败现场，切回后立即补订阅并核验缺失0、健康和消费者恢复；本次不执行回滚。
 
 ---
 
@@ -350,7 +306,7 @@ Legacy `/ws` 的订阅/退订行为未改动。
 |---|---|
 | `process_resident_memory_bytes` | RSS。**建议阈值：≥ 400 MiB（容器限额 512 MiB 的约 78%）持续 10 分钟 → 在低峰期主动重建容器**（清零 musl 高水位；重建后补订阅，见 DEPLOYMENT §12.2）；≥ 480 MiB 视为紧急 |
 | `md_ws_subscriptions_active` | 所有 WS 连接持有的接收端总数。退订/断线后必须回落；与 `md_ws_active_clients` 对照（一个连接订 N 个主题就贡献 N）。只增不减 = 泄漏 |
-| `md_ws_kicked_write_timeout_total` | 因写超时被踢的 Gateway 客户端累计数。**增长说明有消费者卡顿**——去查消费者（GC/阻塞/网络），不是服务端问题 |
+| `md_ws_kicked_write_timeout_total` | 发送等待超过阈值而被踢的 Gateway 连接累计数。增长须单独核对客户端、链路及服务端发送回压；不能仅凭计数或固定文案确认消费者卡顿 |
 | `md_ws_kicked_lagged_total` / `md_broadcast_lagged_total` | 消费者跟不上被踢 / 环溢出丢事件 |
 | `md_ticks_dropped` / `md_klines_dropped` / `md_quotes_dropped` | 入口队列满丢弃。1.1.1 起日志里会限频输出 WARN（含时间与队列深度） |
 | `md_tokio_alive_tasks` | 重连前后应回到同一水平（22 左右），只增不减 = task 泄漏 |

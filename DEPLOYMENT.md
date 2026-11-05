@@ -1,7 +1,43 @@
 # 生产环境部署指南
 
+## 0. NAS 198 现网产物约束（2026-11-05 更正）
+
+**现网只使用已验收的本机镜像，按不可变镜像 ID 核对；不得从 `latest` 部署，也不得把 GitHub Release 或 GHCR 的同版本 CI 产物当作现网验收产物。** 本节优先于下文的通用构建/部署示例；本次仅更正文档，不访问、换版或重启 198。
+
+### 0.1 已验收的本机 1.1.1
+
+| 标识 | 验收记录 |
+|---|---|
+| 源码 | `a06fe2095e8fc58bff1e038a594b25e7002aff1b` |
+| 本机镜像标签 | `md-server:1.1.1`；标签只是查找入口，必须核对下列 ID |
+| 本机 Docker 镜像 ID | `sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010` |
+| 镜像内二进制 SHA-256 | `3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d` |
+| 必需构建特性 | `--features md-connector/vendored-tls,md-server/jemalloc-stats` |
+
+以上身份来自已有验收记录，不是本次重新查询现网的结果。后续部署须使用本机已验收镜像 ID 并禁止拉取（如 `docker run --pull=never`）；镜像不在本机或 ID 不符时停止，不能回退到 `docker pull`、默认 `Dockerfile` 重建或 `latest`。新产物须独立验收和批准。完整换版、备份及即时补订阅流程见 [SWAP_PLAN](evidence/1.1.1/nas-198/SWAP_PLAN_1.1.1.md)。
+
+### 0.2 标签触发的 CI 发布与现网产物不同
+
+推送 Git 标签会触发 [release.yml](.github/workflows/release.yml)，不是只写一个源码标记：
+
+- [运行 42017971662](https://github.com/DFBTCice/market-data-server-rust/actions/runs/42017971662) 对应 `v1.1.1` / `a06fe20`，自动创建 [GitHub Release v1.1.1](https://github.com/DFBTCice/market-data-server-rust/releases/tag/v1.1.1) 并上传二进制压缩包。
+- [运行 42017972062](https://github.com/DFBTCice/market-data-server-rust/actions/runs/42017972062) 对应 `v1.1.0` / `beaac94`，自动创建 [GitHub Release v1.1.0](https://github.com/DFBTCice/market-data-server-rust/releases/tag/v1.1.0) 并上传二进制压缩包。
+- 两次运行推送 `ghcr.io/dfbtcice/market-data-server-rust`，分别写入 `1.1.1`、`1.1.0` 及源码短 SHA 标签，并都更新共享的 `latest`、`1`、`1.1`。共享别名可被不同版本的运行覆盖，不能据此认定版本或验收身份。
+
+**本次 CI 的正式二进制与 Docker 镜像均未启用 jemalloc。** 日志中的正式构建命令是 `cargo build --release`；默认 Dockerfile 也使用该命令，没有 `md-server/jemalloc-stats`。1.1.1 的该特性默认关闭，1.1.0 尚无该特性。此前的 `cargo test --all-features --workspace` 只影响那次测试，不会让后续默认构建继承特性。
+
+CI Release 包内二进制只读下载后计算的 SHA-256 分别为：
+
+- `v1.1.0`：`e99e80fb9b9e166efb5423ae206f70a594cc7204b0b364c66904130cf42d0d67`。
+- `v1.1.1`：`4075f832c949f6de752ec2861e812c4cf803ff9d109f4608016c54dec4308129`。
+
+它们都不是 §0.1 中复核过的现网二进制。GHCR 镜像也是 CI 独立构建的产物，未经该现网产物验收；即使源码标签相同，也不能替换已验收本机镜像。业务方决定保留现有 Release、资产、Git 标签及 GHCR 发布结果；本次不删除、不重打、不覆盖，也不改发布流水线。这里的 GHCR `latest` 与 NAS 本机 `md-server:latest` 是不同的引用，后者同样不得用于现网部署。
+
+业务方 2026-11-05 决定继续运行并合并，保留 tick 入口突发丢弃累计 0.0142% 未修、写超时来源未最终证实及原 24 小时观察字面未通过的事实；不是批准从 CI 或 `latest` 重新部署。
+
 ## 目录
 
+- [0. NAS 198 现网产物约束](#0-nas-198-现网产物约束2026-11-05-更正)
 - [1. 系统要求](#1-系统要求)
 - [2. 快速部署](#2-快速部署)
 - [3. systemd 服务部署（推荐）](#3-systemd-服务部署推荐)
@@ -203,6 +239,8 @@ sudo journalctl -u md-server --since "2026-05-05 10:00" --until "2026-05-05 12:0
 
 ## 4. Docker 部署
 
+以下 §4.1–§4.6 是非现网的通用示例，不是 NAS 198 的部署指令；现网执行 §0 的本机验收镜像约束。默认 Dockerfile 构建没有 jemalloc，不能用于现网 1.1.1。
+
 ### 4.1 Dockerfile
 
 ```dockerfile
@@ -248,7 +286,7 @@ CMD ["md-server", "--config", "/etc/md-server/config.yaml"]
 ### 4.2 构建镜像
 
 ```bash
-docker build -t md-server:latest .
+docker build -t md-server:dev .
 ```
 
 ### 4.3 运行容器
@@ -261,7 +299,7 @@ docker run -d \
   -p 50051:50051 \
   -v /path/to/config.yaml:/etc/md-server/config.yaml:ro \
   -v /var/log/md-server:/var/log/md-server \
-  md-server:latest
+  md-server:dev
 
 # 带环境变量
 docker run -d \
@@ -271,7 +309,7 @@ docker run -d \
   -e RUST_LOG=warn \
   -e TZ=Asia/Shanghai \
   -v /path/to/config.yaml:/etc/md-server/config.yaml:ro \
-  md-server:latest
+  md-server:dev
 
 # 限制资源
 docker run -d \
@@ -281,7 +319,7 @@ docker run -d \
   -p 8081:8081 \
   -p 50051:50051 \
   -v /path/to/config.yaml:/etc/md-server/config.yaml:ro \
-  md-server:latest
+  md-server:dev
 ```
 
 ### 4.4 Docker Compose
@@ -346,7 +384,7 @@ docker-compose down
 | crates 源 | `crates.io` | `rsproxy.cn` 稀疏索引 |
 
 ```bash
-docker build -t md-server:latest -f Dockerfile.cn .
+docker build -t md-server:dev -f Dockerfile.cn .
 ```
 
 ### 4.6 通过 Portainer API 远程一键替换部署
@@ -369,7 +407,7 @@ COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata \
   --exclude='./target' --exclude='./.git' --exclude='./.DS_Store' -cf /tmp/ctx.tar .
 
 # 3. 在远端原生构建镜像（架构与目标主机一致，避免跨架构）
-curl -s -X POST "$B/build?t=md-server:latest&dockerfile=Dockerfile.cn" \
+curl -s -X POST "$B/build?t=md-server:dev&dockerfile=Dockerfile.cn" \
   -H "Authorization: Bearer $JWT" -H 'Content-Type: application/x-tar' \
   --data-binary @/tmp/ctx.tar
 
@@ -378,7 +416,7 @@ curl -s -X POST "$B/containers/md-server/rename?name=md-server-bak" -H "Authoriz
 curl -s -X POST "$B/containers/md-server-bak/stop"                  -H "Authorization: Bearer $JWT"
 curl -s -X POST "$B/containers/create?name=md-server" -H "Authorization: Bearer $JWT" \
   -H 'Content-Type: application/json' -d '{
-    "Image":"md-server:latest",
+    "Image":"md-server:dev",
     "Env":["RUST_LOG=warn","TZ=Asia/Shanghai"],
     "ExposedPorts":{"8081/tcp":{},"50051/tcp":{}},
     "HostConfig":{
@@ -1172,6 +1210,8 @@ USER md-user
 
 ### 12.2 升级到 1.1.1（内存调查 + Gateway 修复 + SIGHUP/log_level；分阶段、可回滚）
 
+现网只允许 §0 中已验收本机镜像 ID；不要从 GHCR `latest`、`1`、`1.1` 或同版本 CI 标签拉取替换。以下流程须经独立部署批准，本次文档更正不执行任何换版。
+
 1.1.1 的内容与结论见 [CHANGELOG](CHANGELOG.md) 与 `evidence/1.1.1/INVESTIGATION_REPORT.md`。要点：
 
 - 修 Gateway `unsubscribe` 不释放接收端（A1）、改用 `StreamMap` 接收路径（A2，输出字节不变）；
@@ -1223,7 +1263,7 @@ node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:808
 **回滚**（任一验收项不通过）：`python3 evidence/1.1.0/nas-198/tools/pt_swap.py rollback md-server-1.1.0-quote-bnb-bak`，随后同样 `restore_subs.mjs` 补订阅。
 
 **换版后 24 小时观察项**：`process_resident_memory_bytes`（逐小时；告警阈值 400MiB）、`md_ws_subscriptions_active`（退订后回落）、
-`md_ws_kicked_write_timeout_total`（应≈0；增长 = 有消费者卡顿）、`md_ticks_dropped`（日志同时有限频 WARN）、
+`md_ws_kicked_write_timeout_total`（应≈0；增长须独立核对客户端/链路/发送回压，不能仅凭计数确认消费者卡顿）、`md_ticks_dropped`（日志同时有限频 WARN）、
 `md_connector_reconnect_total`、`md_tokio_alive_tasks`（重连前后同水平）、1stbotv3 与 OMS 消费正常。
 
 ---
@@ -1266,6 +1306,6 @@ YAML 的 `log_level` 可以用 SIGHUP 热更（不重连）；已设置 `RUST_LO
 
 ---
 
-**文档版本**: 1.1.0
-**最后更新**: 2026-10-09
+**文档版本**: 1.1.1
+**最后更新**: 2026-11-05
 **维护者**: DevOps Team
