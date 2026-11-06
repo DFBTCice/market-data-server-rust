@@ -1135,3 +1135,92 @@ async fn quote_topics_are_subscribed_on_demand_when_enabled() {
         1
     );
 }
+
+/// 运行期订阅已到上限时订阅名单外报价话题：报价在上限判断之前就被跳过，不计上限拒绝、不补订
+#[tokio::test]
+async fn skipped_quote_does_not_count_against_the_limit() {
+    let r = rig_full(
+        Settings {
+            max_runtime_subscriptions: 1,
+            ..fast_settings()
+        },
+        &[],
+        &["BNBUSDT"],
+        &[],
+    )
+    .await;
+    r.post_tick("binance", "SOLUSDT").await;
+    let _sol = r.gateway_ws("tick.binance.SOLUSDT").await;
+    let _q = r.gateway_ws("quote.binance.BTCUSDT").await;
+    tokio::time::sleep(CHECK * 5).await;
+    assert_eq!(r.metric("md_runtime_subscriptions"), 1);
+    assert_eq!(
+        r.metric("md_runtime_subscriptions_limit_rejected_total"),
+        0,
+        "被跳过的报价不得计入上限拒绝"
+    );
+    assert_eq!(r.binance.count("SUBSCRIBE", "btcusdt@bookTicker"), 0);
+}
+
+/// 检查间隔很长时，SIGHUP 改设置（打开报价补订）也立即补订，不等下一次检查
+#[tokio::test]
+async fn settings_change_subscribes_immediately_under_long_check_interval() {
+    let slow = Settings {
+        check_interval: Duration::from_secs(60),
+        ..fast_settings()
+    };
+    let r = rig_full(slow.clone(), &[], &["BNBUSDT"], &[]).await;
+    let _q = r.gateway_ws("quote.binance.BTCUSDT").await;
+    tokio::time::sleep(Duration::from_millis(300)).await;
+    assert_eq!(r.binance.count("SUBSCRIBE", "btcusdt@bookTicker"), 0);
+    r.runtime.update_config(ConfigView {
+        settings: Settings {
+            on_demand_quote: true,
+            ..slow
+        },
+        protected: [SubKey::new("binance", DataType::Quote, "BNBUSDT", None)]
+            .into_iter()
+            .collect(),
+    });
+    assert!(
+        wait_until(Duration::from_secs(2), || r
+            .binance
+            .count("SUBSCRIBE", "btcusdt@bookTicker")
+            == 1)
+        .await,
+        "设置变化后应立即补订，而不是等 60 秒的检查"
+    );
+}
+
+/// POST 登记的 QUOTE 不受 on_demand_quote 影响：无人接收时照常闲置退订
+#[tokio::test]
+async fn posted_quote_without_receivers_is_idle_unsubscribed() {
+    let r = rig_full(fast_settings(), &[], &["BNBUSDT"], &[]).await;
+    let (status, body) = http(
+        "POST",
+        &format!("{}/api/v1/subscriptions", r.base),
+        Some(r#"{"exchange":"binance","type":"QUOTE","symbols":["ETHUSDT"]}"#),
+    )
+    .await;
+    assert_eq!((status, body.as_str()), (200, r#"{"success":true}"#));
+    assert!(
+        wait_until(Duration::from_secs(2), || r
+            .binance
+            .count("SUBSCRIBE", "ethusdt@bookTicker")
+            == 1)
+        .await
+    );
+    assert!(
+        wait_until(Duration::from_secs(3), || r
+            .binance
+            .count("UNSUBSCRIBE", "ethusdt@bookTicker")
+            == 1)
+        .await,
+        "POST 登记的 QUOTE 无人接收时应闲置退订"
+    );
+    assert_eq!(
+        r.binance.count("UNSUBSCRIBE", "bnbusdt@bookTicker"),
+        0,
+        "配置报价不得退订"
+    );
+}
