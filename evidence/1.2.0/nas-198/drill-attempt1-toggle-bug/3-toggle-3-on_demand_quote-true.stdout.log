@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/Users/lihao/Desktop/web3/rust/rest重构/evidence/1.2.0/tools/runtime_toggle.py", line 56, in <module>
+    assert diff == expected, f"配置改动不止该键：{diff}"
+AssertionError: 配置改动不止该键：['-  on_demand_quote: false', '+  on_demand_quote: true']

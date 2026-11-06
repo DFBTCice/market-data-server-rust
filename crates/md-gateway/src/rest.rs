@@ -1,9 +1,11 @@
+use crate::runtime_subs::RuntimeSubscriptions;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Json, Router};
 use md_connector::Connector;
+use md_domain::topic;
 use md_processor::Processor;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -15,6 +17,8 @@ use tokio::sync::RwLock;
 pub struct AppState {
     pub processor: Arc<Processor>,
     pub connectors: Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
+    /// 运行期订阅管理（1.2.0）
+    pub runtime: Option<Arc<RuntimeSubscriptions>>,
 }
 
 /// REST 错误响应 -- 对标 Go 版 {"error": "message"}
@@ -43,6 +47,12 @@ struct SubscriptionInfo {
     symbol: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     kline_interval: String,
+    /// 1.2.0 追加，仅运行期订阅管理开关打开时出现：`config` / `runtime`
+    #[serde(skip_serializing_if = "Option::is_none")]
+    source: Option<&'static str>,
+    /// 1.2.0 追加，仅开关打开时出现：最近一次确认有人在用的 Unix 毫秒；开关打开以来没人用过时为 null
+    #[serde(skip_serializing_if = "Option::is_none")]
+    last_active_at: Option<Option<i64>>,
 }
 
 /// 构建 REST 路由
@@ -50,9 +60,19 @@ pub fn routes(
     processor: Arc<Processor>,
     connectors: Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
 ) -> Router {
+    routes_with_runtime(processor, connectors, None)
+}
+
+/// 构建 REST 路由，并接入运行期订阅管理（1.2.0）
+pub fn routes_with_runtime(
+    processor: Arc<Processor>,
+    connectors: Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
+    runtime: Option<Arc<RuntimeSubscriptions>>,
+) -> Router {
     let state = AppState {
         processor,
         connectors,
+        runtime,
     };
 
     Router::new()
@@ -107,6 +127,7 @@ async fn get_subscriptions(State(state): State<AppState>) -> impl IntoResponse {
 
     for (_name, connector) in connectors.iter() {
         for target in connector.current_subscriptions() {
+            let annotation = state.runtime.as_ref().and_then(|rt| rt.annotate(&target));
             subs.push(SubscriptionInfo {
                 exchange: target.exchange,
                 data_type: match target.data_type {
@@ -116,6 +137,8 @@ async fn get_subscriptions(State(state): State<AppState>) -> impl IntoResponse {
                 },
                 symbol: target.symbol,
                 kline_interval: target.kline_interval.unwrap_or_default(),
+                source: annotation.as_ref().map(|a| a.source),
+                last_active_at: annotation.map(|a| a.last_active_at),
             });
         }
     }
@@ -258,7 +281,12 @@ async fn remove_subscription(
         .collect();
 
     match connector.remove_subscriptions(targets).await {
-        Ok(()) => (StatusCode::OK, Json(serde_json::json!({"success": true}))).into_response(),
+        Ok(()) => {
+            if let Some(rt) = state.runtime.as_ref() {
+                rt.nudge();
+            }
+            (StatusCode::OK, Json(serde_json::json!({"success": true}))).into_response()
+        }
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ErrorResponse {
@@ -274,6 +302,9 @@ async fn get_latest_tick(
     State(state): State<AppState>,
     Path((exchange, symbol)): Path<(String, String)>,
 ) -> impl IntoResponse {
+    state
+        .processor
+        .note_read(&topic::tick_topic(&exchange.to_lowercase(), &symbol));
     match state.processor.get_latest_tick(&exchange, &symbol) {
         Some(tick) => (StatusCode::OK, Json(tick.as_ref().clone())).into_response(),
         None => (
@@ -291,6 +322,9 @@ async fn get_latest_quote(
     State(state): State<AppState>,
     Path((exchange, symbol)): Path<(String, String)>,
 ) -> impl IntoResponse {
+    state
+        .processor
+        .note_read(&topic::quote_topic(&exchange.to_lowercase(), &symbol));
     match state.processor.get_latest_quote(&exchange, &symbol) {
         Some(quote) => (StatusCode::OK, Json(quote.as_ref().clone())).into_response(),
         None => (
@@ -308,6 +342,11 @@ async fn get_latest_kline(
     State(state): State<AppState>,
     Path((exchange, symbol, interval)): Path<(String, String, String)>,
 ) -> impl IntoResponse {
+    state.processor.note_read(&topic::kline_topic(
+        &exchange.to_lowercase(),
+        &symbol,
+        &interval,
+    ));
     match state
         .processor
         .get_latest_kline(&exchange, &symbol, &interval)

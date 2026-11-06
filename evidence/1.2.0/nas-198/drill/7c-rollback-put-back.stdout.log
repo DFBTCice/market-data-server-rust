@@ -1,0 +1,5 @@
+2026-11-06T18:00:52.536048+00:00 archived 14 subscriptions from md-exp-120-drill; process_start_time_seconds=1793988044.0
+2026-11-06T18:00:52.629124+00:00 rollback pre-check: md-exp-120-drill-bak present, image sha256:3250e021d152, stopped, cmd/user/env/ports match
+2026-11-06T18:01:57.240231+00:00 rollback: 1.1.1 container not healthy within 60s; putting the previous container back
+2026-11-06T18:01:59.357900+00:00 rollback result: {"mode": "drill", "at_utc": "2026-11-06T18:01:59.348546+00:00", "status": "rollback_failed_previous_restored", "error": "rollback failed (1.1.1 container not healthy within 60s); previous container restored, health 0.0", "restore_subs_exit": 0, "process_start_time_before": 1793988044.0, "process_start_time_after": 1793988119.0, "healthy_now": true, "pass": false}
+rollback failed (1.1.1 container not healthy within 60s); previous container restored, health 0.0

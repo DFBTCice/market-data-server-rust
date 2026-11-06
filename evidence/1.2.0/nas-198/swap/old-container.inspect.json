@@ -1,0 +1,318 @@
+{
+  "AppArmorProfile": "docker-default",
+  "Args": [
+    "--config",
+    "/etc/md-server/config.yaml"
+  ],
+  "Config": {
+    "AttachStderr": false,
+    "AttachStdin": false,
+    "AttachStdout": false,
+    "Cmd": [
+      "md-server",
+      "--config",
+      "/etc/md-server/config.yaml"
+    ],
+    "Domainname": "",
+    "Entrypoint": [],
+    "Env": [
+      "RUST_LOG=warn",
+      "TZ=Asia/Shanghai",
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "ExposedPorts": {
+      "50051/tcp": {},
+      "8081/tcp": {}
+    },
+    "Healthcheck": {
+      "Interval": 30000000000,
+      "Retries": 3,
+      "StartPeriod": 5000000000,
+      "Test": [
+        "CMD-SHELL",
+        "curl -f http://localhost:8081/health || exit 1"
+      ],
+      "Timeout": 10000000000
+    },
+    "Hostname": "5d6996ca9dc0",
+    "Image": "md-server:1.1.1",
+    "Labels": {
+      "md-server.binary.sha256": "3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d",
+      "md-server.replaced": "1de7da0c7d2c",
+      "md-server.version": "1.1.1",
+      "org.opencontainers.image.revision": "a06fe2095e8fc58bff1e038a594b25e7002aff1b"
+    },
+    "OnBuild": null,
+    "OpenStdin": false,
+    "StdinOnce": false,
+    "Tty": false,
+    "User": "md-user",
+    "Volumes": null,
+    "WorkingDir": ""
+  },
+  "Created": "2026-10-23T19:53:19.66287136Z",
+  "Driver": "overlay2",
+  "ExecIDs": null,
+  "GraphDriver": {
+    "Data": {
+      "ID": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+      "LowerDir": "/vol2/docker/overlay2/a7e28de6544731d1f154c0cf03616725bcf65e96a03f3d2dabcfae9e83b62f3c-init/diff:/vol2/docker/overlay2/446d8ef99974a4852d9f6578cc7f415803fde0fbdbc445eaac2bd43269aaf72d/diff:/vol2/docker/overlay2/e40edd68a94252f638cd88af51bc94b66ac6bc3c8426fb3db1217dd8bc9bd4a0/diff:/vol2/docker/overlay2/936a72b1095673ddbeb03c8c0e17c62dbf3ec9f31e70553f6f51ddc3f235aa1e/diff:/vol2/docker/overlay2/12155f0024dcba9dabfe4738099ac5b2ed18ecdd119b0571a487348ced34eb51/diff:/vol2/docker/overlay2/5639b89cabc2d1f9a2640332f43b593b1a5e72ca58a42f19180f671fa05d4b70/diff:/vol2/docker/overlay2/34abe0a120dde78c701db89743a8ea5e07b150b0371dbadf912295a08ec1ca41/diff:/vol2/docker/overlay2/8d585772de1e795af325ef1d6b4283f508be159fe5ebb478906a1a975dbd4540/diff:/vol2/docker/overlay2/35fcda38b235d675a2a2b454b5d9941498143831fb8bac8c9ec919bc73e40597/diff:/vol2/docker/overlay2/2ad61cb6e1a5aa09828ec6d25a7f1332429e7b62864a6713364c892d7e03a211/diff",
+      "MergedDir": "/vol2/docker/overlay2/a7e28de6544731d1f154c0cf03616725bcf65e96a03f3d2dabcfae9e83b62f3c/merged",
+      "UpperDir": "/vol2/docker/overlay2/a7e28de6544731d1f154c0cf03616725bcf65e96a03f3d2dabcfae9e83b62f3c/diff",
+      "WorkDir": "/vol2/docker/overlay2/a7e28de6544731d1f154c0cf03616725bcf65e96a03f3d2dabcfae9e83b62f3c/work"
+    },
+    "Name": "overlay2"
+  },
+  "HostConfig": {
+    "AutoRemove": false,
+    "Binds": null,
+    "BlkioDeviceReadBps": null,
+    "BlkioDeviceReadIOps": null,
+    "BlkioDeviceWriteBps": null,
+    "BlkioDeviceWriteIOps": null,
+    "BlkioWeight": 0,
+    "BlkioWeightDevice": null,
+    "CapAdd": null,
+    "CapDrop": null,
+    "Cgroup": "",
+    "CgroupParent": "",
+    "CgroupnsMode": "private",
+    "ConsoleSize": [
+      0,
+      0
+    ],
+    "ContainerIDFile": "",
+    "CpuCount": 0,
+    "CpuPercent": 0,
+    "CpuPeriod": 0,
+    "CpuQuota": 0,
+    "CpuRealtimePeriod": 0,
+    "CpuRealtimeRuntime": 0,
+    "CpuShares": 0,
+    "CpusetCpus": "",
+    "CpusetMems": "",
+    "DeviceCgroupRules": null,
+    "DeviceRequests": null,
+    "Devices": null,
+    "Dns": null,
+    "DnsOptions": null,
+    "DnsSearch": null,
+    "ExtraHosts": null,
+    "GroupAdd": null,
+    "IOMaximumBandwidth": 0,
+    "IOMaximumIOps": 0,
+    "IpcMode": "private",
+    "Isolation": "",
+    "Links": null,
+    "LogConfig": {
+      "Config": {
+        "max-file": "5",
+        "max-size": "100m"
+      },
+      "Type": "json-file"
+    },
+    "MaskedPaths": [
+      "/proc/asound",
+      "/proc/acpi",
+      "/proc/interrupts",
+      "/proc/kcore",
+      "/proc/keys",
+      "/proc/latency_stats",
+      "/proc/timer_list",
+      "/proc/timer_stats",
+      "/proc/sched_debug",
+      "/proc/scsi",
+      "/sys/firmware",
+      "/sys/devices/virtual/powercap",
+      "/sys/devices/system/cpu/cpu0/thermal_throttle",
+      "/sys/devices/system/cpu/cpu1/thermal_throttle",
+      "/sys/devices/system/cpu/cpu2/thermal_throttle",
+      "/sys/devices/system/cpu/cpu3/thermal_throttle"
+    ],
+    "Memory": 536870912,
+    "MemoryReservation": 0,
+    "MemorySwap": 1073741824,
+    "MemorySwappiness": null,
+    "NanoCpus": 2000000000,
+    "NetworkMode": "bridge",
+    "OomKillDisable": null,
+    "OomScoreAdj": 0,
+    "PidMode": "",
+    "PidsLimit": null,
+    "PortBindings": {
+      "50051/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "50051"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "8081"
+        }
+      ]
+    },
+    "Privileged": false,
+    "PublishAllPorts": false,
+    "ReadonlyPaths": [
+      "/proc/bus",
+      "/proc/fs",
+      "/proc/irq",
+      "/proc/sys",
+      "/proc/sysrq-trigger"
+    ],
+    "ReadonlyRootfs": false,
+    "RestartPolicy": {
+      "MaximumRetryCount": 0,
+      "Name": "unless-stopped"
+    },
+    "Runtime": "runc",
+    "SecurityOpt": null,
+    "ShmSize": 67108864,
+    "UTSMode": "",
+    "Ulimits": null,
+    "UsernsMode": "",
+    "VolumeDriver": "",
+    "VolumesFrom": null
+  },
+  "HostnamePath": "/vol2/docker/containers/5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812/hostname",
+  "HostsPath": "/vol2/docker/containers/5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812/hosts",
+  "Id": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+  "Image": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "LogPath": "/vol2/docker/containers/5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812/5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812-json.log",
+  "MountLabel": "",
+  "Mounts": [],
+  "Name": "/md-server",
+  "NetworkSettings": {
+    "Bridge": "",
+    "EndpointID": "6df92de3ceaf978429447650c714593e3baf0c41a5a72e245d5fe531c1045084",
+    "Gateway": "172.17.0.1",
+    "GlobalIPv6Address": "",
+    "GlobalIPv6PrefixLen": 0,
+    "HairpinMode": false,
+    "IPAddress": "172.17.0.2",
+    "IPPrefixLen": 16,
+    "IPv6Gateway": "",
+    "LinkLocalIPv6Address": "",
+    "LinkLocalIPv6PrefixLen": 0,
+    "MacAddress": "56:2a:fc:8e:dc:57",
+    "Networks": {
+      "bridge": {
+        "Aliases": null,
+        "DNSNames": null,
+        "DriverOpts": null,
+        "EndpointID": "6df92de3ceaf978429447650c714593e3baf0c41a5a72e245d5fe531c1045084",
+        "Gateway": "172.17.0.1",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "GwPriority": 0,
+        "IPAMConfig": null,
+        "IPAddress": "172.17.0.2",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "Links": null,
+        "MacAddress": "56:2a:fc:8e:dc:57",
+        "NetworkID": "0932b63769d50e483c1acf184c9b69d23c4f5f33717770a54783641c91df4059"
+      }
+    },
+    "Ports": {
+      "50051/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "50051"
+        },
+        {
+          "HostIp": "::",
+          "HostPort": "50051"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8081"
+        },
+        {
+          "HostIp": "::",
+          "HostPort": "8081"
+        }
+      ]
+    },
+    "SandboxID": "962e3f14f43fb8e499d77ac32818d932903fe1dc6f73356c1f13e3487a19010e",
+    "SandboxKey": "/var/run/docker/netns/962e3f14f43f",
+    "SecondaryIPAddresses": null,
+    "SecondaryIPv6Addresses": null
+  },
+  "Path": "md-server",
+  "Platform": "linux",
+  "Portainer": {
+    "ResourceControl": {
+      "Id": 312,
+      "ResourceId": "5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812",
+      "SubResourceIds": [],
+      "Type": 1,
+      "UserAccesses": [
+        {
+          "UserId": 2,
+          "AccessLevel": 1
+        }
+      ],
+      "TeamAccesses": [],
+      "Public": false,
+      "AdministratorsOnly": false,
+      "System": false
+    }
+  },
+  "ProcessLabel": "",
+  "ResolvConfPath": "/vol2/docker/containers/5d6996ca9dc000c162c02ea3a4d5dca7baf29fd1a9cc98601c72a9552cecd812/resolv.conf",
+  "RestartCount": 0,
+  "State": {
+    "Dead": false,
+    "Error": "",
+    "ExitCode": 0,
+    "FinishedAt": "0001-01-01T00:00:00Z",
+    "Health": {
+      "FailingStreak": 0,
+      "Log": [
+        {
+          "End": "2026-11-07T02:25:30.03614757+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  45735      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-11-07T02:25:29.945392721+08:00"
+        },
+        {
+          "End": "2026-11-07T02:26:00.109022062+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  49798      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-11-07T02:26:00.037168938+08:00"
+        },
+        {
+          "End": "2026-11-07T02:26:30.187280366+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  55059      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-11-07T02:26:30.110221803+08:00"
+        },
+        {
+          "End": "2026-11-07T02:27:00.274763681+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  51388      0 --:--:-- --:--:-- --:--:-- 37000\n{\"service\":\"md-server\",\"status\":\"ok\"}",
+          "Start": "2026-11-07T02:27:00.188187301+08:00"
+        },
+        {
+          "End": "2026-11-07T02:27:30.360839136+08:00",
+          "ExitCode": 0,
+          "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100    37  100    37    0     0  53857      0 --:--:-- -{\"service\":\"md-server\",\"status\":\"ok\"}-:--:-- --:--:-- 37000\n",
+          "Start": "2026-11-07T02:27:30.2760394+08:00"
+        }
+      ],
+      "Status": "healthy"
+    },
+    "OOMKilled": false,
+    "Paused": false,
+    "Pid": 933425,
+    "Restarting": false,
+    "Running": true,
+    "StartedAt": "2026-10-23T19:53:21.256218768Z",
+    "Status": "running"
+  }
+}

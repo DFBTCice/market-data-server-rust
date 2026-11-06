@@ -593,8 +593,8 @@ connectors:
 
   okx:
     enabled: true
-    stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public"
-    stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business"
+    stream_base_url_public: "wss://ws.okx.com/ws/v5/public"
+    stream_base_url_business: "wss://ws.okx.com/ws/v5/business"
     rest_base_url: "https://www.okx.com"
 
     subscribe_ticks:
@@ -1265,6 +1265,47 @@ node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:808
 **换版后 24 小时观察项**：`process_resident_memory_bytes`（逐小时；告警阈值 400MiB）、`md_ws_subscriptions_active`（退订后回落）、
 `md_ws_kicked_write_timeout_total`（应≈0；增长须独立核对客户端/链路/发送回压，不能仅凭计数确认消费者卡顿）、`md_ticks_dropped`（日志同时有限频 WARN）、
 `md_connector_reconnect_total`、`md_tokio_alive_tasks`（重连前后同水平）、1stbotv3 与 OMS 消费正常。
+
+### 12.3 升级到 1.2.0（运行期订阅闲置退订与按需补订；开关打开上线、报价补订关闭）
+
+内容见 [CHANGELOG](CHANGELOG.md) `[1.2.0]` 与 [OPS_GUIDE 第八节](OPS_GUIDE.md#八运行期订阅闲置退订与按需补订120-起默认关闭)；验收证据见 `evidence/1.2.0/README.md`。
+现网仍只用独立验收过的本机镜像 ID（§0），1.2.0 产物未经业务方批准不得上 198。
+
+- **构建**：与 1.1.1 相同，必须 `--features md-connector/vendored-tls,md-server/jemalloc-stats`，干净 worktree、固定 `SOURCE_DATE_EPOCH`、两次构建 sha256 一致：
+  `bash evidence/1.2.0/tools/build_final.sh <提交>`，记录在 `evidence/1.2.0/build-logs/dist-sha256.txt`。
+  **产物 sha 与构建路径有关**（二进制里嵌有 md-proto 生成代码与 vendored OpenSSL 的绝对路径），只能在 `/tmp/md-final-<短提交>` 与 `/tmp/md-final-<短提交>-target` 这两个路径下复现。
+- **换版（业务方 2026-11-06 决定：金丝雀通过后直接以开关打开上线）**。镜像 = `md-server:1.0.0-rollback` + 最终产物 + 现网配置末尾追加：
+
+  ```yaml
+  runtime_subscriptions:
+    idle_unsubscribe: true
+    idle_minutes: 10
+    check_interval_seconds: 60
+    startup_grace_minutes: 10
+    max_runtime_subscriptions: 200
+    on_demand_quote: false
+  ```
+
+  容器环境 `RUST_LOG=warn,md_runtime_subs=info`、`TZ=Asia/Shanghai`，其余参数沿用旧容器。工具与步骤见 `evidence/1.2.0/nas-198/SWAP_PLAN_1.2.0.md`
+  （`build_release_image.py` 无参数，产物与 sha 固定为 `cbc6b053…`；`execute_swap.py` 前置检查 → 记录换前订阅 → 换容器 → 立即 `restore_subs.mjs` → 即时检查，失败自动回退；
+  `check_after_swap.py` 10 分钟验收）。
+  换版后 24 小时每分钟采样：RSS 斜率、`md_runtime_subscriptions` 曲线、`md_runtime_subscriptions_{idle_unsubscribed,demand_subscribed,demand_failed,limit_rejected}_total`、
+  各 quote 入站速率、`md_ticks_dropped` / `md_quotes_dropped`、OKX / 币安重连次数，并核对 OMS / botd 无数据中断。
+- **换版后仍必须立刻补订阅**（开关开或关都一样）：运行期订阅不持久化，容器重启即丢失。
+
+  ```bash
+  curl -s http://HOST:8081/api/v1/subscriptions > baseline/subscriptions.json   # 换版前
+  # ……换容器……
+  node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:8081 --apply
+  ```
+
+  开关打开时，补回的订阅若在保护期结束后仍没人接收，会在闲置到期后被自动退掉——这是预期行为；消费者订阅的话题即使漏补也会被按需补订。
+- **回退两级**（工具已在 198 旁路演练，见 `evidence/1.2.0/nas-198/SWAP_TOOLS_REPORT.md`）：
+  ① 不重启：`APPROVED=… python3 evidence/1.2.0/tools/runtime_toggle.py idle_unsubscribe false`（或 `on_demand_quote false`），
+  经 Portainer API 改容器内配置一行 → SIGHUP → 读回开关指标与日志，见 OPS_GUIDE §8.6；
+  ② 切回 1.1.1：`APPROVED=… python3 evidence/1.2.0/tools/rollback_to_111.py`——存档当前订阅 → 先确认 `md-server-1.1.1-bak` 是停止的 1.1.1
+  （不存在则按旧容器 inspect 从 `md-server:1.1.1` 重建并核对，不通过则不动当前容器）→ 切换 → `restore_subs.mjs` 补回存档订阅 →
+  核对进程启动时间已变、`md_runtime_subscriptions*` 指标消失。1.1.0 时代的 `pt_swap.py rollback` 没有回退容器前置检查，1.2.0 不再使用。
 
 ---
 

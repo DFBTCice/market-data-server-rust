@@ -1,0 +1,26 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index fba60a9..9bc54c2 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -744,10 +744,6 @@ impl RuntimeSubscriptions {
+             if subscribed.contains_key(&k) || !planned.insert(k.clone()) {
+                 continue;
+             }
+-            if k.data_type == DataType::Quote && !s.on_demand_quote {
+-                debug!("on-demand subscribe skipped, on_demand_quote=false: {}", k);
+-                continue;
+-            }
+             let Some((name, conn)) = route(&conns, &k) else {
+                 debug!(
+                     "on-demand subscribe skipped, exchange/type not configured: {}",
+@@ -797,6 +793,10 @@ impl RuntimeSubscriptions {
+                 continue;
+             }
+             runtime_count += 1;
++            if k.data_type == DataType::Quote && !s.on_demand_quote {
++                debug!("on-demand subscribe skipped, on_demand_quote=false: {}", k);
++                continue;
++            }
+             let receivers = self.processor.receiver_count(&raw);
+             batches
+                 .entry(name)

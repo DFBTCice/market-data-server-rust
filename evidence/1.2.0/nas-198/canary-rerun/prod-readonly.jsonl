@@ -1,0 +1,2 @@
+{"tag": "before", "at_utc": "2026-11-06T16:30:01.687681+00:00", "process_start_time_seconds": "1792785202", "process_resident_memory_bytes": "101515264", "md_ws_active_clients": "2", "md_quotes_processed": "75926010", "md_ticks_processed": "82992510", "subscriptions": 17}
+{"tag": "after", "at_utc": "2026-11-06T16:45:35.360426+00:00", "process_start_time_seconds": "1792785202", "process_resident_memory_bytes": "101908480", "md_ws_active_clients": "2", "md_quotes_processed": "76028558", "md_ticks_processed": "83150720", "subscriptions": 14}

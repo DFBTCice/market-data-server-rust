@@ -1,0 +1,22 @@
+diff --git a/crates/md-grpc/src/market_data.rs b/crates/md-grpc/src/market_data.rs
+index 30c5ce3..4c364e8 100644
+--- a/crates/md-grpc/src/market_data.rs
++++ b/crates/md-grpc/src/market_data.rs
+@@ -55,7 +55,7 @@ impl MarketDataService for MarketDataServiceImpl {
+                     // 没有成交的 topic 会一直被已断开的流占着，运行期订阅永远判不成闲置
+                     let received = tokio::select! {
+                         r = sub.rx.recv() => r,
+-                        _ = tx.closed() => break,
++                        _ = std::future::pending::<()>() => break,
+                     };
+                     match received {
+                         Ok(BroadcastEvent::Tick(tick, emit_at)) => {
+@@ -131,7 +131,7 @@ impl MarketDataService for MarketDataServiceImpl {
+                 loop {
+                     let received = tokio::select! {
+                         r = sub.rx.recv() => r,
+-                        _ = tx.closed() => break,
++                        _ = std::future::pending::<()>() => break,
+                     };
+                     match received {
+                         Ok(BroadcastEvent::Kline(kline, emit_at)) => {

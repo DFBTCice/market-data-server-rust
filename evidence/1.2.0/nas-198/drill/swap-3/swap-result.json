@@ -1,0 +1,20 @@
+{
+  "status": "immediate_checks_passed",
+  "mode": "drill",
+  "started_at_utc": "2026-11-06T18:00:39.016158+00:00",
+  "approved": "drill",
+  "checked_at_utc": "2026-11-06T18:00:51.495202+00:00",
+  "outage_seconds": 5.2,
+  "health_ready_seconds": 0.0,
+  "old_container_id": "4667483687a5408693393f7abf58ad82cfe5945a0122897ed146dea73c2693ff",
+  "new_container_id": "9a84b5bcbc9987fae22c8a0c16f44c88a4649bdfd5c7b017bff60a97648c5ebb",
+  "new_image_id": "sha256:fde2535ece7b87a1151e1a0233a8464e4ba4375e2544fe57d6ec0cf36ce118cf",
+  "binary_sha256": "cbc6b0531b833f38fa5e4666be286d24d01ad169230ba855c8a5f126aed887bf",
+  "backup_name": "md-exp-120-drill-bak",
+  "subscriptions_before": 14,
+  "subscriptions_after": 14,
+  "ws_active_clients": 0,
+  "ws_kicked_write_timeout_total": 0.0,
+  "docker_health": "healthy",
+  "ten_minute_acceptance": "pending"
+}

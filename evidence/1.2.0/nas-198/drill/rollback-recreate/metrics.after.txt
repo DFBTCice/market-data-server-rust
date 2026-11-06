@@ -1,0 +1,115 @@
+# HELP md_ticks_processed Total ticks processed (global)
+# TYPE md_ticks_processed counter
+md_ticks_processed 0
+# HELP md_klines_processed Total klines processed (global)
+# TYPE md_klines_processed counter
+md_klines_processed 0
+# HELP md_ticks_dropped Total ticks dropped (mpsc channel full)
+# TYPE md_ticks_dropped counter
+md_ticks_dropped 0
+# HELP md_klines_dropped Total klines dropped (mpsc channel full)
+# TYPE md_klines_dropped counter
+md_klines_dropped 0
+# HELP md_quotes_processed Total quotes processed (global)
+# TYPE md_quotes_processed counter
+md_quotes_processed 0
+# HELP md_quotes_dropped Total quotes dropped (mpsc channel full)
+# TYPE md_quotes_dropped counter
+md_quotes_dropped 0
+# HELP md_ingestion_latency_ms Arrival latency: exchange push event(E)->local receive (ms), by exchange/type/symbol/interval
+# TYPE md_ingestion_latency_ms histogram
+# HELP md_ingestion_latency_e2e_ms End-to-end latency: exchange trade time(T)->local receive (ms), includes exchange-side aggregation delay
+# TYPE md_ingestion_latency_e2e_ms histogram
+# HELP md_connector_connected Connector connected state (0/1)
+# TYPE md_connector_connected gauge
+md_connector_connected{exchange="okx-quote"} 0
+md_connector_connected{exchange="okx"} 0
+md_connector_connected{exchange="binance"} 0
+md_connector_connected{exchange="okx-kline"} 0
+md_connector_connected{exchange="binance-quote"} 0
+# HELP md_connector_reconnect_total Total connector reconnections
+# TYPE md_connector_reconnect_total counter
+md_connector_reconnect_total{exchange="okx-quote"} 0
+md_connector_reconnect_total{exchange="okx"} 0
+md_connector_reconnect_total{exchange="binance"} 0
+md_connector_reconnect_total{exchange="okx-kline"} 0
+md_connector_reconnect_total{exchange="binance-quote"} 0
+# HELP md_connector_subscribe_failed_total Total subscribe failures
+# TYPE md_connector_subscribe_failed_total counter
+md_connector_subscribe_failed_total{exchange="okx-quote"} 0
+md_connector_subscribe_failed_total{exchange="okx"} 0
+md_connector_subscribe_failed_total{exchange="binance"} 0
+md_connector_subscribe_failed_total{exchange="okx-kline"} 0
+md_connector_subscribe_failed_total{exchange="binance-quote"} 0
+# HELP md_ws_active_clients Currently active WebSocket clients (gateway + legacy)
+# TYPE md_ws_active_clients gauge
+md_ws_active_clients 0
+# HELP md_ws_subscriptions_active Broadcast receivers currently held by all WebSocket connections (gateway + legacy)
+# TYPE md_ws_subscriptions_active gauge
+md_ws_subscriptions_active 0
+# HELP md_ws_kicked_lagged_total Total WebSocket clients kicked due to consecutive broadcast lagged
+# TYPE md_ws_kicked_lagged_total counter
+md_ws_kicked_lagged_total 0
+# HELP md_ws_kicked_write_timeout_total Total gateway WebSocket clients kicked because a write blocked longer than api_gateway.ws_write_wait
+# TYPE md_ws_kicked_write_timeout_total counter
+md_ws_kicked_write_timeout_total 0
+# HELP md_ws_messages_sent_total Total WebSocket / gRPC messages successfully delivered to clients
+# TYPE md_ws_messages_sent_total counter
+md_ws_messages_sent_total{kind="tick"} 0
+md_ws_messages_sent_total{kind="kline"} 0
+md_ws_messages_sent_total{kind="quote"} 0
+# HELP md_broadcast_lagged_total Total broadcast lagged events (subscriber fell behind)
+# TYPE md_broadcast_lagged_total counter
+md_broadcast_lagged_total{topic_kind="tick"} 0
+md_broadcast_lagged_total{topic_kind="kline"} 0
+md_broadcast_lagged_total{topic_kind="quote"} 0
+# HELP md_gateway_internal_latency_ms Gateway forward latency publish->client send (ms), by topic
+# TYPE md_gateway_internal_latency_ms histogram
+# HELP md_tokio_alive_tasks Tasks currently alive in the tokio runtime
+# TYPE md_tokio_alive_tasks gauge
+md_tokio_alive_tasks 10
+# HELP md_tokio_workers Tokio runtime worker threads
+# TYPE md_tokio_workers gauge
+md_tokio_workers 2
+# HELP md_tokio_global_queue_depth Tasks waiting in the tokio global queue
+# TYPE md_tokio_global_queue_depth gauge
+md_tokio_global_queue_depth 0
+# HELP md_jemalloc_allocated_bytes Bytes allocated by the application (live heap as seen by jemalloc)
+# TYPE md_jemalloc_allocated_bytes gauge
+md_jemalloc_allocated_bytes 1790592
+# HELP md_jemalloc_active_bytes Bytes in active pages allocated by the application
+# TYPE md_jemalloc_active_bytes gauge
+md_jemalloc_active_bytes 2072576
+# HELP md_jemalloc_resident_bytes Bytes in physically resident data pages mapped by the allocator
+# TYPE md_jemalloc_resident_bytes gauge
+md_jemalloc_resident_bytes 4911104
+# HELP md_jemalloc_retained_bytes Bytes in virtual memory mappings retained (not returned to the OS)
+# TYPE md_jemalloc_retained_bytes gauge
+md_jemalloc_retained_bytes 14704640
+# HELP md_jemalloc_mapped_bytes Bytes in active extents mapped by the allocator
+# TYPE md_jemalloc_mapped_bytes gauge
+md_jemalloc_mapped_bytes 23044096
+# HELP md_jemalloc_metadata_bytes Bytes dedicated to allocator metadata
+# TYPE md_jemalloc_metadata_bytes gauge
+md_jemalloc_metadata_bytes 3045856
+# HELP process_resident_memory_bytes Resident memory size (RSS) in bytes
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 63373312
+# HELP process_virtual_memory_bytes Virtual memory size in bytes
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 73945088
+# HELP process_cpu_seconds_total Total user + system CPU time spent (seconds)
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.13
+# HELP process_open_fds Number of open file descriptors
+# TYPE process_open_fds gauge
+process_open_fds 18
+# HELP process_max_fds Maximum number of open file descriptors
+# TYPE process_max_fds gauge
+process_max_fds 1048576
+# HELP process_start_time_seconds Start time of the process since unix epoch (seconds)
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1793988038
+# HELP process_uptime_seconds Uptime of the process (seconds)
+# TYPE process_uptime_seconds gauge
+process_uptime_seconds 0

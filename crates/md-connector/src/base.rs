@@ -1,4 +1,7 @@
-use crate::{Connector, ConnectorError, DataEvent, ExchangeAdapter, SubscriptionTarget, WsCommand};
+use crate::{
+    Connector, ConnectorError, DataEvent, ExchangeAdapter, SubscriptionRejected,
+    SubscriptionTarget, WsCommand,
+};
 use async_trait::async_trait;
 use futures_util::{SinkExt, StreamExt};
 use md_domain::types::{Kline, Quote, Tick};
@@ -44,6 +47,8 @@ pub struct BaseConnector<A: ExchangeAdapter> {
     quote_drop_log: DropLogLimiter,
     /// 仅诊断：每隔固定时间主动断开重连（环境变量 `MD_DEBUG_FORCE_RECONNECT_SECS`，默认关闭）
     debug_force_reconnect: Option<Duration>,
+    /// 上游拒绝订阅时上报（1.2.0，运行期订阅管理用；未设置则只按原有方式记日志和计数）
+    reject_tx: Option<mpsc::UnboundedSender<SubscriptionRejected>>,
 }
 
 /// 丢弃日志限频间隔
@@ -164,7 +169,14 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
             kline_drop_log: DropLogLimiter::new(),
             quote_drop_log: DropLogLimiter::new(),
             debug_force_reconnect: debug_force_reconnect_from_env(),
+            reject_tx: None,
         }
+    }
+
+    /// 设置上游拒绝订阅的上报通道（1.2.0）
+    pub fn with_reject_sink(mut self, tx: mpsc::UnboundedSender<SubscriptionRejected>) -> Self {
+        self.reject_tx = Some(tx);
+        self
     }
 
     /// 设置 metrics 计数器（可选）
@@ -651,6 +663,19 @@ impl<A: ExchangeAdapter> BaseConnector<A> {
                 if let Some(ref counter) = self.subscribe_failed_total {
                     counter.fetch_add(1, Ordering::Relaxed);
                 }
+                if let (Some(tx), false) = (self.reject_tx.as_ref(), err.stream.is_empty()) {
+                    let desired = self.state.desired_subs.read().await;
+                    for target in desired.iter() {
+                        if self.adapter.target_to_streams(target).contains(&err.stream) {
+                            let _ = tx.send(SubscriptionRejected {
+                                connector: adapter_name.to_string(),
+                                target: target.clone(),
+                                code: err.code.clone(),
+                                message: err.message.clone(),
+                            });
+                        }
+                    }
+                }
             }
         }
     }
@@ -870,6 +895,16 @@ impl<A: ExchangeAdapter> Connector for BaseConnector<A> {
             Ok(desired) => desired.iter().cloned().collect(),
             Err(_) => Vec::new(),
         }
+    }
+
+    async fn subscriptions_snapshot(&self) -> Vec<SubscriptionTarget> {
+        self.state
+            .desired_subs
+            .read()
+            .await
+            .iter()
+            .cloned()
+            .collect()
     }
 }
 

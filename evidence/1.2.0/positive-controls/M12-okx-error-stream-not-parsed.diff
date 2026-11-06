@@ -1,0 +1,13 @@
+diff --git a/crates/md-connector/src/okx.rs b/crates/md-connector/src/okx.rs
+index b521b74..e206768 100644
+--- a/crates/md-connector/src/okx.rs
++++ b/crates/md-connector/src/okx.rs
+@@ -415,7 +415,7 @@ impl ExchangeAdapter for OkxAdapter {
+                     let stream = if let Some(ref arg) = msg.arg {
+                         format!("{}:{}", arg.channel, arg.inst_id)
+                     } else {
+-                        stream_from_error_msg(&message).unwrap_or_default()
++                        String::new()
+                     };
+                     tracing::warn!(
+                         "OKX subscribe error: code={}, msg={}, stream={}",

@@ -1,0 +1,7 @@
+checked_at_utc 2026-11-06T16:46:05.800652+00:00
+containers with purpose=md-runtime-subs-1.2.0 or named md-exp-120-*: none
+images md-server:exp-120-* / md-server:1.2.0: none
+md-server* containers: [('/md-server-1.1.0-quote-bnb-bak', 'sha256:a46c88d0aa72bcd34380a38', 'created'), ('/md-server', 'md-server:1.1.1', 'running')]
+prod: md-server:1.1.1 sha256:3250e021d152 running True restarts 0 started 2026-10-23T19:53:21.256218768Z health healthy
+md_ws_active_clients 2
+process_start_time_seconds 1792785202

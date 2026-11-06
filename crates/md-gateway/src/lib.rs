@@ -1,9 +1,11 @@
 pub mod rest;
+pub mod runtime_subs;
 pub mod ws;
 
 use axum::Router;
 use md_connector::Connector;
 use md_processor::Processor;
+use runtime_subs::RuntimeSubscriptions;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
@@ -25,6 +27,8 @@ pub struct Gateway {
     /// Gateway WS（`/ws/v1/data`）单次写超时；`None` = 不限（1.0.0/1.1.0 的行为）。
     /// 由 `api_gateway.ws_write_wait` 配置；Legacy `/ws` 不使用。
     ws_write_wait: Option<Duration>,
+    /// 运行期订阅管理（1.2.0）；`None` 时 REST 行为与 1.1.1 相同
+    runtime: Option<Arc<RuntimeSubscriptions>>,
 }
 
 impl Gateway {
@@ -36,7 +40,14 @@ impl Gateway {
             processor,
             connectors,
             ws_write_wait: None,
+            runtime: None,
         }
+    }
+
+    /// 接入运行期订阅管理：GET 订阅列表在开关打开时追加来源与最近使用时间，DELETE 后立即检查是否需要补订
+    pub fn with_runtime_subscriptions(mut self, runtime: Arc<RuntimeSubscriptions>) -> Self {
+        self.runtime = Some(runtime);
+        self
     }
 
     /// 设置 Gateway WS 的单次写超时（对应配置 `api_gateway.ws_write_wait`）。
@@ -59,9 +70,10 @@ impl Gateway {
             .allow_headers(Any);
 
         Router::new()
-            .merge(rest::routes(
+            .merge(rest::routes_with_runtime(
                 self.processor.clone(),
                 self.connectors.clone(),
+                self.runtime.clone(),
             ))
             .merge(ws::routes_with_write_wait(
                 self.processor.clone(),

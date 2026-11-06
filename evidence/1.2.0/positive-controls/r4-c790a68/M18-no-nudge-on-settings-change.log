@@ -1,0 +1,44 @@
+$ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
+   Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.02s
+     Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
+
+running 20 tests
+test delete_while_receiving_is_restored_on_demand ... ok
+test delete_of_auto_unsubscribed_target_succeeds ... ok
+test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
+test idle_runtime_subscription_is_unsubscribed_upstream ... ok
+test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... ok
+test config_subscription_is_never_unsubscribed ... ok
+test limit_refuses_on_demand_and_counts ... ok
+test posted_quote_without_receivers_is_idle_unsubscribed ... ok
+test legacy_ws_receiver_keeps_subscription ... ok
+test quote_topics_are_not_subscribed_on_demand_by_default ... ok
+test hot_toggle_takes_effect_without_restart ... ok
+test quote_topics_are_subscribed_on_demand_when_enabled ... ok
+test skipped_quote_does_not_count_against_the_limit ... ok
+test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
+test settings_change_subscribes_immediately_under_long_check_interval ... FAILED
+test startup_grace_defers_idle_unsubscribe ... ok
+test rest_reads_refresh_idle_timer ... ok
+test upstream_rejected_symbol_is_not_retried ... ok
+test switch_off_changes_nothing ... ok
+test ws_receiver_and_quick_reconnect_keep_subscription ... ok
+
+failures:
+
+---- settings_change_subscribes_immediately_under_long_check_interval stdout ----
+
+thread 'settings_change_subscribes_immediately_under_long_check_interval' (20834078) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:1185:5:
+设置变化后应立即补订，而不是等 60 秒的检查
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settings_change_subscribes_immediately_under_long_check_interval
+
+test result: FAILED. 19 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.65s
+
+error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
+error: 1 target failed:
+    `-p md-gateway --test runtime_subs_gateway`

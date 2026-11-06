@@ -1,0 +1,161 @@
+{
+  "base": "http://192.168.1.198:28122",
+  "idle_sec": 120,
+  "botd_hold_sec": 90,
+  "total_sec": 420,
+  "started_at": "2026-11-06T16:30:29.004Z",
+  "events": {
+    "initial_subs": [
+      "binance|1|BNBUSDT|",
+      "binance|1|BTCUSDT|",
+      "binance|1|ETHUSDT|",
+      "binance|1|SNDKUSDT|",
+      "binance|2|BNBUSDT|5m",
+      "binance|2|BTCUSDT|30m",
+      "binance|2|BTCUSDT|5m",
+      "binance|2|ETHUSDT|5m",
+      "binance|2|SNDKUSDT|30m",
+      "binance|2|SNDKUSDT|5m",
+      "binance|3|BNBUSDT|",
+      "okx|1|BNB-USDT-SWAP|",
+      "okx|1|BTC-USDT-SWAP|",
+      "okx|1|ETH-USDT-SWAP|",
+      "okx|2|BTC-USDT-SWAP|5m",
+      "okx|2|ETH-USDT-SWAP|5m",
+      "okx|3|BNB-USDT-SWAP|"
+    ],
+    "sndk_seen": true,
+    "quote_subscribed_at": 20.4,
+    "okx_sol_subscribed_at": 30.7,
+    "okx_sol_upstream_at": 35.9,
+    "botd_cancel_at": 91.5,
+    "botd_delete_at": 91.7,
+    "sol_kline_gone_at": 91.7,
+    "sndk_gone_at": 127.5,
+    "sol_tick_gone_at": 219.2,
+    "oms_resubscribe_at": 219.2,
+    "sol_tick_back_at": 224.3
+  },
+  "streams": {
+    "oms_bnb_binance": {
+      "count": 2101,
+      "dups": 0,
+      "first_at": 0.1
+    },
+    "oms_bnb_okx": {
+      "count": 761,
+      "dups": 0,
+      "first_at": 0.9
+    },
+    "oms_sol_okx": {
+      "count": 1997,
+      "dups": 0,
+      "first_at": 31.2
+    },
+    "oms_sol_binance_after_resubscribe": {
+      "count": 648,
+      "dups": 0,
+      "first_at": 220.3
+    },
+    "botd_sol_tick": {
+      "count": 447,
+      "dups": 0,
+      "first_at": 1
+    },
+    "botd_sol_kline": {
+      "count": 191,
+      "dups": 0,
+      "first_at": 0.9
+    },
+    "quote_outside_config": {
+      "quote.binance.BTCUSDT": {
+        "count": 0,
+        "dups": 0
+      },
+      "quote.binance.ETHUSDT": {
+        "count": 0,
+        "dups": 0
+      },
+      "quote.okx.BTC-USDT-SWAP": {
+        "count": 0,
+        "dups": 0
+      },
+      "quote.okx.ETH-USDT-SWAP": {
+        "count": 0,
+        "dups": 0
+      }
+    },
+    "quote_in_config": {
+      "quote.binance.BNBUSDT": {
+        "count": 3419,
+        "dups": 0,
+        "first_at": 20.5
+      },
+      "quote.okx.BNB-USDT-SWAP": {
+        "count": 2532,
+        "dups": 0,
+        "first_at": 20.6
+      }
+    }
+  },
+  "config_keys": [
+    "binance|1|BTCUSDT|",
+    "binance|1|ETHUSDT|",
+    "binance|2|BTCUSDT|5m",
+    "binance|2|ETHUSDT|5m",
+    "binance|3|BNBUSDT|",
+    "okx|1|BTC-USDT-SWAP|",
+    "okx|1|ETH-USDT-SWAP|",
+    "okx|2|BTC-USDT-SWAP|5m",
+    "okx|2|ETH-USDT-SWAP|5m",
+    "okx|3|BNB-USDT-SWAP|"
+  ],
+  "initial_runtime_keys_gone": [
+    "binance|1|SNDKUSDT|",
+    "binance|2|BNBUSDT|5m",
+    "binance|2|BTCUSDT|30m",
+    "binance|2|SNDKUSDT|30m",
+    "binance|2|SNDKUSDT|5m"
+  ],
+  "quote_rate_per_sec": {
+    "before_quote_consumer": 105.98039215686275,
+    "after_quote_consumer": 145.40759493670885,
+    "ratio": 1.37
+  },
+  "resources": {
+    "rss_mib_start": 52.6,
+    "rss_mib_end": 54.3,
+    "cpu_pct_avg": 4.602948169281978
+  },
+  "final_metrics": {
+    "md_runtime_subscriptions_enabled": 1,
+    "md_runtime_subscriptions": 4,
+    "md_runtime_subscriptions_idle_unsubscribed_total": 6,
+    "md_runtime_subscriptions_demand_subscribed_total": 2,
+    "md_runtime_subscriptions_demand_failed_total": 0,
+    "md_runtime_subscriptions_limit_rejected_total": 0,
+    "md_ws_active_clients": 3,
+    "md_ws_subscriptions_active": 10,
+    "md_quotes_processed": 61014,
+    "md_ticks_processed": 74149,
+    "md_ticks_dropped": 0,
+    "md_quotes_dropped": 0,
+    "process_resident_memory_bytes": 56926208,
+    "process_cpu_seconds_total": 19.82
+  },
+  "checks": {
+    "oms_topics_never_unsubscribed": true,
+    "config_subscriptions_kept": true,
+    "botd_kline_deleted_and_not_readded": true,
+    "botd_tick_unsubscribed_after_idle": true,
+    "botd_tick_not_readded_before_resubscribe": true,
+    "restored_runtime_without_receivers_unsubscribed": true,
+    "oms_resubscribe_restored_upstream": true,
+    "oms_resubscribe_no_duplicates": true,
+    "never_registered_tick_subscribed_on_demand": true,
+    "quote_outside_config_not_subscribed": true,
+    "quote_in_config_still_pushed": true,
+    "quote_rate_not_jumped": true
+  },
+  "pass": true
+}

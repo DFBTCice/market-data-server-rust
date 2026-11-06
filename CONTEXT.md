@@ -13,7 +13,12 @@
 - **Cache（缓存）**: 最新 Tick/Kline 的快照存储
 - **Processor（处理器）**: 中央数据处理模块，组合 Cache + PubSub + Metrics
 - **API Gateway**: HTTP/WebSocket 入口层，对外暴露 REST 和 WS 接口
-- **Hot Reload（热重载）**: 通过 SIGHUP 信号重新加载配置，不停机更新**订阅列表**和**日志级别**；其余配置（含各连接器 WebSocket 地址）只在启动时读取，变更需重启
+- **Hot Reload（热重载）**: 通过 SIGHUP 信号重新加载配置，不停机更新**订阅列表**、**日志级别**和 **`runtime_subscriptions`**（1.2.0）；其余配置（含各连接器 WebSocket 地址）只在启动时读取，变更需重启
+- **Config Subscription（配置订阅）**: 配置名单 `subscribe_ticks` / `subscribe_klines` / `subscribe_quotes` 里的订阅；启动时订上，只随 SIGHUP 增删，永不自动退订
+- **Runtime Subscription（运行期订阅）**: 连接器 `desired_subs` 里不在配置名单中的订阅（`POST /api/v1/subscriptions`、gRPC Admin、按需补订）；不持久化，重启即丢
+- **Receiver（接收方）**: 某 topic 上的 broadcast 接收端，来自 `/ws/v1/data`、旧 `/ws` 或 gRPC 流（都经 `Processor::subscribe`）；判断"有人在用"的主要依据
+- **Idle Unsubscribe / On-demand Subscribe（闲置退订 / 按需补订）**: 1.2.0 同一开关下的两件事：运行期订阅连续 `idle_minutes` 无接收方即退上游；有接收方订阅而上游没有对应订阅时自动补订（`md_gateway::runtime_subs`）
+- **Canonical Topic（规范话题）**: 交易所小写、币对大写的 topic 写法，发布端只发这种写法；运行期订阅管理按它比较配置与运行期目标
 - **Applied Config（已应用配置）**: 进程**实际在用**的配置（启动配置 + 已热更成功的订阅列表 / 日志级别）。SIGHUP 总是拿文件里的新配置与它比较；需重启才能生效的变更不会写进它，所以会被持续提示，不会被误当成已生效
 - **Log Filter Precedence（日志过滤器优先级）**: 环境变量 `RUST_LOG`（已设置且合法）＞ YAML `log_level`（`LOG_LEVEL` 环境变量可覆盖）＞ 默认 `info`。`RUST_LOG` 决定过滤器时，YAML 的 `log_level` 不起作用，SIGHUP 改它会明确提示"未生效"（`logging.rs`）
 - **Effective Config（生效配置）**: YAML + 环境变量覆盖 + `--port-offset`。启动与 SIGHUP 重载共用同一套推导（`reload::load_effective_config`）

@@ -1,0 +1,86 @@
+{
+  "base": "http://127.0.0.1:11081",
+  "idle_sec": 120,
+  "botd_hold_sec": 90,
+  "total_sec": 360,
+  "started_at": "2026-11-06T14:13:06.394Z",
+  "events": {
+    "initial_subs": [
+      "binance|1|BNBUSDT|",
+      "binance|1|BTCUSDT|",
+      "binance|1|ETHUSDT|",
+      "binance|1|SNDKUSDT|",
+      "binance|2|BTCUSDT|5m",
+      "binance|2|ETHUSDT|5m",
+      "binance|3|BNBUSDT|",
+      "okx|1|BNB-USDT-SWAP|",
+      "okx|1|BTC-USDT-SWAP|",
+      "okx|1|ETH-USDT-SWAP|",
+      "okx|2|BTC-USDT-SWAP|5m",
+      "okx|2|ETH-USDT-SWAP|5m",
+      "okx|3|BNB-USDT-SWAP|"
+    ],
+    "sndk_seen": true,
+    "okx_sol_subscribed_at": 30.1,
+    "okx_sol_upstream_at": 35.1,
+    "botd_cancel_at": 90.1,
+    "sndk_gone_at": 125.2,
+    "sol_tick_gone_at": 225.3,
+    "sol_kline_gone_at": 225.3,
+    "oms_resubscribe_at": 225.3,
+    "sol_tick_back_at": 230.3
+  },
+  "streams": {
+    "oms_bnb_binance": {
+      "count": 911,
+      "dups": 0,
+      "first_at": 0.1
+    },
+    "oms_bnb_okx": {
+      "count": 455,
+      "dups": 0,
+      "first_at": 1.9
+    },
+    "oms_sol_okx": {
+      "count": 820,
+      "dups": 0,
+      "first_at": 30.8
+    },
+    "oms_sol_binance_after_resubscribe": {
+      "count": 302,
+      "dups": 0,
+      "first_at": 225.8
+    },
+    "botd_sol_tick": {
+      "count": 231,
+      "dups": 0,
+      "first_at": 0.4
+    },
+    "botd_sol_kline": {
+      "count": 145,
+      "dups": 0,
+      "first_at": 0.5
+    }
+  },
+  "final_metrics": {
+    "md_runtime_subscriptions_enabled": 1,
+    "md_runtime_subscriptions": 4,
+    "md_runtime_subscriptions_idle_unsubscribed_total": 3,
+    "md_runtime_subscriptions_demand_subscribed_total": 2,
+    "md_runtime_subscriptions_demand_failed_total": 0,
+    "md_runtime_subscriptions_limit_rejected_total": 0,
+    "md_ws_active_clients": 2,
+    "md_ws_subscriptions_active": 4,
+    "process_resident_memory_bytes": 0
+  },
+  "checks": {
+    "oms_topics_never_unsubscribed": true,
+    "config_subscriptions_kept": true,
+    "botd_unsubscribed_after_idle": true,
+    "restored_runtime_without_receivers_unsubscribed": true,
+    "oms_resubscribe_restored_upstream": true,
+    "oms_resubscribe_no_duplicates": true,
+    "never_registered_topic_subscribed_on_demand": true
+  },
+  "pass": true
+}

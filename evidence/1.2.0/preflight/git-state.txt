@@ -1,0 +1,79 @@
+# captured_at_utc=2026-11-06T13:37:29Z
+## git fetch --all --tags
+## 当前分支与 HEAD
+fix/gateway-unsubscribe-leak-v1.1.1
+56f14fd62e55fdb27b5c392d8f8b87a030fbd661
+## origin/main
+d2f2cb6803eda6e217546289bdc6b1329b2130ba
+## 标签 -> 提交
+v1.0.0 -> 07b9ef74d7351002d1375f7e7a9625bb641b415d
+v1.1.0 -> beaac9448cf29cc5b32bae9ea6fc7deadfeece04
+v1.1.1 -> a06fe2095e8fc58bff1e038a594b25e7002aff1b
+## HEAD...origin/main 领先/落后（左=仅 HEAD，右=仅 origin/main）
+0	3
+d2f2cb6 docs: distinguish CI releases from accepted production image [skip ci]
+71b3ebd Merge pull request #1 from DFBTCice/feat/quote-topic-v1.1.0
+5939dd0 Merge pull request #2 from DFBTCice/fix/gateway-unsubscribe-leak-v1.1.1
+## 已跟踪文件改动（应为空）
+## 未跟踪文件（目录折叠）
+?? Dockerfile.bin
+?? Dockerfile.prebuilt
+?? evidence/1.1.0/README.md
+?? evidence/1.1.0/build-logs/
+?? evidence/1.1.0/compat-proof/
+?? evidence/1.1.0/local-e2e/
+?? evidence/1.1.0/nas-198/DEPLOYMENT_RECORD.md
+?? evidence/1.1.0/nas-198/alloc-ab/
+?? evidence/1.1.0/nas-198/canary-ab/
+?? evidence/1.1.0/nas-198/canary-quote/
+?? evidence/1.1.0/nas-198/config.stage2.diff
+?? evidence/1.1.0/nas-198/config.yaml.running-1.0.0
+?? evidence/1.1.0/nas-198/config.yaml.stage2-quote-bnb
+?? evidence/1.1.0/nas-198/final-state/
+?? evidence/1.1.0/nas-198/image-build-stage2.log
+?? evidence/1.1.0/nas-198/image-build.log
+?? evidence/1.1.0/nas-198/local-rss-ab/
+?? evidence/1.1.0/nas-198/md-server.inspect.json
+?? evidence/1.1.0/nas-198/md-server.inspect.stage2.json
+?? evidence/1.1.0/nas-198/prod-before-swap/
+?? evidence/1.1.0/nas-198/resource-ab-10min/
+?? evidence/1.1.0/nas-198/running-binary.sha256
+?? evidence/1.1.0/nas-198/stage1-ab/
+?? evidence/1.1.0/nas-198/stage1-observe/
+?? evidence/1.1.0/nas-198/stage1/
+?? evidence/1.1.0/nas-198/stage2-longrun/
+?? evidence/1.1.0/nas-198/stage2-observe/
+?? evidence/1.1.0/nas-198/stage2/
+?? evidence/1.1.0/nas-198/tools/__pycache__/
+?? evidence/1.1.0/nas-198/tools/local_rss_ab.sh
+?? evidence/1.1.0/nas-198/tools/run_alloc_ab.sh
+?? evidence/1.1.0/nas-198/tools/run_resource_ab.sh
+?? evidence/1.1.0/positive-controls/
+?? evidence/1.1.0/stage0-baseline/
+?? evidence/1.1.0/tooling/
+?? evidence/1.1.1/compat-control-110-vs-110/new-gateway/
+?? evidence/1.1.1/compat-control-110-vs-110/new-legacy/
+?? evidence/1.1.1/compat-control-110-vs-110/old-gateway/
+?? evidence/1.1.1/compat-control-110-vs-110/old-legacy/
+?? evidence/1.1.1/compat-final-v5-attempt1-quote-key-collision/new-gateway/
+?? evidence/1.1.1/compat-final-v5-attempt1-quote-key-collision/new-legacy/
+?? evidence/1.1.1/compat-final-v5-attempt1-quote-key-collision/old-gateway/
+?? evidence/1.1.1/compat-final-v5-attempt1-quote-key-collision/old-legacy/
+?? evidence/1.1.1/compat-final-v5/new-gateway/
+?? evidence/1.1.1/compat-final-v5/new-legacy/
+?? evidence/1.1.1/compat-final-v5/old-gateway/
+?? evidence/1.1.1/compat-final-v5/old-legacy/
+?? evidence/1.1.1/compat-final/new-gateway/
+?? evidence/1.1.1/compat-final/new-legacy/
+?? evidence/1.1.1/compat-final/old-gateway/
+?? evidence/1.1.1/compat-final/old-legacy/
+?? evidence/1.1.1/compat-live/new-gateway/
+?? evidence/1.1.1/compat-live/new-legacy/
+?? evidence/1.1.1/compat-live/old-gateway/
+?? evidence/1.1.1/compat-live/old-legacy/
+?? evidence/1.1.1/compat-live/quote-same-version-control/a-1.1.0/
+?? evidence/1.1.1/compat-live/quote-same-version-control/b-1.1.0-instr/
+?? evidence/1.2.0/
+?? monitoring/
+## 未跟踪文件数（展开）
+1134

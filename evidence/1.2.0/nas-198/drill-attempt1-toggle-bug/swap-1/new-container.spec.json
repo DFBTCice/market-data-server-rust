@@ -1,0 +1,55 @@
+{
+  "Image": "md-server:exp-120-release",
+  "Env": [
+    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RUST_LOG=warn,md_runtime_subs=info",
+    "TZ=Asia/Shanghai"
+  ],
+  "Cmd": [
+    "md-server",
+    "--config",
+    "/etc/md-server/config.yaml"
+  ],
+  "Entrypoint": [],
+  "User": "md-user",
+  "ExposedPorts": {
+    "50051/tcp": {},
+    "8081/tcp": {}
+  },
+  "Labels": {
+    "purpose": "md-runtime-subs-1.2.0-drill",
+    "md-server.version": "1.2.0",
+    "md-server.replaced": "6cff6ea4e047"
+  },
+  "HostConfig": {
+    "PortBindings": {
+      "50051/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "50125"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "28125"
+        }
+      ]
+    },
+    "RestartPolicy": {
+      "MaximumRetryCount": 0,
+      "Name": "unless-stopped"
+    },
+    "Memory": 268435456,
+    "MemorySwap": 268435456,
+    "NanoCpus": 2000000000,
+    "NetworkMode": "bridge",
+    "LogConfig": {
+      "Config": {
+        "max-file": "3",
+        "max-size": "20m"
+      },
+      "Type": "json-file"
+    }
+  }
+}

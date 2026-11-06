@@ -1,0 +1,52 @@
+{
+ "file": "evidence/1.2.0/nas-198/canary/short/timeline.jsonl",
+ "samples": 83,
+ "config_keys": [
+  "okx|1|BTC-USDT-SWAP|",
+  "okx|1|ETH-USDT-SWAP|",
+  "okx|3|BNB-USDT-SWAP|",
+  "binance|1|ETHUSDT|",
+  "binance|2|ETHUSDT|5m",
+  "binance|1|BTCUSDT|",
+  "binance|2|BTCUSDT|5m",
+  "okx|2|BTC-USDT-SWAP|5m",
+  "okx|2|ETH-USDT-SWAP|5m",
+  "binance|3|BNBUSDT|"
+ ],
+ "missing": [],
+ "initial_runtime_keys_gone": [
+  "binance|1|SNDKUSDT|",
+  "binance|2|SNDKUSDT|15m"
+ ],
+ "config_subscriptions_kept": true,
+ "positive_control": {
+  "removed": "t=213.5 okx|1|BTC-USDT-SWAP|",
+  "caught": true
+ }
+}
+{
+ "file": "evidence/1.2.0/nas-198/canary/prod/timeline.jsonl",
+ "samples": 178,
+ "config_keys": [
+  "binance|2|ETHUSDT|5m",
+  "binance|1|ETHUSDT|",
+  "binance|1|BTCUSDT|",
+  "binance|2|BTCUSDT|5m",
+  "binance|3|BNBUSDT|",
+  "okx|1|ETH-USDT-SWAP|",
+  "okx|1|BTC-USDT-SWAP|",
+  "okx|2|ETH-USDT-SWAP|5m",
+  "okx|2|BTC-USDT-SWAP|5m",
+  "okx|3|BNB-USDT-SWAP|"
+ ],
+ "missing": [],
+ "initial_runtime_keys_gone": [
+  "binance|1|SNDKUSDT|",
+  "binance|2|SNDKUSDT|15m"
+ ],
+ "config_subscriptions_kept": true,
+ "positive_control": {
+  "removed": "t=454.5 binance|2|ETHUSDT|5m",
+  "caught": true
+ }
+}

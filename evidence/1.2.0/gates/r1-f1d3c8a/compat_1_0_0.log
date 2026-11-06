@@ -1,0 +1,38 @@
+$ cargo test --locked -p md-gateway --test compat_1_0_0 -- --nocapture
+   Compiling log v0.4.29
+   Compiling tracing-core v0.1.36
+   Compiling slab v0.4.12
+   Compiling rand v0.8.6
+   Compiling hyper v1.9.0
+   Compiling tokio-util v0.7.18
+   Compiling socket2 v0.5.10
+   Compiling futures-util v0.3.32
+   Compiling tokio-stream v0.1.18
+   Compiling tracing v0.1.44
+   Compiling md-processor v0.1.0 (/private/tmp/md120-gates-f1d3c8a/crates/md-processor)
+   Compiling tungstenite v0.24.0
+   Compiling hyper-util v0.1.20
+   Compiling tokio-tungstenite v0.24.0
+   Compiling tower v0.5.3
+   Compiling axum-core v0.4.5
+   Compiling md-connector v0.1.0 (/private/tmp/md120-gates-f1d3c8a/crates/md-connector)
+   Compiling axum v0.7.9
+   Compiling md-gateway v0.1.0 (/private/tmp/md120-gates-f1d3c8a/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.09s
+     Running tests/compat_1_0_0.rs (/tmp/md120-gates-target/debug/deps/compat_1_0_0-8e790e4cad025c5b)
+
+running 5 tests
+test positive_control_comparison_detects_field_reorder_and_format_change ... ok
+gateway tick.okx.BNB-USDT-SWAP 逐字节一致: 14 行
+test gateway_tick_okx_matches_1_0_0_byte_for_byte ... ok
+legacy /ws tick.binance.BNBUSDT 逐字节一致: 47 行
+legacy /ws tick.okx.BNB-USDT-SWAP 逐字节一致: 13 行
+test legacy_ws_tick_matches_1_0_0_byte_for_byte ... ok
+gateway kline.1m.binance.BNBUSDT 逐字节一致: 79 行
+test gateway_kline_matches_1_0_0_byte_for_byte ... ok
+gateway tick.binance.BNBUSDT 逐字节一致: 100 行
+test gateway_tick_binance_matches_1_0_0_byte_for_byte ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+exit=0

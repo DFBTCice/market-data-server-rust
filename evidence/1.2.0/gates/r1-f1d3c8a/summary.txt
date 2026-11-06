@@ -1,0 +1,9 @@
+commit=f1d3c8a24a7c05c7e5e22cf4251e644382de59b5
+fmt: exit=0; diff lines=0
+clippy: exit=0; warning lines=13
+workspace-test: exit=0; passed=286 failed=0
+md-tests: exit=0; test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+compat_1_0_0: exit=0; test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+runtime_subs_gateway: exit=0; test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.31s
+compare-selftest: exit=0; OK   selftest: metrics: 改类型必须被发现  (期望=fail, failed=1, inconclusive=0)
+dirty_after=0

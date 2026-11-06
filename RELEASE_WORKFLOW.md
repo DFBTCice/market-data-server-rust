@@ -280,8 +280,8 @@ connectors:
 
   okx:
     enabled: true
-    stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public"
-    stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business"
+    stream_base_url_public: "wss://ws.okx.com/ws/v5/public"
+    stream_base_url_business: "wss://ws.okx.com/ws/v5/business"
     rest_base_url: "https://www.okx.com"
     subscribe_ticks:
       - "BTC-USDT-SWAP"

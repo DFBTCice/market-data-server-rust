@@ -1,0 +1,13 @@
+diff --git a/crates/md-server/src/reload.rs b/crates/md-server/src/reload.rs
+index f9ee8e0..99f43ed 100644
+--- a/crates/md-server/src/reload.rs
++++ b/crates/md-server/src/reload.rs
+@@ -813,7 +813,7 @@ impl ReloadState {
+                 show_runtime(&self.applied.runtime_subscriptions),
+                 show_runtime(&file.runtime_subscriptions)
+             );
+-            next.runtime_subscriptions = file.runtime_subscriptions.clone();
++            let _ = &file;
+         }
+         if let Some(runtime) = self.runtime.as_ref() {
+             runtime.apply(&next, &file);

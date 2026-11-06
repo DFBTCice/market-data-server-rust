@@ -10,7 +10,7 @@
 
 从代码 `crates/md-server/src/reload.rs`（重载逻辑）和 `main.rs` 的 `wait_for_signal()` 分析，**SIGHUP 热重载的实际能力如下**：
 
-> **规则一句话**：SIGHUP **只热更订阅列表和日志级别**（`RUST_LOG` 优先）；其余配置项只在进程启动时读取，文件里改了不会生效，必须重启。
+> **规则一句话**：SIGHUP **只热更订阅列表、日志级别**（`RUST_LOG` 优先）**和 `runtime_subscriptions` 整段**（1.2.0）；其余配置项只在进程启动时读取，文件里改了不会生效，必须重启。
 >
 > 进程内部把「文件里的新配置」和「实际已应用配置」分开记录。每次 SIGHUP 都拿文件和**实际在运行的配置**对比：
 > 只要还有没生效的差异，**每一次** SIGHUP 都会继续点名提示（不会因为发过一次就"记成已应用"）；把文件改回原值，提示自动消失。
@@ -24,6 +24,7 @@
 | **订阅列表** | ✅ | `subscribe_ticks`、`subscribe_klines` 的增删会调用 `add_subscriptions` / `remove_subscriptions`，实时生效 |
 | **quote 订阅列表**（1.1.0） | ✅（有前提） | `connectors.{binance,okx}.subscribe_quotes` 的增删实时生效，**前提**是对应 quote 连接器已在运行（启动时 `quotes_enabled=true` 且列表非空） |
 | **`log_level`（日志级别）** | ✅（有前提） | SIGHUP 立即切换日志过滤器，**不重连、不重启**。**前提**：进程环境里没有设置 `RUST_LOG`——`RUST_LOG` 优先于 YAML，设了它 `log_level` 就不起作用（见下面"日志级别"一节） |
+| **`runtime_subscriptions`**（1.2.0） | ✅ | 开关与参数立即生效，不重连、不丢运行期订阅；运行中打开时保护期从打开时刻算。日志 `runtime_subscriptions changed: {...} -> {...} (applied)`。见第八节 |
 
 订阅列表热更的**共同前提**是对应连接器启动时已创建：Binance 需 `binance.enabled=true`；OKX tick 需 `okx.enabled` 且 `subscribe_ticks` 非空；
 OKX K 线需 `okx.enabled` 且 `subscribe_klines` 非空；quote 需 `quotes_enabled=true` 且列表非空。
@@ -31,7 +32,7 @@ OKX K 线需 `okx.enabled` 且 `subscribe_klines` 非空；quote 需 `quotes_ena
 
 ### ❌ 不支持热更（修改后提示需要重启）
 
-除订阅列表和日志级别外，**其余配置项**都归此类（新增配置项默认也归此类，代码里用穷尽解构强制分类）。常见项：
+除订阅列表、日志级别和 `runtime_subscriptions` 外，**其余配置项**都归此类（新增配置项默认也归此类，代码里用穷尽解构强制分类）。常见项：
 
 | 配置项 | 说明 |
 |--------|------|
@@ -339,4 +340,119 @@ Prometheus 告警示例（与 DEPLOYMENT §7 的 500MB 提示规则并存，这�
 4. 需要区分"逻辑滞留 vs 分配器"时，用 jemalloc 构建（`--features md-connector/vendored-tls,md-server/jemalloc-stats`）看 `md_jemalloc_allocated_bytes`（存活堆，应持平在 7~12 MiB）与 `md_jemalloc_resident_bytes`（随负载起落、会回落）。默认构建不输出 `md_jemalloc_*`。
 5. 现网 cgroup 里 `anon_thp`/`thp_collapse_alloc` 非零（只读 `docker stats` 的 memory_stats.stats）是一个**未证实**的线索：内核把稀疏堆折叠成大页可能造成 RSS 单分钟跳升（调查报告 §D4）。
 6. `MD_DEBUG_FORCE_RECONNECT_SECS` / `MD_DEBUG_FORCE_RECONNECT_ONLY` 是**仅限旁路实验**的调试开关（强制周期性重连），不要在生产设置。
+
+---
+
+## 八、运行期订阅闲置退订与按需补订（1.2.0 起，默认关闭）
+
+### 8.1 它做什么、不做什么
+
+- **做**：运行期订阅（`POST /api/v1/subscriptions`、gRPC Admin 登记的，以及本功能按需补订的）**连续 `idle_minutes` 没人接收**就退掉上游；
+  有连接或 gRPC 订阅某话题而**上游没有**对应订阅时，**自动补订**（QUOTE 默认不补订，见 `on_demand_quote`）。两件事同一个开关。
+- **不做**：不碰配置名单（`subscribe_ticks` / `subscribe_klines` / `subscribe_quotes`）里的订阅；不持久化运行期订阅（重启仍丢，换版后仍要 `restore_subs.mjs`）；
+  不改推送内容、旧 `/ws`、REST/gRPC 既有字段。
+- **"有人在接收"**（任一条）：该目标的规范话题（交易所小写、币对大写，如 `tick.okx.BTC-USDT-SWAP`、`kline.5m.binance.BTCUSDT`）上有 `/ws/v1/data`、旧 `/ws`
+  或 gRPC 流的接收端；最近 `idle_minutes` 内有 `GET /api/v1/data/latest/...` 查询过它；最近 `idle_minutes` 内有新接收端订阅过它。
+
+### 8.2 开关与参数
+
+```yaml
+runtime_subscriptions:            # 整段可选；不写 = 关闭，行为与 1.1.1 相同
+  idle_unsubscribe: false         # 总开关
+  idle_minutes: 10                # 连续多少分钟没人接收才退订（≥1）
+  check_interval_seconds: 60      # 检查周期（≥1）
+  startup_grace_minutes: 10       # 启动 / 运行中打开后多少分钟内不退订（可为 0）
+  max_runtime_subscriptions: 200  # 运行期订阅达到该数后不再按需补订（≥1）；POST 不受限
+  on_demand_quote: false          # QUOTE 是否参与按需补订（默认 false，业务方 2026-11-06 决定现网关闭）
+```
+
+- **报价不按需补订（`on_demand_quote: false`，默认）**：订阅配置名单外的 `quote.*` 话题不会补订 QUOTE，也不计入上限拒绝；
+  报价扩量仍按"一次一个币对、各观察 24 小时、业务方定币对"改配置名单。配置名单里的报价（现网 BNB）照常推送；POST 登记的 QUOTE 仍参与闲置退订。
+  这个键可以单独 SIGHUP 热打开 / 关闭（同样须业务方批准）。主审估算：若打开，botd 关注的币安 BTC/ETH 与 OKX BTC/ETH 永续四路报价约每天 10～20 GB 外网流量。
+
+- 键名写错（如 `idle_unsubcribe`）启动时报错退出、SIGHUP 时拒绝并保持运行配置，不会让开关静默失效。
+- 实际退订时刻在"最后一个接收方离开后 `idle_minutes`"到"再加一个 `check_interval_seconds`"之间，不会提前。
+- 内部常量（不可配）：按需补订等待 200ms 合批；上游拒绝后退避 5 分钟起、翻倍、封顶 1 小时；每个连接器订阅变更消息突发 10 条、每 15 秒补 1 条。
+- 币安 K 线按需补订只接受 `1m 3m 5m 15m 30m 1h 2h 4h 6h 8h 12h 1d 3d 1w 1M`（币安对错误级别和不存在的币对都应答成功，没法靠拒绝识别）。
+
+### 8.3 日志串（target 固定为 `md_runtime_subs`）
+
+| 级别 | 日志 | 含义 |
+|---|---|---|
+| INFO | `runtime subscriptions: idle unsubscribe and on-demand subscribe ENABLED (idle_minutes=…, check_interval_seconds=…, startup_grace_minutes=…, max_runtime_subscriptions=…, on_demand_quote=…)` | 开关打开（启动时或 SIGHUP） |
+| INFO | `runtime subscriptions: idle unsubscribe and on-demand subscribe DISABLED (current subscriptions are kept as they are)` | 运行中关闭 |
+| INFO | `runtime subscriptions: settings changed (…)` | 打开状态下改了参数 |
+| INFO | `runtime subscription idle-unsubscribed: exchange=okx type=TICK symbol=SOL-USDT-SWAP interval=- idle=10m05s connector=okx` | 闲置退订（交易所、类型、币对、级别、闲置时长） |
+| INFO | `runtime subscription added on demand: exchange=okx type=TICK symbol=SOL-USDT-SWAP interval=- receivers=1 connector=okx` | 按需补订 |
+| WARN | `runtime subscription on-demand refused: limit reached (runtime=200, max_runtime_subscriptions=200) exchange=… type=… symbol=… interval=…` | 达到上限不补订（同一目标每个检查周期最多一行） |
+| WARN | `runtime subscription rejected by upstream: exchange=… code=60018 msg=…; on-demand subscription withdrawn, no retry for 5m00s` | 按需补订被交易所拒绝，已撤回、退避 |
+| WARN | `runtime subscription rejected by upstream: …; registered via REST/gRPC so it is kept, on-demand will not retry it for …` | POST 登记的目标被拒：保留（与以前一样），按需补订退避 |
+| WARN | `config subscription rejected by upstream: … (config subscriptions are never changed automatically)` | 配置名单里的目标被拒：不自动处理，请检查配置 |
+| INFO（target `md_server`） | `runtime_subscriptions changed: {…} -> {…} (applied)` | SIGHUP 热更了这一段 |
+
+**198 用 `RUST_LOG=warn`，上面的 INFO 都看不到**（WARN 照常可见）。想看退订 / 补订明细：重建容器时把环境变量改成
+`RUST_LOG=warn,md_runtime_subs=info`（只打开本模块的 INFO，量很小：每次退订 / 补订一行）。不想动容器就看下面的指标。
+
+### 8.4 怎么看指标
+
+| 指标 | 类型 | 说明 |
+|---|---|---|
+| `md_runtime_subscriptions_enabled` | gauge | 开关当前状态 0/1。改配置后先看它 |
+| `md_runtime_subscriptions` | gauge | 当前运行期订阅数（不在配置名单里的上游订阅）；开关关闭时不统计、为 0 |
+| `md_runtime_subscriptions_idle_unsubscribed_total` | counter | 闲置退订累计 |
+| `md_runtime_subscriptions_demand_subscribed_total` | counter | 按需补订累计 |
+| `md_runtime_subscriptions_demand_failed_total` | counter | 按需补订被上游拒绝 / 发送失败累计 |
+| `md_runtime_subscriptions_limit_rejected_total` | counter | 因达到上限而拒绝补订的**尝试次数**（每次检查、每个目标各 +1，新接收端触发的检查也算），所以会远大于被拒的目标数；用 `increase(...) > 0` 判断"有没有"即可 |
+
+```bash
+curl -s http://192.168.1.198:8081/metrics | grep -E '^md_runtime_subscriptions'
+# 每条订阅的来源与最近使用时间（仅开关打开时出现这两个字段）
+curl -s http://192.168.1.198:8081/api/v1/subscriptions | jq -c '.[] | {exchange,data_type,symbol,kline_interval,source,last_active_at}'
+```
+
+PromQL：`md_runtime_subscriptions`（数量曲线）；`increase(md_runtime_subscriptions_idle_unsubscribed_total[1h])`、
+`increase(md_runtime_subscriptions_demand_subscribed_total[1h])`（每小时退订 / 补订次数）。同一话题来回"退订 → 补订"很频繁，说明 `idle_minutes` 偏短或消费者订阅抖动。
+`increase(md_runtime_subscriptions_limit_rejected_total[10m]) > 0` 应告警：有消费者订阅了却补订不上。
+
+### 8.5 与 POST / DELETE / GET 的关系
+
+- POST 照旧登记，视为运行期订阅，计入闲置判定（登记后没人接收，同样会在闲置到期后退订）。
+- DELETE 照旧可用；对已被自动退订的目标返回 `{"success":true}`。**开关打开时，DELETE 一个仍有接收方的目标会被按需补订立刻补回**——
+  这是为了不切断其他使用方（以前 DELETE 是全局的，会切断 OMS）。
+- GET 照旧列出当前订阅；开关打开时每条追加 `source`（`config` / `runtime`）和 `last_active_at`（Unix 毫秒，当前有接收端为当前时间，开关打开以来没人用过为 `null`）。
+  `compare.mjs subs` 会把追加字段算作差异，所以兼容对比要在开关关闭时做。
+- **SIGHUP 从配置名单删掉的目标**：照旧立即退订上游；但开关打开时若它仍有接收方，会被按需补订按**运行期订阅**补回，没人接收后再闲置退订。
+- **REST latest 在闲置退订之后返回最后一次缓存的旧值**（时间戳停在退订那一刻），不是 404；REST 查询只刷新闲置计时，**不会**触发补订。
+  所以轮询间隔大于 `idle_minutes` 的纯 REST 使用方会拿到冻结的数据（1.1.1 的 DELETE 也是如此）；目前已知消费者（OMS、botd）都走 WS，不受影响。
+
+### 8.6 怎么打开 / 临时关闭
+
+配置烧在镜像里（`/etc/md-server/config.yaml`，root 所有、容器以 `md-user` 运行），两种方式：
+
+1. **正式变更（推荐，需业务方批准）**：用打开（或关闭）开关的配置构建新镜像，按 SWAP_PLAN 换容器，换后立即 `restore_subs.mjs`。重启会断开所有消费者一次、清空运行期订阅。
+2. **不重启的临时开关（紧急关闭用）**：改容器内的文件后发 SIGHUP，立即生效，不断连、不丢运行期订阅：
+
+   ```bash
+   # 关闭：把 idle_unsubscribe 改成 false（以 root 身份在容器内改文件）
+   docker exec -u root md-server sed -i 's/^\(\s*idle_unsubscribe:\s*\)true/\1false/' /etc/md-server/config.yaml
+   docker kill --signal=HUP md-server
+   curl -s http://127.0.0.1:8081/metrics | grep '^md_runtime_subscriptions_enabled'   # 应为 0
+   ```
+
+   只关报价补订（保留闲置退订与 tick/kline 补订）同理，把 `on_demand_quote` 改成 `false` 再发 SIGHUP。
+
+   NAS 198 没有 shell 时用 Portainer API 版（同样的步骤，外加核对）：
+   `APPROVED="<批准人 时间>" python3 evidence/1.2.0/tools/runtime_toggle.py <idle_unsubscribe|on_demand_quote> <true|false>`。
+   它只改这一个键并读回断言只有这一行变化（不符则原样写回、不发 SIGHUP），发 SIGHUP 后核对开关指标、`md_runtime_subs` 日志、
+   进程启动时间与重启次数不变，结果写 `toggle-result.json`。
+
+   **注意**：容器重建或重启（含 `unless-stopped` 自动拉起）后回到镜像里的配置；临时关闭后要尽快出一个关闭开关的镜像。
+   关闭后已经被退掉的订阅不会自动恢复（有接收方的话题需要 POST 或换版后 `restore_subs.mjs` 补回），按需补订加上的订阅也保持原样。
+
+### 8.7 排障
+
+1. **消费者说某币对没数据**：`GET /api/v1/subscriptions` 里有没有该目标？没有 → 看 `md_runtime_subscriptions_limit_rejected_total` 是否在涨（上限）、
+   WARN 日志里有没有 `rejected by upstream`（交易所拒绝，退避中）；话题写法是否规范（交易所小写、币对大写，K 线级别与交易所一致，如 OKX `1H`）。
+2. **运行期订阅只增不减**：`md_runtime_subscriptions_enabled` 是否为 1；是否还在保护期；有没有消费者一直订着（`last_active_at` 接近当前时间）或一直在用 REST 轮询。
+3. **订阅来回抖动**：`increase(..._idle_unsubscribed_total[1h])` 与 `increase(..._demand_subscribed_total[1h])` 都很高 → 调大 `idle_minutes`。
 

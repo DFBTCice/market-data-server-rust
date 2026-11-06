@@ -1,0 +1,2 @@
+{"tag": "before", "at_utc": "2026-11-06T17:16:43.433866+00:00", "process_start_time_seconds": 1792785202.0, "md_ws_active_clients": 2.0, "image": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010", "restart_count": 0, "health": "healthy"}
+{"tag": "after", "at_utc": "2026-11-06T17:17:18.633684+00:00", "process_start_time_seconds": 1792785202.0, "md_ws_active_clients": 2.0, "image": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010", "restart_count": 0, "health": "healthy"}

@@ -1,0 +1,86 @@
+{
+  "old": {
+    "samples": 19,
+    "from": "2026-11-06T16:06:34.017033+00:00",
+    "to": "2026-11-06T16:11:10.386665+00:00",
+    "mem_usage_mib": {
+      "first": 53.0,
+      "last": 47.6,
+      "mean": 47.6,
+      "max": 53.0
+    },
+    "mem_anon_mib": {
+      "first": 52.0,
+      "last": 46.4,
+      "mean": 46.4,
+      "max": 52.0
+    },
+    "cpu_pct_of_one_core_x_cpus": {
+      "mean": 6.83,
+      "max": 18.35
+    }
+  },
+  "off": {
+    "samples": 19,
+    "from": "2026-11-06T16:06:36.106446+00:00",
+    "to": "2026-11-06T16:11:12.489167+00:00",
+    "mem_usage_mib": {
+      "first": 42.8,
+      "last": 39.4,
+      "mean": 39.3,
+      "max": 42.8
+    },
+    "mem_anon_mib": {
+      "first": 42.2,
+      "last": 38.5,
+      "mean": 38.4,
+      "max": 42.2
+    },
+    "cpu_pct_of_one_core_x_cpus": {
+      "mean": 7.23,
+      "max": 15.6
+    }
+  },
+  "short": {
+    "samples": 33,
+    "from": "2026-11-06T16:06:51.840746+00:00",
+    "to": "2026-11-06T16:14:07.979779+00:00",
+    "mem_usage_mib": {
+      "first": 10.2,
+      "last": 13.8,
+      "mean": 13.3,
+      "max": 13.8
+    },
+    "mem_anon_mib": {
+      "first": 9.6,
+      "last": 13.2,
+      "mean": 12.7,
+      "max": 13.2
+    },
+    "cpu_pct_of_one_core_x_cpus": {
+      "mean": 4.91,
+      "max": 8.65
+    }
+  },
+  "prod": {
+    "samples": 79,
+    "from": "2026-11-06T16:14:32.094743+00:00",
+    "to": "2026-11-06T16:29:29.132549+00:00",
+    "mem_usage_mib": {
+      "first": 54.9,
+      "last": 50.0,
+      "mean": 49.8,
+      "max": 54.9
+    },
+    "mem_anon_mib": {
+      "first": 54.1,
+      "last": 47.8,
+      "mean": 47.9,
+      "max": 54.1
+    },
+    "cpu_pct_of_one_core_x_cpus": {
+      "mean": 4.88,
+      "max": 12.01
+    }
+  }
+}

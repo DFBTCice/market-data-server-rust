@@ -308,6 +308,20 @@ pub fn target_to_streams(target: &SubscriptionTarget) -> Vec<String> {
     }
 }
 
+/// 从 OKX 错误事件的 `msg` 里取出 `channel:instId`。
+///
+/// OKX 的订阅错误事件不带 `arg`（2026-11-06 实测，见 `evidence/1.2.0/upstream-probe/`），频道和合约只出现在文案里：
+/// `Subscribe failed, wrong URL or channel:trades,instId:NOSUCH-USDT-SWAP doesn't exist. ...`
+pub fn stream_from_error_msg(msg: &str) -> Option<String> {
+    let rest = &msg[msg.find("channel:")? + "channel:".len()..];
+    let (channel, rest) = rest.split_once(',')?;
+    let inst_id = rest.strip_prefix("instId:")?.split_whitespace().next()?;
+    if channel.is_empty() || inst_id.is_empty() {
+        return None;
+    }
+    Some(format!("{}:{}", channel, inst_id))
+}
+
 /// 构建 OKX WebSocket 订阅消息
 pub fn build_subscribe_msg(channels: &[String]) -> String {
     let args: Vec<serde_json::Value> = channels
@@ -401,7 +415,7 @@ impl ExchangeAdapter for OkxAdapter {
                     let stream = if let Some(ref arg) = msg.arg {
                         format!("{}:{}", arg.channel, arg.inst_id)
                     } else {
-                        String::new()
+                        stream_from_error_msg(&message).unwrap_or_default()
                     };
                     tracing::warn!(
                         "OKX subscribe error: code={}, msg={}, stream={}",
@@ -859,5 +873,42 @@ mod tests {
             .parse_message(raw.as_bytes())
             .unwrap();
         assert!(events.is_empty());
+    }
+
+    // ---- 订阅错误（1.2.0：错误事件不带 arg，从 msg 取 channel:instId）----
+
+    /// 实测样本（2026-11-06 wss://ws.okx.com:8443/ws/v5/public，订阅不存在的合约）
+    const REAL_SUBSCRIBE_ERROR: &str = r#"{"event":"error","msg":"Subscribe failed, wrong URL or channel:trades,instId:NOSUCH-USDT-SWAP doesn't exist. Please use the correct URL, channel and parameters referring to API document.","code":"60018","connId":"d107ac7f"}"#;
+
+    #[test]
+    fn subscribe_error_without_arg_carries_stream_from_msg() {
+        let events = OkxAdapter::new(okx_cfg())
+            .parse_message(REAL_SUBSCRIBE_ERROR.as_bytes())
+            .unwrap();
+        match &events[..] {
+            [DataEvent::SubscribeError(e)] => {
+                assert_eq!(e.code, "60018");
+                assert_eq!(e.stream, "trades:NOSUCH-USDT-SWAP");
+            }
+            other => panic!("expected one SubscribeError, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn stream_from_error_msg_variants() {
+        assert_eq!(
+            stream_from_error_msg("Subscribe failed, wrong URL or channel:candle7m,instId:BTC-USDT-SWAP doesn't exist."),
+            Some("candle7m:BTC-USDT-SWAP".into())
+        );
+        assert_eq!(
+            stream_from_error_msg("channel:tickers,instId:NOSUCH-USDT-SWAP"),
+            Some("tickers:NOSUCH-USDT-SWAP".into())
+        );
+        assert_eq!(
+            stream_from_error_msg("Invalid request: {\"op\": \"subscribe\"}"),
+            None
+        );
+        assert_eq!(stream_from_error_msg("channel:trades"), None);
+        assert_eq!(stream_from_error_msg("channel:,instId:X"), None);
     }
 }

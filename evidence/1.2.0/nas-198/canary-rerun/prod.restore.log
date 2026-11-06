@@ -1,0 +1,9 @@
+baseline=17 current=10 missing(TICK/KLINE)=7
+200 {"exchange":"binance","type":"TICK","symbols":["SNDKUSDT"]} {"success":true}
+200 {"exchange":"binance","type":"KLINE","symbols":["SNDKUSDT"],"interval":"5m"} {"success":true}
+200 {"exchange":"binance","type":"KLINE","symbols":["SNDKUSDT"],"interval":"30m"} {"success":true}
+200 {"exchange":"binance","type":"TICK","symbols":["BNBUSDT"]} {"success":true}
+200 {"exchange":"binance","type":"KLINE","symbols":["BTCUSDT"],"interval":"30m"} {"success":true}
+200 {"exchange":"binance","type":"KLINE","symbols":["BNBUSDT"],"interval":"5m"} {"success":true}
+200 {"exchange":"okx","type":"TICK","symbols":["BNB-USDT-SWAP"]} {"success":true}
+after: total=17 stillMissing=0 extraVsBaseline=0

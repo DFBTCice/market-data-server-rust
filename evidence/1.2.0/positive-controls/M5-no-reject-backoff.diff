@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index fba60a9..aa73d4d 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -763,7 +763,7 @@ impl RuntimeSubscriptions {
+                 continue;
+             }
+             if let Some(r) = st.rejected.get(&k) {
+-                if now < r.retry_at {
++                if false && now < r.retry_at {
+                     debug!(
+                         "on-demand subscribe skipped, rejected by upstream before (retry in {}): {}",
+                         fmt_dur(r.retry_at - now),

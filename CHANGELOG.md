@@ -4,6 +4,64 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.2.0] - 未发布（功能分支 `feat/runtime-sub-idle-v1.2.0`，待主审复核、业务方批准）
+
+**运行期订阅的闲置退订与按需补订**，默认关闭。关闭时：旧 `config.yaml` 原样可用，推送字节、REST/gRPC 字段与语义、旧 `/ws` 行为都不变，
+`/metrics` 只多 6 个值为 0 的指标族。任务书、验收与证据见 `evidence/1.2.0/README.md`。
+候选产物（未上线、待批准）：源码 `42bc897`，自 `12192d9` 干净 worktree 两次从零构建（jemalloc 特性）SHA-256 一致：
+`cbc6b0531b833f38fa5e4666be286d24d01ad169230ba855c8a5f126aed887bf`（`evidence/1.2.0/build-logs/dist-sha256.txt`；
+取代第一轮的 `f6ab760c…`，后者不含 `on_demand_quote`，不得上线）。
+
+### 新增
+
+- **配置段 `runtime_subscriptions`**（整段可选，键名写错直接报错，SIGHUP 可热更）：
+
+  | 键 | 默认 | 说明 |
+  |---|---|---|
+  | `idle_unsubscribe` | `false` | 总开关。闲置退订与按需补订**同一个开关**：只退不补会让后来交易该币对的 OMS 拿不到价格 |
+  | `idle_minutes` | `10` | 连续多少分钟没有接收方才退订上游（≥ 1） |
+  | `check_interval_seconds` | `60` | 闲置检查周期（≥ 1） |
+  | `startup_grace_minutes` | `10` | 启动（或运行中打开开关）后多少分钟内不退订，给消费者重连的时间 |
+  | `max_runtime_subscriptions` | `200` | 运行期订阅数达到该值后不再按需补订（POST 不受限） |
+  | `on_demand_quote` | `false` | QUOTE 是否参与按需补订。关闭时订阅配置名单外的 `quote.*` 话题不补订 QUOTE（报价仍按"一次一个币对"改配置名单扩量）；POST 登记的 QUOTE 照常参与闲置退订。业务方 2026-11-06 决定现网关闭 |
+
+- **只管运行期订阅**：`POST /api/v1/subscriptions`、gRPC Admin 登记的，以及按需补订加的。配置名单（`subscribe_ticks` / `subscribe_klines` / `subscribe_quotes`）永不自动退订；
+  同一目标同时在配置和运行期（含大小写不同的写法）按配置处理。SIGHUP 对配置订阅的语义不变。
+- **"有人在接收"**：该目标的规范话题（`tick.<ex>.<SYMBOL>` 等）上有 `/ws/v1/data`、旧 `/ws` 或 gRPC 流的接收端；或最近 `idle_minutes` 内有
+  `GET /api/v1/data/latest/{tick,kline,quote}/...` 查询过它；或最近有新接收端登记过它。
+- **闲置退订**：每 `check_interval_seconds` 检查；连续 `idle_minutes` 没有接收方才退上游并从 `desired_subs` 移除。闲置起点取"首次观察到无接收端"的检查时刻，
+  实际闲置时长只会 ≥ `idle_minutes`。
+- **按需补订**：有连接或 gRPC 订阅某话题而上游没有对应订阅时，约 200ms 内自动按运行期订阅补订（每次检查再兜底一次）。保护：
+  - 只接受已配置的交易所和类型（与 POST 同一路由；quote 需对应 quote 连接器在运行，且 `on_demand_quote` 打开）；只认规范写法的话题（其它写法本来就收不到推送）。
+  - 上游明确拒绝（OKX 60018/60012）的目标撤回、缓存失败并退避：5 分钟起、每次翻倍、封顶 1 小时。**币安对不存在的币对、错误的 K 线级别都应答成功（实测）**，
+    无法识别为拒绝，所以币安 K 线只接受合约支持的 15 个级别；不存在的币对靠闲置退订与上限兜底。
+  - 运行期订阅数达到 `max_runtime_subscriptions` 不再补订，记 WARN 并计数。
+  - 本功能向每个连接器发出的订阅变更消息经令牌桶限速（突发 10 条、每 15 秒补 1 条，≤ 240 条/小时），不挤占同一连接上的配置订阅（OKX 单连接有订阅请求频率限制）。
+- **与现有接口**：POST 照旧；DELETE 照旧（对已被自动退订的目标返回成功）。开关打开时，DELETE 一个**仍有接收方**的目标，会被按需补订立即补回（不切断其他使用方）。
+  `GET /api/v1/subscriptions` 仅在开关打开时每条追加 `source`（`config` / `runtime`）与 `last_active_at`（最近确认有人在用的 Unix 毫秒，未用过为 `null`），已有字段与顺序不变。
+- **指标（只追加）**：`md_runtime_subscriptions_enabled`、`md_runtime_subscriptions`（gauge）；
+  `md_runtime_subscriptions_{idle_unsubscribed,demand_subscribed,demand_failed,limit_rejected}_total`（counter）。开关关闭时也输出（值为 0）。
+- **日志**：固定 target `md_runtime_subs`（现网 `RUST_LOG=warn` 时用 `RUST_LOG=warn,md_runtime_subs=info` 打开），日志串见 `OPS_GUIDE.md` 第八节。
+
+### 修复（与开关无关）
+
+- **OKX 订阅错误不带 `arg`**（2026-11-06 实测，`evidence/1.2.0/upstream-probe/`）：频道与合约只在 `msg` 里，以前解析出的 stream 为空串，
+  连接器日志 `subscribe error: ... stream=` 为空、"从活跃订阅移除"不生效。现在从 `msg` 取 `channel:instId`。
+- **gRPC 订阅流在客户端断开后立即释放接收端**：以前要等下一条事件写失败才发现，没有成交的话题会被已断开的流一直占着。客户端可见行为不变。
+- **仓库示例配置的 OKX 地址改为 443**（`config.yaml`、DEPLOYMENT / RELEASE_WORKFLOW 配置样例、`deploy.sh` 模板）：OKX 已通知 8443 端口将停用；现网配置早已是 443，不受影响。
+
+### 已知限制
+
+- 运行期订阅仍不持久化（另立项）：换版 / 重启后仍需 `restore_subs.mjs` 补回（DEPLOYMENT §12.3）。
+- 配置烧在镜像里：运行中开关需 root 进容器改文件后 SIGHUP；容器重建后回到镜像里的配置（OPS_GUIDE §8.6）。
+- 闲置退订后 REST latest 返回最后缓存的旧值，REST 查询不触发补订；SIGHUP 删掉但仍有人接收的配置目标会按运行期订阅补回（OPS_GUIDE §8.5）。
+
+### 测试
+
+- 工作区测试 248 → 290 个全部通过；`cargo clippy` warning 13 条（与基线位置相同）；`cargo fmt --check` 无输出。
+- 新增集成测试 `crates/md-gateway/tests/runtime_subs_gateway.rs`（17 个，假上游 + 真实连接器 + 真实网关）覆盖任务书 §四 全部集成场景与报价补订开关；
+  正对照 16 种故意改坏全部被抓住（`evidence/1.2.0/tools/run_mutations.sh`）。
+
 ## [1.1.1] - 2026-10-24（NAS 已换版；2026-11-05 批准合并，已知问题保留）
 
 本版同时包含 A1–A5、jemalloc 分配器和 SIGHUP/log_level 修复，不另发 1.1.2。

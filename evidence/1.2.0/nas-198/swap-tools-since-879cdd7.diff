@@ -1,0 +1,1363 @@
+diff --git a/evidence/1.2.0/tools/analyze_24h.py b/evidence/1.2.0/tools/analyze_24h.py
+new file mode 100644
+index 0000000..55196d0
+--- /dev/null
++++ b/evidence/1.2.0/tools/analyze_24h.py
+@@ -0,0 +1,81 @@
++#!/usr/bin/env python3
++"""24 小时采样分析：覆盖率与采样缺口、进程是否重启、换版后前 10 分钟消费者重连情况、计数器增量。
++
++用法：python3 evidence/1.2.0/tools/analyze_24h.py [prod.csv] [换版完成时间 ISO，默认取 CSV 第一行]
++输出：同目录 analysis.json，并打印摘要。缺口 = 相邻两个成功采样点间隔超过 2 个采样周期，或采样行全空（请求失败）。
++"""
++import csv
++import json
++import pathlib
++import sys
++from datetime import datetime, timedelta
++
++ROOT = pathlib.Path(__file__).resolve().parents[3]
++CSV = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "evidence/1.2.0/nas-198/post-swap-24h/prod.csv"
++INTERVAL = 60
++COUNTERS = [
++    "ws_kicked_write_timeout", "ws_kicked_lagged", "ticks_dropped", "klines_dropped", "quotes_dropped",
++    "reconnect_okx", "reconnect_okx_kline", "reconnect_okx_quote", "reconnect_binance", "reconnect_binance_quote",
++    "rt_idle_unsubscribed", "rt_demand_subscribed", "rt_demand_failed", "rt_limit_rejected",
++]
++
++
++def ts(s):
++    return datetime.fromisoformat(s.replace("Z", "+00:00"))
++
++
++def num(v):
++    return float(v) if v not in ("", None) else None
++
++
++rows = list(csv.DictReader(CSV.open()))
++assert rows, f"{CSV} 没有采样行"
++ok = [r for r in rows if r.get("rss_bytes")]
++failed = [r["ts_utc"] for r in rows if not r.get("rss_bytes")]
++swap_at = ts(sys.argv[2]) if len(sys.argv) > 2 else ts(rows[0]["ts_utc"])
++first, last = ts(rows[0]["ts_utc"]), ts(rows[-1]["ts_utc"])
++
++gaps = []
++for a, b in zip(ok, ok[1:]):
++    d = (ts(b["ts_utc"]) - ts(a["ts_utc"])).total_seconds()
++    if d > 2 * INTERVAL:
++        gaps.append({"from": a["ts_utc"], "to": b["ts_utc"], "seconds": int(d), "missing_samples": int(d // INTERVAL) - 1})
++
++starts = sorted({r["process_start_time_seconds"] for r in ok if r.get("process_start_time_seconds")})
++first10 = [r for r in ok if swap_at <= ts(r["ts_utc"]) < swap_at + timedelta(minutes=10)]
++clients = [int(num(r["ws_clients"])) for r in first10 if r.get("ws_clients")]
++
++
++def delta(col):
++    vals = [num(r.get(col)) for r in ok if r.get(col)]
++    return None if not vals else vals[-1] - vals[0]
++
++
++rss = [num(r["rss_bytes"]) for r in ok]
++result = {
++    "csv": str(CSV.relative_to(ROOT)) if CSV.is_relative_to(ROOT) else str(CSV),
++    "first_sample_utc": rows[0]["ts_utc"],
++    "last_sample_utc": rows[-1]["ts_utc"],
++    "span_hours": round((last - first).total_seconds() / 3600, 2),
++    "expected_samples": int((last - first).total_seconds() // INTERVAL) + 1,
++    "rows": len(rows),
++    "ok_samples": len(ok),
++    "failed_samples": failed,
++    "gaps": gaps,
++    "coverage_pct": round(100 * len(ok) / (int((last - first).total_seconds() // INTERVAL) + 1), 2),
++    "process_start_times": starts,
++    "restarted_during_window": len(starts) > 1,
++    "first_10_min_ws_clients": clients,
++    "first_10_min_ws_clients_min": min(clients) if clients else None,
++    "first_10_min_ws_clients_changes": sum(1 for a, b in zip(clients, clients[1:]) if a != b),
++    "rss_mib": {"first": round(rss[0] / 2**20, 1), "max": round(max(rss) / 2**20, 1), "last": round(rss[-1] / 2**20, 1)},
++    "counter_deltas": {c: delta(c) for c in COUNTERS},
++    "rt_subscriptions_last": num(ok[-1].get("rt_subscriptions")),
++}
++out = CSV.parent / "analysis.json"
++out.write_text(json.dumps(result, indent=1, ensure_ascii=False) + "\n")
++print(json.dumps({k: result[k] for k in (
++    "span_hours", "coverage_pct", "gaps", "failed_samples", "restarted_during_window",
++    "first_10_min_ws_clients", "first_10_min_ws_clients_min", "first_10_min_ws_clients_changes", "rss_mib")},
++    indent=1, ensure_ascii=False))
++print(f"written {out}")
+diff --git a/evidence/1.2.0/tools/build_release_image.py b/evidence/1.2.0/tools/build_release_image.py
+index b7fb38d..3b97c0a 100644
+--- a/evidence/1.2.0/tools/build_release_image.py
++++ b/evidence/1.2.0/tools/build_release_image.py
+@@ -1,24 +1,29 @@
+ #!/usr/bin/env python3
+-"""在 198（endpoint 3）构建换版镜像 md-server:1.2.0：md-server:1.0.0-rollback + 最终产物 + config.release.yaml。
+-不操作现网容器、不动 latest。用法：python3 evidence/1.2.0/tools/build_release_image.py <二进制> <sha256> <源码提交>"""
++"""在 198（endpoint 3）构建换版镜像：md-server:1.0.0-rollback + 最终产物 + config.release.yaml。不操作任何容器、不动 latest。
++产物与 sha 固定（swaplib.ARTIFACT / EXPECTED_SHA，并与 build-logs/dist-sha256.txt 交叉核对），不接受外部传入。
++用法：python3 evidence/1.2.0/tools/build_release_image.py            # 现网镜像 md-server:1.2.0 → nas-198/image-manifest.json
++      python3 evidence/1.2.0/tools/build_release_image.py --drill    # 演练镜像 md-server:exp-120-release → nas-198/drill/image-manifest.json"""
+ import hashlib
+ import io
+ import json
+-import pathlib
+ import sys
+ import tarfile
++import pathlib
+ 
+-ROOT = pathlib.Path(__file__).resolve().parents[3]
+-sys.path.insert(0, str(ROOT / "evidence/1.1.1/tools"))
+-from pt_exp import D, call, guard  # noqa: E402
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++from swaplib import D, call, guard  # noqa: E402
+ 
+-OUT = ROOT / "evidence/1.2.0/nas-198"
+-TAG = "md-server:1.2.0"
++DRILL = "--drill" in sys.argv
++OUT = S.ROOT / "evidence/1.2.0/nas-198" / ("drill" if DRILL else "")
++TAG = "md-server:exp-120-release" if DRILL else "md-server:1.2.0"
+ BASE = "md-server:1.0.0-rollback"
+-binary_path, sha, commit = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+-binary = binary_path.read_bytes()
+-config = (OUT / "config.release.yaml").read_bytes()
+-assert hashlib.sha256(binary).hexdigest() == sha, "产物 sha 不符"
++SOURCE_COMMIT = "42bc897e6b9180214cf50a5264a28131b8196b3e"  # 产物源码；产物从 12192d9 构建（源码相同）
++OUT.mkdir(parents=True, exist_ok=True)
++sha = S.expected_sha()
++binary = S.ARTIFACT.read_bytes()
++config = S.RELEASE_CONFIG.read_bytes()
++assert hashlib.sha256(binary).hexdigest() == sha, "本地产物不是固定期望的 cbc6b053…"
+ for needle in (b'log_level: "warn"', b"idle_unsubscribe: true", b"idle_minutes: 10", b"check_interval_seconds: 60",
+                b"startup_grace_minutes: 10", b"max_runtime_subscriptions: 200", b"on_demand_quote: false"):
+     assert needle in config, f"config.release.yaml 缺少 {needle!r}"
+@@ -30,7 +35,7 @@ assert base["Id"].startswith("sha256:06907bdf7fd8"), "回滚基础镜像与交
+ dockerfile = (f"FROM {BASE}\n"
+               "COPY md-server /usr/local/bin/md-server\n"
+               "COPY config.yaml /etc/md-server/config.yaml\n"
+-              f'LABEL org.opencontainers.image.revision="{commit}" '
++              f'LABEL org.opencontainers.image.revision="{SOURCE_COMMIT}" '
+               f'md-server.binary.sha256="{sha}" '
+               f'md-server.config.sha256="{hashlib.sha256(config).hexdigest()}"\n').encode()
+ (OUT / "Dockerfile.release").write_bytes(dockerfile)
+@@ -48,7 +53,7 @@ rows = [json.loads(line) for line in raw.splitlines() if line.strip()]
+ assert not any(row.get("error") for row in rows), raw.decode()[-1500:]
+ image = call("GET", f"{D}/images/{TAG}/json")
+ assert image["Config"]["Labels"]["md-server.binary.sha256"] == sha
+-record = {"tag": TAG, "id": image["Id"], "base": BASE, "base_id": base["Id"], "source_commit": commit,
++record = {"tag": TAG, "id": image["Id"], "base": BASE, "base_id": base["Id"], "source_commit": SOURCE_COMMIT,
+           "binary_sha256": sha, "config_sha256": hashlib.sha256(config).hexdigest(),
+           "user": image["Config"].get("User"), "cmd": image["Config"].get("Cmd"),
+           "healthcheck": image["Config"].get("Healthcheck")}
+diff --git a/evidence/1.2.0/tools/check_after_swap.py b/evidence/1.2.0/tools/check_after_swap.py
+index c845dfe..b3ce8b7 100644
+--- a/evidence/1.2.0/tools/check_after_swap.py
++++ b/evidence/1.2.0/tools/check_after_swap.py
+@@ -1,55 +1,128 @@
+ #!/usr/bin/env python3
+-"""换版后 10 分钟验收（只读：GET 现网接口 + Portainer 容器信息）。
+-判据：健康、RestartCount=0、订阅数回到换前、md_ws_active_clients=2、各连接器重连增量 ≤ 1（无重连风暴）、
+-新指标出现且开关为 1、jemalloc 指标在、写超时为 0。用法：python3 evidence/1.2.0/tools/check_after_swap.py"""
++"""换版后 10 分钟验收（只读：GET 现网接口 + Portainer 容器信息与日志）。
++判据：同一容器、健康、RestartCount=0、配置订阅（从 config.release.yaml 独立解析）全部还在、
++缺失的运行期订阅都能对上 idle-unsubscribed 日志且 md_runtime_subscriptions_idle_unsubscribed_total 不小于缺失数、
++md_ws_active_clients >= 2、开关为 1、jemalloc 指标在。
++只记录不判失败：写超时（为 0 或附日志说明）、交易所重连增量（辅助）、消费者口径（post-swap-24h/prod.csv 前 10 分钟 ws_clients 最小值与变化次数）。
++用法：python3 evidence/1.2.0/tools/check_after_swap.py            # 现网
++      python3 evidence/1.2.0/tools/check_after_swap.py --drill <换版输出目录>"""
++import csv
+ import datetime
+ import json
+ import pathlib
+ import re
+ import sys
+-import urllib.request
+ 
+-ROOT = pathlib.Path(__file__).resolve().parents[3]
+-sys.path.insert(0, str(ROOT / "evidence/1.1.1/tools"))
+-from pt_exp import D, call, guard  # noqa: E402
++import yaml
+ 
+-OUT = ROOT / "evidence/1.2.0/nas-198/swap"
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++from swaplib import D, call, demux, guard  # noqa: E402
+ 
++DRILL = "--drill" in sys.argv
++ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
++T = S.DRILL if DRILL else S.PROD
++OUT = pathlib.Path(ARGS[0]) if DRILL else S.ROOT / "evidence/1.2.0/nas-198/swap"
++CSV = S.ROOT / "evidence/1.2.0/nas-198/post-swap-24h/prod.csv"
++MIN_CLIENTS = 0 if DRILL else 2
++TYPES = {1: "TICK", 2: "KLINE", 3: "QUOTE"}
+ 
+-def get(path):
+-    return urllib.request.urlopen("http://192.168.1.198:8081" + path, timeout=10).read()
++
++def key(exchange, data_type, symbol, interval):
++    return (exchange.lower(), int(data_type), symbol.upper(), interval or "")
++
++
++def config_keys(path):
++    c = yaml.safe_load(path.read_text())["connectors"]
++    keys = set()
++    for ex in ("binance", "okx"):
++        e = c.get(ex) or {}
++        keys |= {key(ex, 1, s, "") for s in e.get("subscribe_ticks") or []}
++        keys |= {key(ex, 2, s, iv) for iv, syms in (e.get("subscribe_klines") or {}).items() for s in syms}
++        keys |= {key(ex, 3, s, "") for s in e.get("subscribe_quotes") or []}
++    return keys
+ 
+ 
+ def reconnects(text):
+     return {m.group(1): float(m.group(2)) for m in re.finditer(r'^md_connector_reconnect_total\{exchange="([^"]+)"\} (\S+)$', text, re.M)}
+ 
+ 
+-guard()
+-result = json.loads((OUT / "swap-result.json").read_text())
+-assert result["status"] == "immediate_checks_passed", result
+-before = json.loads((OUT / "subscriptions.before.json").read_text())
+-c = call("GET", f"{D}/containers/md-server/json")
+-metrics = get("/metrics").decode()
+-subs = json.loads(get("/api/v1/subscriptions"))
+-first = (OUT / "metrics.after.txt").read_text()
+-key = lambda s: (s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval", ""))
+-missing = sorted(set(map(key, before)) - set(map(key, subs)))
+-deltas = {k: v - reconnects(first).get(k, 0) for k, v in reconnects(metrics).items()}
+-checks = {
+-    "same_container": c["Id"] == result["new_container_id"],
+-    "healthy": c["State"].get("Health", {}).get("Status") == "healthy",
+-    "restart_count_0": c["RestartCount"] == 0,
+-    "subscriptions_back": not missing,
+-    "ws_active_clients_2": "\nmd_ws_active_clients 2\n" in metrics,
+-    "no_reconnect_storm": all(d <= 1 for d in deltas.values()),
+-    "runtime_switch_on": "\nmd_runtime_subscriptions_enabled 1\n" in metrics,
+-    "jemalloc_metrics": "\nmd_jemalloc_allocated_bytes " in metrics,
+-    "write_timeout_0": "\nmd_ws_kicked_write_timeout_total 0\n" in metrics,
+-}
+-record = {"checked_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(), "checks": checks,
+-          "subscriptions_before": len(before), "subscriptions_now": len(subs), "missing": missing,
+-          "reconnect_deltas_since_swap": deltas, "pass": all(checks.values())}
+-(OUT / "ten-minute.json").write_text(json.dumps(record, indent=2) + "\n")
+-(OUT / "metrics.ten-minute.txt").write_text(metrics)
+-print(json.dumps(record, indent=2))
+-sys.exit(0 if record["pass"] else 1)
++def idle_unsubscribed_keys(log_lines):
++    keys = set()
++    for line in log_lines:
++        m = re.search(r"runtime subscription idle-unsubscribed: exchange=(\S+) type=(\S+) symbol=(\S+) interval=(\S+)", line)
++        if m:
++            dt = {v: k for k, v in TYPES.items()}[m.group(2)]
++            keys.add(key(m.group(1), dt, m.group(3), "" if m.group(4) == "-" else m.group(4)))
++    return keys
++
++
++def judge_subscriptions(before, now_subs, log_lines, metrics, config_path):
++    """配置订阅必须全在；缺失的运行期订阅必须每个都有 idle-unsubscribed 日志，且退订计数不小于缺失数"""
++    now_keys = {key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) for s in now_subs}
++    expected_config = config_keys(config_path)
++    before_keys = {key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) for s in before}
++    missing_config = sorted(expected_config - now_keys)
++    missing_runtime = sorted(before_keys - now_keys - expected_config)
++    unexplained = [k for k in missing_runtime if k not in idle_unsubscribed_keys(log_lines)]
++    idle_total = S.metric(metrics, "md_runtime_subscriptions_idle_unsubscribed_total") or 0
++    return {
++        "config_subscriptions_expected": len(expected_config), "missing_config": missing_config,
++        "missing_runtime": missing_runtime, "missing_runtime_unexplained": unexplained, "idle_unsubscribed_total": idle_total,
++        "config_subscriptions_present": not missing_config,
++        "missing_runtime_explained_by_idle_unsubscribe": not unexplained and idle_total >= len(missing_runtime),
++    }
++
++
++def main():
++    guard()
++    result = json.loads((OUT / "swap-result.json").read_text())
++    assert result["status"] == "immediate_checks_passed", result
++    swap_epoch = int(datetime.datetime.fromisoformat(result["started_at_utc"]).timestamp())
++    before = json.loads((OUT / "subscriptions.before.json").read_text())
++    c = call("GET", f"{D}/containers/{T.check_name(T.current)}/json")
++    metrics = S.http_get(T, "/metrics").decode()
++    now_subs = json.loads(S.http_get(T, "/api/v1/subscriptions"))
++    raw_logs = call("GET", f"{D}/containers/{T.current}/logs?stdout=1&stderr=1&timestamps=1&since={swap_epoch}", want_raw=True)
++    log_lines = [re.sub(r"\x1b\[[0-9;]*m", "", l) for l in demux(raw_logs).splitlines()]
++    subs = judge_subscriptions(before, now_subs, log_lines, metrics, S.RELEASE_CONFIG)
++    clients = S.metric(metrics, "md_ws_active_clients") or 0
++    first = (OUT / "metrics.after.txt").read_text()
++    consumers = None
++    if not DRILL and CSV.exists():
++        rows = [r for r in csv.DictReader(open(CSV)) if r["ws_clients"] != ""][:10]
++        vals = [int(float(r["ws_clients"])) for r in rows]
++        consumers = {"first_10_samples": vals, "min": min(vals) if vals else None,
++                     "changes": sum(1 for a, b in zip(vals, vals[1:]) if a != b)}
++    write_timeouts = S.metric(metrics, "md_ws_kicked_write_timeout_total") or 0
++    checks = {
++        "same_container": c["Id"] == result["new_container_id"],
++        "healthy": c["State"].get("Health", {}).get("Status") == "healthy",
++        "restart_count_0": c["RestartCount"] == 0,
++        "config_subscriptions_present": subs["config_subscriptions_present"],
++        "missing_runtime_explained_by_idle_unsubscribe": subs["missing_runtime_explained_by_idle_unsubscribe"],
++        "ws_active_clients_ok": clients >= MIN_CLIENTS,
++        "runtime_switch_on": S.metric(metrics, "md_runtime_subscriptions_enabled") == 1,
++        "jemalloc_metrics": "\nmd_jemalloc_allocated_bytes " in metrics,
++    }
++    record = {
++        "mode": T.mode, "checked_at_utc": S.now(), "checks": checks, "pass": all(checks.values()),
++        "config_subscriptions_expected": subs["config_subscriptions_expected"], "missing_config": subs["missing_config"],
++        "subscriptions_before": len(before), "subscriptions_now": len(now_subs),
++        "missing_runtime": subs["missing_runtime"], "missing_runtime_unexplained": subs["missing_runtime_unexplained"],
++        "idle_unsubscribed_total": subs["idle_unsubscribed_total"], "ws_active_clients": clients,
++        "recorded_only": {
++            "write_timeout_total": write_timeouts,
++            "write_timeout_log_lines": [l for l in log_lines if "write blocked longer than ws_write_wait" in l],
++            "exchange_reconnect_deltas_since_swap": {k: v - reconnects(first).get(k, 0) for k, v in reconnects(metrics).items()},
++            "consumers_from_post_swap_csv": consumers,
++        },
++    }
++    (OUT / "ten-minute.json").write_text(json.dumps(record, indent=2) + "\n")
++    (OUT / "metrics.ten-minute.txt").write_text(metrics)
++    print(json.dumps(record, indent=2))
++    sys.exit(0 if record["pass"] else 1)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/evidence/1.2.0/tools/drill_198.py b/evidence/1.2.0/tools/drill_198.py
+new file mode 100644
+index 0000000..4bad709
+--- /dev/null
++++ b/evidence/1.2.0/tools/drill_198.py
+@@ -0,0 +1,118 @@
++#!/usr/bin/env python3
++"""换版工具旁路演练（主审 2026-11-07 复核意见 §二-6）。只操作 md-exp-120-drill* 容器与 md-server:exp-120-release 镜像（端口 28125 / 50125）；
++现网 md-server 只读（GET 订阅、指标与容器信息）。演练路径：
++  0 构建演练镜像（build_release_image.py --drill）
++  1 起演练用 1.1.1 容器 md-exp-120-drill（256 MiB、2 核、unless-stopped），灌入现网订阅
++  2 换版演练 swap-1（execute_swap.py --drill）
++  3 一级回退：idle_unsubscribe 1→0→1，on_demand_quote 0→1→0（runtime_toggle.py --drill）
++  4 10 分钟验收逻辑（check_after_swap.py --drill，立即执行）
++  5 二级回退正常路径（rollback_to_111.py --drill，回退容器存在）
++  6 再换版 swap-2，删除回退容器，二级回退「回退容器不存在 → 先重建再切换」路径
++  7 清理全部 md-exp-120-drill* 与演练镜像，核对现网未受影响
++用法：python3 evidence/1.2.0/tools/drill_198.py"""
++import json
++import pathlib
++import subprocess
++import sys
++import urllib.parse
++import urllib.request
++
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++from swaplib import D, call, guard  # noqa: E402
++
++T = S.DRILL
++OUT = S.ROOT / "evidence/1.2.0/nas-198/drill"
++OUT.mkdir(parents=True, exist_ok=True)
++LABEL = "md-runtime-subs-1.2.0-drill"
++IMAGE = "md-server:exp-120-release"
++TOOLS = "evidence/1.2.0/tools"
++steps = []
++
++
++def log(msg):
++    line = f"{S.now()} {msg}"
++    print(line, flush=True)
++    with open(OUT / "drill.log", "a") as f:
++        f.write(line + "\n")
++
++
++def step(name, args, expect=0):
++    with open(OUT / f"{name}.stdout.log", "w") as f:
++        code = subprocess.run(args, cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT).returncode
++    steps.append({"step": name, "command": " ".join(args), "exit": code, "expected": expect})
++    log(f"step {name}: exit={code} (expected {expect}) :: {' '.join(args)}")
++    assert code == expect, f"step {name} exit {code}"
++
++
++def prod_snapshot(tag):
++    text = urllib.request.urlopen("http://192.168.1.198:8081/metrics", timeout=10).read().decode()
++    prod = call("GET", f"{D}/containers/md-server/json")
++    snap = {"tag": tag, "at_utc": S.now(), "process_start_time_seconds": S.metric(text, "process_start_time_seconds"),
++            "md_ws_active_clients": S.metric(text, "md_ws_active_clients"), "image": prod["Image"],
++            "restart_count": prod["RestartCount"], "health": prod["State"].get("Health", {}).get("Status")}
++    with open(OUT / "prod-readonly.jsonl", "a") as f:
++        f.write(json.dumps(snap) + "\n")
++    return snap
++
++
++before = None
++try:
++    guard()
++    before = prod_snapshot("before")
++    log(f"prod (read-only) before: {before}")
++    leftovers = [n for n in S.containers_by_name() if n.startswith("md-exp-120-drill")]
++    assert not leftovers, f"演练容器残留: {leftovers}"
++
++    step("0-build-drill-image", ["python3", f"{TOOLS}/build_release_image.py", "--drill"])
++
++    body = {"Image": S.OLD_IMAGE_TAG, "Env": ["RUST_LOG=warn", "TZ=Asia/Shanghai"],
++            "ExposedPorts": {"8081/tcp": {}, "50051/tcp": {}}, "Labels": {"purpose": LABEL},
++            "HostConfig": {"PortBindings": {"8081/tcp": [{"HostPort": "28125"}], "50051/tcp": [{"HostPort": "50125"}]},
++                           "RestartPolicy": {"Name": "unless-stopped"}, "Memory": 256 * 2**20, "MemorySwap": 256 * 2**20,
++                           "NanoCpus": 2_000_000_000, "NetworkMode": "bridge",
++                           "LogConfig": {"Type": "json-file", "Config": {"max-size": "20m", "max-file": "3"}}}}
++    created = call("POST", f"{D}/containers/create?name={T.check_name(T.current)}", body)
++    call("POST", f"{D}/containers/{created['Id']}/start")
++    assert S.wait_health(T, 60) is not None, "演练 1.1.1 容器未就绪"
++    (OUT / "prod.subscriptions.json").write_bytes(urllib.request.urlopen("http://192.168.1.198:8081/api/v1/subscriptions", timeout=10).read())
++    step("1-restore-into-drill-111", ["node", "scripts/compat/restore_subs.mjs", str(OUT / "prod.subscriptions.json"), T.url(""), "--apply"])
++    log(f"drill 1.1.1 container {created['Id'][:12]} up on {T.url('')}")
++
++    step("2-swap-1", ["python3", f"{TOOLS}/execute_swap.py", "--drill", str(OUT / "swap-1")])
++    for i, (key, value) in enumerate([("idle_unsubscribe", "false"), ("idle_unsubscribe", "true"),
++                                      ("on_demand_quote", "true"), ("on_demand_quote", "false")], 1):
++        step(f"3-toggle-{i}-{key}-{value}", ["python3", f"{TOOLS}/runtime_toggle.py", "--drill", key, value,
++                                             str(OUT / f"toggle-{i}-{key}-{value}")])
++    step("4-ten-minute-check-logic", ["python3", f"{TOOLS}/check_after_swap.py", "--drill", str(OUT / "swap-1")])
++    step("5-rollback-normal", ["python3", f"{TOOLS}/rollback_to_111.py", "--drill", str(OUT / "rollback-normal"),
++                               str(OUT / "swap-1/old-container.inspect.json")])
++    step("6a-swap-2", ["python3", f"{TOOLS}/execute_swap.py", "--drill", str(OUT / "swap-2")])
++    bak = call("GET", f"{D}/containers/{T.check_name(T.bak)}/json")
++    call("DELETE", f"{D}/containers/{T.bak}?force=1&v=1")
++    log(f"step 6b: deleted {T.bak} {bak['Id'][:12]} to simulate the backup container being cleaned up")
++    steps.append({"step": "6b-delete-bak", "deleted": T.bak, "id": bak["Id"][:12]})
++    step("6c-rollback-recreate", ["python3", f"{TOOLS}/rollback_to_111.py", "--drill", str(OUT / "rollback-recreate"),
++                                  str(OUT / "swap-2/old-container.inspect.json")])
++    recreate = json.loads((OUT / "rollback-recreate/rollback-result.json").read_text())
++    assert recreate["bak_status"] == "recreated", recreate
++finally:
++    removed = []
++    for name, c in S.containers_by_name().items():
++        if name.startswith("md-exp-120-drill"):
++            T.check_name(name)
++            labels = call("GET", f"{D}/containers/{name}/json")["Config"]["Labels"] or {}
++            assert labels.get("purpose") == LABEL, f"{name} 没有演练标签，拒绝删除"
++            call("DELETE", f"{D}/containers/{name}?force=1&v=1")
++            removed.append(name)
++    images = [t for i in call("GET", f"{D}/images/json") for t in (i.get("RepoTags") or [])]
++    if IMAGE in images:
++        call("DELETE", f"{D}/images/{urllib.parse.quote(IMAGE, safe='')}")
++    left_c = [n for n in S.containers_by_name() if n.startswith("md-exp-120-drill")]
++    left_i = [t for i in call("GET", f"{D}/images/json") for t in (i.get("RepoTags") or []) if "exp-120" in t]
++    after = prod_snapshot("after")
++    summary = {"steps": steps, "removed_containers": removed, "removed_image": IMAGE,
++               "leftover_containers": left_c, "leftover_images": left_i, "prod_before": before,
++               "prod_after": after}
++    (OUT / "drill-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
++    log(f"cleanup: removed {removed}; leftovers containers={left_c} images={left_i}; prod after: {after}")
+diff --git a/evidence/1.2.0/tools/execute_swap.py b/evidence/1.2.0/tools/execute_swap.py
+index b3c897d..78adc6a 100644
+--- a/evidence/1.2.0/tools/execute_swap.py
++++ b/evidence/1.2.0/tools/execute_swap.py
+@@ -1,155 +1,152 @@
+ #!/usr/bin/env python3
+-"""1.2.0 换版（业务方批准后执行，见 evidence/1.2.0/nas-198/SWAP_PLAN_1.2.0.md）：
+-门禁 / 身份检查 → 记录换前订阅 → 换容器（旧容器改名 md-server-1.1.1-bak 停止保留）→ 立刻 restore_subs → 即时检查 → 失败自动回退。
+-与 1.1.1 的 pt_swap.py swap 唯一区别：容器环境 RUST_LOG 改为 warn,md_runtime_subs=info（业务方决定），其余参数沿用旧容器。
++"""1.2.0 换版（见 evidence/1.2.0/nas-198/SWAP_PLAN_1.2.0.md）：
++前置检查（全部在动容器之前）→ 记录换前订阅 → 换容器（旧容器改名 *-bak 停止保留）→ 健康后立刻 restore_subs → 即时检查 → 失败自动回退。
++与 1.1.1 的 pt_swap.py swap 的区别：容器环境 RUST_LOG 改为 warn,md_runtime_subs=info；复制旧容器标签时去掉镜像来源标签；
++自动回退走 swaplib.rollback（先确认 / 重建回退容器，不通过则不停当前容器）。
+ 
+-用法：APPROVED="<批准人与时间>" python3 evidence/1.2.0/tools/execute_swap.py
++用法：
++  现网：APPROVED="<业务方批准人与时间>" python3 evidence/1.2.0/tools/execute_swap.py
++  演练：python3 evidence/1.2.0/tools/execute_swap.py --drill <输出目录>   # 只操作 md-exp-120-drill*，端口 28125
+ """
+-import datetime
+ import hashlib
+-import io
+ import json
+ import os
+ import pathlib
+ import subprocess
+ import sys
+-import tarfile
+ import time
+-import urllib.request
+ 
+-ROOT = pathlib.Path(__file__).resolve().parents[3]
+-sys.path.insert(0, str(ROOT / "evidence/1.1.1/tools"))
+-from pt_exp import D, call, guard  # noqa: E402
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++from swaplib import D, call, guard  # noqa: E402
+ 
+-NAS = ROOT / "evidence/1.2.0/nas-198"
+-OUT = NAS / "swap"
+-CANARY = NAS / "canary"
+-OLD_IMAGE_ID = "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010"  # 现网 md-server:1.1.1
+-BAK = "md-server-1.1.1-bak"
+-NEW_ENV = {"RUST_LOG": "warn,md_runtime_subs=info", "TZ": "Asia/Shanghai"}
+-ROLLBACK = ROOT / "evidence/1.1.0/nas-198/tools/pt_swap.py"
++DRILL = "--drill" in sys.argv
++ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
++T = S.DRILL if DRILL else S.PROD
++NAS = S.ROOT / "evidence/1.2.0/nas-198"
++OUT = pathlib.Path(ARGS[0]) if DRILL else NAS / "swap"
++MANIFEST = (NAS / "drill" / "image-manifest.json") if DRILL else (NAS / "image-manifest.json")
++MIN_CLIENTS = 0 if DRILL else 2  # 演练容器没有业务消费者
+ OUT.mkdir(parents=True, exist_ok=True)
+ 
+ 
+-def get(path):
+-    return urllib.request.urlopen("http://192.168.1.198:8081" + path, timeout=10).read()
++def log(msg):
++    line = f"{S.now()} {msg}"
++    print(line, flush=True)
++    with open(OUT / "execution.log", "a") as f:
++        f.write(line + "\n")
+ 
+ 
+ def run(args, filename, timeout=120):
+     with (OUT / filename).open("w") as f:
+-        subprocess.run(args, cwd=ROOT, stdout=f, stderr=subprocess.STDOUT, check=True, timeout=timeout)
++        subprocess.run(args, cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT, check=True, timeout=timeout)
+ 
+ 
+-def read_file(name, path):
+-    raw = call("GET", f"{D}/containers/{name}/archive?path={path}", want_raw=True)
+-    with tarfile.open(fileobj=io.BytesIO(raw)) as tar:
+-        return tar.extractfile(next(m for m in tar.getmembers() if m.isfile())).read()
++def check_canary():
++    """金丝雀已通过：第 1 部分 gate-results 全 0（quote_raw 另核）；第 2 部分以修正判据后的 canary-rerun 为准；
++    第一次运行的第 2 部分只有 config_subscriptions_kept 为 false，且按 source=config 复核通过（带正对照）。"""
++    gates = json.loads((NAS / "canary/gate-results.json").read_text())
++    assert all(code == 0 for name, code in gates.items() if name != "quote_raw"), f"金丝雀第 1 部分未通过: {gates}"
++    for part in ("short", "prod"):
++        rerun = json.loads((NAS / "canary-rerun" / part / "summary.json").read_text())
++        assert rerun["pass"] is True, f"canary-rerun/{part} 未通过"
++        first = json.loads((NAS / "canary" / part / "summary.json").read_text())
++        failed = [k for k, v in first["checks"].items() if v not in (True, "not-in-baseline")]
++        assert failed == ["config_subscriptions_kept"], f"canary/{part} 第一次失败项不是只有配置订阅判定: {failed}"
++    run(["node", "evidence/1.2.0/tools/recheck_config_kept.mjs", "evidence/1.2.0/nas-198/canary/short/timeline.jsonl",
++         "evidence/1.2.0/nas-198/canary/prod/timeline.jsonl"], "precheck-recheck-config-kept.log", 60)
+ 
+ 
+-def wait_health(limit=60):
+-    t0 = time.time()
+-    while time.time() - t0 < limit:
+-        try:
+-            if json.loads(get("/health")).get("status") == "ok":
+-                return round(time.time() - t0, 1)
+-        except Exception:
+-            pass
+-        time.sleep(0.5)
+-    return None
+-
+-
+-approved = os.environ.get("APPROVED", "").strip()
+-assert approved, "须设置 APPROVED=<业务方批准人与时间>"
++if not DRILL:
++    approved = os.environ.get("APPROVED", "").strip()
++    assert approved, "须设置 APPROVED=<业务方批准人与时间>"
++else:
++    approved = "drill"
+ assert not (OUT / "swap-result.json").exists(), "已有执行结果，拒绝重复换版"
+-manifest = json.loads((NAS / "image-manifest.json").read_text())
+-gates = json.loads((CANARY / "gate-results.json").read_text())
+-assert all(code == 0 for name, code in gates.items() if name != "quote_raw"), f"金丝雀第 1 部分未通过: {gates}"
+-for part in ("short", "prod"):
+-    summary = json.loads((CANARY / part / "summary.json").read_text())
+-    assert summary["pass"], f"金丝雀 {part} 未通过"
++check_canary()
++sha = S.expected_sha()
++assert hashlib.sha256(S.ARTIFACT.read_bytes()).hexdigest() == sha, "本地产物 sha 不是固定期望值"
++manifest = json.loads(MANIFEST.read_text())
++assert manifest["binary_sha256"] == sha, "镜像清单里的二进制 sha 不是固定期望值"
+ guard()
+-old = call("GET", f"{D}/containers/md-server/json")
+-assert old["Image"] == OLD_IMAGE_ID and old["State"]["Running"], "现网不是预期的 md-server:1.1.1"
++T.check_name(T.current)
++T.check_name(T.bak)
++old = call("GET", f"{D}/containers/{T.current}/json")
++assert old["Image"] == S.OLD_IMAGE_ID and old["State"]["Running"], f"{T.current} 不是正在运行的 1.1.1"
+ image = call("GET", f"{D}/images/{manifest['tag']}/json")
+-assert image["Id"] == manifest["id"] and image["Config"]["Labels"]["md-server.binary.sha256"] == manifest["binary_sha256"]
+-names = [n.lstrip("/") for c in call("GET", f"{D}/containers/json?all=1") for n in c["Names"]]
+-assert BAK not in names, f"{BAK} 已存在"
+-subscriptions = get("/api/v1/subscriptions")
++assert image["Id"] == manifest["id"] and image["Config"]["Labels"]["md-server.binary.sha256"] == sha
++names = S.containers_by_name()
++assert T.bak not in names, f"{T.bak} 已存在"
++subscriptions = S.http_get(T, "/api/v1/subscriptions")
+ parsed = json.loads(subscriptions)
+-assert isinstance(parsed, list) and parsed and all(s["data_type"] in (1, 2, 3) for s in parsed)
++assert isinstance(parsed, list) and all(s["data_type"] in (1, 2, 3) for s in parsed) and (DRILL or parsed)
++metrics_before = S.http_get(T, "/metrics")
++clients_before = S.metric(metrics_before.decode(), "md_ws_active_clients") or 0
++assert clients_before >= MIN_CLIENTS, \
++    f"换版前消费者只有 {clients_before:g} 个（< {MIN_CLIENTS}），换版后会被自动回退；先确认 botd 等消费者都已连上"
+ (OUT / "subscriptions.before.json").write_bytes(subscriptions)
+-(OUT / "metrics.before.txt").write_bytes(get("/metrics"))
+-(OUT / "old-container.inspect.json").write_text(json.dumps(old, indent=2) + "\n")
++(OUT / "metrics.before.txt").write_bytes(metrics_before)
++inspect_path = OUT / "old-container.inspect.json"
++inspect_path.write_text(json.dumps(old, indent=2) + "\n")
+ 
+-cfg, hc = old["Config"], old["HostConfig"]
+-env = [e for e in cfg["Env"] if e.split("=", 1)[0] not in NEW_ENV] + [f"{k}={v}" for k, v in NEW_ENV.items()]
+-spec = {
+-    "Image": manifest["tag"], "Env": env, "Cmd": cfg["Cmd"], "Entrypoint": cfg.get("Entrypoint"), "User": cfg.get("User"),
+-    "ExposedPorts": cfg["ExposedPorts"],
+-    "Labels": {**(cfg.get("Labels") or {}), "md-server.version": "1.2.0", "md-server.replaced": old["Id"][:12]},
+-    "HostConfig": {k: hc[k] for k in ("PortBindings", "RestartPolicy", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig")},
+-}
++env = [e for e in old["Config"]["Env"] if e.split("=", 1)[0] not in S.NEW_ENV] + [f"{k}={v}" for k, v in S.NEW_ENV.items()]
++spec = S.spec_from_inspect(old, manifest["tag"], env=env,
++                           labels={"md-server.version": "1.2.0", "md-server.replaced": old["Id"][:12]})
+ (OUT / "new-container.spec.json").write_text(json.dumps(spec, indent=2) + "\n")
+-started = datetime.datetime.now(datetime.timezone.utc).isoformat()
+-(OUT / "swap-started.json").write_text(json.dumps({"started_at_utc": started, "approved": approved, "old_container_id": old["Id"],
+-    "old_image_id": old["Image"], "old_restart_count": old["RestartCount"], "subscriptions": len(parsed)}, indent=2) + "\n")
++started = S.now()
++(OUT / "swap-started.json").write_text(json.dumps({"mode": T.mode, "started_at_utc": started, "approved": approved,
++    "old_container_id": old["Id"], "old_image_id": old["Image"], "old_restart_count": old["RestartCount"],
++    "subscriptions": len(parsed)}, indent=2) + "\n")
++log(f"swap start ({T.mode}): {T.current} {old['Id'][:12]} -> {manifest['tag']}; subscriptions={len(parsed)}")
+ try:
+     t_stop = time.time()
+-    call("POST", f"{D}/containers/md-server/rename?name={BAK}")
++    call("POST", f"{D}/containers/{T.current}/rename?name={T.bak}")
+     call("POST", f"{D}/containers/{old['Id']}/update", {"RestartPolicy": {"Name": "no"}})
+     call("POST", f"{D}/containers/{old['Id']}/stop?t=15")
+-    created = call("POST", f"{D}/containers/create?name=md-server", spec)
++    created = call("POST", f"{D}/containers/create?name={T.current}", spec)
+     call("POST", f"{D}/containers/{created['Id']}/start")
+-    up = wait_health(60)
++    up = S.wait_health(T, 60)
+     assert up is not None, "新容器 60 秒内未就绪"
+     outage = round(time.time() - t_stop, 1)
+-    # 健康后第一件事就是补订阅
+-    run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"),
+-         "http://192.168.1.198:8081", "--apply"], "restore.log", 60)
+-    after = get("/api/v1/subscriptions")
++    run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"), T.url(""), "--apply"],
++        "restore.log", 60)
++    after = S.http_get(T, "/api/v1/subscriptions")
+     (OUT / "subscriptions.after.json").write_bytes(after)
+     deadline = time.time() + 90
+     while True:
+-        current = call("GET", f"{D}/containers/md-server/json")
+-        metrics = get("/metrics").decode()
+-        if current["State"].get("Health", {}).get("Status") == "healthy" and "md_ws_active_clients 2\n" in metrics:
++        current = call("GET", f"{D}/containers/{T.current}/json")
++        metrics = S.http_get(T, "/metrics").decode()
++        clients = S.metric(metrics, "md_ws_active_clients") or 0
++        if current["State"].get("Health", {}).get("Status") == "healthy" and clients >= MIN_CLIENTS:
+             break
+-        assert time.time() < deadline, "健康或两个消费者 90 秒内未恢复"
++        assert time.time() < deadline, f"健康或消费者（>= {MIN_CLIENTS}）90 秒内未恢复"
+         time.sleep(2)
+     assert current["Image"] == manifest["id"]
+-    assert all(f"{k}={v}" in current["Config"]["Env"] for k, v in NEW_ENV.items())
++    assert all(f"{k}={v}" in current["Config"]["Env"] for k, v in S.NEW_ENV.items())
+     for field in ("Memory", "MemorySwap", "NanoCpus", "RestartPolicy", "PortBindings"):
+         assert current["HostConfig"][field] == old["HostConfig"][field], field
+-    assert hashlib.sha256(read_file("md-server", "/usr/local/bin/md-server")).hexdigest() == manifest["binary_sha256"]
+-    assert read_file("md-server", "/etc/md-server/config.yaml") == (NAS / "config.release.yaml").read_bytes()
+-    for needle in ("\nmd_runtime_subscriptions_enabled 1\n", "\nmd_ws_kicked_write_timeout_total 0\n"):
+-        assert needle in metrics, needle
++    labels = current["Config"]["Labels"] or {}
++    assert labels.get("md-server.binary.sha256") == sha, "容器标签里的二进制 sha 不是新产物（镜像标签被旧标签覆盖）"
++    assert hashlib.sha256(S.read_file(T.current, "/usr/local/bin/md-server")).hexdigest() == sha
++    assert S.read_file(T.current, "/etc/md-server/config.yaml") == S.RELEASE_CONFIG.read_bytes()
++    assert S.metric(metrics, "md_runtime_subscriptions_enabled") == 1
+     for name in ("allocated", "active", "resident", "retained", "mapped", "metadata"):
+         assert f"\nmd_jemalloc_{name}_bytes " in metrics
+     (OUT / "metrics.after.txt").write_text(metrics)
+-    result = {"status": "immediate_checks_passed", "started_at_utc": started, "approved": approved,
+-              "checked_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+-              "outage_seconds": outage, "health_ready_seconds": up,
++    result = {"status": "immediate_checks_passed", "mode": T.mode, "started_at_utc": started, "approved": approved,
++              "checked_at_utc": S.now(), "outage_seconds": outage, "health_ready_seconds": up,
+               "old_container_id": old["Id"], "new_container_id": current["Id"], "new_image_id": current["Image"],
+-              "binary_sha256": manifest["binary_sha256"], "backup_name": BAK,
++              "binary_sha256": sha, "backup_name": T.bak,
+               "subscriptions_before": len(parsed), "subscriptions_after": len(json.loads(after)),
+-              "ws_active_clients": 2, "docker_health": "healthy", "ten_minute_acceptance": "pending"}
++              "ws_active_clients": clients, "ws_kicked_write_timeout_total": S.metric(metrics, "md_ws_kicked_write_timeout_total"),
++              "docker_health": "healthy", "ten_minute_acceptance": "pending"}
+     (OUT / "swap-result.json").write_text(json.dumps(result, indent=2) + "\n")
+-    print(json.dumps(result, indent=2), flush=True)
++    log(f"swap done: {json.dumps(result)}")
+ except BaseException as exc:
+-    containers = call("GET", f"{D}/containers/json?all=1")
+-    by_name = {n.lstrip("/"): c for c in containers for n in c["Names"]}
+-    if "md-server" in by_name and by_name["md-server"]["Id"] != old["Id"] and BAK in by_name:
+-        run(["python3", str(ROLLBACK), "rollback", BAK], "rollback.log")
+-    else:
+-        if "md-server" not in by_name and BAK in by_name:
+-            call("POST", f"{D}/containers/{BAK}/rename?name=md-server")
+-        call("POST", f"{D}/containers/{old['Id']}/update", {"RestartPolicy": {"Name": "unless-stopped"}})
+-        if not call("GET", f"{D}/containers/{old['Id']}/json")["State"]["Running"]:
+-            call("POST", f"{D}/containers/{old['Id']}/start")
+-        wait_health(60)
+-    run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"),
+-         "http://192.168.1.198:8081", "--apply"], "rollback-restore.log", 60)
+-    (OUT / "swap-result.json").write_text(json.dumps({"status": "rolled_back", "error": str(exc),
+-        "at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat()}, indent=2) + "\n")
++    log(f"swap failed: {exc}; reverting")
++    revert = S.revert_after_failed_swap(T, old["Id"], inspect_path, log)
++    run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"), T.url(""), "--apply"],
++        "rollback-restore.log", 60)
++    (OUT / "swap-result.json").write_text(json.dumps({"status": "rolled_back", "error": str(exc), "revert": revert,
++        "at_utc": S.now()}, indent=2) + "\n")
+     raise
+diff --git a/evidence/1.2.0/tools/observe_24h.sh b/evidence/1.2.0/tools/observe_24h.sh
+index 9c631ad..8dd88b9 100644
+--- a/evidence/1.2.0/tools/observe_24h.sh
++++ b/evidence/1.2.0/tools/observe_24h.sh
+@@ -1,14 +1,36 @@
+ #!/usr/bin/env bash
+ # 换版后 24 小时每分钟只读采样（GET /metrics 与 /api/v1/subscriptions），写 evidence/1.2.0/nas-198/post-swap-24h/。
+-# caffeinate 阻止本机休眠（1.1.1 的教训：本机休眠会中断采样）。采样列见 scripts/compat/sample_metrics.mjs（含运行期订阅与各 quote 入站累计）。
++# 采样机：业务方这台 MacBook Pro（在 192.168.1.x 内网）。休眠会中断采样（1.1.1 的教训），所以：
++#   caffeinate -i -s 阻止空闲休眠与系统休眠，但 -s 只在接电源时有效；合盖且无外接显示器仍会强制休眠。
++#   采样期间必须接电源、不合盖；电源与断言状态写入 host.txt，结束后用 analyze_24h.py 标出采样缺口。
++# 采样列见 scripts/compat/sample_metrics.mjs（含运行期订阅与各 quote 入站累计）。
+ # 用法：bash evidence/1.2.0/tools/observe_24h.sh        # 后台启动，PID 写入 sampler.pid
+ set -euo pipefail
+ ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+ OUT="$ROOT/evidence/1.2.0/nas-198/post-swap-24h"
+ mkdir -p "$OUT"
+ cd "$ROOT"
++if [ -f "$OUT/sampler.pid" ] && kill -0 "$(cat "$OUT/sampler.pid")" 2>/dev/null; then
++  echo "sampler already running: pid $(cat "$OUT/sampler.pid")" >&2; exit 1
++fi
++power="$(pmset -g batt | head -1)"
++case "$power" in
++  *"AC Power"*) ;;
++  *) echo "WARNING: not on AC power ($power); caffeinate -s will not prevent system sleep" >&2 ;;
++esac
+ date -u +%FT%TZ > "$OUT/started-at.txt"
+-nohup caffeinate -i node scripts/compat/sample_metrics.mjs http://192.168.1.198:8081 86460 60 "$OUT/prod.csv" --snapshot-every-min 60 \
++nohup caffeinate -i -s node scripts/compat/sample_metrics.mjs http://192.168.1.198:8081 86460 60 "$OUT/prod.csv" --snapshot-every-min 60 \
+   > "$OUT/sampler.log" 2>&1 &
+ echo $! > "$OUT/sampler.pid"
++sleep 2
++{
++  echo "started_at_utc=$(cat "$OUT/started-at.txt")"
++  echo "host=$(scutil --get ComputerName 2>/dev/null || hostname)"
++  echo "model=$(sysctl -n hw.model)"
++  echo "power=$power"
++  echo "caffeinate=caffeinate -i -s (pid $(cat "$OUT/sampler.pid"))"
++  echo "--- pmset -g assertions (caffeinate lines)"
++  pmset -g assertions | grep -i caffeinate || echo "no caffeinate assertion found"
++} > "$OUT/host.txt"
++cat "$OUT/host.txt"
+ echo "sampler pid $(cat "$OUT/sampler.pid"); output $OUT/prod.csv"
+diff --git a/evidence/1.2.0/tools/rollback_to_111.py b/evidence/1.2.0/tools/rollback_to_111.py
+new file mode 100644
+index 0000000..43b91bd
+--- /dev/null
++++ b/evidence/1.2.0/tools/rollback_to_111.py
+@@ -0,0 +1,65 @@
++#!/usr/bin/env python3
++"""二级回退：切回 1.1.1。
++步骤：GET 当前订阅存档 → swaplib.rollback（先确认 / 按旧容器 inspect 重建回退容器，不通过则不停当前容器）→
++restore_subs.mjs <刚存的订阅> → 核对 process_start_time_seconds 已变化、md_runtime_subscriptions* 指标消失、镜像为 1.1.1。
++用法：
++  现网：APPROVED="<批准人与时间>" python3 evidence/1.2.0/tools/rollback_to_111.py [输出目录]     # inspect 取 nas-198/swap/old-container.inspect.json
++  演练：python3 evidence/1.2.0/tools/rollback_to_111.py --drill <输出目录> <旧容器 inspect.json>
++"""
++import json
++import os
++import pathlib
++import subprocess
++import sys
++
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++from swaplib import D, call, guard  # noqa: E402
++
++DRILL = "--drill" in sys.argv
++ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
++T = S.DRILL if DRILL else S.PROD
++NAS = S.ROOT / "evidence/1.2.0/nas-198"
++OUT = pathlib.Path(ARGS[0]) if ARGS else NAS / "swap" / f"rollback-{S.now()[:19].replace(':', '')}"
++INSPECT = pathlib.Path(ARGS[1]) if DRILL else NAS / "swap/old-container.inspect.json"
++OUT.mkdir(parents=True, exist_ok=True)
++if not DRILL:
++    assert os.environ.get("APPROVED", "").strip(), "现网二级回退须设置 APPROVED=<批准人与时间>"
++
++
++def log(msg):
++    line = f"{S.now()} {msg}"
++    print(line, flush=True)
++    with open(OUT / "rollback.log", "a") as f:
++        f.write(line + "\n")
++
++
++guard()
++assert INSPECT.exists(), f"缺少旧容器 inspect：{INSPECT}"
++before_metrics = S.http_get(T, "/metrics").decode()
++subs = S.http_get(T, "/api/v1/subscriptions")
++(OUT / "subscriptions.archived.json").write_bytes(subs)
++(OUT / "metrics.before.txt").write_text(before_metrics)
++start_before = S.metric(before_metrics, "process_start_time_seconds")
++log(f"archived {len(json.loads(subs))} subscriptions from {T.current}; process_start_time_seconds={start_before}")
++result = S.rollback(T, INSPECT, log)
++with open(OUT / "restore.log", "w") as f:
++    restore_code = subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.archived.json"),
++                                   T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=60).returncode
++after_metrics = S.http_get(T, "/metrics").decode()
++(OUT / "metrics.after.txt").write_text(after_metrics)
++current = call("GET", f"{D}/containers/{T.current}/json")
++checks = {
++    "image_is_111": current["Image"] == S.OLD_IMAGE_ID,
++    "process_start_time_changed": S.metric(after_metrics, "process_start_time_seconds") != start_before,
++    "runtime_metrics_gone": "md_runtime_subscriptions" not in after_metrics,
++    "restore_subs_ok": restore_code == 0,
++    "healthy_now": S.wait_health(T, 5) is not None,
++}
++record = {"mode": T.mode, "at_utc": S.now(), **result, "process_start_time_before": start_before,
++          "process_start_time_after": S.metric(after_metrics, "process_start_time_seconds"),
++          "subscriptions_after": len(json.loads(S.http_get(T, "/api/v1/subscriptions"))), "checks": checks,
++          "pass": all(checks.values())}
++(OUT / "rollback-result.json").write_text(json.dumps(record, indent=2) + "\n")
++log(f"rollback result: {json.dumps(record)}")
++sys.exit(0 if record["pass"] else 1)
+diff --git a/evidence/1.2.0/tools/run_mutations.sh b/evidence/1.2.0/tools/run_mutations.sh
+index 4611971..428bbad 100644
+--- a/evidence/1.2.0/tools/run_mutations.sh
++++ b/evidence/1.2.0/tools/run_mutations.sh
+@@ -38,11 +38,15 @@ MUTATIONS=(
+   "M14-quote-on-demand-ignores-off-switch|$RS|s/if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{/if false \&\& k.data_type == DataType::Quote {/|${GW_TEST[*]}|quote_topics_are_not_subscribed_on_demand_by_default"
+   "M15-quote-never-on-demand-even-when-on|$RS|s/if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{/if k.data_type == DataType::Quote {/|${GW_TEST[*]}|quote_topics_are_subscribed_on_demand_when_enabled"
+   "M16-yaml-on-demand-quote-not-mapped|crates/md-server/src/runtime_subs.rs|s/on_demand_quote: rs\.on_demand_quote,/on_demand_quote: false,/|-p md-server|settings_follow_yaml"
++  "M17-quote-skip-after-taking-a-slot|$RS|s/(            if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{\n.*?\n            \}\n)(.*?            runtime_count \+= 1;\n)/\$2\$1/s|${GW_TEST[*]}|skipped_quote_does_not_count_against_the_limit"
++  "M18-no-nudge-on-settings-change|$RS|s/(settings changed \(\{\}\)\", describe\(s\)\);\n)\s*self\.nudge\.notify_one\(\);\n/\$1/|${GW_TEST[*]}|settings_change_subscribes_immediately_under_long_check_interval"
+ )
++ONLY="${ONLY:-}"
+ 
+ overall=0
+ for m in "${MUTATIONS[@]}"; do
+   IFS='|' read -r name file expr args expect <<< "$m"
++  if [ -n "$ONLY" ] && ! [[ "$name" =~ ^($ONLY)- ]]; then continue; fi
+   git -C "$WT" checkout -q -- .
+   before="$(shasum "$WT/$file" | cut -d' ' -f1)"
+   perl -0pi -e "$expr" "$WT/$file"
+diff --git a/evidence/1.2.0/tools/runtime_toggle.py b/evidence/1.2.0/tools/runtime_toggle.py
+new file mode 100644
+index 0000000..1d3610e
+--- /dev/null
++++ b/evidence/1.2.0/tools/runtime_toggle.py
+@@ -0,0 +1,100 @@
++#!/usr/bin/env python3
++"""一级回退：不重启，经 Portainer API 改容器内配置的一个开关后发 SIGHUP（OPS_GUIDE §8.6 的 API 版）。
++步骤：guard → 读回配置 → exec（root）sed 只改该键 → 读回配置断言只有这一行变化 → kill?signal=HUP → 读回指标与日志确认、进程未重启。
++用法：
++  现网：APPROVED="<批准人与时间>" python3 evidence/1.2.0/tools/runtime_toggle.py <idle_unsubscribe|on_demand_quote> <true|false> [输出目录]
++  演练：python3 evidence/1.2.0/tools/runtime_toggle.py --drill <键> <值> [输出目录]      # 只操作 md-exp-120-drill
++"""
++import difflib
++import io
++import json
++import os
++import pathlib
++import re
++import sys
++import tarfile
++import time
++
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++from swaplib import D, call, demux, guard  # noqa: E402
++
++DRILL = "--drill" in sys.argv
++ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
++key, value = ARGS[0], ARGS[1]
++assert key in ("idle_unsubscribe", "on_demand_quote") and value in ("true", "false"), "只允许改 idle_unsubscribe / on_demand_quote 为 true / false"
++T = S.DRILL if DRILL else S.PROD
++OUT = pathlib.Path(ARGS[2]) if len(ARGS) > 2 else S.ROOT / "evidence/1.2.0/nas-198" / ("drill" if DRILL else "swap") / f"toggle-{key}-{value}"
++OUT.mkdir(parents=True, exist_ok=True)
++CONFIG = "/etc/md-server/config.yaml"
++if not DRILL:
++    assert os.environ.get("APPROVED", "").strip(), "现网一级回退须设置 APPROVED=<批准人与时间>"
++
++
++def exec_root(name, cmd):
++    ex = call("POST", f"{D}/containers/{name}/exec", {"AttachStdout": True, "AttachStderr": True, "User": "root", "Cmd": cmd})
++    raw = call("POST", f"{D}/exec/{ex['Id']}/start", {"Detach": False, "Tty": False}, want_raw=True)
++    info = call("GET", f"{D}/exec/{ex['Id']}/json")
++    return info["ExitCode"], demux(raw)
++
++
++def put_config(name, data):
++    """把配置原样写回（root:root 0644），用于 SIGHUP 之前任何一步失败时撤销 sed 的改动"""
++    buf = io.BytesIO()
++    with tarfile.open(fileobj=buf, mode="w") as tar:
++        entry = tarfile.TarInfo(pathlib.PurePosixPath(CONFIG).name)
++        entry.size, entry.mode, entry.uid, entry.gid = len(data), 0o644, 0, 0
++        tar.addfile(entry, io.BytesIO(data))
++    call("PUT", f"{D}/containers/{name}/archive?path={pathlib.PurePosixPath(CONFIG).parent}",
++         raw_body=buf.getvalue(), ctype="application/x-tar")
++    assert S.read_file(name, CONFIG) == data, "写回原配置后读回不一致"
++
++
++def expected_diff(cfg, key, value):
++    m = re.search(rf"^([ \t]*{key}:[ \t]*)(true|false)[ \t]*$", cfg, re.M)
++    return [] if m.group(2) == value else [f"-{m.group(0)}", f"+{m.group(1)}{value}"]
++
++
++guard()
++name = T.check_name(T.current)
++before_inspect = call("GET", f"{D}/containers/{name}/json")
++assert before_inspect["State"]["Running"], f"{name} 没在运行"
++metrics_before = S.http_get(T, "/metrics").decode()
++start_before = S.metric(metrics_before, "process_start_time_seconds")
++cfg_before = S.read_file(name, CONFIG).decode()
++assert len(re.findall(rf"^[ \t]*{key}:[ \t]*(?:true|false)[ \t]*$", cfg_before, re.M)) == 1, f"配置里 {key} 行不是恰好一行"
++expected = expected_diff(cfg_before, key, value)
++since = int(time.time()) - 1
++try:
++    code, out = exec_root(name, ["sed", "-i", rf"s/^\([ \t]*{key}:[ \t]*\)\(true\|false\)[ \t]*$/\1{value}/", CONFIG])
++    assert code == 0, f"sed 失败 exit={code}: {out}"
++    cfg_after = S.read_file(name, CONFIG).decode()
++    diff = [l for l in difflib.unified_diff(cfg_before.splitlines(), cfg_after.splitlines(), lineterm="", n=0)
++            if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
++    assert diff == expected, f"配置改动与预期不符：{diff} != {expected}"
++except BaseException:
++    put_config(name, cfg_before.encode())
++    print("config restored to its previous content; no SIGHUP sent", file=sys.stderr)
++    raise
++call("POST", f"{D}/containers/{name}/kill?signal=HUP")
++time.sleep(3)
++metrics_after = S.http_get(T, "/metrics").decode()
++after_inspect = call("GET", f"{D}/containers/{name}/json")
++raw_logs = call("GET", f"{D}/containers/{name}/logs?stdout=1&stderr=1&timestamps=1&since={since}", want_raw=True)
++logs = [re.sub(r"\x1b\[[0-9;]*m", "", l) for l in demux(raw_logs).splitlines() if "md_runtime_subs" in l or "runtime_subscriptions" in l]
++enabled = S.metric(metrics_after, "md_runtime_subscriptions_enabled")
++checks = {
++    "config_only_that_line_changed": True,
++    "process_not_restarted": S.metric(metrics_after, "process_start_time_seconds") == start_before
++                             and after_inspect["RestartCount"] == before_inspect["RestartCount"],
++    "enabled_metric_matches": key != "idle_unsubscribe" or enabled == (1 if value == "true" else 0),
++    "module_log_confirms": key != "idle_unsubscribe" or any(("ENABLED" if value == "true" else "DISABLED") in l for l in logs)
++                           or not expected,
++    "settings_log_confirms": key != "on_demand_quote" or any(f"on_demand_quote={value}" in l for l in logs) or not expected,
++}
++record = {"mode": T.mode, "container": name, "key": key, "value": value, "at_utc": S.now(), "config_diff": diff,
++          "md_runtime_subscriptions_enabled": enabled, "process_start_time_seconds": start_before,
++          "restart_count": after_inspect["RestartCount"], "log_lines": logs, "checks": checks, "pass": all(checks.values())}
++(OUT / "toggle-result.json").write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
++print(json.dumps(record, indent=1, ensure_ascii=False))
++sys.exit(0 if record["pass"] else 1)
+diff --git a/evidence/1.2.0/tools/swaplib.py b/evidence/1.2.0/tools/swaplib.py
+new file mode 100644
+index 0000000..f96715a
+--- /dev/null
++++ b/evidence/1.2.0/tools/swaplib.py
+@@ -0,0 +1,204 @@
++#!/usr/bin/env python3
++"""1.2.0 换版 / 回退共用逻辑（只经 Portainer endpoint 3；JWT 由 pt_exp 从 /tmp/pt_jwt 读取）。
++
++两种模式严格分开，每个工具只拿一个 Target，所有容器操作前都用 Target.check_name() 校验名字：
++  PROD  ：现网 md-server、回退容器 md-server-1.1.1-bak、失败现场 md-server-<ts>-failed，端口 8081
++  DRILL ：演练容器 md-exp-120-drill、md-exp-120-drill-bak、md-exp-120-drill-<ts>-failed，端口 28125；
++          演练模式拒绝任何不以 md-exp-120-drill 开头的名字，现网模式拒绝任何 md-exp- 开头的名字。
++"""
++import datetime
++import io
++import json
++import pathlib
++import re
++import sys
++import tarfile
++import time
++import urllib.request
++
++ROOT = pathlib.Path(__file__).resolve().parents[3]
++sys.path.insert(0, str(ROOT / "evidence/1.1.1/tools"))
++from pt_exp import D, call, demux, guard  # noqa: E402,F401
++
++OLD_IMAGE_TAG = "md-server:1.1.1"
++OLD_IMAGE_ID = "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010"
++EXPECTED_SHA = "cbc6b0531b833f38fa5e4666be286d24d01ad169230ba855c8a5f126aed887bf"
++ARTIFACT = ROOT / "dist/md-server-1.2.0-12192d9-linux-x86_64"
++DIST_SHA_FILE = ROOT / "evidence/1.2.0/build-logs/dist-sha256.txt"
++RELEASE_CONFIG = ROOT / "evidence/1.2.0/nas-198/config.release.yaml"
++NEW_ENV = {"RUST_LOG": "warn,md_runtime_subs=info", "TZ": "Asia/Shanghai"}
++HOST = "192.168.1.198"
++# 镜像写入的来源标签：Docker 会把它们并入容器 Labels，复制旧容器标签时必须去掉，否则新容器显示旧镜像的 sha
++IMAGE_LABEL_KEYS = ("md-server.binary.sha256", "md-server.config.sha256")
++IMAGE_LABEL_PREFIX = "org.opencontainers.image."
++
++
++class Target:
++    def __init__(self, mode, current, bak, http_port):
++        self.mode, self.current, self.bak, self.http_port = mode, current, bak, http_port
++
++    def check_name(self, name):
++        if self.mode == "drill":
++            assert name.startswith("md-exp-120-drill"), f"演练模式拒绝操作 {name!r}"
++        else:
++            assert not name.startswith("md-exp-"), f"现网模式拒绝操作 {name!r}"
++            assert name == "md-server" or (name.startswith("md-server-") and name.endswith(("-bak", "-failed"))), \
++                f"现网模式拒绝操作 {name!r}"
++        return name
++
++    def url(self, path):
++        return f"http://{HOST}:{self.http_port}{path}"
++
++
++PROD = Target("prod", "md-server", "md-server-1.1.1-bak", 8081)
++DRILL = Target("drill", "md-exp-120-drill", "md-exp-120-drill-bak", 28125)
++
++
++def now():
++    return datetime.datetime.now(datetime.timezone.utc).isoformat()
++
++
++def http_get(target, path, timeout=10):
++    return urllib.request.urlopen(target.url(path), timeout=timeout).read()
++
++
++def metric(text, name):
++    m = re.search(rf"^{re.escape(name)} (\S+)$", text, re.M)
++    return float(m.group(1)) if m else None
++
++
++def wait_health(target, limit=60):
++    t0 = time.time()
++    while time.time() - t0 < limit:
++        try:
++            if json.loads(http_get(target, "/health", 3)).get("status") == "ok":
++                return round(time.time() - t0, 1)
++        except Exception:
++            pass
++        time.sleep(0.5)
++    return None
++
++
++def read_file(name, path):
++    raw = call("GET", f"{D}/containers/{name}/archive?path={path}", want_raw=True)
++    with tarfile.open(fileobj=io.BytesIO(raw)) as tar:
++        return tar.extractfile(next(m for m in tar.getmembers() if m.isfile())).read()
++
++
++def containers_by_name():
++    return {n.lstrip("/"): c for c in call("GET", f"{D}/containers/json?all=1") for n in c["Names"]}
++
++
++def expected_sha():
++    """固定期望 sha：常量必须与 build-logs/dist-sha256.txt 里该产物的记录、以及本地产物文件一致"""
++    recorded = {line.split()[1]: line.split()[0] for line in DIST_SHA_FILE.read_text().splitlines()
++                if re.match(r"^[0-9a-f]{64}  ", line)}
++    assert recorded.get("dist/md-server-1.2.0-12192d9-linux-x86_64") == EXPECTED_SHA, "dist-sha256.txt 与固定期望 sha 不符"
++    return EXPECTED_SHA
++
++
++def strip_image_labels(labels):
++    return {k: v for k, v in (labels or {}).items()
++            if k not in IMAGE_LABEL_KEYS and not k.startswith(IMAGE_LABEL_PREFIX)}
++
++
++def spec_from_inspect(inspect, image, env=None, labels=None, restart=None):
++    cfg, hc = inspect["Config"], inspect["HostConfig"]
++    host = {k: hc[k] for k in ("PortBindings", "RestartPolicy", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig")}
++    if restart is not None:
++        host["RestartPolicy"] = restart
++    return {"Image": image, "Env": env if env is not None else cfg["Env"], "Cmd": cfg["Cmd"],
++            "Entrypoint": cfg.get("Entrypoint"), "User": cfg.get("User"), "ExposedPorts": cfg["ExposedPorts"],
++            "Labels": {**strip_image_labels(cfg.get("Labels")), **(labels or {})}, "HostConfig": host}
++
++
++def ensure_bak(target, inspect_path, log):
++    """二级回退前置检查：回退容器存在、是 1.1.1 镜像、处于停止状态；不存在则按旧容器 inspect 从 md-server:1.1.1 重建并核对。
++    任何检查不通过都抛异常——调用方此时还没有动当前容器。返回 'present' 或 'recreated'。"""
++    target.check_name(target.bak)
++    names = containers_by_name()
++    if target.bak in names:
++        bak = call("GET", f"{D}/containers/{target.bak}/json")
++        assert bak["Image"] == OLD_IMAGE_ID, f"{target.bak} 镜像 {bak['Image'][:19]} 不是 1.1.1"
++        assert not bak["State"]["Running"], f"{target.bak} 正在运行"
++        log(f"rollback pre-check: {target.bak} present, image {OLD_IMAGE_ID[:19]}, stopped")
++        return "present"
++    old = json.loads(pathlib.Path(inspect_path).read_text())
++    assert old["Image"] == OLD_IMAGE_ID, "旧容器 inspect 的镜像不是 1.1.1，拒绝据此重建"
++    image = call("GET", f"{D}/images/{OLD_IMAGE_TAG}/json")
++    assert image["Id"] == OLD_IMAGE_ID, f"{OLD_IMAGE_TAG} 镜像 ID {image['Id'][:19]} 不符"
++    spec = spec_from_inspect(old, OLD_IMAGE_TAG, labels={"md-server.recreated-from": old["Id"][:12]},
++                             restart={"Name": "no"})
++    created = call("POST", f"{D}/containers/create?name={target.bak}", spec)
++    bak = call("GET", f"{D}/containers/{created['Id']}/json")
++    assert bak["Image"] == OLD_IMAGE_ID and bak["Config"]["Env"] == old["Config"]["Env"]
++    for field in ("PortBindings", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig"):
++        assert bak["HostConfig"][field] == old["HostConfig"][field], field
++    log(f"rollback pre-check: {target.bak} was missing; recreated {created['Id'][:12]} from {OLD_IMAGE_TAG} "
++        f"with the old container's parameters (verified image, env, ports, memory, cpu, network, logging)")
++    return "recreated"
++
++
++def rollback(target, inspect_path, log):
++    """二级回退：先 ensure_bak（不通过则不动当前容器）→ 停并改名当前容器为 *-failed → 回退容器改名、恢复重启策略、启动 → 等健康。
++    回退容器 60 秒内不健康时，把刚停掉的容器放回原位并重新启动，然后报错（不让服务空着）。"""
++    guard()
++    cur_name = target.check_name(target.current)
++    cur = call("GET", f"{D}/containers/{cur_name}/json")
++    bak_status = ensure_bak(target, inspect_path, log)
++    restart = json.loads(pathlib.Path(inspect_path).read_text())["HostConfig"]["RestartPolicy"] or {"Name": "unless-stopped"}
++    failed = target.check_name(f"{target.current}-{int(time.time())}-failed")
++    t0 = time.time()
++    stopped = False
++    try:
++        call("POST", f"{D}/containers/{cur['Id']}/update", {"RestartPolicy": {"Name": "no"}})
++        call("POST", f"{D}/containers/{cur['Id']}/stop?t=15")
++        stopped = True
++        call("POST", f"{D}/containers/{cur['Id']}/rename?name={failed}")
++        call("POST", f"{D}/containers/{target.bak}/rename?name={cur_name}")
++        restored = call("GET", f"{D}/containers/{cur_name}/json")
++        call("POST", f"{D}/containers/{restored['Id']}/update", {"RestartPolicy": restart})
++        call("POST", f"{D}/containers/{restored['Id']}/start")
++        up = wait_health(target, 60)
++        if up is None:
++            raise SystemExit("1.1.1 container not healthy within 60s")
++    except BaseException as exc:
++        if stopped:
++            log(f"rollback: {exc}; putting the previous container back")
++            _put_back(target, cur, cur_name)
++            raise SystemExit(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}")
++        raise
++    result = {"bak_status": bak_status, "failed_container": failed, "restored_container_id": restored["Id"],
++              "health_ready_seconds": up, "outage_seconds": round(time.time() - t0, 1)}
++    log(f"rollback done: {result}")
++    return result
++
++
++def _put_back(target, cur, cur_name):
++    """回退失败时把原来的容器放回：占着名字的（回退容器）停掉、改回 *-bak，原容器改回原名、恢复重启策略并启动"""
++    names = containers_by_name()
++    holder = names.get(cur_name)
++    if holder and holder["Id"] != cur["Id"]:
++        call("POST", f"{D}/containers/{holder['Id']}/update", {"RestartPolicy": {"Name": "no"}})
++        call("POST", f"{D}/containers/{holder['Id']}/stop?t=15")
++        call("POST", f"{D}/containers/{holder['Id']}/rename?name={target.bak}")
++    if containers_by_name().get(cur_name, {}).get("Id") != cur["Id"]:
++        call("POST", f"{D}/containers/{cur['Id']}/rename?name={cur_name}")
++    call("POST", f"{D}/containers/{cur['Id']}/update", {"RestartPolicy": cur["HostConfig"]["RestartPolicy"]})
++    call("POST", f"{D}/containers/{cur['Id']}/start")
++
++
++def revert_after_failed_swap(target, old_id, inspect_path, log):
++    """execute_swap 中途失败时的自动回退：新容器已建 → rollback（含 ensure_bak）；新容器没建成 → 把回退容器放回原位启动。"""
++    names = containers_by_name()
++    if target.current in names and names[target.current]["Id"] != old_id:
++        return rollback(target, inspect_path, log)
++    if target.current not in names and target.bak in names:
++        call("POST", f"{D}/containers/{target.bak}/rename?name={target.current}")
++    restart = json.loads(pathlib.Path(inspect_path).read_text())["HostConfig"]["RestartPolicy"]
++    call("POST", f"{D}/containers/{old_id}/update", {"RestartPolicy": restart})
++    if not call("GET", f"{D}/containers/{old_id}/json")["State"]["Running"]:
++        call("POST", f"{D}/containers/{old_id}/start")
++    up = wait_health(target, 60)
++    log(f"revert: old container back in place, health {up}")
++    return {"reverted_in_place": True, "health_ready_seconds": up}
+diff --git a/evidence/1.2.0/tools/test_swaplib_offline.py b/evidence/1.2.0/tools/test_swaplib_offline.py
+new file mode 100644
+index 0000000..0c8bbae
+--- /dev/null
++++ b/evidence/1.2.0/tools/test_swaplib_offline.py
+@@ -0,0 +1,201 @@
++#!/usr/bin/env python3
++"""swaplib 回退逻辑的离线测试（假 Portainer，不联网、不需要 JWT）。覆盖 198 演练不便制造的失败分支：
++回退容器镜像不对 / 正在运行 → 不动当前容器；回退容器不存在 → 先重建再切换；回退后的 1.1.1 不健康 → 把原容器放回；
++两种模式的名字互不越界；复制标签时去掉镜像来源标签；固定期望 sha 与 dist-sha256.txt 一致。
++用法：python3 evidence/1.2.0/tools/test_swaplib_offline.py"""
++import copy
++import json
++import pathlib
++import sys
++import tempfile
++import types
++
++fake = types.ModuleType("pt_exp")
++fake.D = "/endpoints/3/docker"
++fake.demux = lambda raw: raw.decode() if isinstance(raw, bytes) else raw
++fake.guard = lambda: None
++fake.call = lambda *a, **k: (_ for _ in ()).throw(AssertionError("fake Portainer not installed"))
++sys.modules["pt_exp"] = fake
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
++import swaplib as S  # noqa: E402
++
++OLD, NEW = S.OLD_IMAGE_ID, "sha256:" + "1" * 64
++
++
++class FakeDocker:
++    def __init__(self, containers, healthy_images=(OLD, NEW)):
++        self.c = {cid: dict(v, Id=cid) for cid, v in containers.items()}
++        self.healthy_images = healthy_images
++        self.ops = []
++        self.seq = 0
++
++    def find(self, ref):
++        for cid, v in self.c.items():
++            if ref in (cid, v["Name"]):
++                return v
++        raise SystemExit(f"HTTP 404 {ref}")
++
++    def inspect(self, v):
++        return {"Id": v["Id"], "Image": v["Image"], "RestartCount": 0,
++                "State": {"Running": v["Running"]},
++                "Config": {"Env": v["Env"], "Cmd": ["md-server"], "Entrypoint": None, "User": "md-user",
++                           "ExposedPorts": {"8081/tcp": {}}, "Labels": copy.deepcopy(v["Labels"])},
++                "HostConfig": copy.deepcopy(v["HostConfig"])}
++
++    def call(self, method, path, body=None, **kw):
++        p = path.replace(fake.D, "")
++        self.ops.append((method, p))
++        if method == "GET" and p.startswith("/containers/json"):
++            return [{"Id": v["Id"], "Names": ["/" + v["Name"]]} for v in self.c.values()]
++        if method == "GET" and p.startswith("/images/"):
++            return {"Id": OLD}
++        if method == "GET" and p.endswith("/json"):
++            return self.inspect(self.find(p.split("/")[2]))
++        if method == "POST" and p.startswith("/containers/create"):
++            self.seq += 1
++            cid = f"new{self.seq}"
++            name = p.split("name=")[1]
++            image = OLD if body["Image"] == S.OLD_IMAGE_TAG else NEW
++            self.c[cid] = {"Id": cid, "Name": name, "Image": image, "Running": False, "Env": body["Env"],
++                           "Labels": body["Labels"], "HostConfig": body["HostConfig"]}
++            return {"Id": cid}
++        v = self.find(p.split("/")[2])
++        if p.endswith("/start"):
++            v["Running"] = True
++        elif "/stop" in p:
++            v["Running"] = False
++        elif "/rename" in p:
++            new = p.split("name=")[1]
++            assert all(o["Name"] != new for o in self.c.values()), f"name {new} taken"
++            v["Name"] = new
++        elif p.endswith("/update"):
++            v["HostConfig"]["RestartPolicy"] = body["RestartPolicy"]
++        return None
++
++    def running(self, name):
++        return next((v for v in self.c.values() if v["Name"] == name and v["Running"]), None)
++
++
++def install(fd, target):
++    S.call = fd.call
++    S.guard = lambda: None
++    S.wait_health = lambda t, limit=60: 1.0 if (v := fd.running(target.current)) and v["Image"] in fd.healthy_images else None
++
++
++HC = {"PortBindings": {"8081/tcp": [{"HostPort": "8081"}]}, "RestartPolicy": {"Name": "unless-stopped"},
++      "Memory": 512, "MemorySwap": 1024, "NanoCpus": 2, "NetworkMode": "bridge", "LogConfig": {"Type": "json-file"}}
++ENV = ["RUST_LOG=warn", "TZ=Asia/Shanghai", "PATH=/usr/bin"]
++
++
++def world(bak_image=OLD, bak_running=False, with_bak=True, names=("md-server", "md-server-1.1.1-bak")):
++    cs = {"cur": {"Name": names[0], "Image": NEW, "Running": True, "Env": ENV, "Labels": {}, "HostConfig": copy.deepcopy(HC)}}
++    if with_bak:
++        cs["bak"] = {"Name": names[1], "Image": bak_image, "Running": bak_running, "Env": ENV,
++                     "Labels": {}, "HostConfig": dict(copy.deepcopy(HC), RestartPolicy={"Name": "no"})}
++    return FakeDocker(cs)
++
++
++def inspect_file(tmp):
++    old = {"Id": "oldcontainer123", "Image": OLD, "Config": {"Env": ENV, "Cmd": ["md-server"], "Entrypoint": None,
++           "User": "md-user", "ExposedPorts": {"8081/tcp": {}},
++           "Labels": {"md-server.binary.sha256": "3ffa…", "org.opencontainers.image.revision": "a06fe20", "keep": "yes"}},
++           "HostConfig": copy.deepcopy(HC)}
++    path = pathlib.Path(tmp) / "old.json"
++    path.write_text(json.dumps(old))
++    return path
++
++
++results = {}
++logs = []
++with tempfile.TemporaryDirectory() as tmp:
++    insp = inspect_file(tmp)
++
++    fd = world(); install(fd, S.PROD)
++    r = S.rollback(S.PROD, insp, logs.append)
++    results["bak_present_normal_path"] = (r["bak_status"] == "present" and fd.running("md-server")["Image"] == OLD
++                                          and any(v["Name"].endswith("-failed") and v["Image"] == NEW for v in fd.c.values()))
++
++    for case, kwargs in {"bak_wrong_image_aborts_before_touching_current": {"bak_image": NEW},
++                         "bak_running_aborts_before_touching_current": {"bak_running": True}}.items():
++        fd = world(**kwargs); install(fd, S.PROD)
++        try:
++            S.rollback(S.PROD, insp, logs.append)
++            results[case] = False
++        except AssertionError:
++            results[case] = fd.c["cur"]["Running"] and fd.c["cur"]["Name"] == "md-server" and \
++                not any(m == "POST" and ("/stop" in p or "/rename" in p) for m, p in fd.ops)
++
++    fd = world(with_bak=False); install(fd, S.PROD)
++    r = S.rollback(S.PROD, insp, logs.append)
++    recreated = next(v for v in fd.c.values() if v["Id"].startswith("new"))
++    results["bak_missing_recreated_then_switched"] = (
++        r["bak_status"] == "recreated" and fd.running("md-server")["Id"] == recreated["Id"]
++        and recreated["Image"] == OLD and recreated["Env"] == ENV
++        and "md-server.binary.sha256" not in recreated["Labels"] and recreated["Labels"].get("keep") == "yes"
++        and recreated["HostConfig"]["RestartPolicy"] == {"Name": "unless-stopped"})
++    create_idx = next(i for i, (m, p) in enumerate(fd.ops) if p.startswith("/containers/create"))
++    stop_idx = next(i for i, (m, p) in enumerate(fd.ops) if "/stop" in p)
++    results["recreate_happens_before_current_is_stopped"] = create_idx < stop_idx
++
++    fd = world(); fd.healthy_images = (NEW,); install(fd, S.PROD)
++    try:
++        S.rollback(S.PROD, insp, logs.append)
++        results["unhealthy_111_puts_previous_back"] = False
++    except SystemExit:
++        cur = fd.c["cur"]
++        results["unhealthy_111_puts_previous_back"] = (cur["Running"] and cur["Name"] == "md-server"
++                                                       and cur["HostConfig"]["RestartPolicy"] == {"Name": "unless-stopped"}
++                                                       and fd.c["bak"]["Name"] == "md-server-1.1.1-bak"
++                                                       and not fd.c["bak"]["Running"])
++
++    fd = world(names=("md-exp-120-drill", "md-exp-120-drill-bak")); install(fd, S.DRILL)
++    r = S.rollback(S.DRILL, insp, logs.append)
++    results["drill_mode_uses_only_drill_names"] = (r["failed_container"].startswith("md-exp-120-drill-")
++                                                   and all(v["Name"].startswith("md-exp-120-drill") for v in fd.c.values()))
++
++def refused(target, name):
++    try:
++        target.check_name(name)
++        return False
++    except AssertionError:
++        return True
++
++
++results["prod_refuses_drill_names"] = all(refused(S.PROD, n) for n in ("md-exp-120-drill", "md-exp-120-drill-bak", "md-exp-120-old"))
++results["drill_refuses_prod_names"] = all(refused(S.DRILL, n) for n in ("md-server", "md-server-1.1.1-bak", "md-server-1-failed"))
++results["prod_allows_its_names"] = not any(refused(S.PROD, n) for n in ("md-server", "md-server-1.1.1-bak", "md-server-1793-failed"))
++results["strip_image_labels"] = S.strip_image_labels({"md-server.binary.sha256": "x", "md-server.config.sha256": "y",
++    "org.opencontainers.image.revision": "z", "purpose": "p"}) == {"purpose": "p"}
++results["expected_sha_matches_dist_record"] = S.expected_sha() == "cbc6b0531b833f38fa5e4666be286d24d01ad169230ba855c8a5f126aed887bf"
++
++# 10 分钟验收的订阅判据，用 198 金丝雀复跑（short：闲置 2 分钟、确有闲置退订）的真实数据
++import check_after_swap as C  # noqa: E402
++
++RERUN = S.ROOT / "evidence/1.2.0/nas-198/canary-rerun"
++before = json.loads((RERUN / "subscriptions.before.json").read_text())
++final = json.loads((RERUN / "short.subscriptions.final.json").read_text())
++lines = (RERUN / "short.container.log").read_text().splitlines()
++metrics = (RERUN / "short.metrics.final.txt").read_text()
++cfg = RERUN / "short.config.yaml"
++real = C.judge_subscriptions(before, final, lines, metrics, cfg)
++results["ten_minute_real_canary_data_passes"] = (real["config_subscriptions_present"]
++                                                 and real["missing_runtime_explained_by_idle_unsubscribe"]
++                                                 and len(real["missing_runtime"]) > 0)
++idle_lines = [l for l in lines if "idle-unsubscribed" in l]
++dropped = C.judge_subscriptions(before, final, [l for l in lines if l != idle_lines[0]], metrics, cfg)
++results["ten_minute_missing_log_line_fails"] = (not dropped["missing_runtime_explained_by_idle_unsubscribe"]
++                                                and len(dropped["missing_runtime_unexplained"]) == 1)
++low = C.judge_subscriptions(before, final, lines, metrics.replace(
++    f"md_runtime_subscriptions_idle_unsubscribed_total {real['idle_unsubscribed_total']:g}",
++    "md_runtime_subscriptions_idle_unsubscribed_total 0"), cfg)
++results["ten_minute_counter_below_missing_fails"] = not low["missing_runtime_explained_by_idle_unsubscribe"]
++cfg_keys = C.config_keys(cfg)
++without_config = [s for s in final
++                  if C.key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) != sorted(cfg_keys)[0]]
++results["ten_minute_missing_config_subscription_fails"] = not C.judge_subscriptions(
++    before, without_config, lines, metrics, cfg)["config_subscriptions_present"]
++print(json.dumps({"real_canary_missing_runtime": real["missing_runtime"],
++                  "idle_unsubscribed_total": real["idle_unsubscribed_total"]}), file=sys.stderr)
++
++print(json.dumps(results, indent=1))
++sys.exit(0 if all(results.values()) else 1)

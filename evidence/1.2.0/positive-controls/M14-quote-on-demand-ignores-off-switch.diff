@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index fba60a9..bca89c5 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -744,7 +744,7 @@ impl RuntimeSubscriptions {
+             if subscribed.contains_key(&k) || !planned.insert(k.clone()) {
+                 continue;
+             }
+-            if k.data_type == DataType::Quote && !s.on_demand_quote {
++            if false && k.data_type == DataType::Quote {
+                 debug!("on-demand subscribe skipped, on_demand_quote=false: {}", k);
+                 continue;
+             }

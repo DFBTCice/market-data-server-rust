@@ -1,0 +1,12 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index fba60a9..39afc56 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -604,7 +604,6 @@ impl RuntimeSubscriptions {
+             );
+         } else if s.enabled && old.is_some_and(|o| o != s) {
+             info!("runtime subscriptions: settings changed ({})", describe(s));
+-            self.nudge.notify_one();
+         }
+     }
+ 

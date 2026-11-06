@@ -1,0 +1,13 @@
+2026-11-06T16:30:29.080Z t=0.1s oms subscribe tick.binance.BNBUSDT,tick.okx.BNB-USDT-SWAP
+2026-11-06T16:30:29.086Z t=0.1s POST {"exchange":"binance","type":"TICK","symbols":["SOLUSDT"]} -> 200 {"success":true}
+2026-11-06T16:30:29.099Z t=0.1s POST {"exchange":"binance","type":"KLINE","symbols":["SOLUSDT"],"interval":"1m"} -> 200 {"success":true}
+2026-11-06T16:30:29.100Z t=0.1s botd subscribe tick.binance.SOLUSDT,kline.1m.binance.SOLUSDT
+2026-11-06T16:30:49.271Z t=20.3s quote subscribe quote.binance.BTCUSDT,quote.binance.ETHUSDT,quote.okx.BTC-USDT-SWAP,quote.okx.ETH-USDT-SWAP,quote.binance.BNBUSDT,quote.okx.BNB-USDT-SWAP
+2026-11-06T16:30:59.662Z t=30.7s oms subscribe tick.okx.SOL-USDT-SWAP
+2026-11-06T16:31:30.160Z t=61.2s botd unsubscribe tick.binance.SOLUSDT,kline.1m.binance.SOLUSDT
+2026-11-06T16:31:30.249Z t=61.2s DELETE {"exchange":"binance","type":"KLINE","symbols":["SOLUSDT"],"interval":"1m"} -> 200 {"success":true}
+2026-11-06T16:42:23.301Z t=714.3s oms subscribe tick.binance.SOLUSDT
+2026-11-06T16:45:33.406Z t=904.4s SUMMARY pass=true {"oms_topics_never_unsubscribed":true,"config_subscriptions_kept":true,"botd_kline_deleted_and_not_readded":true,"botd_tick_unsubscribed_after_idle":true,"botd_tick_not_readded_before_resubscribe":true,"restored_runtime_without_receivers_unsubscribed":true,"oms_resubscribe_restored_upstream":true,"oms_resubscribe_no_duplicates":true,"never_registered_tick_subscribed_on_demand":true,"quote_outside_config_not_subscribed":true,"quote_in_config_still_pushed":true,"quote_rate_not_jumped":true}
+2026-11-06T16:45:33.417Z t=904.4s botd closed
+2026-11-06T16:45:33.419Z t=904.4s oms closed
+2026-11-06T16:45:33.419Z t=904.4s quote closed

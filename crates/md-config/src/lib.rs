@@ -13,6 +13,72 @@ pub struct Config {
     pub processor: ProcessorConfig,
     pub api_gateway: ApiGatewayConfig,
     pub admin_server: AdminServerConfig,
+    /// 运行期订阅的闲置退订与按需补订（1.2.0 新增，整段可选；缺省关闭，关闭时行为与 1.1.1 相同）
+    #[serde(default)]
+    pub runtime_subscriptions: RuntimeSubscriptionsConfig,
+}
+
+/// 运行期订阅管理（1.2.0）。只作用于 `POST /api/v1/subscriptions` 等运行期登记的订阅；
+/// 配置名单（`subscribe_ticks` / `subscribe_klines` / `subscribe_quotes`）里的订阅永不自动退订。
+///
+/// 闲置退订与按需补订共用 `idle_unsubscribe` 一个开关：只退不补会让后来的接收方拿不到数据。
+/// 键名写错直接报错（`deny_unknown_fields`），避免开关因拼写错误而静默失效。
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct RuntimeSubscriptionsConfig {
+    /// 总开关，默认 false
+    #[serde(default)]
+    pub idle_unsubscribe: bool,
+    /// 连续多少分钟没有接收方才退订上游（≥ 1）
+    #[serde(default = "default_runtime_idle_minutes")]
+    pub idle_minutes: u64,
+    /// 闲置检查周期（秒，≥ 1）
+    #[serde(default = "default_runtime_check_interval_seconds")]
+    pub check_interval_seconds: u64,
+    /// 启动（或开关打开）后多少分钟内不退订，给消费者重连的时间
+    #[serde(default = "default_runtime_startup_grace_minutes")]
+    pub startup_grace_minutes: u64,
+    /// 运行期订阅总数达到该值后不再按需补订（≥ 1；POST 登记不受限）
+    #[serde(default = "default_runtime_max_subscriptions")]
+    pub max_runtime_subscriptions: usize,
+    /// QUOTE（报价）是否参与按需补订，默认 false：报价按"一次一个币对、各观察 24 小时"经配置名单扩量，
+    /// 关闭时订阅 `quote.*` 话题不会补订 QUOTE。POST 登记的 QUOTE 不受影响，照常参与闲置退订。
+    #[serde(default)]
+    pub on_demand_quote: bool,
+}
+
+pub const DEFAULT_RUNTIME_IDLE_MINUTES: u64 = 10;
+pub const DEFAULT_RUNTIME_CHECK_INTERVAL_SECONDS: u64 = 60;
+pub const DEFAULT_RUNTIME_STARTUP_GRACE_MINUTES: u64 = 10;
+pub const DEFAULT_RUNTIME_MAX_SUBSCRIPTIONS: usize = 200;
+
+fn default_runtime_idle_minutes() -> u64 {
+    DEFAULT_RUNTIME_IDLE_MINUTES
+}
+
+fn default_runtime_check_interval_seconds() -> u64 {
+    DEFAULT_RUNTIME_CHECK_INTERVAL_SECONDS
+}
+
+fn default_runtime_startup_grace_minutes() -> u64 {
+    DEFAULT_RUNTIME_STARTUP_GRACE_MINUTES
+}
+
+fn default_runtime_max_subscriptions() -> usize {
+    DEFAULT_RUNTIME_MAX_SUBSCRIPTIONS
+}
+
+impl Default for RuntimeSubscriptionsConfig {
+    fn default() -> Self {
+        Self {
+            idle_unsubscribe: false,
+            idle_minutes: DEFAULT_RUNTIME_IDLE_MINUTES,
+            check_interval_seconds: DEFAULT_RUNTIME_CHECK_INTERVAL_SECONDS,
+            startup_grace_minutes: DEFAULT_RUNTIME_STARTUP_GRACE_MINUTES,
+            max_runtime_subscriptions: DEFAULT_RUNTIME_MAX_SUBSCRIPTIONS,
+            on_demand_quote: false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -369,6 +435,22 @@ fn validate(cfg: &Config) -> Result<(), ConfigError> {
                 "okx 连接器已启用但未配置 rest_base_url".into(),
             ));
         }
+    }
+    let rs = &cfg.runtime_subscriptions;
+    if rs.idle_minutes == 0 {
+        return Err(ConfigError::ValidationError(
+            "runtime_subscriptions.idle_minutes 必须 >= 1".into(),
+        ));
+    }
+    if rs.check_interval_seconds == 0 {
+        return Err(ConfigError::ValidationError(
+            "runtime_subscriptions.check_interval_seconds 必须 >= 1".into(),
+        ));
+    }
+    if rs.max_runtime_subscriptions == 0 {
+        return Err(ConfigError::ValidationError(
+            "runtime_subscriptions.max_runtime_subscriptions 必须 >= 1".into(),
+        ));
     }
     Ok(())
 }
@@ -819,5 +901,90 @@ processor:
             // load_config 保留原写法；统一成标准写法由 md-server 的"生效配置"负责
             assert_eq!(cfg.log_level, raw);
         }
+    }
+
+    // ---- 1.2.0 runtime_subscriptions ----
+
+    fn sample_with_runtime(section: &str) -> String {
+        let base = std::fs::read_to_string("../../config.yaml").unwrap();
+        format!("{base}\nruntime_subscriptions:\n{section}\n")
+    }
+
+    /// 旧配置文件（无 runtime_subscriptions 段）原样可用，开关默认关闭，其余取默认值
+    #[test]
+    fn legacy_config_without_runtime_section_defaults_off() {
+        let raw = std::fs::read_to_string("../../config.yaml").unwrap();
+        assert!(!raw.contains("runtime_subscriptions"));
+        let cfg = load_config("../../config.yaml").unwrap();
+        assert_eq!(
+            cfg.runtime_subscriptions,
+            RuntimeSubscriptionsConfig::default()
+        );
+        assert!(!cfg.runtime_subscriptions.idle_unsubscribe);
+        assert_eq!(cfg.runtime_subscriptions.idle_minutes, 10);
+        assert_eq!(cfg.runtime_subscriptions.check_interval_seconds, 60);
+        assert_eq!(cfg.runtime_subscriptions.startup_grace_minutes, 10);
+        assert_eq!(cfg.runtime_subscriptions.max_runtime_subscriptions, 200);
+        assert!(!cfg.runtime_subscriptions.on_demand_quote);
+    }
+
+    #[test]
+    fn on_demand_quote_defaults_off_and_parses() {
+        let cfg = load_config_from_str(&sample_with_runtime("  idle_unsubscribe: true")).unwrap();
+        assert!(!cfg.runtime_subscriptions.on_demand_quote);
+        let cfg = load_config_from_str(&sample_with_runtime(
+            "  idle_unsubscribe: true\n  on_demand_quote: true",
+        ))
+        .unwrap();
+        assert!(cfg.runtime_subscriptions.on_demand_quote);
+    }
+
+    #[test]
+    fn runtime_section_parses_and_fills_missing_keys() {
+        let cfg = load_config_from_str(&sample_with_runtime(
+            "  idle_unsubscribe: true\n  idle_minutes: 2\n  check_interval_seconds: 10",
+        ))
+        .unwrap();
+        let rs = &cfg.runtime_subscriptions;
+        assert!(rs.idle_unsubscribe);
+        assert_eq!(rs.idle_minutes, 2);
+        assert_eq!(rs.check_interval_seconds, 10);
+        assert_eq!(
+            rs.startup_grace_minutes,
+            DEFAULT_RUNTIME_STARTUP_GRACE_MINUTES
+        );
+        assert_eq!(
+            rs.max_runtime_subscriptions,
+            DEFAULT_RUNTIME_MAX_SUBSCRIPTIONS
+        );
+    }
+
+    #[test]
+    fn runtime_section_rejects_misspelled_key() {
+        let err = load_config_from_str(&sample_with_runtime("  idle_unsubcribe: true"))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("idle_unsubcribe"), "error: {err}");
+    }
+
+    #[test]
+    fn runtime_section_rejects_zero_values() {
+        for (key, line) in [
+            ("idle_minutes", "  idle_minutes: 0"),
+            ("check_interval_seconds", "  check_interval_seconds: 0"),
+            (
+                "max_runtime_subscriptions",
+                "  max_runtime_subscriptions: 0",
+            ),
+        ] {
+            let err = load_config_from_str(&sample_with_runtime(line)).unwrap_err();
+            assert!(
+                matches!(err, ConfigError::ValidationError(_)) && err.to_string().contains(key),
+                "{key}: {err}"
+            );
+        }
+        // 保护期允许为 0
+        let cfg = load_config_from_str(&sample_with_runtime("  startup_grace_minutes: 0")).unwrap();
+        assert_eq!(cfg.runtime_subscriptions.startup_grace_minutes, 0);
     }
 }

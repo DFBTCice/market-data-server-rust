@@ -31,6 +31,18 @@ pub struct SubscribeErrorInfo {
     pub stream: String,
 }
 
+/// 上游明确拒绝了某个订阅目标（1.2.0）：由连接器把交易所的订阅错误对应回 `desired_subs` 里的目标后上报，
+/// 供运行期订阅管理缓存失败、退避。目前只有 OKX 会明确拒绝（错误码 60018 / 60012）；
+/// 币安对不存在的币对、错误的 K 线级别都应答 `{"result":null}`，不会产生拒绝。
+#[derive(Debug, Clone)]
+pub struct SubscriptionRejected {
+    /// 适配器名，仅用于日志（OKX Business 连接器的适配器名也是 `okx`，与 connectors 映射的键不一定相同）
+    pub connector: String,
+    pub target: SubscriptionTarget,
+    pub code: String,
+    pub message: String,
+}
+
 /// 订阅目标 -- 对标 Go 版 common.SubscriptionTarget
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SubscriptionTarget {
@@ -102,6 +114,11 @@ pub trait Connector: Send + Sync {
         targets: Vec<SubscriptionTarget>,
     ) -> Result<(), ConnectorError>;
     fn current_subscriptions(&self) -> Vec<SubscriptionTarget>;
+
+    /// 与 `current_subscriptions` 相同，但等待锁而不是在锁竞争时返回空列表（1.2.0，运行期订阅管理使用）
+    async fn subscriptions_snapshot(&self) -> Vec<SubscriptionTarget> {
+        self.current_subscriptions()
+    }
 }
 
 /// 交易所适配器 trait -- 定义交易所特定逻辑

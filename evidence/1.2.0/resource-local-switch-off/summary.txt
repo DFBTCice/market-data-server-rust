@@ -1,0 +1,2 @@
+old: samples=18 rss_mib mean=11.5 max=15.5 cpu_pct mean=1.58 max=4.20 external_established_conns=[5] cpu_time_end=0:02.99
+new: samples=18 rss_mib mean=11.6 max=15.8 cpu_pct mean=1.38 max=2.70 external_established_conns=[5] cpu_time_end=0:02.96

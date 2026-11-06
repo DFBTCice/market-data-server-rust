@@ -1,0 +1,24 @@
+# captured_at_utc=2026-11-06T13:37:31Z target=http://192.168.1.198:8081
+## GET /health
+{"service":"md-server","status":"ok"}
+## /metrics 关键项
+md_ws_active_clients 2
+md_ws_subscriptions_active 13
+md_jemalloc_allocated_bytes 12154680
+md_jemalloc_active_bytes 13217792
+md_jemalloc_resident_bytes 16347136
+md_jemalloc_retained_bytes 18587648
+md_jemalloc_mapped_bytes 34365440
+md_jemalloc_metadata_bytes 3015392
+process_resident_memory_bytes 100192256
+process_start_time_seconds 1792785202
+## process_start_time_seconds 换算
+2026-10-23T19:53:22+00:00
+## evidence/1.1.1 换版记录（从运行容器读回的二进制 sha）
+{'started_at_utc': '2026-10-23T19:53:15.074444+00:00', 'new_image_id': 'sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010', 'binary_sha256': '3ffa127752ae8c13fc7646b5c75f8d3f1fa1c0b915b2bff596c1c93328c6c79d'}
+## evidence/1.1.1 产物清单
+commit: a06fe2095e8fc58bff1e038a594b25e7002aff1b dirty=0
+SOURCE_DATE_EPOCH=1792193713
+## GET /api/v1/subscriptions
+[{"exchange":"okx","data_type":3,"symbol":"BNB-USDT-SWAP"},{"exchange":"binance","data_type":3,"symbol":"BNBUSDT"},{"exchange":"binance","data_type":2,"symbol":"BTCUSDT","kline_interval":"5m"},{"exchange":"binance","data_type":1,"symbol":"SNDKUSDT"},{"exchange":"binance","data_type":2,"symbol":"ETHUSDT","kline_interval":"5m"},{"exchange":"binance","data_type":1,"symbol":"BTCUSDT"},{"exchange":"binance","data_type":1,"symbol":"BNBUSDT"},{"exchange":"binance","data_type":1,"symbol":"ETHUSDT"},{"exchange":"okx","data_type":2,"symbol":"BTC-USDT-SWAP","kline_interval":"5m"},{"exchange":"okx","data_type":2,"symbol":"ETH-USDT-SWAP","kline_interval":"5m"},{"exchange":"okx","data_type":1,"symbol":"ETH-USDT-SWAP"},{"exchange":"okx","data_type":1,"symbol":"BTC-USDT-SWAP"},{"exchange":"okx","data_type":1,"symbol":"BNB-USDT-SWAP"}]
+total 13 {('KLINE', 'binance'): 2, ('KLINE', 'okx'): 2, ('QUOTE', 'binance'): 1, ('QUOTE', 'okx'): 1, ('TICK', 'binance'): 4, ('TICK', 'okx'): 3}

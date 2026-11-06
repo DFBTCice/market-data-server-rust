@@ -1,0 +1,54 @@
+{
+  "Image": "md-server:1.2.0",
+  "Env": [
+    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RUST_LOG=warn,md_runtime_subs=info",
+    "TZ=Asia/Shanghai"
+  ],
+  "Cmd": [
+    "md-server",
+    "--config",
+    "/etc/md-server/config.yaml"
+  ],
+  "Entrypoint": [],
+  "User": "md-user",
+  "ExposedPorts": {
+    "50051/tcp": {},
+    "8081/tcp": {}
+  },
+  "Labels": {
+    "md-server.replaced": "5d6996ca9dc0",
+    "md-server.version": "1.2.0"
+  },
+  "HostConfig": {
+    "PortBindings": {
+      "50051/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "50051"
+        }
+      ],
+      "8081/tcp": [
+        {
+          "HostIp": "",
+          "HostPort": "8081"
+        }
+      ]
+    },
+    "RestartPolicy": {
+      "MaximumRetryCount": 0,
+      "Name": "unless-stopped"
+    },
+    "Memory": 536870912,
+    "MemorySwap": 1073741824,
+    "NanoCpus": 2000000000,
+    "NetworkMode": "bridge",
+    "LogConfig": {
+      "Config": {
+        "max-file": "5",
+        "max-size": "100m"
+      },
+      "Type": "json-file"
+    }
+  }
+}

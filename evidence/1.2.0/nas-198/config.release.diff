@@ -1,0 +1,15 @@
+--- ../../1.1.1/final-artifact/config.final.yaml	2026-10-24 01:31:19
++++ config.release.yaml	2026-11-06 23:11:55
+@@ -72,3 +72,12 @@
+   ws_ping_period: "30s"
+   ws_write_wait: "10s"
+   ws_max_message_size: 1024
++
++# 1.2.0 运行期订阅闲置退订与按需补订（业务方 2026-11-06 决定：开关打开、报价补订关闭）
++runtime_subscriptions:
++  idle_unsubscribe: true
++  idle_minutes: 10
++  check_interval_seconds: 60
++  startup_grace_minutes: 10
++  max_runtime_subscriptions: 200
++  on_demand_quote: false

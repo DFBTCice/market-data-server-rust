@@ -1,0 +1,8 @@
+2026-11-06T14:12:56.590155Z  INFO md_runtime_subs: runtime subscriptions: idle unsubscribe and on-demand subscribe ENABLED (idle_minutes=2, check_interval_seconds=10, startup_grace_minutes=1, max_runtime_subscriptions=200)
+2026-11-06T14:13:36.660020Z  INFO md_runtime_subs: runtime subscription added on demand: exchange=okx type=TICK symbol=SOL-USDT-SWAP interval=- receivers=1 connector=okx
+2026-11-06T14:15:06.838225Z  INFO md_runtime_subs: runtime subscription idle-unsubscribed: exchange=binance type=TICK symbol=SNDKUSDT interval=- idle=2m00s connector=binance
+2026-11-06T14:16:46.840966Z  INFO md_runtime_subs: runtime subscription idle-unsubscribed: exchange=binance type=KLINE symbol=SOLUSDT interval=1m idle=2m10s connector=binance
+2026-11-06T14:16:46.841928Z  INFO md_runtime_subs: runtime subscription idle-unsubscribed: exchange=binance type=TICK symbol=SOLUSDT interval=- idle=2m10s connector=binance
+2026-11-06T14:16:51.925789Z  INFO md_runtime_subs: runtime subscription added on demand: exchange=binance type=TICK symbol=SOLUSDT interval=- receivers=1 connector=binance
+2026-11-06T14:19:07.821142Z  INFO md_runtime_subs: runtime subscriptions: idle unsubscribe and on-demand subscribe DISABLED (current subscriptions are kept as they are)
+2026-11-06T14:19:09.974256Z  INFO md_runtime_subs: runtime subscriptions: idle unsubscribe and on-demand subscribe ENABLED (idle_minutes=2, check_interval_seconds=10, startup_grace_minutes=1, max_runtime_subscriptions=200)

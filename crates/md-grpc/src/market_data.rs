@@ -51,7 +51,13 @@ impl MarketDataService for MarketDataServiceImpl {
             let topic_for_metric = topic.clone();
             tokio::spawn(async move {
                 loop {
-                    match sub.rx.recv().await {
+                    // 客户端断开即释放接收端（1.2.0）：否则要等下一条事件写失败才发现，
+                    // 没有成交的 topic 会一直被已断开的流占着，运行期订阅永远判不成闲置
+                    let received = tokio::select! {
+                        r = sub.rx.recv() => r,
+                        _ = tx.closed() => break,
+                    };
+                    match received {
                         Ok(BroadcastEvent::Tick(tick, emit_at)) => {
                             let proto_tick = tick_to_proto(&tick);
                             if tx.send(Ok(proto_tick)).await.is_err() {
@@ -123,7 +129,11 @@ impl MarketDataService for MarketDataServiceImpl {
             let topic_for_metric = topic.clone();
             tokio::spawn(async move {
                 loop {
-                    match sub.rx.recv().await {
+                    let received = tokio::select! {
+                        r = sub.rx.recv() => r,
+                        _ = tx.closed() => break,
+                    };
+                    match received {
                         Ok(BroadcastEvent::Kline(kline, emit_at)) => {
                             let proto_kline = kline_to_proto(&kline);
                             if tx.send(Ok(proto_kline)).await.is_err() {
@@ -396,6 +406,58 @@ mod tests {
 
         assert_eq!(tick.exchange, "binance");
         assert_eq!(tick.price, "67000.50");
+    }
+
+    async fn wait_receivers(proc: &Processor, topic: &str, want: usize) -> usize {
+        let deadline = tokio::time::Instant::now() + std::time::Duration::from_secs(2);
+        loop {
+            let n = proc.receiver_count(topic);
+            if n == want || tokio::time::Instant::now() >= deadline {
+                return n;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+    }
+
+    /// 1.2.0：gRPC 流是接收方（计入 receiver_count、触发新接收端信号）；客户端断开后不等事件即释放
+    #[tokio::test]
+    async fn grpc_stream_counts_as_receiver_and_releases_on_disconnect() {
+        let proc = make_processor();
+        proc.enable_usage_signals();
+        let svc = MarketDataServiceImpl::new(proc.clone());
+
+        let ticks = svc
+            .subscribe_ticks(Request::new(SubscriptionRequest {
+                exchange: "okx".into(),
+                symbols: vec!["SOL-USDT-SWAP".into()],
+                kline_interval: "".into(),
+            }))
+            .await
+            .unwrap()
+            .into_inner();
+        let klines = svc
+            .subscribe_klines(Request::new(SubscriptionRequest {
+                exchange: "binance".into(),
+                symbols: vec!["SOLUSDT".into()],
+                kline_interval: "5m".into(),
+            }))
+            .await
+            .unwrap()
+            .into_inner();
+        assert_eq!(proc.receiver_count("tick.okx.SOL-USDT-SWAP"), 1);
+        assert_eq!(proc.receiver_count("kline.5m.binance.SOLUSDT"), 1);
+        let signals = proc.take_usage_signals();
+        assert!(signals.receivers.contains_key("tick.okx.SOL-USDT-SWAP"));
+        assert!(signals.receivers.contains_key("kline.5m.binance.SOLUSDT"));
+
+        // 不发送任何事件，只断开客户端
+        drop(ticks);
+        drop(klines);
+        assert_eq!(wait_receivers(&proc, "tick.okx.SOL-USDT-SWAP", 0).await, 0);
+        assert_eq!(
+            wait_receivers(&proc, "kline.5m.binance.SOLUSDT", 0).await,
+            0
+        );
     }
 
     #[tokio::test]

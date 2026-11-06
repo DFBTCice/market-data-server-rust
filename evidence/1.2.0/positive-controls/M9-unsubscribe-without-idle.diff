@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index fba60a9..b0fb0c7 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -679,7 +679,7 @@ impl RuntimeSubscriptions {
+                     .max()
+                     .unwrap_or(absent);
+                 let idle_for = now.saturating_duration_since(idle_start);
+-                if idle_for >= s.idle {
++                if idle_for >= Duration::ZERO {
+                     idle_candidates.push((k.clone(), idle_for));
+                 }
+             }

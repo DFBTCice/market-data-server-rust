@@ -1,0 +1,6 @@
+baseline=14 current=10 missing(TICK/KLINE)=4
+200 {"exchange":"binance","type":"TICK","symbols":["SNDKUSDT"]} {"success":true}
+200 {"exchange":"binance","type":"KLINE","symbols":["SNDKUSDT"],"interval":"30m"} {"success":true}
+200 {"exchange":"binance","type":"TICK","symbols":["BNBUSDT"]} {"success":true}
+200 {"exchange":"okx","type":"TICK","symbols":["BNB-USDT-SWAP"]} {"success":true}
+after: total=14 stillMissing=0 extraVsBaseline=0
