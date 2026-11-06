@@ -1,10 +1,11 @@
 use dashmap::DashMap;
 use md_domain::topic;
 use md_domain::types::{Kline, Quote, Tick};
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::{broadcast, mpsc, Notify};
 use tracing::{info, warn};
 use uuid::Uuid;
 
@@ -553,6 +554,36 @@ impl BroadcastEvent {
     }
 }
 
+// ---- 使用信号（1.2.0）----
+
+/// 运行期订阅管理所需的"有人在用"信号：新接收端登记（subscribe）与只读查询（REST latest）。
+///
+/// 默认不启用：开关关闭时 `subscribe` / `note_read` 只多一次原子读，不记录任何东西。
+/// 两张表都以 topic 为键、只保留最近一次时间，规模不超过被访问过的 topic 数，由消费方定期取走清空。
+#[derive(Default)]
+struct UsageSignals {
+    enabled: AtomicBool,
+    receivers: std::sync::Mutex<HashMap<String, Instant>>,
+    reads: std::sync::Mutex<HashMap<String, Instant>>,
+    notify: Notify,
+}
+
+/// 一次取走的使用信号：topic → 该周期内最近一次发生的时间
+#[derive(Debug, Default)]
+pub struct UsageSnapshot {
+    /// 新接收端登记（Gateway WS / Legacy WS / gRPC 的 subscribe）
+    pub receivers: HashMap<String, Instant>,
+    /// 只读查询（REST latest）
+    pub reads: HashMap<String, Instant>,
+}
+
+impl UsageSignals {
+    fn record(map: &std::sync::Mutex<HashMap<String, Instant>>, topic: &str) {
+        let mut m = map.lock().unwrap_or_else(|e| e.into_inner());
+        m.insert(topic.to_string(), Instant::now());
+    }
+}
+
 // ---- Processor ----
 
 /// quote 入口 channel 默认容量（与 md-config 的 `processor.quote_channel_buffer` 默认值一致）
@@ -608,6 +639,8 @@ pub struct Processor {
     shutdown_tx: broadcast::Sender<()>,
     /// broadcast channel 容量
     broadcast_capacity: usize,
+    /// 运行期订阅管理的使用信号（1.2.0，默认不启用）
+    usage: UsageSignals,
 }
 
 use tokio::sync::Mutex;
@@ -658,6 +691,7 @@ impl Processor {
             metrics: Arc::new(ProcessorMetrics::default()),
             shutdown_tx,
             broadcast_capacity,
+            usage: UsageSignals::default(),
         }
     }
 
@@ -692,7 +726,62 @@ impl Processor {
 
         let id = Uuid::new_v4().to_string();
         let rx = tx.subscribe();
+        if self.usage.enabled.load(Ordering::Relaxed) {
+            UsageSignals::record(&self.usage.receivers, topic);
+            self.usage.notify.notify_one();
+        }
         Subscriber { id, rx }
+    }
+
+    /// 该 topic 当前的接收端数量（Gateway WS、Legacy WS、gRPC 流合计）
+    pub fn receiver_count(&self, topic: &str) -> usize {
+        self.broadcasters
+            .get(topic)
+            .map(|tx| tx.receiver_count())
+            .unwrap_or(0)
+    }
+
+    /// 当前至少有一个接收端的全部 topic
+    pub fn topics_with_receivers(&self) -> Vec<String> {
+        self.broadcasters
+            .iter()
+            .filter(|e| e.value().receiver_count() > 0)
+            .map(|e| e.key().clone())
+            .collect()
+    }
+
+    /// 开始收集使用信号（运行期订阅管理开关打开时调用）
+    pub fn enable_usage_signals(&self) {
+        self.usage.enabled.store(true, Ordering::Relaxed);
+    }
+
+    /// 停止收集并丢弃尚未取走的信号
+    pub fn disable_usage_signals(&self) {
+        self.usage.enabled.store(false, Ordering::Relaxed);
+        drop(self.take_usage_signals());
+    }
+
+    /// 记录一次只读查询（REST latest）；未启用时不做任何事
+    pub fn note_read(&self, topic: &str) {
+        if self.usage.enabled.load(Ordering::Relaxed) {
+            UsageSignals::record(&self.usage.reads, topic);
+        }
+    }
+
+    /// 取走自上次以来的使用信号
+    pub fn take_usage_signals(&self) -> UsageSnapshot {
+        let take = |m: &std::sync::Mutex<HashMap<String, Instant>>| {
+            std::mem::take(&mut *m.lock().unwrap_or_else(|e| e.into_inner()))
+        };
+        UsageSnapshot {
+            receivers: take(&self.usage.receivers),
+            reads: take(&self.usage.reads),
+        }
+    }
+
+    /// 等待下一次新接收端登记（没有等待者时通知会保留一次，不会丢失）
+    pub async fn usage_signaled(&self) {
+        self.usage.notify.notified().await;
     }
 
     /// 获取最新 Tick
@@ -1486,6 +1575,64 @@ mod tests {
         // 不污染 tick/kline 计数
         assert_eq!(snap.ws_messages_sent_tick, 0);
         assert_eq!(snap.broadcast_lagged_tick, 0);
+    }
+}
+
+#[cfg(test)]
+mod usage_signal_tests {
+    use super::*;
+
+    #[test]
+    fn disabled_by_default_records_nothing() {
+        let p = Processor::new(10, 10);
+        let _sub = p.subscribe("tick.binance.BTCUSDT");
+        p.note_read("tick.binance.BTCUSDT");
+        let s = p.take_usage_signals();
+        assert!(s.receivers.is_empty() && s.reads.is_empty());
+    }
+
+    #[test]
+    fn enabled_records_receivers_and_reads_then_take_clears() {
+        let p = Processor::new(10, 10);
+        p.enable_usage_signals();
+        let _a = p.subscribe("tick.binance.BTCUSDT");
+        p.note_read("kline.1m.okx.BTC-USDT-SWAP");
+        let s = p.take_usage_signals();
+        assert!(s.receivers.contains_key("tick.binance.BTCUSDT"));
+        assert!(s.reads.contains_key("kline.1m.okx.BTC-USDT-SWAP"));
+        let again = p.take_usage_signals();
+        assert!(again.receivers.is_empty() && again.reads.is_empty());
+
+        p.disable_usage_signals();
+        let _b = p.subscribe("tick.binance.ETHUSDT");
+        assert!(p.take_usage_signals().receivers.is_empty());
+    }
+
+    #[test]
+    fn receiver_count_follows_subscribers() {
+        let p = Processor::new(10, 10);
+        assert_eq!(p.receiver_count("tick.binance.BTCUSDT"), 0);
+        let a = p.subscribe("tick.binance.BTCUSDT");
+        let b = p.subscribe("tick.binance.BTCUSDT");
+        let _c = p.subscribe("tick.okx.BTC-USDT-SWAP");
+        assert_eq!(p.receiver_count("tick.binance.BTCUSDT"), 2);
+        let mut topics = p.topics_with_receivers();
+        topics.sort();
+        assert_eq!(topics, ["tick.binance.BTCUSDT", "tick.okx.BTC-USDT-SWAP"]);
+        drop(a);
+        drop(b);
+        assert_eq!(p.receiver_count("tick.binance.BTCUSDT"), 0);
+        assert_eq!(p.topics_with_receivers(), ["tick.okx.BTC-USDT-SWAP"]);
+    }
+
+    #[tokio::test]
+    async fn subscribe_wakes_waiter_when_enabled() {
+        let p = Arc::new(Processor::new(10, 10));
+        p.enable_usage_signals();
+        let _sub = p.subscribe("tick.binance.BTCUSDT");
+        tokio::time::timeout(Duration::from_secs(1), p.usage_signaled())
+            .await
+            .expect("通知应已保留");
     }
 }
 

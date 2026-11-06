@@ -15,13 +15,15 @@
 //!    或下发失败的订阅组，不再被静默吞掉，而是作为"待处理"持续提示，且不推进 `applied`。
 //! 5. **`log_level` 可热更**（见 [`crate::logging`]）：SIGHUP 直接切换日志过滤器，不重连、不重启。
 //!    环境变量 `RUST_LOG` 优先于 YAML：设置了它时，`log_level` 的改动不会生效，作为待处理持续提示（并写明原因）。
+//! 6. **`runtime_subscriptions` 整段可热更**（1.2.0，见 [`RuntimeSubsSwitch`]）：开关与参数立即生效，不重连、不丢运行期订阅；
+//!    每次 SIGHUP 之后都把最新的配置名单推给运行期订阅管理（名单里的目标永不自动退订）。
 //!
 //! 约定：URL 等"需重启"的配置不做连接器热重建；自动重连只会重连启动时的地址（`ExchangeAdapter::ws_url()` 取自启动配置）。
 
 use crate::logging::{LevelOutcome, LevelSwitch};
 use md_config::{
     AdminServerConfig, ApiGatewayConfig, BinanceConfig, Config, ConfigError, ConnectorConfigs,
-    GRPCConfig, OkxConfig, ProcessorConfig, WebSocketConfig,
+    GRPCConfig, OkxConfig, ProcessorConfig, RuntimeSubscriptionsConfig, WebSocketConfig,
 };
 use md_connector::{Connector, DataType, SubscriptionTarget};
 use std::collections::{HashMap, HashSet};
@@ -308,6 +310,7 @@ fn restart_only_fields(cfg: &Config) -> Vec<(&'static str, String)> {
         admin_server: AdminServerConfig {
             listen_address: admin_listen,
         },
+        runtime_subscriptions: _,
     } = cfg;
 
     vec![
@@ -664,6 +667,28 @@ pub(crate) async fn apply_group(
 }
 
 // ---------------------------------------------------------------------------
+// 运行期订阅管理（1.2.0）
+// ---------------------------------------------------------------------------
+
+/// SIGHUP 应用之后，把运行期订阅设置与配置名单推给运行期订阅管理（生产实现见 `crate::runtime_subs`；测试里用 mock）。
+pub(crate) trait RuntimeSubsSwitch: Send + Sync {
+    /// `applied`：本次应用后的已应用配置；`file`：文件里的新配置。
+    /// 订阅热更部分失败时两者的名单不同，实现方应把两者的名单都当作配置订阅保护起来。
+    fn apply(&self, applied: &Config, file: &Config);
+}
+
+fn show_runtime(rs: &RuntimeSubscriptionsConfig) -> String {
+    format!(
+        "{{idle_unsubscribe={}, idle_minutes={}, check_interval_seconds={}, startup_grace_minutes={}, max_runtime_subscriptions={}}}",
+        rs.idle_unsubscribe,
+        rs.idle_minutes,
+        rs.check_interval_seconds,
+        rs.startup_grace_minutes,
+        rs.max_runtime_subscriptions
+    )
+}
+
+// ---------------------------------------------------------------------------
 // 重载状态机
 // ---------------------------------------------------------------------------
 
@@ -672,6 +697,8 @@ pub(crate) struct ReloadState {
     applied: Config,
     /// 日志过滤器的热更接口
     log: Arc<dyn LevelSwitch>,
+    /// 运行期订阅管理（1.2.0）
+    runtime: Option<Arc<dyn RuntimeSubsSwitch>>,
 }
 
 impl ReloadState {
@@ -681,7 +708,14 @@ impl ReloadState {
         Self {
             applied: startup_effective,
             log,
+            runtime: None,
         }
+    }
+
+    /// 接入运行期订阅管理：每次 SIGHUP 应用后推送设置与配置名单
+    pub(crate) fn with_runtime_subs(mut self, runtime: Arc<dyn RuntimeSubsSwitch>) -> Self {
+        self.runtime = Some(runtime);
+        self
     }
 
     #[cfg(test)]
@@ -769,6 +803,19 @@ impl ReloadState {
                     }),
                 }
             }
+        }
+
+        // 1b. 运行期订阅管理：整段热更（值在加载时已校验，不会失败）；名单每次都推送（订阅列表可能刚变过）
+        if file.runtime_subscriptions != self.applied.runtime_subscriptions {
+            info!(
+                "  runtime_subscriptions changed: {} -> {} (applied)",
+                show_runtime(&self.applied.runtime_subscriptions),
+                show_runtime(&file.runtime_subscriptions)
+            );
+            next.runtime_subscriptions = file.runtime_subscriptions.clone();
+        }
+        if let Some(runtime) = self.runtime.as_ref() {
+            runtime.apply(&next, &file);
         }
 
         // 2. 只在启动时读取的字段：文件值 != 运行值 → 需重启。
@@ -1806,5 +1853,92 @@ connectors:
             vec!["warn"],
             "WARNING 应规范成 warn 再交给过滤器"
         );
+    }
+
+    // ---- 1.2.0 runtime_subscriptions：整段热更，每次 SIGHUP 推送设置与名单 ----
+
+    /// 一次推送：(已应用配置里的运行期订阅设置, 已应用配置的 binance tick 名单, 文件的 binance tick 名单)
+    type Push = (RuntimeSubscriptionsConfig, Vec<String>, Vec<String>);
+
+    #[derive(Default)]
+    struct MockRuntime {
+        pushes: Mutex<Vec<Push>>,
+    }
+
+    impl RuntimeSubsSwitch for MockRuntime {
+        fn apply(&self, applied: &Config, file: &Config) {
+            self.pushes.lock().unwrap().push((
+                applied.runtime_subscriptions.clone(),
+                applied.connectors.binance.subscribe_ticks.clone(),
+                file.connectors.binance.subscribe_ticks.clone(),
+            ));
+        }
+    }
+
+    #[test]
+    fn runtime_subscriptions_is_not_a_restart_only_field() {
+        let applied = base();
+        let mut file = base();
+        file.runtime_subscriptions.idle_unsubscribe = true;
+        file.runtime_subscriptions.idle_minutes = 3;
+        assert!(restart_required_changes(&applied, &file).is_empty());
+    }
+
+    #[tokio::test]
+    async fn runtime_subscriptions_change_is_hot_applied_and_pushed() {
+        let r = rig(&[]);
+        let rt = Arc::new(MockRuntime::default());
+        let mut state = state_of(base()).with_runtime_subs(rt.clone());
+        let mut file = base();
+        file.runtime_subscriptions.idle_unsubscribe = true;
+        file.runtime_subscriptions.idle_minutes = 2;
+
+        let report = state.apply(file.clone(), &r.conns).await;
+        assert!(report.fully_applied(), "{:?}", report.pending);
+        assert_eq!(
+            state.applied().runtime_subscriptions,
+            file.runtime_subscriptions
+        );
+        let pushes = rt.pushes.lock().unwrap().clone();
+        assert_eq!(pushes.len(), 1);
+        assert_eq!(pushes[0].0, file.runtime_subscriptions);
+        // 与连接器无关：不得有任何订阅动作
+        assert_eq!(r.okx.calls() + r.binance.calls() + r.okx_kline.calls(), 0);
+
+        // 关回去同样立即生效
+        let report = state.apply(base(), &r.conns).await;
+        assert!(report.fully_applied());
+        assert!(!state.applied().runtime_subscriptions.idle_unsubscribe);
+        assert!(!rt.pushes.lock().unwrap()[1].0.idle_unsubscribe);
+    }
+
+    #[tokio::test]
+    async fn every_sighup_pushes_current_config_lists() {
+        let r = rig(&[]);
+        let rt = Arc::new(MockRuntime::default());
+        let mut state = state_of(base()).with_runtime_subs(rt.clone());
+
+        // 订阅列表热更成功：推送的已应用名单就是新名单
+        let mut file = base();
+        file.connectors.binance.subscribe_ticks = vec!["BTCUSDT".into(), "SOLUSDT".into()];
+        state.apply(file.clone(), &r.conns).await;
+        // 文件没变也照样推送（保持名单同步）
+        state.apply(file.clone(), &r.conns).await;
+        let pushes = rt.pushes.lock().unwrap().clone();
+        assert_eq!(pushes.len(), 2);
+        for p in &pushes {
+            assert_eq!(p.1, vec!["BTCUSDT", "SOLUSDT"]);
+            assert_eq!(p.2, vec!["BTCUSDT", "SOLUSDT"]);
+        }
+
+        // 下发失败：已应用名单保持旧值，文件名单作为第二个参数一并推送（实现方保护两者的并集）
+        r.binance.fail.store(true, Ordering::SeqCst);
+        let mut failing = file.clone();
+        failing.connectors.binance.subscribe_ticks = vec!["ETHUSDT".into()];
+        let report = state.apply(failing, &r.conns).await;
+        assert!(!report.fully_applied());
+        let last = rt.pushes.lock().unwrap().last().cloned().unwrap();
+        assert_eq!(last.1, vec!["BTCUSDT", "SOLUSDT"]);
+        assert_eq!(last.2, vec!["ETHUSDT"]);
     }
 }

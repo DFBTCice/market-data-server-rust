@@ -2,19 +2,24 @@ mod alloc_stats;
 mod logging;
 mod process_metrics;
 mod reload;
+mod runtime_subs;
 
 use clap::Parser;
 use md_connector::base::BaseConnector;
 use md_connector::binance::{BinanceAdapter, BinanceConnectorConfig};
 use md_connector::okx::{OkxAdapter, OkxConnectorConfig};
-use md_connector::{Connector, DataType, SubscriptionTarget};
+use md_connector::{Connector, DataType, SubscriptionRejected, SubscriptionTarget};
+use md_gateway::runtime_subs::RuntimeSubscriptions;
 use md_processor::{ConnectorMetrics, Processor};
 use std::collections::HashMap;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::{watch, RwLock};
+use tokio::sync::{mpsc, watch, RwLock};
 use tracing::{info, warn};
+
+/// 各连接器上报"上游拒绝订阅"的通道发送端（1.2.0，运行期订阅管理用）
+type RejectSink = mpsc::UnboundedSender<SubscriptionRejected>;
 
 #[derive(Parser)]
 #[command(name = "md-server", about = "Market Data Server (Rust)")]
@@ -31,6 +36,7 @@ struct Cli {
 async fn start_connectors(
     cfg: &md_config::Config,
     processor: &Arc<Processor>,
+    reject_sink: &RejectSink,
 ) -> (
     Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
     HashMap<String, Arc<ConnectorMetrics>>,
@@ -67,7 +73,8 @@ async fn start_connectors(
                 binance_metrics.connected.clone(),
                 binance_metrics.reconnect_total.clone(),
                 binance_metrics.subscribe_failed_total.clone(),
-            ),
+            )
+            .with_reject_sink(reject_sink.clone()),
         );
 
         let mut targets = Vec::new();
@@ -137,7 +144,8 @@ async fn start_connectors(
                     okx_metrics.connected.clone(),
                     okx_metrics.reconnect_total.clone(),
                     okx_metrics.subscribe_failed_total.clone(),
-                ),
+                )
+                .with_reject_sink(reject_sink.clone()),
             );
 
             let mut targets = Vec::new();
@@ -186,7 +194,8 @@ async fn start_connectors(
                     okx_kline_metrics.connected.clone(),
                     okx_kline_metrics.reconnect_total.clone(),
                     okx_kline_metrics.subscribe_failed_total.clone(),
-                ),
+                )
+                .with_reject_sink(reject_sink.clone()),
             );
 
             let mut targets = Vec::new();
@@ -217,7 +226,14 @@ async fn start_connectors(
     }
 
     // ---- Quote 专用连接器（1.1.0 新增；开关默认关闭，关闭时不建任何新连接）----
-    start_quote_connectors(cfg, processor, &connectors, &mut connector_metrics_map).await;
+    start_quote_connectors(
+        cfg,
+        processor,
+        &connectors,
+        &mut connector_metrics_map,
+        reject_sink,
+    )
+    .await;
 
     (connectors, connector_metrics_map)
 }
@@ -236,6 +252,7 @@ async fn start_quote_connectors(
     processor: &Arc<Processor>,
     connectors: &Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
     connector_metrics_map: &mut HashMap<String, Arc<ConnectorMetrics>>,
+    reject_sink: &RejectSink,
 ) {
     // ---- Binance quote（bookTicker，Public 流）----
     let b = &cfg.connectors.binance;
@@ -275,7 +292,8 @@ async fn start_quote_connectors(
                 m.connected.clone(),
                 m.reconnect_total.clone(),
                 m.subscribe_failed_total.clone(),
-            ),
+            )
+            .with_reject_sink(reject_sink.clone()),
         );
         let targets: Vec<SubscriptionTarget> = b
             .subscribe_quotes
@@ -337,7 +355,8 @@ async fn start_quote_connectors(
                 m.connected.clone(),
                 m.reconnect_total.clone(),
                 m.subscribe_failed_total.clone(),
-            ),
+            )
+            .with_reject_sink(reject_sink.clone()),
         );
         let targets: Vec<SubscriptionTarget> = o
             .subscribe_quotes
@@ -412,8 +431,20 @@ async fn main() {
         cfg.processor.quote_channel_buffer,
     ));
 
-    // 启动连接器
-    let (connectors, connector_metrics_map) = start_connectors(&cfg, &processor).await;
+    // 启动连接器（上游拒绝订阅时经 reject_sink 上报给运行期订阅管理）
+    let (reject_sink, reject_rx) = mpsc::unbounded_channel();
+    let (connectors, connector_metrics_map) =
+        start_connectors(&cfg, &processor, &reject_sink).await;
+    drop(reject_sink);
+
+    // 运行期订阅管理（1.2.0）：开关 runtime_subscriptions.idle_unsubscribe 默认关闭，关闭时空转
+    let runtime_subs = RuntimeSubscriptions::new(
+        processor.clone(),
+        connectors.clone(),
+        runtime_subs::view_of(&cfg, &cfg),
+        reject_rx,
+    );
+    tokio::spawn(runtime_subs.clone().run());
 
     // 启动 Processor dispatch loop
     let processor_clone = processor.clone();
@@ -452,9 +483,11 @@ async fn main() {
     let gateway_addr = parse_addr(&cfg.api_gateway.listen_address);
     let processor_metrics = processor.clone();
     let connector_metrics_for_handler = connector_metrics_map.clone();
+    let runtime_metrics = runtime_subs.metrics();
     // 1.1.1：Gateway WS 写超时取配置项 api_gateway.ws_write_wait（默认 10s，"0s" 关闭）；Legacy /ws 不受影响
     let gateway = md_gateway::Gateway::new(processor.clone(), connectors.clone())
-        .with_ws_write_wait(cfg.api_gateway.ws_write_wait);
+        .with_ws_write_wait(cfg.api_gateway.ws_write_wait)
+        .with_runtime_subscriptions(runtime_subs.clone());
     let router = gateway
         .router()
         .route("/health", axum::routing::get(health_handler))
@@ -464,6 +497,7 @@ async fn main() {
                 metrics_handler(
                     processor_metrics.clone(),
                     connector_metrics_for_handler.clone(),
+                    runtime_metrics.clone(),
                 )
             }),
         );
@@ -489,6 +523,7 @@ async fn main() {
         &connectors,
         &shutdown_tx,
         log_control,
+        runtime_subs,
     )
     .await;
 
@@ -517,7 +552,9 @@ async fn main() {
 ///
 /// `cfg` 必须是启动时实际使用的"生效配置"（已含环境变量覆盖和端口偏移）；
 /// `port_offset` 用于让重载时用同一套规则推导文件里的新配置；
-/// `log_control` 是日志过滤器的热更句柄（SIGHUP 时据此切换 `log_level`）。
+/// `log_control` 是日志过滤器的热更句柄（SIGHUP 时据此切换 `log_level`）；
+/// `runtime_subs` 接收 SIGHUP 之后的运行期订阅设置与配置名单。
+#[allow(clippy::too_many_arguments)]
 async fn wait_for_signal(
     config_path: &str,
     port_offset: u16,
@@ -526,6 +563,7 @@ async fn wait_for_signal(
     connectors: &Arc<RwLock<HashMap<String, Arc<dyn Connector>>>>,
     shutdown_tx: &watch::Sender<bool>,
     log_control: Arc<logging::LogControl>,
+    runtime_subs: Arc<RuntimeSubscriptions>,
 ) {
     #[cfg(unix)]
     {
@@ -535,7 +573,8 @@ async fn wait_for_signal(
         let mut sighup = signal(SignalKind::hangup()).expect("failed to register SIGHUP handler");
 
         // "已应用配置"：只记录进程真正在用的配置；重启才能生效的变更不会写进来
-        let mut reload_state = reload::ReloadState::new(cfg.clone(), log_control);
+        let mut reload_state =
+            reload::ReloadState::new(cfg.clone(), log_control).with_runtime_subs(runtime_subs);
 
         loop {
             tokio::select! {
@@ -556,7 +595,14 @@ async fn wait_for_signal(
 
     #[cfg(not(unix))]
     {
-        let _ = (config_path, port_offset, cfg, connectors, log_control);
+        let _ = (
+            config_path,
+            port_offset,
+            cfg,
+            connectors,
+            log_control,
+            runtime_subs,
+        );
         tokio::signal::ctrl_c()
             .await
             .expect("failed to listen for Ctrl+C");
@@ -647,6 +693,10 @@ fn esc(v: &str) -> String {
 /// - `md_gateway_internal_latency_ms{topic}` (histogram)
 ///   对标 Go 版 marketdata_gateway_internal_latency_ms。总体延迟 `by (le)`，推送吞吐 TOP10 用 `_count by (topic)`。
 ///
+/// **运行期订阅管理（1.2.0 新增，只增不改；开关关闭时 enabled=0、数量=0、计数不动）**
+/// - `md_runtime_subscriptions_enabled` / `md_runtime_subscriptions` (gauge)
+/// - `md_runtime_subscriptions_{idle_unsubscribed,demand_subscribed,demand_failed,limit_rejected}_total` (counter)
+///
 /// **运行时 / 分配器诊断（1.1.1 新增）**
 /// - `md_tokio_alive_tasks` / `md_tokio_workers` / `md_tokio_global_queue_depth` (gauge)
 /// - `md_jemalloc_{allocated,active,resident,retained,mapped}_bytes` (gauge，仅 `jemalloc-stats` 构建)
@@ -659,6 +709,7 @@ fn esc(v: &str) -> String {
 async fn metrics_handler(
     processor: Arc<Processor>,
     connector_metrics: HashMap<String, Arc<ConnectorMetrics>>,
+    runtime_metrics: Arc<md_gateway::runtime_subs::Metrics>,
 ) -> String {
     let snap = processor.metrics.snapshot();
     let mut out = String::with_capacity(8192);
@@ -822,6 +873,9 @@ async fn metrics_handler(
         );
     }
 
+    // ---- 运行期订阅管理（1.2.0）----
+    runtime_metrics.render_prometheus(&mut out);
+
     // ---- tokio 运行时指标（1.1.1：重连前后存活 task 数应回到同一水平，用于发现孤儿 task）----
     if let Ok(handle) = tokio::runtime::Handle::try_current() {
         let rt = handle.metrics();
@@ -902,7 +956,7 @@ mod tests {
         conn_metrics.insert("binance".into(), m);
 
         process_metrics::init();
-        let out = metrics_handler(processor, conn_metrics).await;
+        let out = metrics_handler(processor, conn_metrics, Default::default()).await;
 
         // ---- 全局吞吐 ----
         assert!(
@@ -1016,6 +1070,17 @@ mod tests {
             out.contains("process_uptime_seconds"),
             "missing process_uptime_seconds"
         );
+        // ---- 运行期订阅管理（1.2.0）：开关关闭时也输出，值为 0 ----
+        for line in [
+            "md_runtime_subscriptions_enabled 0\n",
+            "md_runtime_subscriptions 0\n",
+            "md_runtime_subscriptions_idle_unsubscribed_total 0\n",
+            "md_runtime_subscriptions_demand_subscribed_total 0\n",
+            "md_runtime_subscriptions_demand_failed_total 0\n",
+            "md_runtime_subscriptions_limit_rejected_total 0\n",
+        ] {
+            assert!(out.contains(line), "missing {line:?}");
+        }
     }
 
     // ---- quote（1.1.0 新增）----
@@ -1027,7 +1092,7 @@ mod tests {
         process_metrics::init();
 
         // 无任何 quote 流量
-        let out = metrics_handler(processor.clone(), HashMap::new()).await;
+        let out = metrics_handler(processor.clone(), HashMap::new(), Default::default()).await;
         assert!(out.contains("md_quotes_processed 0"));
         assert!(out.contains("md_quotes_dropped 0"));
         assert!(out.contains("md_ws_messages_sent_total{kind=\"quote\"} 0"));
@@ -1048,7 +1113,7 @@ mod tests {
         });
         processor.metrics.ws_message_sent("quote");
         processor.metrics.record_broadcast_lagged("quote");
-        let out = metrics_handler(processor, HashMap::new()).await;
+        let out = metrics_handler(processor, HashMap::new(), Default::default()).await;
         assert!(out.contains("md_quotes_processed 1"));
         assert!(out.contains("md_ws_messages_sent_total{kind=\"quote\"} 1"));
         assert!(out.contains("md_broadcast_lagged_total{topic_kind=\"quote\"} 1"));
@@ -1130,7 +1195,8 @@ connectors:
         let cfg = md_config::load_config_from_str(&yaml).unwrap();
 
         let processor = Arc::new(Processor::new_full(1000, 1000, 4096, 1000));
-        let (connectors, _metrics) = start_connectors(&cfg, &processor).await;
+        let (reject_sink, _reject_rx) = mpsc::unbounded_channel();
+        let (connectors, _metrics) = start_connectors(&cfg, &processor, &reject_sink).await;
 
         // 期望：每个地址收到的订阅帧
         let expect: [(&str, &[&str]); 4] = [
