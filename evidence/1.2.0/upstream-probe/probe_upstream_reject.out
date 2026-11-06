@@ -1,0 +1,26 @@
+# captured_at_utc=2026-11-06T13:40:31Z  command: node evidence/1.2.0/upstream-probe/probe_upstream_reject.mjs
+{
+ "case": "okx-public",
+ "frames": [
+  "{\"event\":\"notice\",\"msg\":\"WebSocket port 8443 will be retired soon. Please migrate to port 443.\",\"code\":\"64010\",\"connId\":\"d107ac7f\"}",
+  "{\"event\":\"error\",\"msg\":\"Subscribe failed, wrong URL or channel:trades,instId:NOSUCH-USDT-SWAP doesn't exist. Please use the correct URL, channel and parameters referring to API document.\",\"code\":\"60018\",\"connId\":\"d107ac7f\"}",
+  "{\"event\":\"error\",\"msg\":\"Subscribe failed, wrong URL or channel:tickers,instId:NOSUCH-USDT-SWAP doesn't exist. Please use the correct URL, channel and parameters referring to API document.\",\"code\":\"60018\",\"connId\":\"d107ac7f\"}",
+  "{\"event\":\"subscribe\",\"arg\":{\"channel\":\"trades\",\"instId\":\"BTC-USDT-SWAP\"},\"connId\":\"d107ac7f\"}",
+  "{\"event\":\"error\",\"msg\":\"Subscribe failed, wrong URL or channel:trades,instId:NOSUCH2-USDT-SWAP doesn't exist. Please use the correct URL, channel and parameters referring to API document.\",\"code\":\"60018\",\"connId\":\"d107ac7f\"}"
+ ]
+}
+{
+ "case": "okx-business",
+ "frames": [
+  "{\"event\":\"notice\",\"msg\":\"WebSocket port 8443 will be retired soon. Please migrate to port 443.\",\"code\":\"64010\",\"connId\":\"b64076c8\"}",
+  "{\"event\":\"error\",\"msg\":\"Subscribe failed, wrong URL or channel:candle7m,instId:BTC-USDT-SWAP doesn't exist. Please use the correct URL, channel and parameters referring to API document.\",\"code\":\"60018\",\"connId\":\"b64076c8\"}",
+  "{\"event\":\"error\",\"msg\":\"Subscribe failed, wrong URL or channel:candle1m,instId:NOSUCH-USDT-SWAP doesn't exist. Please use the correct URL, channel and parameters referring to API document.\",\"code\":\"60018\",\"connId\":\"b64076c8\"}"
+ ]
+}
+{
+ "case": "binance-market",
+ "frames": [
+  "{\"result\":null,\"id\":1}",
+  "{\"result\":null,\"id\":2}"
+ ]
+}

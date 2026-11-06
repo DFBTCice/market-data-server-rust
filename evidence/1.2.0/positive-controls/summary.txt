@@ -1,0 +1,16 @@
+commit=6b3949e8b82b311fb4fd691a3cdca68cd79e13c5
+M1-receivers-ignored: CAUGHT; exit=101; failed=[legacy_ws_receiver_keeps_subscription subscribing_a_topic_missing_upstream_subscribes_on_demand ws_receiver_and_quick_reconnect_keep_subscription ]
+M2-config-not-protected: CAUGHT; exit=101; failed=[config_subscription_is_never_unsubscribed idle_runtime_subscription_is_unsubscribed_upstream ]
+M3-grace-ignored: CAUGHT; exit=101; failed=[hot_toggle_takes_effect_without_restart startup_grace_defers_idle_unsubscribe ]
+M4-rest-reads-ignored: CAUGHT; exit=101; failed=[rest_reads_refresh_idle_timer ]
+M5-no-reject-backoff: CAUGHT; exit=101; failed=[upstream_rejected_symbol_is_not_retried ]
+M6-no-limit: CAUGHT; exit=101; failed=[limit_refuses_on_demand_and_counts ]
+M7-no-on-demand: CAUGHT; exit=101; failed=[auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates delete_while_receiving_is_restored_on_demand limit_refuses_on_demand_and_counts subscribing_a_topic_missing_upstream_subscribes_on_demand upstream_rejected_symbol_is_not_retried ]
+M8-switch-ignored: CAUGHT; exit=101; failed=[hot_toggle_takes_effect_without_restart switch_off_changes_nothing ]
+M9-unsubscribe-without-idle: CAUGHT; exit=101; failed=[idle_runtime_subscription_is_unsubscribed_upstream rest_reads_refresh_idle_timer ws_receiver_and_quick_reconnect_keep_subscription ]
+M10-ws-unsubscribe-keeps-receiver-1.1.1-regression: CAUGHT; exit=101; failed=[auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates no_events_after_unsubscribe partial_unsubscribe_keeps_other_streams_and_bytes repeated_churn_still_one_copy_per_event resubscribe_after_unsubscribe_delivers_exactly_one_copy unsubscribe_on_one_connection_does_not_affect_another ]
+M11-grpc-keeps-receiver-after-disconnect: CAUGHT; exit=101; failed=[grpc_stream_counts_as_receiver_and_releases_on_disconnect ]
+M12-okx-error-stream-not-parsed: CAUGHT; exit=101; failed=[subscribe_error_without_arg_carries_stream_from_msg upstream_rejected_symbol_is_not_retried ]
+M13-sighup-does-not-apply-runtime-section: CAUGHT; exit=101; failed=[runtime_subscriptions_change_is_hot_applied_and_pushed ]
+M0-unmutated: exit=0; passed=286 failed=0
+overall=PASS

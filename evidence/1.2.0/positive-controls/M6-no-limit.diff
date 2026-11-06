@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index ccd290e..6d2732b 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -774,7 +774,7 @@ impl RuntimeSubscriptions {
+                     continue;
+                 }
+             }
+-            if runtime_count >= s.max_runtime_subscriptions {
++            if false {
+                 self.metrics
+                     .limit_rejected_total
+                     .fetch_add(1, Ordering::Relaxed);

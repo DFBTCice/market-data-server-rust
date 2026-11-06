@@ -1266,6 +1266,39 @@ node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:808
 `md_ws_kicked_write_timeout_total`（应≈0；增长须独立核对客户端/链路/发送回压，不能仅凭计数确认消费者卡顿）、`md_ticks_dropped`（日志同时有限频 WARN）、
 `md_connector_reconnect_total`、`md_tokio_alive_tasks`（重连前后同水平）、1stbotv3 与 OMS 消费正常。
 
+### 12.3 升级到 1.2.0（运行期订阅闲置退订与按需补订；先关后开、分两次批准）
+
+内容见 [CHANGELOG](CHANGELOG.md) `[1.2.0]` 与 [OPS_GUIDE 第八节](OPS_GUIDE.md#八运行期订阅闲置退订与按需补订120-起默认关闭)；验收证据见 `evidence/1.2.0/README.md`。
+现网仍只用独立验收过的本机镜像 ID（§0），1.2.0 产物未经业务方批准不得上 198。
+
+- **构建**：与 1.1.1 相同，必须 `--features md-connector/vendored-tls,md-server/jemalloc-stats`，干净 worktree、固定 `SOURCE_DATE_EPOCH`、两次构建 sha256 一致：
+  `bash evidence/1.2.0/tools/build_final.sh <提交>`，记录在 `evidence/1.2.0/build-logs/dist-sha256.txt`。
+- **第一次换版：开关关闭上线**。镜像配置 = 现网配置原样（**不加** `runtime_subscriptions` 段），行为与 1.1.1 相同；换版流程同 §12.2（记录换前订阅 → 换容器 → 立即补订阅 → 10 分钟验收）。
+- **第二次（另行批准、提前通知主审）：打开开关**。在配置末尾追加：
+
+  ```yaml
+  runtime_subscriptions:
+    idle_unsubscribe: true
+    idle_minutes: 10
+    check_interval_seconds: 60
+    startup_grace_minutes: 10
+    max_runtime_subscriptions: 200
+  ```
+
+  正式做法是出一个带该段的镜像再换容器（需要退订 / 补订明细日志时，同时把容器环境改成 `RUST_LOG=warn,md_runtime_subs=info`）；
+  不想重启可以按 OPS_GUIDE §8.6 改容器内文件后 SIGHUP（容器重建后失效）。打开后 24 小时采样
+  `md_runtime_subscriptions`、`md_runtime_subscriptions_{idle_unsubscribed,demand_subscribed,demand_failed,limit_rejected}_total`、RSS，并核对 OMS / botd 无数据中断。
+- **换版后仍必须立刻补订阅**（开关开或关都一样）：运行期订阅不持久化，容器重启即丢失。
+
+  ```bash
+  curl -s http://HOST:8081/api/v1/subscriptions > baseline/subscriptions.json   # 换版前
+  # ……换容器……
+  node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:8081 --apply
+  ```
+
+  开关打开时，补回的订阅若在保护期结束后仍没人接收，会在闲置到期后被自动退掉——这是预期行为；消费者订阅的话题即使漏补也会被按需补订。
+- **回滚**：回到 `md-server:1.1.1`（§0.1 的镜像 ID），同样立即 `restore_subs.mjs`。只想停用本功能时不必回滚版本，关掉开关即可（OPS_GUIDE §8.6）。
+
 ---
 
 ## 附录

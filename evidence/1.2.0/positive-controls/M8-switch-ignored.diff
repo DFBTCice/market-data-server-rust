@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index ccd290e..67f04b4 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -576,7 +576,7 @@ impl RuntimeSubscriptions {
+         *write(&self.shared.protected) = next.protected.clone();
+         let s = &next.settings;
+         let was_enabled = old.is_some_and(|o| o.enabled);
+-        if s.enabled && !was_enabled {
++        if !was_enabled {
+             self.processor.enable_usage_signals();
+             *state = Some(LoopState::new(Instant::now()));
+             self.shared.enabled.store(true, Ordering::Relaxed);

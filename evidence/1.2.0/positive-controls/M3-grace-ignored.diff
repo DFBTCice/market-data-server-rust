@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index ccd290e..e7f8820 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -692,7 +692,7 @@ impl RuntimeSubscriptions {
+         }
+ 
+         // ---- 闲置退订 ----
+-        let in_grace = now.saturating_duration_since(st.enabled_at) < s.startup_grace;
++        let in_grace = false;
+         if idle_check && !in_grace && !idle_candidates.is_empty() {
+             let mut by_conn: HashMap<String, Vec<(SubKey, Duration, SubscriptionTarget)>> =
+                 HashMap::new();

@@ -1,0 +1,59 @@
+$ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
+   Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
+warning: field `enabled_at` is never read
+   --> crates/md-gateway/src/runtime_subs.rs:375:5
+    |
+373 | struct LoopState {
+    |        --------- field in this struct
+374 |     /// 开关打开的时刻；保护期从这里算
+375 |     enabled_at: Instant,
+    |     ^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `md-gateway` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.60s
+     Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
+
+running 15 tests
+test delete_while_receiving_is_restored_on_demand ... ok
+test delete_of_auto_unsubscribed_target_succeeds ... ok
+test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
+test idle_runtime_subscription_is_unsubscribed_upstream ... ok
+test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... ok
+test hot_toggle_takes_effect_without_restart ... FAILED
+test config_subscription_is_never_unsubscribed ... ok
+test limit_refuses_on_demand_and_counts ... ok
+test legacy_ws_receiver_keeps_subscription ... ok
+test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
+test startup_grace_defers_idle_unsubscribe ... FAILED
+test rest_reads_refresh_idle_timer ... ok
+test upstream_rejected_symbol_is_not_retried ... ok
+test switch_off_changes_nothing ... ok
+test ws_receiver_and_quick_reconnect_keep_subscription ... ok
+
+failures:
+
+---- hot_toggle_takes_effect_without_restart stdout ----
+
+thread 'hot_toggle_takes_effect_without_restart' (19629287) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:976:5:
+保护期应从打开时算
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- startup_grace_defers_idle_unsubscribe stdout ----
+
+thread 'startup_grace_defers_idle_unsubscribe' (19629378) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:622:5:
+assertion `left == right` failed: 保护期内不得退订
+  left: 1
+ right: 0
+
+
+failures:
+    hot_toggle_takes_effect_without_restart
+    startup_grace_defers_idle_unsubscribe
+
+test result: FAILED. 13 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.85s
+
+error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
+error: 1 target failed:
+    `-p md-gateway --test runtime_subs_gateway`

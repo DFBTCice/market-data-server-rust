@@ -1,0 +1,91 @@
+$ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway --test unsubscribe_gateway -- --test-threads=4
+   Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.68s
+     Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
+
+running 15 tests
+test delete_while_receiving_is_restored_on_demand ... ok
+test delete_of_auto_unsubscribed_target_succeeds ... ok
+test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
+test idle_runtime_subscription_is_unsubscribed_upstream ... ok
+test config_subscription_is_never_unsubscribed ... ok
+test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... FAILED
+test legacy_ws_receiver_keeps_subscription ... ok
+test limit_refuses_on_demand_and_counts ... ok
+test hot_toggle_takes_effect_without_restart ... ok
+test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
+test startup_grace_defers_idle_unsubscribe ... ok
+test rest_reads_refresh_idle_timer ... ok
+test switch_off_changes_nothing ... ok
+test upstream_rejected_symbol_is_not_retried ... ok
+test ws_receiver_and_quick_reconnect_keep_subscription ... ok
+
+failures:
+
+---- auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates stdout ----
+
+thread 'auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates' (19639652) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:688:5:
+接收方退订后应闲置退订上游
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.13s
+
+error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
+     Running tests/unsubscribe_gateway.rs (/tmp/md120-mutation-target/debug/deps/unsubscribe_gateway-0abd922e940a315a)
+
+running 6 tests
+test partial_unsubscribe_keeps_other_streams_and_bytes ... FAILED
+test no_events_after_unsubscribe ... FAILED
+test duplicate_subscribe_adds_no_extra_copy ... ok
+test repeated_churn_still_one_copy_per_event ... FAILED
+test resubscribe_after_unsubscribe_delivers_exactly_one_copy ... FAILED
+test unsubscribe_on_one_connection_does_not_affect_another ... FAILED
+
+failures:
+
+---- partial_unsubscribe_keeps_other_streams_and_bytes stdout ----
+
+thread 'partial_unsubscribe_keeps_other_streams_and_bytes' (19640134) panicked at crates/md-gateway/tests/unsubscribe_gateway.rs:240:5:
+assertion `left == right` failed: ["{\"type\":\"kline\",\"topic\":\"kline.1m.binance.BNBUSDT\",\"data\":{\"exchange\":\"binance\",\"symbol\":\"BNBUSDT\",\"interval\":\"1m\",\"close\":\"743.5\"}}", "{\"type\":\"tick\",\"topic\":\"tick.binance.BNBUSDT\",\"data\":{\"exchange\":\"binance\",\"symbol\":\"BNBUSDT\",\"timestamp\":1791531605419,\"price\":\"743.90\",\"quantity\":\"1\",\"trade_id\":1}}"]
+  left: 2
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- no_events_after_unsubscribe stdout ----
+
+thread 'no_events_after_unsubscribe' (19640133) panicked at crates/md-gateway/tests/unsubscribe_gateway.rs:155:5:
+退订后不应再收到事件：["{\"type\":\"tick\",\"topic\":\"tick.binance.BNBUSDT\",\"data\":{\"exchange\":\"binance\",\"symbol\":\"BNBUSDT\",\"timestamp\":1791531605419,\"price\":\"743.90\",\"quantity\":\"1\",\"trade_id\":2}}", "{\"type\":\"tick\",\"topic\":\"tick.binance.BNBUSDT\",\"data\":{\"exchange\":\"binance\",\"symbol\":\"BNBUSDT\",\"timestamp\":1791531605419,\"price\":\"743.90\",\"quantity\":\"1\",\"trade_id\":3}}", "{\"type\":\"tick\",\"topic\":\"tick.binance.BNBUSDT\",\"data\":{\"exchange\":\"binance\",\"symbol\":\"BNBUSDT\",\"timestamp\":1791531605419,\"price\":\"743.90\",\"quantity\":\"1\",\"trade_id\":4}}"]
+
+---- repeated_churn_still_one_copy_per_event stdout ----
+
+thread 'repeated_churn_still_one_copy_per_event' (19640135) panicked at crates/md-gateway/tests/unsubscribe_gateway.rs:184:40:
+called `Option::unwrap()` on a `None` value
+
+---- resubscribe_after_unsubscribe_delivers_exactly_one_copy stdout ----
+
+thread 'resubscribe_after_unsubscribe_delivers_exactly_one_copy' (19640144) panicked at crates/md-gateway/tests/unsubscribe_gateway.rs:120:10:
+called `Option::unwrap()` on a `None` value
+
+---- unsubscribe_on_one_connection_does_not_affect_another stdout ----
+
+thread 'unsubscribe_on_one_connection_does_not_affect_another' (19640158) panicked at crates/md-gateway/tests/unsubscribe_gateway.rs:217:35:
+called `Option::unwrap()` on a `None` value
+
+
+failures:
+    no_events_after_unsubscribe
+    partial_unsubscribe_keeps_other_streams_and_bytes
+    repeated_churn_still_one_copy_per_event
+    resubscribe_after_unsubscribe_delivers_exactly_one_copy
+    unsubscribe_on_one_connection_does_not_affect_another
+
+test result: FAILED. 1 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.72s
+
+error: test failed, to rerun pass `-p md-gateway --test unsubscribe_gateway`
+error: 2 targets failed:
+    `-p md-gateway --test runtime_subs_gateway`
+    `-p md-gateway --test unsubscribe_gateway`

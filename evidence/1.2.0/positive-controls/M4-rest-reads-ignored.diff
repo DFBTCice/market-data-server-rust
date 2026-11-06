@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index ccd290e..6f66db7 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -622,7 +622,7 @@ impl RuntimeSubscriptions {
+         let signals = self.processor.take_usage_signals();
+         for (t, at) in signals.reads {
+             if let Some(k) = SubKey::from_canonical_topic(&t) {
+-                bump(&mut st.last_read, k, at);
++                let _ = (k, at);
+             }
+         }
+         for (t, at) in signals.receivers {

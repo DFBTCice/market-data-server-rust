@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/ws.rs b/crates/md-gateway/src/ws.rs
+index 62c6f01..a2f7613 100644
+--- a/crates/md-gateway/src/ws.rs
++++ b/crates/md-gateway/src/ws.rs
+@@ -181,7 +181,7 @@ async fn handle_gateway_ws(
+                                     "unsubscribe" => {
+                                         for stream in &req.streams {
+                                             // 1.1.1：真正释放该 stream 的接收端（此前只删了 topics 集合，Receiver 泄漏且重订后事件重复推送）
+-                                            let released = subscriptions.remove(stream).is_some();
++                                            let released = subscriptions.contains_key(stream);
+                                             sub_guard.sync(subscriptions.len());
+                                             debug!(
+                                                 "gateway ws unsubscribe stream={} released={} conn_subscriptions={} total_active={}",

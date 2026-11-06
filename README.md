@@ -416,6 +416,7 @@ scrape_configs:
 - `md_ws_kicked_write_timeout_total` — Gateway 客户端因写超时（`api_gateway.ws_write_wait`）被断开的累计数（1.1.1 新增）
 - `md_jemalloc_{allocated,active,resident,retained,mapped,metadata}_bytes` — 仅 `--features md-server/jemalloc-stats` 构建（jemalloc 分配器）暴露的分配器统计（1.1.1 新增）
 - `md_tokio_alive_tasks` / `md_tokio_workers` / `md_tokio_global_queue_depth` — tokio 运行时存活 task / 工作线程 / 全局队列（1.1.1 新增，排查任务泄漏用）
+- `md_runtime_subscriptions_enabled` / `md_runtime_subscriptions` / `md_runtime_subscriptions_{idle_unsubscribed,demand_subscribed,demand_failed,limit_rejected}_total` — 运行期订阅闲置退订与按需补订（1.2.0 新增，默认关闭，见 [OPS_GUIDE 第八节](OPS_GUIDE.md#八运行期订阅闲置退订与按需补订120-起默认关闭)）
 - `process_resident_memory_bytes` / `process_cpu_seconds_total` / `process_open_fds` … — 标准进程指标
 
 ## 已知差异

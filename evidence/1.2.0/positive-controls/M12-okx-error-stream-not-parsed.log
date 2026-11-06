@@ -1,0 +1,118 @@
+$ cargo test --no-fail-fast -p md-connector --lib -- --test-threads=4
+   Compiling md-domain v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-domain)
+   Compiling md-connector v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-connector)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.72s
+     Running unittests src/lib.rs (/tmp/md120-mutation-target/debug/deps/md_connector-baa0bb8a1809ac0a)
+
+running 48 tests
+test base::tests::drop_log_limiter_rate_limits_and_accumulates ... ok
+test base::tests::drop_log_limiter_total_equals_drops ... ok
+test binance::tests::adapter_ignores_book_ticker ... ok
+test binance::tests::adapter_parse_kline_message ... ok
+test binance::tests::adapter_parse_aggtrade_message ... ok
+test binance::tests::build_subscribe_message ... ok
+test binance::tests::build_unsubscribe_message ... ok
+test binance::tests::legacy_adapter_still_ignores_real_book_ticker ... ok
+test binance::tests::parse_aggtrade_symbol_normalized ... ok
+test binance::tests::parse_aggtrade_to_tick ... ok
+test binance::tests::parse_book_ticker_falls_back_to_transaction_time ... ok
+test binance::tests::parse_book_ticker_missing_price_is_error ... ok
+test binance::tests::parse_book_ticker_real_sample ... ok
+test binance::tests::parse_invalid_json_returns_error ... ok
+test binance::tests::parse_kline_to_kline ... ok
+test binance::tests::parse_missing_field_returns_error ... ok
+test binance::tests::quote_adapter_builds_book_ticker_subscribe_msg ... ok
+test binance::tests::quote_adapter_emits_quote_event ... ok
+test base::tests::burst_larger_than_buffer_drops_exactly_the_excess ... ok
+test binance::tests::quote_adapter_ignores_subscribe_ack ... ok
+test binance::tests::target_to_streams_kline ... ok
+test binance::tests::target_to_streams_kline_5m ... ok
+test binance::tests::target_to_streams_quote ... ok
+test binance::tests::target_to_streams_tick ... ok
+test okx::tests::adapter_ignores_event_message ... ok
+test okx::tests::adapter_parse_candle_message ... ok
+test okx::tests::adapter_parse_trades_message ... ok
+test okx::tests::build_subscribe_message ... ok
+test okx::tests::build_unsubscribe_message ... ok
+test okx::tests::heartbeat_is_ping ... ok
+test okx::tests::build_subscribe_message_for_tickers ... ok
+test okx::tests::parse_candle_not_closed ... ok
+test okx::tests::legacy_adapter_still_ignores_real_ticker ... ok
+test okx::tests::parse_candle_to_kline ... ok
+test okx::tests::parse_ticker_empty_bid_or_ask_is_error ... ok
+test okx::tests::parse_ticker_real_sample ... ok
+test okx::tests::parse_trade_buy_side ... ok
+test okx::tests::parse_trade_to_tick ... ok
+test okx::tests::quote_adapter_emits_quote_event ... ok
+test okx::tests::quote_adapter_ignores_subscribe_event ... ok
+test okx::tests::stream_from_error_msg_variants ... ok
+test okx::tests::target_to_streams_kline ... ok
+test okx::tests::target_to_streams_kline_5m ... ok
+test okx::tests::target_to_streams_quote ... ok
+test okx::tests::target_to_streams_tick ... ok
+test routing_tests::quote_routing_is_strict_no_fallback ... ok
+test routing_tests::tick_and_kline_routing_unchanged ... ok
+test okx::tests::subscribe_error_without_arg_carries_stream_from_msg ... FAILED
+
+failures:
+
+---- okx::tests::subscribe_error_without_arg_carries_stream_from_msg stdout ----
+
+thread 'okx::tests::subscribe_error_without_arg_carries_stream_from_msg' (19641735) panicked at crates/md-connector/src/okx.rs:891:17:
+assertion `left == right` failed
+  left: ""
+ right: "trades:NOSUCH-USDT-SWAP"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    okx::tests::subscribe_error_without_arg_carries_stream_from_msg
+
+test result: FAILED. 47 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p md-connector --lib`
+error: 1 target failed:
+    `-p md-connector --lib`
+$ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
+   Compiling md-connector v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-connector)
+   Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.83s
+     Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
+
+running 15 tests
+test delete_while_receiving_is_restored_on_demand ... ok
+test delete_of_auto_unsubscribed_target_succeeds ... ok
+test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
+test idle_runtime_subscription_is_unsubscribed_upstream ... ok
+test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... ok
+test config_subscription_is_never_unsubscribed ... ok
+test limit_refuses_on_demand_and_counts ... ok
+test legacy_ws_receiver_keeps_subscription ... ok
+test hot_toggle_takes_effect_without_restart ... ok
+test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
+test startup_grace_defers_idle_unsubscribe ... ok
+test rest_reads_refresh_idle_timer ... ok
+test switch_off_changes_nothing ... ok
+test upstream_rejected_symbol_is_not_retried ... FAILED
+test ws_receiver_and_quick_reconnect_keep_subscription ... ok
+
+failures:
+
+---- upstream_rejected_symbol_is_not_retried stdout ----
+
+thread 'upstream_rejected_symbol_is_not_retried' (19643252) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:772:5:
+assertion failed: wait_until(Duration::from_secs(2),
+        ||
+            r.metric("md_runtime_subscriptions_demand_failed_total") ==
+                1).await
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    upstream_rejected_symbol_is_not_retried
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.56s
+
+error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
+error: 1 target failed:
+    `-p md-gateway --test runtime_subs_gateway`

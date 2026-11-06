@@ -1,0 +1,13 @@
+## 源码树哈希（crates / Cargo.lock / Cargo.toml / Dockerfile / config.yaml）
+a06fe20 crates=4c39382d77737e26ad3e32ebc693bdea65581904 Cargo.lock=6fa664077f4762f20d643f9aac52cafb858e0c26 Cargo.toml=a06d90d9649085bb6ecbd571c69e76405a48a960 Dockerfile=e2da2efd95559a7e9788b7c7baace3ebca7f4cb1 config=914ba4e915d32eef95b1cc622782a68038953fc3
+v1.1.1 crates=4c39382d77737e26ad3e32ebc693bdea65581904 Cargo.lock=6fa664077f4762f20d643f9aac52cafb858e0c26 Cargo.toml=a06d90d9649085bb6ecbd571c69e76405a48a960 Dockerfile=e2da2efd95559a7e9788b7c7baace3ebca7f4cb1 config=914ba4e915d32eef95b1cc622782a68038953fc3
+HEAD crates=4c39382d77737e26ad3e32ebc693bdea65581904 Cargo.lock=6fa664077f4762f20d643f9aac52cafb858e0c26 Cargo.toml=a06d90d9649085bb6ecbd571c69e76405a48a960 Dockerfile=e2da2efd95559a7e9788b7c7baace3ebca7f4cb1 config=914ba4e915d32eef95b1cc622782a68038953fc3
+origin/main crates=4c39382d77737e26ad3e32ebc693bdea65581904 Cargo.lock=6fa664077f4762f20d643f9aac52cafb858e0c26 Cargo.toml=a06d90d9649085bb6ecbd571c69e76405a48a960 Dockerfile=e2da2efd95559a7e9788b7c7baace3ebca7f4cb1 config=914ba4e915d32eef95b1cc622782a68038953fc3
+## git diff --stat v1.1.1 origin/main -- crates Cargo.toml Cargo.lock Dockerfile Dockerfile.cn config.yaml deploy .github（应为空）
+## v1.1.1..origin/main 中 docs/evidence/*.md 以外的改动
+.gitattributes
+scripts/compat/load_consumers.mjs
+scripts/compat/sample_metrics.mjs
+## a06fe20 / 56f14fd 是否为 origin/main 祖先
+a06fe20 ancestor: yes
+56f14fd ancestor: yes

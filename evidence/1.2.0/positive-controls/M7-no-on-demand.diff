@@ -1,0 +1,13 @@
+diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
+index ccd290e..04497ca 100644
+--- a/crates/md-gateway/src/runtime_subs.rs
++++ b/crates/md-gateway/src/runtime_subs.rs
+@@ -743,7 +743,7 @@ impl RuntimeSubscriptions {
+         let mut runtime_count = runtime_keys.len();
+         let mut planned: HashSet<SubKey> = HashSet::new();
+         let mut batches: DemandBatches = HashMap::new();
+-        for raw in self.processor.topics_with_receivers() {
++        for raw in Vec::<String>::new() {
+             let Some(k) = SubKey::from_canonical_topic(&raw) else {
+                 continue;
+             };
