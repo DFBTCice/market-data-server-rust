@@ -8,8 +8,9 @@
 
 **运行期订阅的闲置退订与按需补订**，默认关闭。关闭时：旧 `config.yaml` 原样可用，推送字节、REST/gRPC 字段与语义、旧 `/ws` 行为都不变，
 `/metrics` 只多 6 个值为 0 的指标族。任务书、验收与证据见 `evidence/1.2.0/README.md`。
-候选产物（未上线、待批准）：源码 `6b3949e`，自 `f1d3c8a` 干净 worktree 两次从零构建（jemalloc 特性）SHA-256 一致：
-`f6ab760cc2b62562b188104f10efaabf075723c6c8feae9dd2e14816c61e13ba`（`evidence/1.2.0/build-logs/dist-sha256.txt`）。
+候选产物（未上线、待批准）：源码 `42bc897`，自 `12192d9` 干净 worktree 两次从零构建（jemalloc 特性）SHA-256 一致：
+`cbc6b0531b833f38fa5e4666be286d24d01ad169230ba855c8a5f126aed887bf`（`evidence/1.2.0/build-logs/dist-sha256.txt`；
+取代第一轮的 `f6ab760c…`，后者不含 `on_demand_quote`，不得上线）。
 
 ### 新增
 
@@ -57,9 +58,9 @@
 
 ### 测试
 
-- 工作区测试 248 → 286 个全部通过；`cargo clippy` warning 13 条（与基线位置相同）；`cargo fmt --check` 无输出。
-- 新增集成测试 `crates/md-gateway/tests/runtime_subs_gateway.rs`（15 个，假上游 + 真实连接器 + 真实网关）覆盖任务书 §四 全部集成场景；
-  正对照 13 种故意改坏全部被抓住（`evidence/1.2.0/tools/run_mutations.sh`）。
+- 工作区测试 248 → 290 个全部通过；`cargo clippy` warning 13 条（与基线位置相同）；`cargo fmt --check` 无输出。
+- 新增集成测试 `crates/md-gateway/tests/runtime_subs_gateway.rs`（17 个，假上游 + 真实连接器 + 真实网关）覆盖任务书 §四 全部集成场景与报价补订开关；
+  正对照 16 种故意改坏全部被抓住（`evidence/1.2.0/tools/run_mutations.sh`）。
 
 ## [1.1.1] - 2026-10-24（NAS 已换版；2026-11-05 批准合并，已知问题保留）
 

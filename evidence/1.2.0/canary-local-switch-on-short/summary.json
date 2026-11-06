@@ -1,0 +1,138 @@
+{
+  "base": "http://127.0.0.1:11081",
+  "idle_sec": 120,
+  "botd_hold_sec": 90,
+  "total_sec": 420,
+  "started_at": "2026-11-06T15:16:09.070Z",
+  "events": {
+    "initial_subs": [
+      "binance|1|BNBUSDT|",
+      "binance|1|BTCUSDT|",
+      "binance|1|ETHUSDT|",
+      "binance|1|SNDKUSDT|",
+      "binance|2|BTCUSDT|5m",
+      "binance|2|ETHUSDT|5m",
+      "binance|3|BNBUSDT|",
+      "okx|1|BNB-USDT-SWAP|",
+      "okx|1|BTC-USDT-SWAP|",
+      "okx|1|ETH-USDT-SWAP|",
+      "okx|2|BTC-USDT-SWAP|5m",
+      "okx|2|ETH-USDT-SWAP|5m",
+      "okx|3|BNB-USDT-SWAP|"
+    ],
+    "sndk_seen": true,
+    "quote_subscribed_at": 20.1,
+    "okx_sol_subscribed_at": 30.1,
+    "okx_sol_upstream_at": 35.2,
+    "botd_cancel_at": 91,
+    "botd_delete_at": 91,
+    "sol_kline_gone_at": 91,
+    "sndk_gone_at": 121.1,
+    "sol_tick_gone_at": 221.9,
+    "oms_resubscribe_at": 221.9,
+    "sol_tick_back_at": 226.9
+  },
+  "streams": {
+    "oms_bnb_binance": {
+      "count": 3207,
+      "dups": 0,
+      "first_at": 0.6
+    },
+    "oms_bnb_okx": {
+      "count": 1265,
+      "dups": 0,
+      "first_at": 1.2
+    },
+    "oms_sol_okx": {
+      "count": 2144,
+      "dups": 0,
+      "first_at": 31
+    },
+    "oms_sol_binance_after_resubscribe": {
+      "count": 898,
+      "dups": 0,
+      "first_at": 222.7
+    },
+    "botd_sol_tick": {
+      "count": 478,
+      "dups": 0,
+      "first_at": 0.4
+    },
+    "botd_sol_kline": {
+      "count": 213,
+      "dups": 0,
+      "first_at": 0.4
+    },
+    "quote_outside_config": {
+      "quote.binance.BTCUSDT": {
+        "count": 0,
+        "dups": 0
+      },
+      "quote.binance.ETHUSDT": {
+        "count": 0,
+        "dups": 0
+      },
+      "quote.okx.BTC-USDT-SWAP": {
+        "count": 0,
+        "dups": 0
+      },
+      "quote.okx.ETH-USDT-SWAP": {
+        "count": 0,
+        "dups": 0
+      }
+    },
+    "quote_in_config": {
+      "quote.binance.BNBUSDT": {
+        "count": 3461,
+        "dups": 0,
+        "first_at": 20.3
+      },
+      "quote.okx.BNB-USDT-SWAP": {
+        "count": 2500,
+        "dups": 0,
+        "first_at": 20.3
+      }
+    }
+  },
+  "quote_rate_per_sec": {
+    "before_quote_consumer": 170.05,
+    "after_quote_consumer": 145.89478983136172,
+    "ratio": 0.86
+  },
+  "resources": {
+    "rss_mib_start": 0,
+    "rss_mib_end": 0,
+    "cpu_pct_avg": 0
+  },
+  "final_metrics": {
+    "md_runtime_subscriptions_enabled": 1,
+    "md_runtime_subscriptions": 4,
+    "md_runtime_subscriptions_idle_unsubscribed_total": 2,
+    "md_runtime_subscriptions_demand_subscribed_total": 2,
+    "md_runtime_subscriptions_demand_failed_total": 0,
+    "md_runtime_subscriptions_limit_rejected_total": 0,
+    "md_ws_active_clients": 3,
+    "md_ws_subscriptions_active": 10,
+    "md_quotes_processed": 64117,
+    "md_ticks_processed": 131206,
+    "md_ticks_dropped": 0,
+    "md_quotes_dropped": 0,
+    "process_resident_memory_bytes": 0,
+    "process_cpu_seconds_total": 0
+  },
+  "checks": {
+    "oms_topics_never_unsubscribed": true,
+    "config_subscriptions_kept": true,
+    "botd_kline_deleted_and_not_readded": true,
+    "botd_tick_unsubscribed_after_idle": true,
+    "botd_tick_not_readded_before_resubscribe": true,
+    "restored_runtime_without_receivers_unsubscribed": true,
+    "oms_resubscribe_restored_upstream": true,
+    "oms_resubscribe_no_duplicates": true,
+    "never_registered_tick_subscribed_on_demand": true,
+    "quote_outside_config_not_subscribed": true,
+    "quote_in_config_still_pushed": true,
+    "quote_rate_not_jumped": true
+  },
+  "pass": true
+}

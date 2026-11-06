@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..67f04b4 100644
+index fba60a9..a496d25 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -576,7 +576,7 @@ impl RuntimeSubscriptions {
+@@ -579,7 +579,7 @@ impl RuntimeSubscriptions {
          *write(&self.shared.protected) = next.protected.clone();
          let s = &next.settings;
          let was_enabled = old.is_some_and(|o| o.enabled);

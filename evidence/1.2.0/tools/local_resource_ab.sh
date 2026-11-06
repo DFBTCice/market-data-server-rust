@@ -11,13 +11,21 @@ mkdir -p "$OUT"
 cd "$ROOT"
 { echo "old $(shasum -a 256 $OLD_BIN | cut -d' ' -f1)"; echo "new $(shasum -a 256 $NEW_BIN | cut -d' ' -f1)"; } | tee "$OUT/binaries.txt"
 CFG=evidence/1.1.1/final-artifact/config.final.yaml
-RUST_LOG=warn $OLD_BIN --config $CFG --port-offset 4000 > "$OUT/old.server.log" 2>&1 & OLD=$!
-RUST_LOG=warn $NEW_BIN --config $CFG --port-offset 5000 > "$OUT/new.server.log" 2>&1 & NEW=$!
+OLD_OFF="${OLD_OFF:-6100}"; NEW_OFF="${NEW_OFF:-6200}"
+OLD_HTTP=$((8081 + OLD_OFF)); NEW_HTTP=$((8081 + NEW_OFF))
+for p in $OLD_HTTP $NEW_HTTP $((50051 + OLD_OFF)) $((50051 + NEW_OFF)); do
+  if lsof -nP -iTCP:"$p" -sTCP:LISTEN >/dev/null 2>&1; then echo "port $p already in use; set OLD_OFF/NEW_OFF"; exit 1; fi
+done
+RUST_LOG=warn $OLD_BIN --config $CFG --port-offset "$OLD_OFF" > "$OUT/old.server.log" 2>&1 & OLD=$!
+RUST_LOG=warn $NEW_BIN --config $CFG --port-offset "$NEW_OFF" > "$OUT/new.server.log" 2>&1 & NEW=$!
 trap 'kill $OLD $NEW 2>/dev/null; wait $OLD $NEW 2>/dev/null' EXIT
 sleep 12
+for p in $OLD_HTTP $NEW_HTTP; do
+  curl -sf "http://127.0.0.1:$p/health" >/dev/null || { echo "server on $p not healthy, see $OUT/*.server.log"; exit 1; }
+done
 T="tick.binance.BTCUSDT tick.binance.ETHUSDT tick.binance.BNBUSDT tick.okx.BTC-USDT-SWAP tick.okx.ETH-USDT-SWAP tick.okx.BNB-USDT-SWAP kline.5m.binance.BTCUSDT kline.5m.binance.ETHUSDT kline.5m.okx.BTC-USDT-SWAP kline.5m.okx.ETH-USDT-SWAP quote.binance.BNBUSDT quote.okx.BNB-USDT-SWAP"
 CAP=()
-for side in old:12081 new:13081; do
+for side in old:$OLD_HTTP new:$NEW_HTTP; do
   n=${side%%:*}; p=${side##*:}
   node scripts/compat/restore_subs.mjs evidence/1.2.0/preflight/198.subscriptions.json "http://127.0.0.1:$p" --apply | tail -1
   # shellcheck disable=SC2086
@@ -36,6 +44,11 @@ while [ $(( $(date +%s) - start )) -lt "$SECS" ]; do
 done
 wait "${CAP[@]}"
 for side in old:$OLD new:$NEW; do n=${side%%:*}; echo "$n final: $(ps -o rss=,time= -p ${side##*:})"; done | tee "$OUT/final.txt"
+for n in old new; do
+  msgs=$(node -e 'const s=require(process.argv[1]);console.log(Object.values(s.topics).reduce((a,t)=>a+t.count,0))' "/tmp/md120-resource-$n/_summary.json")
+  echo "$n consumer messages=$msgs" | tee -a "$OUT/final.txt"
+  [ "$msgs" -gt 0 ] || { echo "$n consumer received nothing; run invalid"; exit 1; }
+done
 python3 - "$OUT/samples.csv" <<'PY' | tee "$OUT/summary.txt"
 import csv, sys, statistics
 rows = list(csv.DictReader(open(sys.argv[1])))

@@ -1,2 +1,4 @@
-old final:  11264   0:01.84
-new final:  11408   0:01.80
+old final:  11136   0:03.15
+new final:  11264   0:03.12
+old consumer messages=30359
+new consumer messages=30362

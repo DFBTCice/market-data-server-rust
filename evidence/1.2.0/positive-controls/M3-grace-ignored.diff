@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..e7f8820 100644
+index fba60a9..c493f48 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -692,7 +692,7 @@ impl RuntimeSubscriptions {
+@@ -686,7 +686,7 @@ impl RuntimeSubscriptions {
          }
  
          // ---- 闲置退订 ----

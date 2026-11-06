@@ -5,13 +5,13 @@ $ cargo test --no-fail-fast -p md-grpc --lib -- --test-threads=4
    Compiling md-processor v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-processor)
    Compiling md-connector v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-connector)
    Compiling md-grpc v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-grpc)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.84s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.80s
      Running unittests src/lib.rs (/tmp/md120-mutation-target/debug/deps/md_grpc-7b83cb5dd7a7a3d4)
 
 running 24 tests
 test admin_service::tests::add_subscription_missing_exchange ... ok
-test admin_service::tests::add_and_list_quote_subscription ... ok
 test admin_service::tests::add_subscription_success ... ok
+test admin_service::tests::add_and_list_quote_subscription ... ok
 test admin_service::tests::add_quote_subscription_not_enabled ... ok
 test admin_service::tests::add_subscription_unknown_connector ... ok
 test admin_service::tests::get_subscriptions_after_add ... ok
@@ -26,19 +26,19 @@ test market_data::tests::get_latest_tick_found ... ok
 test market_data::tests::get_latest_tick_missing_exchange ... ok
 test market_data::tests::get_latest_tick_not_found ... ok
 test market_data::tests::subscribe_klines_validation ... ok
-test tests::data_type_conversion ... ok
 test market_data::tests::subscribe_ticks_validation ... ok
+test tests::data_type_conversion ... ok
 test tests::data_type_numeric_values_stable_and_quote_is_new ... ok
-test market_data::tests::subscribe_ticks_receives_data ... ok
 test tests::kline_roundtrip ... ok
 test tests::tick_roundtrip ... ok
+test market_data::tests::subscribe_ticks_receives_data ... ok
 test market_data::tests::grpc_stream_counts_as_receiver_and_releases_on_disconnect ... FAILED
 
 failures:
 
 ---- market_data::tests::grpc_stream_counts_as_receiver_and_releases_on_disconnect stdout ----
 
-thread 'market_data::tests::grpc_stream_counts_as_receiver_and_releases_on_disconnect' (19641156) panicked at crates/md-grpc/src/market_data.rs:456:9:
+thread 'market_data::tests::grpc_stream_counts_as_receiver_and_releases_on_disconnect' (20368114) panicked at crates/md-grpc/src/market_data.rs:456:9:
 assertion `left == right` failed
   left: 1
  right: 0
@@ -48,7 +48,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 failures:
     market_data::tests::grpc_stream_counts_as_receiver_and_releases_on_disconnect
 
-test result: FAILED. 23 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.02s
+test result: FAILED. 23 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.01s
 
 error: test failed, to rerun pass `-p md-grpc --lib`
 error: 1 target failed:

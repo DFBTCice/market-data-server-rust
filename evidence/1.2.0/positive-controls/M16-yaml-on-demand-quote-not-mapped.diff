@@ -1,0 +1,13 @@
+diff --git a/crates/md-server/src/runtime_subs.rs b/crates/md-server/src/runtime_subs.rs
+index 4613984..29c5aa6 100644
+--- a/crates/md-server/src/runtime_subs.rs
++++ b/crates/md-server/src/runtime_subs.rs
+@@ -14,7 +14,7 @@ pub(crate) fn settings_of(rs: &RuntimeSubscriptionsConfig) -> Settings {
+         check_interval: Duration::from_secs(rs.check_interval_seconds),
+         startup_grace: Duration::from_secs(rs.startup_grace_minutes.saturating_mul(60)),
+         max_runtime_subscriptions: rs.max_runtime_subscriptions,
+-        on_demand_quote: rs.on_demand_quote,
++        on_demand_quote: false,
+         ..Settings::default()
+     }
+ }

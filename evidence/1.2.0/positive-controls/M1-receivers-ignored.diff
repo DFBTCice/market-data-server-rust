@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..a1156fa 100644
+index fba60a9..7d57e41 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -651,7 +651,7 @@ impl RuntimeSubscriptions {
+@@ -645,7 +645,7 @@ impl RuntimeSubscriptions {
          let mut runtime_keys: HashSet<SubKey> = HashSet::new();
          let mut idle_candidates: Vec<(SubKey, Duration)> = Vec::new();
          for k in subscribed.keys() {

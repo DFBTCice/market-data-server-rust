@@ -1,9 +1,9 @@
 $ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
    Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.66s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.71s
      Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
 
-running 15 tests
+running 17 tests
 test delete_while_receiving_is_restored_on_demand ... ok
 test delete_of_auto_unsubscribed_target_succeeds ... ok
 test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
@@ -11,12 +11,14 @@ test idle_runtime_subscription_is_unsubscribed_upstream ... ok
 test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... ok
 test limit_refuses_on_demand_and_counts ... FAILED
 test config_subscription_is_never_unsubscribed ... ok
+test quote_topics_are_not_subscribed_on_demand_by_default ... ok
+test quote_topics_are_subscribed_on_demand_when_enabled ... ok
 test legacy_ws_receiver_keeps_subscription ... ok
 test hot_toggle_takes_effect_without_restart ... ok
-test startup_grace_defers_idle_unsubscribe ... ok
 test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
-test rest_reads_refresh_idle_timer ... ok
+test startup_grace_defers_idle_unsubscribe ... ok
 test upstream_rejected_symbol_is_not_retried ... ok
+test rest_reads_refresh_idle_timer ... ok
 test switch_off_changes_nothing ... ok
 test ws_receiver_and_quick_reconnect_keep_subscription ... ok
 
@@ -24,7 +26,7 @@ failures:
 
 ---- limit_refuses_on_demand_and_counts stdout ----
 
-thread 'limit_refuses_on_demand_and_counts' (19633820) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:812:5:
+thread 'limit_refuses_on_demand_and_counts' (20360893) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:876:5:
 assertion `left == right` failed: 达到上限不得补订
   left: 1
  right: 0
@@ -34,7 +36,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 failures:
     limit_refuses_on_demand_and_counts
 
-test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.12s
+test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.88s
 
 error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
 error: 1 target failed:

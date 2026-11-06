@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..562fd0d 100644
+index fba60a9..aa73d4d 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -765,7 +765,7 @@ impl RuntimeSubscriptions {
+@@ -763,7 +763,7 @@ impl RuntimeSubscriptions {
                  continue;
              }
              if let Some(r) = st.rejected.get(&k) {

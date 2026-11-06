@@ -1,7 +1,7 @@
-commit: f1d3c8a24a7c05c7e5e22cf4251e644382de59b5 dirty=0
-SOURCE_DATE_EPOCH=1793974425
-worktree=/tmp/md-final-f1d3c8a
-CARGO_TARGET_DIR=/tmp/md-final-f1d3c8a-target
+commit: 12192d966daf7513f4357cf0a696836ae472c87b dirty=0
+SOURCE_DATE_EPOCH=1793977930
+worktree=/tmp/md-final-12192d9
+CARGO_TARGET_DIR=/tmp/md-final-12192d9-target
 features=md-connector/vendored-tls,md-server/jemalloc-stats
 rustc 1.95.0 (59807616e 2026-04-14)
 cargo 1.95.0 (f2d3ce0bd 2026-03-21)

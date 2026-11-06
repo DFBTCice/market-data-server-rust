@@ -1,9 +1,9 @@
 $ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
    Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.38s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.52s
      Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
 
-running 15 tests
+running 17 tests
 test delete_of_auto_unsubscribed_target_succeeds ... ok
 test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
 test delete_while_receiving_is_restored_on_demand ... FAILED
@@ -13,41 +13,53 @@ test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_dupl
 test limit_refuses_on_demand_and_counts ... FAILED
 test hot_toggle_takes_effect_without_restart ... ok
 test legacy_ws_receiver_keeps_subscription ... ok
+test quote_topics_are_not_subscribed_on_demand_by_default ... FAILED
+test quote_topics_are_subscribed_on_demand_when_enabled ... FAILED
 test startup_grace_defers_idle_unsubscribe ... ok
-test rest_reads_refresh_idle_timer ... ok
 test subscribing_a_topic_missing_upstream_subscribes_on_demand ... FAILED
-test upstream_rejected_symbol_is_not_retried ... FAILED
+test rest_reads_refresh_idle_timer ... ok
 test switch_off_changes_nothing ... ok
+test upstream_rejected_symbol_is_not_retried ... FAILED
 test ws_receiver_and_quick_reconnect_keep_subscription ... ok
 
 failures:
 
 ---- delete_while_receiving_is_restored_on_demand stdout ----
 
-thread 'delete_while_receiving_is_restored_on_demand' (19635211) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:873:5:
+thread 'delete_while_receiving_is_restored_on_demand' (20362405) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:937:5:
 assertion failed: wait_until(Duration::from_secs(2),
         || r.binance.count("SUBSCRIBE", SOL) == 2).await
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ---- auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates stdout ----
 
-thread 'auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates' (19635208) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:704:5:
+thread 'auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates' (20362402) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:768:5:
 应自动补订（POST 一次 + 补订一次）
 
 ---- limit_refuses_on_demand_and_counts stdout ----
 
-thread 'limit_refuses_on_demand_and_counts' (19635362) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:817:5:
+thread 'limit_refuses_on_demand_and_counts' (20362593) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:881:5:
 assertion failed: r.metric("md_runtime_subscriptions_limit_rejected_total") >= 1
+
+---- quote_topics_are_not_subscribed_on_demand_by_default stdout ----
+
+thread 'quote_topics_are_not_subscribed_on_demand_by_default' (20362610) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:1066:5:
+开关已打开：tick 应照常补订
+
+---- quote_topics_are_subscribed_on_demand_when_enabled stdout ----
+
+thread 'quote_topics_are_subscribed_on_demand_when_enabled' (20362613) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:1119:5:
+打开报价补订后应补订 QUOTE
 
 ---- subscribing_a_topic_missing_upstream_subscribes_on_demand stdout ----
 
-thread 'subscribing_a_topic_missing_upstream_subscribes_on_demand' (19635430) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:737:5:
+thread 'subscribing_a_topic_missing_upstream_subscribes_on_demand' (20362681) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:801:5:
 assertion failed: wait_until(Duration::from_secs(2),
         || r.okx.count("subscribe", "trades:SOL-USDT-SWAP") == 1).await
 
 ---- upstream_rejected_symbol_is_not_retried stdout ----
 
-thread 'upstream_rejected_symbol_is_not_retried' (19635454) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:767:5:
+thread 'upstream_rejected_symbol_is_not_retried' (20362779) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:831:5:
 assertion failed: wait_until(Duration::from_secs(2),
         || r.okx.count("subscribe", stream) == 1).await
 
@@ -56,10 +68,12 @@ failures:
     auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates
     delete_while_receiving_is_restored_on_demand
     limit_refuses_on_demand_and_counts
+    quote_topics_are_not_subscribed_on_demand_by_default
+    quote_topics_are_subscribed_on_demand_when_enabled
     subscribing_a_topic_missing_upstream_subscribes_on_demand
     upstream_rejected_symbol_is_not_retried
 
-test result: FAILED. 10 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.33s
+test result: FAILED. 10 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.41s
 
 error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
 error: 1 target failed:

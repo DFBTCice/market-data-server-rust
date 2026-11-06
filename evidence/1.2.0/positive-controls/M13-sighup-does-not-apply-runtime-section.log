@@ -1,56 +1,57 @@
 $ cargo test --no-fail-fast -p md-server -- --test-threads=4
    Compiling md-proto v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-proto)
-   Compiling md-processor v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-processor)
    Compiling md-connector v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-connector)
+   Compiling md-processor v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-processor)
    Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
    Compiling md-grpc v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-grpc)
    Compiling md-server v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-server)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.01s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.53s
      Running unittests src/main.rs (/tmp/md120-mutation-target/debug/deps/md_server-aa857acd75d044e1)
 
-running 48 tests
+running 49 tests
+test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
 test logging::tests::config_level_is_used_when_rust_log_is_unset_or_blank ... ok
 test logging::tests::every_plan_produces_a_valid_env_filter ... ok
-test logging::tests::apply_after_subscriber_is_gone_is_reported_not_panicked ... ok
 test logging::tests::current_filter_reflects_last_applied_level ... ok
-test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
-test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
 test logging::tests::invalid_rust_log_falls_back_to_config_and_says_so ... ok
+test logging::tests::hot_apply_changes_which_events_pass_without_reinstalling_the_subscriber ... ok
 test logging::tests::plain_rust_log_that_disagrees_with_config_warns_loudly ... ok
 test logging::tests::plain_rust_log_that_agrees_with_config_is_quiet ... ok
-test logging::tests::rust_log_takes_precedence_over_config ... ok
+test logging::tests::invalid_level_is_rejected_and_keeps_the_running_filter ... ok
 test logging::tests::rust_log_overrides_and_is_never_touched_by_apply ... ok
+test logging::tests::rust_log_takes_precedence_over_config ... ok
 test process_metrics::tests::render_produces_all_metrics ... ok
 test reload::tests::diff_quote_targets_add_and_remove ... ok
 test reload::tests::canonicalize_log_level_rejects_invalid_values_such_as_a_bad_log_level_env ... ok
 test reload::tests::effective_config_is_derived_identically_for_startup_and_reload ... ok
 test reload::tests::every_restart_only_field_is_detected_individually ... ok
-test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
 test reload::tests::every_sighup_pushes_current_config_lists ... ok
-test reload::tests::identical_configs_have_no_restart_changes ... ok
 test reload::tests::failed_apply_keeps_old_list_and_is_retried_on_next_reload ... ok
+test reload::tests::effective_config_canonicalizes_log_level_spellings ... ok
+test reload::tests::identical_configs_have_no_restart_changes ... ok
 test reload::tests::every_url_stays_pending_across_consecutive_reloads_and_clears_on_revert ... ok
-test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
 test reload::tests::log_level_change_is_hot_applied_once_and_adopted ... ok
-test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
+test reload::tests::log_level_failure_keeps_old_level_and_is_retried_on_next_reload ... ok
 test reload::tests::log_level_hot_update_coexists_with_url_pending_and_subscription_update ... ok
+test reload::tests::missing_connector_keeps_group_pending_until_reverted ... ok
 test reload::tests::offset_port_handles_both_address_forms_and_zero ... ok
 test reload::tests::log_level_is_not_a_restart_only_field ... ok
+test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
 test reload::tests::load_failure_keeps_running_config_and_touches_nothing ... ok
 test reload::tests::quote_group_noop_when_lists_equal_or_connector_missing ... ok
-test reload::tests::okx_business_url_only_change_requires_restart_and_is_not_success ... ok
 test reload::tests::pending_restart_items_accumulate_and_stay_visible ... ok
+test reload::tests::on_demand_quote_alone_is_hot_applied ... FAILED
 test reload::tests::runtime_subscriptions_is_not_a_restart_only_field ... ok
 test reload::tests::runtime_subscriptions_change_is_hot_applied_and_pushed ... FAILED
 test reload::tests::rust_log_override_keeps_log_level_pending_across_reloads_and_clears_on_revert ... ok
+test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
 test reload::tests::sighup_applies_log_level_written_in_any_accepted_spelling ... ok
 test reload::tests::sighup_with_invalid_log_level_in_file_keeps_running_level ... ok
-test reload::tests::subscription_hot_update_applies_once_and_updates_applied_lists ... ok
-test reload::tests::subscription_lists_are_not_restart_changes ... ok
 test reload::tests::subscription_hot_update_coexists_with_pending_url_change ... ok
-test runtime_subs::tests::every_config_list_is_protected_with_canonical_keys ... ok
+test reload::tests::subscription_lists_are_not_restart_changes ... ok
 test reload::tests::unchanged_file_is_fully_applied_and_touches_no_connector ... ok
 test reload::tests::unchanged_log_level_never_touches_the_filter ... ok
+test runtime_subs::tests::every_config_list_is_protected_with_canonical_keys ... ok
 test runtime_subs::tests::settings_follow_yaml ... ok
 test tests::metrics_handler_exposes_quote_metrics ... ok
 test runtime_subs::tests::view_protects_union_of_applied_and_file ... ok
@@ -60,19 +61,25 @@ test tests::start_connectors_connects_each_connector_to_its_configured_url ... o
 
 failures:
 
+---- reload::tests::on_demand_quote_alone_is_hot_applied stdout ----
+
+thread 'reload::tests::on_demand_quote_alone_is_hot_applied' (20371425) panicked at crates/md-server/src/reload.rs:1929:9:
+assertion failed: state.applied().runtime_subscriptions.on_demand_quote
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
 ---- reload::tests::runtime_subscriptions_change_is_hot_applied_and_pushed stdout ----
 
-thread 'reload::tests::runtime_subscriptions_change_is_hot_applied_and_pushed' (19644743) panicked at crates/md-server/src/reload.rs:1898:9:
+thread 'reload::tests::runtime_subscriptions_change_is_hot_applied_and_pushed' (20371428) panicked at crates/md-server/src/reload.rs:1899:9:
 assertion `left == right` failed
-  left: RuntimeSubscriptionsConfig { idle_unsubscribe: false, idle_minutes: 10, check_interval_seconds: 60, startup_grace_minutes: 10, max_runtime_subscriptions: 200 }
- right: RuntimeSubscriptionsConfig { idle_unsubscribe: true, idle_minutes: 2, check_interval_seconds: 60, startup_grace_minutes: 10, max_runtime_subscriptions: 200 }
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+  left: RuntimeSubscriptionsConfig { idle_unsubscribe: false, idle_minutes: 10, check_interval_seconds: 60, startup_grace_minutes: 10, max_runtime_subscriptions: 200, on_demand_quote: false }
+ right: RuntimeSubscriptionsConfig { idle_unsubscribe: true, idle_minutes: 2, check_interval_seconds: 60, startup_grace_minutes: 10, max_runtime_subscriptions: 200, on_demand_quote: false }
 
 
 failures:
+    reload::tests::on_demand_quote_alone_is_hot_applied
     reload::tests::runtime_subscriptions_change_is_hot_applied_and_pushed
 
-test result: FAILED. 47 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+test result: FAILED. 47 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
 
 error: test failed, to rerun pass `-p md-server --bin md-server`
 error: 1 target failed:

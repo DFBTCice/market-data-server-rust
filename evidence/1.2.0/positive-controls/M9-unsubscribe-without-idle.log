@@ -1,9 +1,9 @@
 $ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
    Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.79s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.63s
      Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
 
-running 15 tests
+running 17 tests
 test delete_of_auto_unsubscribed_target_succeeds ... ok
 test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
 test delete_while_receiving_is_restored_on_demand ... ok
@@ -11,11 +11,13 @@ test idle_runtime_subscription_is_unsubscribed_upstream ... FAILED
 test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... ok
 test limit_refuses_on_demand_and_counts ... ok
 test legacy_ws_receiver_keeps_subscription ... ok
+test quote_topics_are_not_subscribed_on_demand_by_default ... ok
 test config_subscription_is_never_unsubscribed ... ok
-test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
+test quote_topics_are_subscribed_on_demand_when_enabled ... ok
 test hot_toggle_takes_effect_without_restart ... ok
-test rest_reads_refresh_idle_timer ... FAILED
+test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
 test startup_grace_defers_idle_unsubscribe ... ok
+test rest_reads_refresh_idle_timer ... FAILED
 test upstream_rejected_symbol_is_not_retried ... ok
 test switch_off_changes_nothing ... ok
 test ws_receiver_and_quick_reconnect_keep_subscription ... FAILED
@@ -24,7 +26,7 @@ failures:
 
 ---- idle_runtime_subscription_is_unsubscribed_upstream stdout ----
 
-thread 'idle_runtime_subscription_is_unsubscribed_upstream' (19638103) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:491:5:
+thread 'idle_runtime_subscription_is_unsubscribed_upstream' (20365117) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:555:5:
 assertion `left == right` failed: 未到闲置时长不得退订
   left: 1
  right: 0
@@ -32,14 +34,14 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ---- rest_reads_refresh_idle_timer stdout ----
 
-thread 'rest_reads_refresh_idle_timer' (19638237) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:650:5:
+thread 'rest_reads_refresh_idle_timer' (20365186) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:714:5:
 assertion `left == right` failed: 持续有 REST 查询时不得退订
   left: 1
  right: 0
 
 ---- ws_receiver_and_quick_reconnect_keep_subscription stdout ----
 
-thread 'ws_receiver_and_quick_reconnect_keep_subscription' (19638328) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:554:5:
+thread 'ws_receiver_and_quick_reconnect_keep_subscription' (20365278) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:618:5:
 assertion `left == right` failed: 闲置时长内重连不得退订
   left: 1
  right: 0
@@ -50,7 +52,7 @@ failures:
     rest_reads_refresh_idle_timer
     ws_receiver_and_quick_reconnect_keep_subscription
 
-test result: FAILED. 12 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.75s
+test result: FAILED. 14 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.34s
 
 error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
 error: 1 target failed:

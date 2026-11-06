@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..04497ca 100644
+index fba60a9..00776d8 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -743,7 +743,7 @@ impl RuntimeSubscriptions {
+@@ -737,7 +737,7 @@ impl RuntimeSubscriptions {
          let mut runtime_count = runtime_keys.len();
          let mut planned: HashSet<SubKey> = HashSet::new();
          let mut batches: DemandBatches = HashMap::new();

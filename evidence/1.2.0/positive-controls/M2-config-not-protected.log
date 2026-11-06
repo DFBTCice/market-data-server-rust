@@ -1,9 +1,9 @@
 $ cargo test --no-fail-fast -p md-gateway --test runtime_subs_gateway -- --test-threads=4
    Compiling md-gateway v0.1.0 (/private/tmp/md120-mutation-wt/crates/md-gateway)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.47s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.87s
      Running tests/runtime_subs_gateway.rs (/tmp/md120-mutation-target/debug/deps/runtime_subs_gateway-6cb6073c6dd68234)
 
-running 15 tests
+running 17 tests
 test delete_while_receiving_is_restored_on_demand ... ok
 test delete_of_auto_unsubscribed_target_succeeds ... ok
 test get_subscriptions_reports_source_and_last_active_when_enabled ... ok
@@ -11,12 +11,14 @@ test idle_runtime_subscription_is_unsubscribed_upstream ... FAILED
 test auto_unsubscribe_then_on_demand_resubscribe_on_same_connection_without_duplicates ... ok
 test config_subscription_is_never_unsubscribed ... FAILED
 test limit_refuses_on_demand_and_counts ... ok
+test quote_topics_are_not_subscribed_on_demand_by_default ... ok
 test legacy_ws_receiver_keeps_subscription ... ok
+test quote_topics_are_subscribed_on_demand_when_enabled ... ok
 test hot_toggle_takes_effect_without_restart ... ok
 test subscribing_a_topic_missing_upstream_subscribes_on_demand ... ok
 test startup_grace_defers_idle_unsubscribe ... ok
-test rest_reads_refresh_idle_timer ... ok
 test upstream_rejected_symbol_is_not_retried ... ok
+test rest_reads_refresh_idle_timer ... ok
 test switch_off_changes_nothing ... ok
 test ws_receiver_and_quick_reconnect_keep_subscription ... ok
 
@@ -24,13 +26,13 @@ failures:
 
 ---- idle_runtime_subscription_is_unsubscribed_upstream stdout ----
 
-thread 'idle_runtime_subscription_is_unsubscribed_upstream' (19628084) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:512:5:
+thread 'idle_runtime_subscription_is_unsubscribed_upstream' (20352039) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:576:5:
 assertion failed: r.has_sub("BTCUSDT").await
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ---- config_subscription_is_never_unsubscribed stdout ----
 
-thread 'config_subscription_is_never_unsubscribed' (19628035) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:529:9:
+thread 'config_subscription_is_never_unsubscribed' (20351991) panicked at crates/md-gateway/tests/runtime_subs_gateway.rs:593:9:
 assertion `left == right` failed: btcusdt@aggTrade 不得被退订
   left: 1
  right: 0
@@ -40,7 +42,7 @@ failures:
     config_subscription_is_never_unsubscribed
     idle_runtime_subscription_is_unsubscribed_upstream
 
-test result: FAILED. 13 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.38s
+test result: FAILED. 15 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.22s
 
 error: test failed, to rerun pass `-p md-gateway --test runtime_subs_gateway`
 error: 1 target failed:

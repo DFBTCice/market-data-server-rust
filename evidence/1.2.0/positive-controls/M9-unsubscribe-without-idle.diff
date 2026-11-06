@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..7daac83 100644
+index fba60a9..b0fb0c7 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -685,7 +685,7 @@ impl RuntimeSubscriptions {
+@@ -679,7 +679,7 @@ impl RuntimeSubscriptions {
                      .max()
                      .unwrap_or(absent);
                  let idle_for = now.saturating_duration_since(idle_start);

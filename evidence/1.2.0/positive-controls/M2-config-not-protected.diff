@@ -1,8 +1,8 @@
 diff --git a/crates/md-gateway/src/runtime_subs.rs b/crates/md-gateway/src/runtime_subs.rs
-index ccd290e..857c50d 100644
+index fba60a9..2b34c9b 100644
 --- a/crates/md-gateway/src/runtime_subs.rs
 +++ b/crates/md-gateway/src/runtime_subs.rs
-@@ -674,9 +674,7 @@ impl RuntimeSubscriptions {
+@@ -668,9 +668,7 @@ impl RuntimeSubscriptions {
                  let ago = now.saturating_duration_since(a).as_millis() as i64;
                  last_active_ms.insert(k.clone(), now_ms - ago);
              }

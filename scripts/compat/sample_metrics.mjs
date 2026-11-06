@@ -45,7 +45,16 @@ const COLS = [
   'connected_sum', 'ws_sent_tick', 'ws_sent_kline', 'ws_sent_quote', 'metrics_lines',
   'tokio_alive_tasks', 'jemalloc_allocated', 'jemalloc_active', 'jemalloc_resident', 'jemalloc_retained', 'jemalloc_mapped',
   'ws_kicked_write_timeout', 'ws_kicked_lagged', 'process_start_time_seconds',
+  // 1.2.0：运行期订阅管理；quote_counts = 各 quote 序列入站累计条数（"交易所/币对=N;..."，相邻两行相减即入站速率）
+  'rt_enabled', 'rt_subscriptions', 'rt_idle_unsubscribed', 'rt_demand_subscribed', 'rt_demand_failed', 'rt_limit_rejected',
+  'quote_counts',
 ];
+const quoteCounts = (m) => [...m]
+  .map(([k, v]) => [k.match(/^md_ingestion_latency_ms_count\{exchange="([^"]*)",type="quote",symbol="([^"]*)"/), v])
+  .filter(([hit]) => hit)
+  .map(([hit, v]) => `${hit[1]}/${hit[2]}=${v}`)
+  .sort()
+  .join(';');
 writeFileSync(out, COLS.join(',') + '\n');
 
 const subKey = (s) => `${s.exchange}|${s.data_type}|${s.symbol}|${s.kline_interval ?? ''}`;
@@ -93,6 +102,13 @@ while (true) {
     ws_kicked_write_timeout: m ? g(m, 'md_ws_kicked_write_timeout_total') : '',
     ws_kicked_lagged: m ? g(m, 'md_ws_kicked_lagged_total') : '',
     process_start_time_seconds: m ? g(m, 'process_start_time_seconds') : '',
+    rt_enabled: m ? g(m, 'md_runtime_subscriptions_enabled') : '',
+    rt_subscriptions: m ? g(m, 'md_runtime_subscriptions') : '',
+    rt_idle_unsubscribed: m ? g(m, 'md_runtime_subscriptions_idle_unsubscribed_total') : '',
+    rt_demand_subscribed: m ? g(m, 'md_runtime_subscriptions_demand_subscribed_total') : '',
+    rt_demand_failed: m ? g(m, 'md_runtime_subscriptions_demand_failed_total') : '',
+    rt_limit_rejected: m ? g(m, 'md_runtime_subscriptions_limit_rejected_total') : '',
+    quote_counts: m ? quoteCounts(m) : '',
   };
   appendFileSync(out, COLS.map((c) => row[c]).join(',') + '\n');
 
