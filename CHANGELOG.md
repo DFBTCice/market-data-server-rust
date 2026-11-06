@@ -8,6 +8,8 @@
 
 **运行期订阅的闲置退订与按需补订**，默认关闭。关闭时：旧 `config.yaml` 原样可用，推送字节、REST/gRPC 字段与语义、旧 `/ws` 行为都不变，
 `/metrics` 只多 6 个值为 0 的指标族。任务书、验收与证据见 `evidence/1.2.0/README.md`。
+候选产物（未上线、待批准）：源码 `6b3949e`，自 `f1d3c8a` 干净 worktree 两次从零构建（jemalloc 特性）SHA-256 一致：
+`f6ab760cc2b62562b188104f10efaabf075723c6c8feae9dd2e14816c61e13ba`（`evidence/1.2.0/build-logs/dist-sha256.txt`）。
 
 ### 新增
 

@@ -4,6 +4,7 @@
 # 两边补入同一份 198 订阅后同时抓 Gateway + Legacy 推送，再用 scripts/compat/compare.mjs 对比。
 # 用法：bash evidence/1.2.0/tools/local_compat.sh [抓取秒数=240] [new 提交=HEAD] [输出目录]
 #      COMPARE_ONLY=1 bash evidence/1.2.0/tools/local_compat.sh 240 HEAD <已有输出目录>   # 只对已抓数据重跑对比
+#      （入库的是 captures.tar.gz + raw-sha256.txt：先 `tar -xzf captures.tar.gz && shasum -a 256 -c raw-sha256.txt` 再重跑）
 # 判据与 1.1.1 一致：push-gateway 只比 tick/kline；quote 单独留证，按 docs/33 §4 裁定只允许 quote.binance.BNBUSDT 的逐字节项有数量差异。
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
@@ -88,5 +89,9 @@ for side in old:$OLD_HTTP new:$NEW_HTTP; do
   curl -s "http://127.0.0.1:$p/metrics" > "$OUT/$n.metrics.txt"
 done
 compare_all
+# 原始抓取打包入库（解开后 COMPARE_ONLY=1 可重跑对比）；解开的目录由同目录 .gitignore 排除
+(cd "$OUT" && find old-gateway new-gateway old-legacy new-legacy -type f | sort | xargs shasum -a 256 > raw-sha256.txt \
+  && COPYFILE_DISABLE=1 tar -czf captures.tar.gz old-gateway new-gateway old-legacy new-legacy \
+  && printf 'old-gateway/\nnew-gateway/\nold-legacy/\nnew-legacy/\n' > .gitignore)
 git worktree remove --force $OLD_WT >/dev/null 2>&1; git worktree remove --force $NEW_WT >/dev/null 2>&1
 echo LOCAL_COMPAT_DONE

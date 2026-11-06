@@ -1,0 +1,16 @@
+commit: f1d3c8a24a7c05c7e5e22cf4251e644382de59b5 dirty=0
+SOURCE_DATE_EPOCH=1793974425
+worktree=/tmp/md-final-f1d3c8a
+CARGO_TARGET_DIR=/tmp/md-final-f1d3c8a-target
+features=md-connector/vendored-tls,md-server/jemalloc-stats
+rustc 1.95.0 (59807616e 2026-04-14)
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+cargo-zigbuild v0.22.3:
+0.16.0
+libprotoc 29.3
+command: cargo zigbuild --locked --offline -p md-server --release --target x86_64-unknown-linux-musl --features md-connector/vendored-tls,md-server/jemalloc-stats
+f6ab760cc2b62562b188104f10efaabf075723c6c8feae9dd2e14816c61e13ba  dist/md-server-1.2.0-f1d3c8a-rebuild-1-linux-x86_64
+f6ab760cc2b62562b188104f10efaabf075723c6c8feae9dd2e14816c61e13ba  dist/md-server-1.2.0-f1d3c8a-rebuild-2-linux-x86_64
+f6ab760cc2b62562b188104f10efaabf075723c6c8feae9dd2e14816c61e13ba  dist/md-server-1.2.0-f1d3c8a-linux-x86_64
+dist/md-server-1.2.0-f1d3c8a-linux-x86_64: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped
+cmp: identical; dirty=0 after both builds
