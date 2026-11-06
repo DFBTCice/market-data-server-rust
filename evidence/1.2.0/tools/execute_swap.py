@@ -144,9 +144,24 @@ try:
     log(f"swap done: {json.dumps(result)}")
 except BaseException as exc:
     log(f"swap failed: {exc}; reverting")
-    revert = S.revert_after_failed_swap(T, old["Id"], inspect_path, log)
-    run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"), T.url(""), "--apply"],
-        "rollback-restore.log", 60)
-    (OUT / "swap-result.json").write_text(json.dumps({"status": "rolled_back", "error": str(exc), "revert": revert,
-        "at_utc": S.now()}, indent=2) + "\n")
+    status = "rolled_back"
+    try:
+        revert = S.revert_after_failed_swap(T, old["Id"], inspect_path, log)
+    except S.RollbackFailed as rexc:
+        status = "revert_failed_new_container_restored" if rexc.restored else "revert_failed_manual_recovery_needed"
+        revert = {"error": str(rexc), "restored": rexc.restored}
+        log(f"revert failed: {rexc}")
+    except BaseException as rexc:
+        status, revert = "revert_failed_manual_recovery_needed", {"error": repr(rexc)}
+        log(f"revert failed: {rexc!r}")
+    try:
+        with (OUT / "rollback-restore.log").open("w") as f:
+            restore_code = subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"),
+                                           T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT,
+                                          timeout=60).returncode
+    except Exception as restore_exc:
+        restore_code = repr(restore_exc)
+    (OUT / "swap-result.json").write_text(json.dumps({"status": status, "error": str(exc), "revert": revert,
+        "restore_subs_exit": restore_code, "at_utc": S.now()}, indent=2, ensure_ascii=False) + "\n")
+    log(f"swap result: {status}; restore_subs exit {restore_code}")
     raise

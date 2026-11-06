@@ -112,36 +112,56 @@ def spec_from_inspect(inspect, image, env=None, labels=None, restart=None):
             "Labels": {**strip_image_labels(cfg.get("Labels")), **(labels or {})}, "HostConfig": host}
 
 
+class RollbackFailed(SystemExit):
+    """回退在动了当前容器之后失败。restored=True：原容器已放回原位并启动（进程重启过，运行期订阅已丢，调用方要补订阅）；
+    restored=False：放回也失败，须按 SWAP_PLAN §4.3 人工兜底。"""
+
+    def __init__(self, message, restored):
+        super().__init__(message)
+        self.restored = restored
+
+
 def ensure_bak(target, inspect_path, log):
-    """二级回退前置检查：回退容器存在、是 1.1.1 镜像、处于停止状态；不存在则按旧容器 inspect 从 md-server:1.1.1 重建并核对。
+    """二级回退前置检查：回退容器存在 → 镜像是 1.1.1、处于停止状态、Cmd / User / Env / 端口与旧容器 inspect 一致；
+    不存在 → 按旧容器 inspect 从 md-server:1.1.1 重建并核对，核对不通过就删掉刚建的容器（不留下可能被误用的回退容器）。
     任何检查不通过都抛异常——调用方此时还没有动当前容器。返回 'present' 或 'recreated'。"""
     target.check_name(target.bak)
+    old = json.loads(pathlib.Path(inspect_path).read_text())
     names = containers_by_name()
     if target.bak in names:
         bak = call("GET", f"{D}/containers/{target.bak}/json")
         assert bak["Image"] == OLD_IMAGE_ID, f"{target.bak} 镜像 {bak['Image'][:19]} 不是 1.1.1"
         assert not bak["State"]["Running"], f"{target.bak} 正在运行"
-        log(f"rollback pre-check: {target.bak} present, image {OLD_IMAGE_ID[:19]}, stopped")
+        for section, field in (("Config", "Cmd"), ("Config", "User"), ("Config", "Env"), ("HostConfig", "PortBindings")):
+            assert bak[section][field] == old[section][field], f"{target.bak} 的 {field} 与旧容器不一致，拒绝使用"
+        log(f"rollback pre-check: {target.bak} present, image {OLD_IMAGE_ID[:19]}, stopped, cmd/user/env/ports match")
         return "present"
-    old = json.loads(pathlib.Path(inspect_path).read_text())
     assert old["Image"] == OLD_IMAGE_ID, "旧容器 inspect 的镜像不是 1.1.1，拒绝据此重建"
     image = call("GET", f"{D}/images/{OLD_IMAGE_TAG}/json")
     assert image["Id"] == OLD_IMAGE_ID, f"{OLD_IMAGE_TAG} 镜像 ID {image['Id'][:19]} 不符"
     spec = spec_from_inspect(old, OLD_IMAGE_TAG, labels={"md-server.recreated-from": old["Id"][:12]},
                              restart={"Name": "no"})
     created = call("POST", f"{D}/containers/create?name={target.bak}", spec)
-    bak = call("GET", f"{D}/containers/{created['Id']}/json")
-    assert bak["Image"] == OLD_IMAGE_ID and bak["Config"]["Env"] == old["Config"]["Env"]
-    for field in ("PortBindings", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig"):
-        assert bak["HostConfig"][field] == old["HostConfig"][field], field
+    try:
+        bak = call("GET", f"{D}/containers/{created['Id']}/json")
+        assert bak["Image"] == OLD_IMAGE_ID, "Image"
+        for section, field in (("Config", "Cmd"), ("Config", "User"), ("Config", "Env")):
+            assert bak[section][field] == old[section][field], field
+        for field in ("PortBindings", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig"):
+            assert bak["HostConfig"][field] == old["HostConfig"][field], field
+    except BaseException as exc:
+        call("DELETE", f"{D}/containers/{created['Id']}?force=1")
+        log(f"rollback pre-check: recreated {target.bak} did not match the old container ({exc}); deleted it")
+        raise
     log(f"rollback pre-check: {target.bak} was missing; recreated {created['Id'][:12]} from {OLD_IMAGE_TAG} "
-        f"with the old container's parameters (verified image, env, ports, memory, cpu, network, logging)")
+        f"with the old container's parameters (verified image, cmd, user, env, ports, memory, cpu, network, logging)")
     return "recreated"
 
 
 def rollback(target, inspect_path, log):
     """二级回退：先 ensure_bak（不通过则不动当前容器）→ 停并改名当前容器为 *-failed → 回退容器改名、恢复重启策略、启动 → 等健康。
-    回退容器 60 秒内不健康时，把刚停掉的容器放回原位并重新启动，然后报错（不让服务空着）。"""
+    动了当前容器之后任何一步失败（含停容器的调用报错、回退容器 60 秒内不健康），都把当前容器放回原位、恢复重启策略、
+    没在运行就启动，然后抛 RollbackFailed（不让服务空着）。"""
     guard()
     cur_name = target.check_name(target.current)
     cur = call("GET", f"{D}/containers/{cur_name}/json")
@@ -149,11 +169,9 @@ def rollback(target, inspect_path, log):
     restart = json.loads(pathlib.Path(inspect_path).read_text())["HostConfig"]["RestartPolicy"] or {"Name": "unless-stopped"}
     failed = target.check_name(f"{target.current}-{int(time.time())}-failed")
     t0 = time.time()
-    stopped = False
     try:
         call("POST", f"{D}/containers/{cur['Id']}/update", {"RestartPolicy": {"Name": "no"}})
         call("POST", f"{D}/containers/{cur['Id']}/stop?t=15")
-        stopped = True
         call("POST", f"{D}/containers/{cur['Id']}/rename?name={failed}")
         call("POST", f"{D}/containers/{target.bak}/rename?name={cur_name}")
         restored = call("GET", f"{D}/containers/{cur_name}/json")
@@ -163,11 +181,14 @@ def rollback(target, inspect_path, log):
         if up is None:
             raise SystemExit("1.1.1 container not healthy within 60s")
     except BaseException as exc:
-        if stopped:
-            log(f"rollback: {exc}; putting the previous container back")
+        log(f"rollback: {exc}; putting the previous container back")
+        try:
             _put_back(target, cur, cur_name)
-            raise SystemExit(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}")
-        raise
+        except BaseException as put_exc:
+            raise RollbackFailed(f"rollback failed ({exc}); putting the previous container back ALSO failed ({put_exc}); "
+                                 f"recover by hand (SWAP_PLAN §4.3)", restored=False) from exc
+        raise RollbackFailed(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}",
+                             restored=True) from exc
     result = {"bak_status": bak_status, "failed_container": failed, "restored_container_id": restored["Id"],
               "health_ready_seconds": up, "outage_seconds": round(time.time() - t0, 1)}
     log(f"rollback done: {result}")
@@ -175,17 +196,18 @@ def rollback(target, inspect_path, log):
 
 
 def _put_back(target, cur, cur_name):
-    """回退失败时把原来的容器放回：占着名字的（回退容器）停掉、改回 *-bak，原容器改回原名、恢复重启策略并启动"""
-    names = containers_by_name()
-    holder = names.get(cur_name)
+    """把原来的容器放回：占着名字的另一个容器（回退容器）停掉、改回 *-bak；原容器改回原名、恢复重启策略，没在运行就启动。
+    任何中间状态都适用（停 / 启动已处于该状态的容器 Docker 返回 304，视为成功）。"""
+    holder = containers_by_name().get(cur_name)
     if holder and holder["Id"] != cur["Id"]:
         call("POST", f"{D}/containers/{holder['Id']}/update", {"RestartPolicy": {"Name": "no"}})
-        call("POST", f"{D}/containers/{holder['Id']}/stop?t=15")
+        call("POST", f"{D}/containers/{holder['Id']}/stop?t=15", ok=(204, 304))
         call("POST", f"{D}/containers/{holder['Id']}/rename?name={target.bak}")
     if containers_by_name().get(cur_name, {}).get("Id") != cur["Id"]:
         call("POST", f"{D}/containers/{cur['Id']}/rename?name={cur_name}")
     call("POST", f"{D}/containers/{cur['Id']}/update", {"RestartPolicy": cur["HostConfig"]["RestartPolicy"]})
-    call("POST", f"{D}/containers/{cur['Id']}/start")
+    if not call("GET", f"{D}/containers/{cur['Id']}/json")["State"]["Running"]:
+        call("POST", f"{D}/containers/{cur['Id']}/start", ok=(204, 304))
 
 
 def revert_after_failed_swap(target, old_id, inspect_path, log):
@@ -198,7 +220,7 @@ def revert_after_failed_swap(target, old_id, inspect_path, log):
     restart = json.loads(pathlib.Path(inspect_path).read_text())["HostConfig"]["RestartPolicy"]
     call("POST", f"{D}/containers/{old_id}/update", {"RestartPolicy": restart})
     if not call("GET", f"{D}/containers/{old_id}/json")["State"]["Running"]:
-        call("POST", f"{D}/containers/{old_id}/start")
+        call("POST", f"{D}/containers/{old_id}/start", ok=(204, 304))
     up = wait_health(target, 60)
     log(f"revert: old container back in place, health {up}")
     return {"reverted_in_place": True, "health_ready_seconds": up}

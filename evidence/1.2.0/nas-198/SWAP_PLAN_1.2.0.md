@@ -38,9 +38,19 @@ sleep 600 && python3 evidence/1.2.0/tools/check_after_swap.py          # 10 分�
 ```
 
 10 分钟验收判据（`check_after_swap.py`）：同一容器、健康、RestartCount = 0、**配置订阅（从 `config.release.yaml` 独立解析）全部还在**；
-换前有、现在没有的运行期订阅，必须每个都有 `runtime subscription idle-unsubscribed:` 日志，且 `md_runtime_subscriptions_idle_unsubscribed_total` 不小于缺失数；
-`md_ws_active_clients >= 2`、开关为 1、jemalloc 指标在。**只记录不判失败**：写超时（为 0，或附日志说明原因）、交易所重连增量、
-`post-swap-24h/prod.csv` 前 10 个采样点的消费者数最小值与变化次数（消费者侧重连风暴检查）。
+换前有、现在没有的运行期订阅中，**TICK / QUOTE** 必须每个都有 `runtime subscription idle-unsubscribed:` 日志，
+且 `md_runtime_subscriptions_idle_unsubscribed_total` 不小于有日志的缺失数；`md_ws_active_clients >= 2`、开关为 1、jemalloc 指标在。
+**运行期 KLINE** 缺失又对不上闲置退订日志时不判失败，单列 `needs_botd_confirmation`：REST DELETE 不打日志，
+业务方关掉 1stbotv3 的 K 线图约 60 秒后，botd 会先退 WS 话题再 DELETE 自己登记的 K 线，这是正常释放。
+**只记录不判失败**：写超时（为 0，或附日志说明原因）、交易所重连增量、`post-swap-24h/prod.csv` 前 10 个采样点的消费者数最小值与变化次数（消费者侧重连风暴检查）。
+
+结论 `verdict` 三种（同时写在 `swap/ten-minute.json` 和输出最后一行）：
+
+| verdict | 退出码 | 怎么办 |
+|---|---|---|
+| `pass` | 0 | 通过 |
+| `pass_needs_botd_confirmation` | 0 | **不回退**。把 `needs_botd_confirmation` 清单（如 `KLINE binance BTCUSDT 30m`）交业务方转主审，由主审对照 botd 日志「已释放行情服务端 K 线订阅 <交易所> <币对> <级别>」核对 |
+| `fail` | 1 | 按第 4 节回退（配置订阅缺失、TICK / QUOTE 缺失对不上日志、退订计数不足、消费者不足、健康 / 重启 / 开关 / jemalloc 任一不符） |
 
 ## 4. 回退（两级，均有现成工具，已在 198 旁路演练，见 `drill/` 与 `SWAP_TOOLS_REPORT.md`）
 
@@ -64,17 +74,47 @@ APPROVED="<批准人 时间>" python3 evidence/1.2.0/tools/rollback_to_111.py
 工具步骤（全部自动）：
 
 1. 存档当前订阅 `swap/rollback-<时间>/subscriptions.archived.json` 与当前指标。
-2. **回退容器前置检查（不通过则不动当前容器）**：`md-server-1.1.1-bak` 存在 → 断言镜像 ID 是 1.1.1、处于停止状态；
-   不存在 → 按 `swap/old-container.inspect.json` 从 `md-server:1.1.1`（断言镜像 ID `3250e021…`）重建，核对镜像、环境、端口、内存、CPU、网络、日志配置后再切换。
+2. **回退容器前置检查（不通过则不动当前容器）**：`md-server-1.1.1-bak` 存在 → 断言镜像 ID 是 1.1.1、处于停止状态、Cmd / User / Env / 端口与旧容器一致；
+   不存在 → 按 `swap/old-container.inspect.json` 从 `md-server:1.1.1`（断言镜像 ID `3250e021…`）重建，核对镜像、Cmd、User、环境、端口、内存、CPU、网络、日志配置后再切换；
+   重建出来的容器核对不通过就删掉（不留下可能被下次误用的回退容器）。
 3. 当前容器重启策略改 no → 停止 → 改名 `md-server-<时间戳>-failed`（保留现场）→ 回退容器改名 `md-server`、恢复原重启策略、启动 → 60 秒内健康。
-   回退后的 1.1.1 不健康时，把刚停的容器放回原位并启动（服务不留空），然后报错。
-4. `restore_subs.mjs <存档订阅> http://192.168.1.198:8081 --apply`。
-5. 核对：镜像为 1.1.1、`process_start_time_seconds` 已变化、`md_runtime_subscriptions*` 指标消失、restore 成功、健康。结果写 `rollback-result.json`。
+   动了当前容器之后**任何一步**失败（包括停容器的调用报错、回退容器启动报错、60 秒内不健康），都把当前容器放回原位：
+   占着名字的回退容器停掉并改回 `-bak`，当前容器改回原名、恢复原重启策略、没在运行就启动（服务不留空），然后报错。
+4. `restore_subs.mjs <存档订阅> http://192.168.1.198:8081 --apply`（回退失败、原容器被放回时也照样补，因为它被停过一次，运行期订阅已丢）。
+5. 核对：镜像为 1.1.1、`process_start_time_seconds` 已变化、`md_runtime_subscriptions*` 指标消失、restore 成功、健康。结果写 `rollback-result.json`，`status` 为：
+   `rolled_back`（成功）、`refused_before_touching_current`（前置检查不过，现网没动）、`rollback_failed_previous_restored`（已放回 1.2.0 并补了订阅）、
+   `rollback_failed_manual_recovery_needed`（放回也失败 → 立即按 4.3 人工兜底）。
 
-`execute_swap.py` 的自动回退走同一套逻辑（`swaplib.revert_after_failed_swap`：新容器已建 → 上面的二级回退；新容器没建成 → 把旧容器放回原位启动）。
+`execute_swap.py` 的自动回退走同一套逻辑（`swaplib.revert_after_failed_swap`：新容器已建 → 上面的二级回退；新容器没建成 → 把旧容器放回原位启动）；
+自动回退本身失败时也照样补订阅并写 `swap-result.json`（`status` 为 `revert_failed_new_container_restored` 或 `revert_failed_manual_recovery_needed`）。
 
-触发条件：健康 60 秒不恢复（自动）；消费者 90 秒未回到 2 个（自动）；10 分钟验收不通过；24 小时内出现 OMS / botd 数据中断、重连风暴、RSS 异常增长或配置订阅被退。
-观察期内保留 `md-server-*-bak` 容器与 `md-server:1.1.1` 镜像。
+触发条件：健康 60 秒不恢复（自动）；消费者 90 秒未回到 2 个（自动）；10 分钟验收 `verdict` 为 `fail`（`pass_needs_botd_confirmation` **不回退**，见第 3 节）；
+24 小时内出现 OMS / botd 数据中断、重连风暴、RSS 异常增长或配置订阅被退。
+观察期内保留 `md-server-*-bak` 容器与 `md-server:1.1.1` 镜像（镜像不在就无法二级回退：脚本会拒绝回退、不停现网）。
+
+### 4.3 人工兜底（Portainer 中途不可用、脚本报 `manual_recovery_needed` 或脚本中断时）
+
+目标只有一个：**让一个名叫 `md-server` 的容器跑起来并健康**，优先 1.1.1。业务方在 Portainer 界面操作
+（`http://192.168.1.198:9000` → 环境 `local` → Containers；改名在容器详情页名字旁的编辑按钮，重启策略在详情页下方 Restart policies → Update）：
+
+1. **先看现状**：容器列表里搜 `md-server`，记下 `md-server`、`md-server-1.1.1-bak`、`md-server-<时间戳>-failed` 各自是否存在、是否在运行、镜像是什么。
+   `md-server` 在运行且 `curl -s http://192.168.1.198:8081/health` 返回 `{"status":"ok"…}` → 服务没空着，不用动，把现状告诉我。
+2. **`md-server` 不在运行**：
+   - 若存在名叫 `md-server` 但没在运行的容器 → 先把它改名为 `md-server-<当前时间>-failed`（腾出名字），不要删。
+   - (i) 有 `md-server-1.1.1-bak`（镜像 `md-server:1.1.1`）→ 改名为 `md-server` → 重启策略改为 `Unless stopped` → Start。
+   - (ii) 没有回退容器 → 把时间戳最新的 `md-server-<时间戳>-failed`（回退前在跑的 1.2.0，镜像 `md-server:1.2.0`）改回 `md-server`
+     → 重启策略改为 `Unless stopped` → Start，先保证服务不空着；之后由我用 `rollback_to_111.py` 重建回退容器再切 1.1.1。
+   - 两者都没有 → 告诉我，由我按 `swap/old-container.inspect.json` 用 `rollback_to_111.py` 重建（Portainer 恢复后）。
+   - 不要用 `md-server-1.1.0-quote-bnb-bak`（1.1.0 时代的旧回退容器，与本次无关）。
+3. **等健康**：`curl -s http://192.168.1.198:8081/health`，30 秒内应为 ok。
+4. **补订阅**（这台 MacBook 上执行，不需要 Portainer）：
+   `node scripts/compat/restore_subs.mjs evidence/1.2.0/nas-198/swap/subscriptions.before.json http://192.168.1.198:8081 --apply`
+   （回退过程中存过档的话，用更新的 `swap/rollback-*/subscriptions.archived.json`）。
+5. **核对**：`curl -s http://192.168.1.198:8081/metrics | grep -E '^(md_ws_active_clients|process_start_time_seconds|md_runtime_subscriptions_enabled) '`；
+   消费者回到 2 个；1.1.1 没有 `md_runtime_subscriptions_enabled` 这一行。
+
+有 198 的 shell 时，等价命令：`docker ps -a --filter name=md-server`、`docker rename <旧名> <新名>`、`docker update --restart unless-stopped md-server`、
+`docker start md-server`。人工兜底后，把操作过程与时间告诉我，我补记到 `swap/` 并通知主审。
 
 ## 5. 24 小时采样（`post-swap-24h/prod.csv`，每分钟）
 

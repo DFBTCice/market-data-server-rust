@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """换版后 10 分钟验收（只读：GET 现网接口 + Portainer 容器信息与日志）。
 判据：同一容器、健康、RestartCount=0、配置订阅（从 config.release.yaml 独立解析）全部还在、
-缺失的运行期订阅都能对上 idle-unsubscribed 日志且 md_runtime_subscriptions_idle_unsubscribed_total 不小于缺失数、
+缺失的运行期 TICK / QUOTE 都能对上 idle-unsubscribed 日志且 md_runtime_subscriptions_idle_unsubscribed_total 不小于已解释数、
 md_ws_active_clients >= 2、开关为 1、jemalloc 指标在。
+缺失且对不上日志的运行期 KLINE 不判失败，单列 needs_botd_confirmation（结论 pass_needs_botd_confirmation，不回退，交主审对照 botd 日志）。
+退出码：0 = pass / pass_needs_botd_confirmation，1 = fail。
 只记录不判失败：写超时（为 0 或附日志说明）、交易所重连增量（辅助）、消费者口径（post-swap-24h/prod.csv 前 10 分钟 ws_clients 最小值与变化次数）。
 用法：python3 evidence/1.2.0/tools/check_after_swap.py            # 现网
       python3 evidence/1.2.0/tools/check_after_swap.py --drill <换版输出目录>"""
@@ -58,20 +60,31 @@ def idle_unsubscribed_keys(log_lines):
 
 
 def judge_subscriptions(before, now_subs, log_lines, metrics, config_path):
-    """配置订阅必须全在；缺失的运行期订阅必须每个都有 idle-unsubscribed 日志，且退订计数不小于缺失数"""
+    """配置订阅必须全在。换前有、现在没有的运行期订阅：有 idle-unsubscribed 日志的算已解释（退订计数须不小于已解释数）；
+    没有日志的 TICK / QUOTE 判失败；没有日志的 KLINE 不判失败，单列 needs_botd_confirmation——REST DELETE 不打日志，
+    botd 在 K 线图关闭约 60 秒后会 DELETE 自己登记的 K 线，须由主审对照 botd 日志「已释放行情服务端 K 线订阅」确认。"""
     now_keys = {key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) for s in now_subs}
     expected_config = config_keys(config_path)
     before_keys = {key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) for s in before}
     missing_config = sorted(expected_config - now_keys)
     missing_runtime = sorted(before_keys - now_keys - expected_config)
-    unexplained = [k for k in missing_runtime if k not in idle_unsubscribed_keys(log_lines)]
+    logged = idle_unsubscribed_keys(log_lines)
+    explained = [k for k in missing_runtime if k in logged]
+    needs_botd = [k for k in missing_runtime if k not in logged and k[1] == 2]
+    unexplained = [k for k in missing_runtime if k not in logged and k[1] != 2]
     idle_total = S.metric(metrics, "md_runtime_subscriptions_idle_unsubscribed_total") or 0
     return {
         "config_subscriptions_expected": len(expected_config), "missing_config": missing_config,
-        "missing_runtime": missing_runtime, "missing_runtime_unexplained": unexplained, "idle_unsubscribed_total": idle_total,
+        "missing_runtime": missing_runtime, "missing_runtime_explained": explained,
+        "missing_runtime_unexplained": unexplained, "needs_botd_confirmation": needs_botd,
+        "idle_unsubscribed_total": idle_total,
         "config_subscriptions_present": not missing_config,
-        "missing_runtime_explained_by_idle_unsubscribe": not unexplained and idle_total >= len(missing_runtime),
+        "missing_tick_quote_explained_by_idle_unsubscribe": not unexplained and idle_total >= len(explained),
     }
+
+
+def botd_note(needs_botd):
+    return [f"{TYPES[k[1]]} {k[0]} {k[2]} {k[3]}" for k in needs_botd]
 
 
 def main():
@@ -100,16 +113,20 @@ def main():
         "healthy": c["State"].get("Health", {}).get("Status") == "healthy",
         "restart_count_0": c["RestartCount"] == 0,
         "config_subscriptions_present": subs["config_subscriptions_present"],
-        "missing_runtime_explained_by_idle_unsubscribe": subs["missing_runtime_explained_by_idle_unsubscribe"],
+        "missing_tick_quote_explained_by_idle_unsubscribe": subs["missing_tick_quote_explained_by_idle_unsubscribe"],
         "ws_active_clients_ok": clients >= MIN_CLIENTS,
         "runtime_switch_on": S.metric(metrics, "md_runtime_subscriptions_enabled") == 1,
         "jemalloc_metrics": "\nmd_jemalloc_allocated_bytes " in metrics,
     }
+    passed = all(checks.values())
+    verdict = "fail" if not passed else ("pass_needs_botd_confirmation" if subs["needs_botd_confirmation"] else "pass")
     record = {
-        "mode": T.mode, "checked_at_utc": S.now(), "checks": checks, "pass": all(checks.values()),
+        "mode": T.mode, "checked_at_utc": S.now(), "verdict": verdict, "checks": checks, "pass": passed,
+        "needs_botd_confirmation": botd_note(subs["needs_botd_confirmation"]),
         "config_subscriptions_expected": subs["config_subscriptions_expected"], "missing_config": subs["missing_config"],
         "subscriptions_before": len(before), "subscriptions_now": len(now_subs),
-        "missing_runtime": subs["missing_runtime"], "missing_runtime_unexplained": subs["missing_runtime_unexplained"],
+        "missing_runtime": subs["missing_runtime"], "missing_runtime_explained": subs["missing_runtime_explained"],
+        "missing_runtime_unexplained": subs["missing_runtime_unexplained"],
         "idle_unsubscribed_total": subs["idle_unsubscribed_total"], "ws_active_clients": clients,
         "recorded_only": {
             "write_timeout_total": write_timeouts,
@@ -120,8 +137,13 @@ def main():
     }
     (OUT / "ten-minute.json").write_text(json.dumps(record, indent=2) + "\n")
     (OUT / "metrics.ten-minute.txt").write_text(metrics)
-    print(json.dumps(record, indent=2))
-    sys.exit(0 if record["pass"] else 1)
+    print(json.dumps(record, indent=2, ensure_ascii=False))
+    if verdict == "pass_needs_botd_confirmation":
+        print(f"VERDICT pass_needs_botd_confirmation: 不回退。以下运行期 K 线缺失、没有闲置退订日志，可能是 botd 释放了自己的订阅，"
+              f"请把清单交业务方转主审对照 botd 日志「已释放行情服务端 K 线订阅」核对：{record['needs_botd_confirmation']}")
+    else:
+        print(f"VERDICT {verdict}")
+    sys.exit(0 if passed else 1)
 
 
 if __name__ == "__main__":

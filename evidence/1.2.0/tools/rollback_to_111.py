@@ -42,10 +42,43 @@ subs = S.http_get(T, "/api/v1/subscriptions")
 (OUT / "metrics.before.txt").write_text(before_metrics)
 start_before = S.metric(before_metrics, "process_start_time_seconds")
 log(f"archived {len(json.loads(subs))} subscriptions from {T.current}; process_start_time_seconds={start_before}")
-result = S.rollback(T, INSPECT, log)
-with open(OUT / "restore.log", "w") as f:
-    restore_code = subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.archived.json"),
-                                   T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=60).returncode
+
+
+def write_record(record):
+    (OUT / "rollback-result.json").write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
+    log(f"rollback result: {json.dumps(record, ensure_ascii=False)}")
+
+
+def restore_archived():
+    """把刚存档的订阅补到现在占着名字的容器上（回退成功是 1.1.1；回退失败、原容器放回时是放回的容器）"""
+    with open(OUT / "restore.log", "w") as f:
+        return subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.archived.json"),
+                               T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=60).returncode
+
+
+def safe(fn, default=None):
+    try:
+        return fn()
+    except Exception:
+        return default
+
+
+try:
+    result = S.rollback(T, INSPECT, log)
+except S.RollbackFailed as exc:
+    restore_code = safe(restore_archived, "error") if exc.restored else None
+    after_metrics = safe(lambda: S.http_get(T, "/metrics").decode(), "")
+    write_record({"mode": T.mode, "at_utc": S.now(), "status": "rollback_failed_previous_restored" if exc.restored
+                  else "rollback_failed_manual_recovery_needed", "error": str(exc),
+                  "restore_subs_exit": restore_code, "process_start_time_before": start_before,
+                  "process_start_time_after": S.metric(after_metrics, "process_start_time_seconds"),
+                  "healthy_now": safe(lambda: S.wait_health(T, 5)) is not None, "pass": False})
+    raise
+except BaseException as exc:
+    write_record({"mode": T.mode, "at_utc": S.now(), "status": "refused_before_touching_current", "error": repr(exc),
+                  "process_start_time_before": start_before, "pass": False})
+    raise
+restore_code = restore_archived()
 after_metrics = S.http_get(T, "/metrics").decode()
 (OUT / "metrics.after.txt").write_text(after_metrics)
 current = call("GET", f"{D}/containers/{T.current}/json")
@@ -56,10 +89,9 @@ checks = {
     "restore_subs_ok": restore_code == 0,
     "healthy_now": S.wait_health(T, 5) is not None,
 }
-record = {"mode": T.mode, "at_utc": S.now(), **result, "process_start_time_before": start_before,
+record = {"mode": T.mode, "at_utc": S.now(), "status": "rolled_back", **result, "process_start_time_before": start_before,
           "process_start_time_after": S.metric(after_metrics, "process_start_time_seconds"),
           "subscriptions_after": len(json.loads(S.http_get(T, "/api/v1/subscriptions"))), "checks": checks,
           "pass": all(checks.values())}
-(OUT / "rollback-result.json").write_text(json.dumps(record, indent=2) + "\n")
-log(f"rollback result: {json.dumps(record)}")
+write_record(record)
 sys.exit(0 if record["pass"] else 1)
