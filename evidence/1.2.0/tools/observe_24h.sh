@@ -19,7 +19,9 @@ case "$power" in
   *) echo "WARNING: not on AC power ($power); caffeinate -s will not prevent system sleep" >&2 ;;
 esac
 date -u +%FT%TZ > "$OUT/started-at.txt"
-nohup caffeinate -i -s node scripts/compat/sample_metrics.mjs http://192.168.1.198:8081 86460 60 "$OUT/prod.csv" --snapshot-every-min 60 \
+# setsid 放进独立会话：启动它的命令（包括 agent 的命令工具）结束时会结束整个进程组，nohup 只挡 SIGHUP 挡不住
+nohup perl -MPOSIX -e 'POSIX::setsid() or die "setsid: $!"; exec @ARGV' \
+  caffeinate -i -s node scripts/compat/sample_metrics.mjs http://192.168.1.198:8081 86460 60 "$OUT/prod.csv" --snapshot-every-min 60 \
   > "$OUT/sampler.log" 2>&1 &
 echo $! > "$OUT/sampler.pid"
 sleep 2

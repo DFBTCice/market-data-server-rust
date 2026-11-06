@@ -1,0 +1,17 @@
+{"stream":"Step 1/4 : FROM md-server:1.0.0-rollback"}
+{"stream":"\n"}
+{"stream":" ---\u003e 06907bdf7fd8\n"}
+{"stream":"Step 2/4 : COPY md-server /usr/local/bin/md-server"}
+{"stream":"\n"}
+{"stream":" ---\u003e 9a6b8f9d2ab1\n"}
+{"stream":"Step 3/4 : COPY config.yaml /etc/md-server/config.yaml"}
+{"stream":"\n"}
+{"stream":" ---\u003e ed2f2102bc78\n"}
+{"stream":"Step 4/4 : LABEL org.opencontainers.image.revision=\"42bc897e6b9180214cf50a5264a28131b8196b3e\" md-server.binary.sha256=\"cbc6b0531b833f38fa5e4666be286d24d01ad169230ba855c8a5f126aed887bf\" md-server.config.sha256=\"44a5e0e6523b22be657372a17cf2c96a7c76bfad6f7e2c41927f7d7ca2405949\""}
+{"stream":"\n"}
+{"stream":" ---\u003e Running in 471f1666ac06\n"}
+{"stream":" ---\u003e Removed intermediate container 471f1666ac06\n"}
+{"stream":" ---\u003e 1dc6447e8b33\n"}
+{"aux":{"ID":"sha256:1dc6447e8b33487376ab10cf04fbe191c40bbbb80269c739322b089743004ab7"}}
+{"stream":"Successfully built 1dc6447e8b33\n"}
+{"stream":"Successfully tagged md-server:1.2.0\n"}

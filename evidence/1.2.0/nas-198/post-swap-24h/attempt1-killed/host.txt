@@ -1,0 +1,12 @@
+started_at_utc=2026-11-06T18:27:55Z
+host=lihao的MacBook Pro
+model=MacBookPro18,3
+power=Now drawing from 'AC Power'
+caffeinate=caffeinate -i -s (pid 56908)
+--- pmset -g assertions (caffeinate lines)
+   pid 56910(caffeinate): [0x0009b91f00019b8c] 00:00:02 PreventUserIdleSystemSleep named: "caffeinate command-line tool"  
+	Details: caffeinate asserting on behalf of 'node' (pid 56908)
+	Localized=THE CAFFEINATE TOOL IS PREVENTING SLEEP.
+   pid 56910(caffeinate): [0x0009b91f00079b8d] 00:00:02 PreventSystemSleep named: "caffeinate command-line tool"  
+	Details: caffeinate asserting on behalf of 'node' (pid 56908)
+	Localized=THE CAFFEINATE TOOL IS PREVENTING SLEEP.
