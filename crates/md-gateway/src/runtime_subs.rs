@@ -9,7 +9,7 @@
 //!   闲置起点取"首次观察到没有接收端"的检查时刻，所以实际闲置时长只会 ≥ `idle`、不会提前。
 //!   开关打开（进程启动或 SIGHUP 打开）后 `startup_grace` 内不退订。
 //! - **按需补订**：某 topic 有接收端、上游却没有对应订阅时，按运行期订阅补订（新接收端登记后约 200ms 内，每次检查再兜底一次）。
-//!   只接受已配置的交易所和类型（与 POST 同一路由规则）；上游明确拒绝的目标缓存失败并指数退避；
+//!   只接受已配置的交易所和类型（与 POST 同一路由规则），QUOTE 还须 `on_demand_quote` 打开；上游明确拒绝的目标缓存失败并指数退避；
 //!   运行期订阅数达到上限后不再补订；本模块向每个连接器发出的订阅变更消息经令牌桶限速，避免挤占同一连接上的配置订阅。
 //!
 //! 开关关闭时本模块不读也不改任何订阅，只丢弃收到的通知，行为与 1.1.1 相同。
@@ -65,6 +65,8 @@ pub struct Settings {
     pub check_interval: Duration,
     pub startup_grace: Duration,
     pub max_runtime_subscriptions: usize,
+    /// QUOTE 是否参与按需补订（`on_demand_quote`，默认 false）；不影响 POST 登记的 QUOTE 与闲置退订
+    pub on_demand_quote: bool,
     /// 新接收端登记后等这么久再处理，把同一时刻的多个订阅合成一条上游消息
     pub demand_batch_delay: Duration,
     /// 上游拒绝后第一次重试前的等待；之后每次翻倍，封顶 `reject_backoff_max`
@@ -83,6 +85,7 @@ impl Default for Settings {
             check_interval: Duration::from_secs(60),
             startup_grace: Duration::from_secs(10 * 60),
             max_runtime_subscriptions: 200,
+            on_demand_quote: false,
             demand_batch_delay: Duration::from_millis(200),
             reject_backoff_initial: Duration::from_secs(5 * 60),
             reject_backoff_max: Duration::from_secs(60 * 60),
@@ -582,12 +585,8 @@ impl RuntimeSubscriptions {
             self.shared.enabled.store(true, Ordering::Relaxed);
             self.metrics.enabled.store(1, Ordering::Relaxed);
             info!(
-                "runtime subscriptions: idle unsubscribe and on-demand subscribe ENABLED \
-                 (idle_minutes={}, check_interval_seconds={}, startup_grace_minutes={}, max_runtime_subscriptions={})",
-                s.idle.as_secs_f64() / 60.0,
-                s.check_interval.as_secs_f64(),
-                s.startup_grace.as_secs_f64() / 60.0,
-                s.max_runtime_subscriptions
+                "runtime subscriptions: idle unsubscribe and on-demand subscribe ENABLED ({})",
+                describe(s)
             );
             self.nudge.notify_one();
         } else if !s.enabled && was_enabled {
@@ -604,13 +603,8 @@ impl RuntimeSubscriptions {
                  (current subscriptions are kept as they are)"
             );
         } else if s.enabled && old.is_some_and(|o| o != s) {
-            info!(
-                "runtime subscriptions: settings changed (idle_minutes={}, check_interval_seconds={}, startup_grace_minutes={}, max_runtime_subscriptions={})",
-                s.idle.as_secs_f64() / 60.0,
-                s.check_interval.as_secs_f64(),
-                s.startup_grace.as_secs_f64() / 60.0,
-                s.max_runtime_subscriptions
-            );
+            info!("runtime subscriptions: settings changed ({})", describe(s));
+            self.nudge.notify_one();
         }
     }
 
@@ -748,6 +742,10 @@ impl RuntimeSubscriptions {
                 continue;
             };
             if subscribed.contains_key(&k) || !planned.insert(k.clone()) {
+                continue;
+            }
+            if k.data_type == DataType::Quote && !s.on_demand_quote {
+                debug!("on-demand subscribe skipped, on_demand_quote=false: {}", k);
                 continue;
             }
             let Some((name, conn)) = route(&conns, &k) else {
@@ -920,6 +918,17 @@ impl RuntimeSubscriptions {
             );
         }
     }
+}
+
+fn describe(s: &Settings) -> String {
+    format!(
+        "idle_minutes={}, check_interval_seconds={}, startup_grace_minutes={}, max_runtime_subscriptions={}, on_demand_quote={}",
+        s.idle.as_secs_f64() / 60.0,
+        s.check_interval.as_secs_f64(),
+        s.startup_grace.as_secs_f64() / 60.0,
+        s.max_runtime_subscriptions,
+        s.on_demand_quote
+    )
 }
 
 fn new_ticker(every: Duration) -> tokio::time::Interval {

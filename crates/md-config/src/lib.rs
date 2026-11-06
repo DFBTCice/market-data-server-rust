@@ -41,6 +41,10 @@ pub struct RuntimeSubscriptionsConfig {
     /// 运行期订阅总数达到该值后不再按需补订（≥ 1；POST 登记不受限）
     #[serde(default = "default_runtime_max_subscriptions")]
     pub max_runtime_subscriptions: usize,
+    /// QUOTE（报价）是否参与按需补订，默认 false：报价按"一次一个币对、各观察 24 小时"经配置名单扩量，
+    /// 关闭时订阅 `quote.*` 话题不会补订 QUOTE。POST 登记的 QUOTE 不受影响，照常参与闲置退订。
+    #[serde(default)]
+    pub on_demand_quote: bool,
 }
 
 pub const DEFAULT_RUNTIME_IDLE_MINUTES: u64 = 10;
@@ -72,6 +76,7 @@ impl Default for RuntimeSubscriptionsConfig {
             check_interval_seconds: DEFAULT_RUNTIME_CHECK_INTERVAL_SECONDS,
             startup_grace_minutes: DEFAULT_RUNTIME_STARTUP_GRACE_MINUTES,
             max_runtime_subscriptions: DEFAULT_RUNTIME_MAX_SUBSCRIPTIONS,
+            on_demand_quote: false,
         }
     }
 }
@@ -920,6 +925,18 @@ processor:
         assert_eq!(cfg.runtime_subscriptions.check_interval_seconds, 60);
         assert_eq!(cfg.runtime_subscriptions.startup_grace_minutes, 10);
         assert_eq!(cfg.runtime_subscriptions.max_runtime_subscriptions, 200);
+        assert!(!cfg.runtime_subscriptions.on_demand_quote);
+    }
+
+    #[test]
+    fn on_demand_quote_defaults_off_and_parses() {
+        let cfg = load_config_from_str(&sample_with_runtime("  idle_unsubscribe: true")).unwrap();
+        assert!(!cfg.runtime_subscriptions.on_demand_quote);
+        let cfg = load_config_from_str(&sample_with_runtime(
+            "  idle_unsubscribe: true\n  on_demand_quote: true",
+        ))
+        .unwrap();
+        assert!(cfg.runtime_subscriptions.on_demand_quote);
     }
 
     #[test]

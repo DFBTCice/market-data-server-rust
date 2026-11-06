@@ -31,6 +31,7 @@ fn fast_settings() -> Settings {
         check_interval: CHECK,
         startup_grace: Duration::ZERO,
         max_runtime_subscriptions: 50,
+        on_demand_quote: false,
         demand_batch_delay: Duration::from_millis(50),
         reject_backoff_initial: Duration::from_secs(60),
         reject_backoff_max: Duration::from_secs(600),
@@ -146,6 +147,15 @@ impl FakeUpstream {
         let _ = self.push_tx.send((stream, payload.to_string()));
     }
 
+    fn push_binance_book_ticker(&self, symbol: &str, bid: &str) {
+        let stream = format!("{}@bookTicker", symbol.to_lowercase());
+        let payload = serde_json::json!({
+            "stream": stream,
+            "data": {"e":"bookTicker","u":1,"s":symbol,"b":bid,"B":"1.5","a":"999","A":"2.5","T":1791531605400i64,"E":1791531605419i64}
+        });
+        let _ = self.push_tx.send((stream, payload.to_string()));
+    }
+
     fn push_okx_trade(&self, inst_id: &str, id: i64) {
         let stream = format!("trades:{}", inst_id);
         let payload = serde_json::json!({
@@ -252,6 +262,16 @@ fn tick_target(ex: &str, sym: &str) -> SubscriptionTarget {
 
 /// `config_ticks`：币安配置名单里的 tick 币对（受保护）；`okx_reject`：OKX 假上游拒绝的合约
 async fn rig(settings: Settings, config_ticks: &[&str], okx_reject: &[&str]) -> Rig {
+    rig_full(settings, config_ticks, &[], okx_reject).await
+}
+
+/// 同上，另带币安配置报价名单 `config_quotes`：非空时才启动 `binance-quote` 连接器（与现网创建条件一致）
+async fn rig_full(
+    settings: Settings,
+    config_ticks: &[&str],
+    config_quotes: &[&str],
+    okx_reject: &[&str],
+) -> Rig {
     let processor = Arc::new(Processor::new(1000, 1000));
     let p = processor.clone();
     tokio::spawn(async move { p.run().await });
@@ -297,16 +317,53 @@ async fn rig(settings: Settings, config_ticks: &[&str], okx_reject: &[&str]) -> 
             processor.kline_tx(),
             Duration::from_millis(200),
         )
-        .with_reject_sink(reject_tx),
+        .with_reject_sink(reject_tx.clone()),
     );
     let mut map: HashMap<String, Arc<dyn Connector>> = HashMap::new();
     map.insert("binance".into(), b.clone());
     map.insert("okx".into(), o.clone());
+    let quote_targets: Vec<SubscriptionTarget> = config_quotes
+        .iter()
+        .map(|s| SubscriptionTarget {
+            exchange: "binance".into(),
+            data_type: DataType::Quote,
+            symbol: s.to_string(),
+            kline_interval: None,
+        })
+        .collect();
+    if !quote_targets.is_empty() {
+        let q = Arc::new(
+            BaseConnector::new(
+                BinanceAdapter::new_quote(BinanceConnectorConfig {
+                    stream_base_url: binance.url.clone(),
+                    subscribe_ticks: vec![],
+                    subscribe_klines: HashMap::new(),
+                    reconnect_delay: Duration::from_millis(200),
+                    ping_interval: Duration::from_secs(30),
+                }),
+                processor.tick_tx(),
+                processor.kline_tx(),
+                Duration::from_millis(200),
+            )
+            .with_quote(
+                processor.quote_tx(),
+                processor.metrics.quotes_dropped.clone(),
+            )
+            .with_reject_sink(reject_tx),
+        );
+        q.add_subscriptions(quote_targets.clone()).await.unwrap();
+        map.insert("binance-quote".into(), q.clone());
+        tokio::spawn(async move { q.run_connection_loop().await });
+    }
     let connectors = Arc::new(RwLock::new(map));
     tokio::spawn(async move { b.run_connection_loop().await });
     tokio::spawn(async move { o.run_connection_loop().await });
 
-    let protected = config_targets.iter().map(SubKey::of).collect();
+    let protected = config_targets
+        .iter()
+        .chain(&quote_targets)
+        .map(SubKey::of)
+        .collect();
     let runtime = RuntimeSubscriptions::new(
         processor.clone(),
         connectors.clone(),
@@ -339,8 +396,15 @@ async fn rig(settings: Settings, config_ticks: &[&str], okx_reject: &[&str]) -> 
         *r.binance.connections.lock().unwrap() > 0 && *r.okx.connections.lock().unwrap() > 0
     })
     .await;
-    for s in config_ticks {
-        let stream = format!("{}@aggTrade", s.to_lowercase());
+    let config_streams = config_ticks
+        .iter()
+        .map(|s| format!("{}@aggTrade", s.to_lowercase()))
+        .chain(
+            config_quotes
+                .iter()
+                .map(|s| format!("{}@bookTicker", s.to_lowercase())),
+        );
+    for stream in config_streams {
         assert!(
             wait_until(Duration::from_secs(5), || r
                 .binance
@@ -984,4 +1048,90 @@ async fn hot_toggle_takes_effect_without_restart() {
     tokio::time::sleep(IDLE * 3).await;
     assert_eq!(r.binance.count("UNSUBSCRIBE", SOL), 1, "关闭后不得再退订");
     assert_eq!(r.metric("md_runtime_subscriptions_enabled"), 0);
+}
+
+/// 报价补订关闭（默认，现网配置）：订阅配置名单外的 quote 话题不补订 QUOTE、不计上限拒绝；
+/// 同一连接上的 tick 话题照常补订；配置名单里的报价照常推送
+#[tokio::test]
+async fn quote_topics_are_not_subscribed_on_demand_by_default() {
+    let settings = fast_settings();
+    assert!(!settings.on_demand_quote);
+    let r = rig_full(settings, &[], &["BNBUSDT"], &[]).await;
+    let mut ws = r.gateway_ws("quote.binance.BTCUSDT").await;
+    send(&mut ws, "subscribe", "quote.binance.BNBUSDT").await;
+    next_text(&mut ws, 1000).await.unwrap();
+    send(&mut ws, "subscribe", "tick.binance.BTCUSDT").await;
+    next_text(&mut ws, 1000).await.unwrap();
+
+    assert!(
+        wait_until(Duration::from_secs(2), || r
+            .binance
+            .count("SUBSCRIBE", "btcusdt@aggTrade")
+            == 1)
+        .await,
+        "开关已打开：tick 应照常补订"
+    );
+    tokio::time::sleep(CHECK * 5).await;
+    assert_eq!(
+        r.binance.count("SUBSCRIBE", "btcusdt@bookTicker"),
+        0,
+        "不得补订 QUOTE"
+    );
+    assert!(!r
+        .subscriptions()
+        .await
+        .iter()
+        .any(|s| s["data_type"] == 3 && s["symbol"] == "BTCUSDT"));
+    assert_eq!(
+        r.metric("md_runtime_subscriptions_demand_subscribed_total"),
+        1
+    );
+    assert_eq!(r.metric("md_runtime_subscriptions_limit_rejected_total"), 0);
+
+    r.binance.push_binance_book_ticker("BNBUSDT", "700.1");
+    r.binance.push_binance_book_ticker("BTCUSDT", "90000.1");
+    let got = drain(&mut ws, 400).await;
+    let topics: Vec<&str> = got.iter().filter_map(|m| m["topic"].as_str()).collect();
+    assert_eq!(
+        topics,
+        vec!["quote.binance.BNBUSDT"],
+        "配置名单报价照常、名单外报价无数据：{got:?}"
+    );
+}
+
+/// 报价补订打开：quote 话题补订 QUOTE、推送到达；运行中单独打开（SIGHUP 热更走 update_config）同样生效
+#[tokio::test]
+async fn quote_topics_are_subscribed_on_demand_when_enabled() {
+    let r = rig_full(fast_settings(), &[], &["BNBUSDT"], &[]).await;
+    let mut ws = r.gateway_ws("quote.binance.BTCUSDT").await;
+    tokio::time::sleep(CHECK * 3).await;
+    assert_eq!(r.binance.count("SUBSCRIBE", "btcusdt@bookTicker"), 0);
+
+    r.runtime.update_config(ConfigView {
+        settings: Settings {
+            on_demand_quote: true,
+            ..fast_settings()
+        },
+        protected: [SubKey::new("binance", DataType::Quote, "BNBUSDT", None)]
+            .into_iter()
+            .collect(),
+    });
+    assert!(
+        wait_until(Duration::from_secs(2), || r
+            .binance
+            .count("SUBSCRIBE", "btcusdt@bookTicker")
+            == 1)
+        .await,
+        "打开报价补订后应补订 QUOTE"
+    );
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    r.binance.push_binance_book_ticker("BTCUSDT", "90000.1");
+    let got = drain(&mut ws, 400).await;
+    assert_eq!(got.len(), 1, "{got:?}");
+    assert_eq!(got[0]["type"], "quote");
+    assert_eq!(got[0]["data"]["bid_price"], "90000.1");
+    assert_eq!(
+        r.metric("md_runtime_subscriptions_demand_subscribed_total"),
+        1
+    );
 }

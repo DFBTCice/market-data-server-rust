@@ -37,8 +37,8 @@ connectors:
   okx:
     enabled: true
     # OKX 公共频道
-    stream_base_url_public: "wss://ws.okx.com:8443/ws/v5/public"
-    stream_base_url_business: "wss://ws.okx.com:8443/ws/v5/business"
+    stream_base_url_public: "wss://ws.okx.com/ws/v5/public"
+    stream_base_url_business: "wss://ws.okx.com/ws/v5/business"
     rest_base_url: "https://www.okx.com"
 
     # 只订阅 BTC 和 ETH 永续合约

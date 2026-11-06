@@ -679,12 +679,13 @@ pub(crate) trait RuntimeSubsSwitch: Send + Sync {
 
 fn show_runtime(rs: &RuntimeSubscriptionsConfig) -> String {
     format!(
-        "{{idle_unsubscribe={}, idle_minutes={}, check_interval_seconds={}, startup_grace_minutes={}, max_runtime_subscriptions={}}}",
+        "{{idle_unsubscribe={}, idle_minutes={}, check_interval_seconds={}, startup_grace_minutes={}, max_runtime_subscriptions={}, on_demand_quote={}}}",
         rs.idle_unsubscribe,
         rs.idle_minutes,
         rs.check_interval_seconds,
         rs.startup_grace_minutes,
-        rs.max_runtime_subscriptions
+        rs.max_runtime_subscriptions,
+        rs.on_demand_quote
     )
 }
 
@@ -1910,6 +1911,31 @@ connectors:
         assert!(report.fully_applied());
         assert!(!state.applied().runtime_subscriptions.idle_unsubscribe);
         assert!(!rt.pushes.lock().unwrap()[1].0.idle_unsubscribe);
+    }
+
+    /// 报价补订可以单独热打开 / 关闭（业务方以后单独打开报价补订的路径）
+    #[tokio::test]
+    async fn on_demand_quote_alone_is_hot_applied() {
+        let r = rig(&[]);
+        let rt = Arc::new(MockRuntime::default());
+        let mut on = base();
+        on.runtime_subscriptions.idle_unsubscribe = true;
+        let mut state = state_of(on.clone()).with_runtime_subs(rt.clone());
+
+        let mut quotes_on = on.clone();
+        quotes_on.runtime_subscriptions.on_demand_quote = true;
+        let report = state.apply(quotes_on.clone(), &r.conns).await;
+        assert!(report.fully_applied(), "{:?}", report.pending);
+        assert!(state.applied().runtime_subscriptions.on_demand_quote);
+        assert!(rt.pushes.lock().unwrap().last().unwrap().0.on_demand_quote);
+
+        let report = state.apply(on, &r.conns).await;
+        assert!(report.fully_applied());
+        assert!(!rt.pushes.lock().unwrap().last().unwrap().0.on_demand_quote);
+        assert_eq!(
+            r.okx.calls() + r.binance.calls() + r.binance_quote.calls(),
+            0
+        );
     }
 
     #[tokio::test]

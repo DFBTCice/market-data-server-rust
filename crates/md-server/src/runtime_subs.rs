@@ -14,6 +14,7 @@ pub(crate) fn settings_of(rs: &RuntimeSubscriptionsConfig) -> Settings {
         check_interval: Duration::from_secs(rs.check_interval_seconds),
         startup_grace: Duration::from_secs(rs.startup_grace_minutes.saturating_mul(60)),
         max_runtime_subscriptions: rs.max_runtime_subscriptions,
+        on_demand_quote: rs.on_demand_quote,
         ..Settings::default()
     }
 }
@@ -96,6 +97,7 @@ runtime_subscriptions:
   check_interval_seconds: 10
   startup_grace_minutes: 0
   max_runtime_subscriptions: 5
+  on_demand_quote: true
 "#;
 
     fn cfg() -> Config {
@@ -129,9 +131,11 @@ runtime_subscriptions:
         assert_eq!(s.check_interval, Duration::from_secs(10));
         assert_eq!(s.startup_grace, Duration::ZERO);
         assert_eq!(s.max_runtime_subscriptions, 5);
-        // 旧配置：关闭，默认 10 分钟 / 60 秒 / 10 分钟 / 200
+        assert!(s.on_demand_quote);
+        // 旧配置：关闭，默认 10 分钟 / 60 秒 / 10 分钟 / 200，报价不按需补订
         let legacy = settings_of(&RuntimeSubscriptionsConfig::default());
         assert!(!legacy.enabled);
+        assert!(!legacy.on_demand_quote);
         assert_eq!(legacy.idle, Duration::from_secs(600));
         assert_eq!(legacy.check_interval, Duration::from_secs(60));
         assert_eq!(legacy.startup_grace, Duration::from_secs(600));
