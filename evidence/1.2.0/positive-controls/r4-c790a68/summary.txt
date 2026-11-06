@@ -1,0 +1,5 @@
+commit=c790a6884501f4ea1990bd3767890f48c8ff5e98
+M17-quote-skip-after-taking-a-slot: CAUGHT; exit=101; failed=[skipped_quote_does_not_count_against_the_limit ]
+M18-no-nudge-on-settings-change: CAUGHT; exit=101; failed=[settings_change_subscribes_immediately_under_long_check_interval ]
+M0-unmutated: exit=0; passed=293 failed=0
+overall=PASS

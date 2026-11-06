@@ -1,0 +1,25 @@
+{
+ "mode": "drill",
+ "container": "md-exp-120-drill",
+ "key": "on_demand_quote",
+ "value": "false",
+ "at_utc": "2026-11-06T17:18:18.813768+00:00",
+ "config_diff": [
+  "-  on_demand_quote: true",
+  "+  on_demand_quote: false"
+ ],
+ "md_runtime_subscriptions_enabled": 1.0,
+ "process_start_time_seconds": 1793985476.0,
+ "restart_count": 0,
+ "log_lines": [
+  "2026-11-06T17:18:15.560567095Z 2026-11-06T17:18:15.560438Z  INFO md_runtime_subs: runtime subscriptions: settings changed (idle_minutes=10, check_interval_seconds=60, startup_grace_minutes=10, max_runtime_subscriptions=200, on_demand_quote=false)"
+ ],
+ "checks": {
+  "config_only_that_line_changed": true,
+  "process_not_restarted": true,
+  "enabled_metric_matches": true,
+  "module_log_confirms": true,
+  "settings_log_confirms": true
+ },
+ "pass": true
+}

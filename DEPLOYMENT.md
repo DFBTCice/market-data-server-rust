@@ -1287,7 +1287,8 @@ node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:808
   ```
 
   容器环境 `RUST_LOG=warn,md_runtime_subs=info`、`TZ=Asia/Shanghai`，其余参数沿用旧容器。工具与步骤见 `evidence/1.2.0/nas-198/SWAP_PLAN_1.2.0.md`
-  （`build_release_image.py` 构建镜像并记录配置 diff，`execute_swap.py` 记录换前订阅 → 换容器 → 立即 `restore_subs.mjs` → 即时检查）。
+  （`build_release_image.py` 无参数，产物与 sha 固定为 `cbc6b053…`；`execute_swap.py` 前置检查 → 记录换前订阅 → 换容器 → 立即 `restore_subs.mjs` → 即时检查，失败自动回退；
+  `check_after_swap.py` 10 分钟验收）。
   换版后 24 小时每分钟采样：RSS 斜率、`md_runtime_subscriptions` 曲线、`md_runtime_subscriptions_{idle_unsubscribed,demand_subscribed,demand_failed,limit_rejected}_total`、
   各 quote 入站速率、`md_ticks_dropped` / `md_quotes_dropped`、OKX / 币安重连次数，并核对 OMS / botd 无数据中断。
 - **换版后仍必须立刻补订阅**（开关开或关都一样）：运行期订阅不持久化，容器重启即丢失。
@@ -1299,8 +1300,12 @@ node scripts/compat/restore_subs.mjs baseline/subscriptions.json http://HOST:808
   ```
 
   开关打开时，补回的订阅若在保护期结束后仍没人接收，会在闲置到期后被自动退掉——这是预期行为；消费者订阅的话题即使漏补也会被按需补订。
-- **回退两级**：① 不重启：SIGHUP 关闭开关（或只关报价补订），见 OPS_GUIDE §8.6；② 切回保留的 1.1.1 旧容器
-  （`python3 evidence/1.1.0/nas-198/tools/pt_swap.py rollback md-server-1.1.1-bak`），同样立即 `restore_subs.mjs`。
+- **回退两级**（工具已在 198 旁路演练，见 `evidence/1.2.0/nas-198/SWAP_TOOLS_REPORT.md`）：
+  ① 不重启：`APPROVED=… python3 evidence/1.2.0/tools/runtime_toggle.py idle_unsubscribe false`（或 `on_demand_quote false`），
+  经 Portainer API 改容器内配置一行 → SIGHUP → 读回开关指标与日志，见 OPS_GUIDE §8.6；
+  ② 切回 1.1.1：`APPROVED=… python3 evidence/1.2.0/tools/rollback_to_111.py`——存档当前订阅 → 先确认 `md-server-1.1.1-bak` 是停止的 1.1.1
+  （不存在则按旧容器 inspect 从 `md-server:1.1.1` 重建并核对，不通过则不动当前容器）→ 切换 → `restore_subs.mjs` 补回存档订阅 →
+  核对进程启动时间已变、`md_runtime_subscriptions*` 指标消失。1.1.0 时代的 `pt_swap.py rollback` 没有回退容器前置检查，1.2.0 不再使用。
 
 ---
 

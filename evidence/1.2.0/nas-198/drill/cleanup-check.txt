@@ -1,0 +1,7 @@
+checked_at_utc 2026-11-06T17:20:26.724086+00:00
+md-exp-* containers: []
+md-server* containers: [('md-server', 'md-server:1.1.1', 'running'), ('md-server-1.1.0-quote-bnb-bak', 'sha256:a46c88d0aa72bcd34380a38', 'created')]
+exp-120 images: []
+md-server images: ['md-server:1.0.0-rollback', 'md-server:1.1.0', 'md-server:1.1.0-quote-bnb', 'md-server:1.1.1', 'md-server:exp-v4', 'md-server:exp-v5', 'md-server:latest']
+prod md-server metrics: {"md_ws_active_clients": "1", "md_ws_subscriptions_active": "2", "md_ws_kicked_write_timeout_total": "88", "process_start_time_seconds": "1792785202"}
+prod md-server: sha256:3250e021d152 restarts 0 started 2026-10-23T19:53:21 healthy

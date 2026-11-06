@@ -38,11 +38,15 @@ MUTATIONS=(
   "M14-quote-on-demand-ignores-off-switch|$RS|s/if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{/if false \&\& k.data_type == DataType::Quote {/|${GW_TEST[*]}|quote_topics_are_not_subscribed_on_demand_by_default"
   "M15-quote-never-on-demand-even-when-on|$RS|s/if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{/if k.data_type == DataType::Quote {/|${GW_TEST[*]}|quote_topics_are_subscribed_on_demand_when_enabled"
   "M16-yaml-on-demand-quote-not-mapped|crates/md-server/src/runtime_subs.rs|s/on_demand_quote: rs\.on_demand_quote,/on_demand_quote: false,/|-p md-server|settings_follow_yaml"
+  "M17-quote-skip-after-taking-a-slot|$RS|s/(            if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{\n.*?\n            \}\n)(.*?            runtime_count \+= 1;\n)/\$2\$1/s|${GW_TEST[*]}|skipped_quote_does_not_count_against_the_limit"
+  "M18-no-nudge-on-settings-change|$RS|s/(settings changed \(\{\}\)\", describe\(s\)\);\n)\s*self\.nudge\.notify_one\(\);\n/\$1/|${GW_TEST[*]}|settings_change_subscribes_immediately_under_long_check_interval"
 )
+ONLY="${ONLY:-}"
 
 overall=0
 for m in "${MUTATIONS[@]}"; do
   IFS='|' read -r name file expr args expect <<< "$m"
+  if [ -n "$ONLY" ] && ! [[ "$name" =~ ^($ONLY)- ]]; then continue; fi
   git -C "$WT" checkout -q -- .
   before="$(shasum "$WT/$file" | cut -d' ' -f1)"
   perl -0pi -e "$expr" "$WT/$file"

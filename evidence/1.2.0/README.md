@@ -1,9 +1,22 @@
 # 1.2.0 证据索引：运行期订阅闲置退订与按需补订
 
-任务书：1stbotv3 主审 2026-11-06「闲置自动退订与按需补订」；第二轮：主审复核意见（2026-11-06，补改、金丝雀与换版）。
-当前报告：[`REPORT.md`](REPORT.md)（第二轮）；第一轮报告：[`REPORT-r1-889bca8.md`](REPORT-r1-889bca8.md)。
+任务书：1stbotv3 主审 2026-11-06「闲置自动退订与按需补订」；第二轮：主审复核意见（2026-11-06，补改、金丝雀与换版）；换版前修正：主审复核意见（2026-11-07）。
+当前报告：[`nas-198/SWAP_TOOLS_REPORT.md`](nas-198/SWAP_TOOLS_REPORT.md)（换版前修正与 198 旁路演练）；金丝雀：[`nas-198/CANARY_REPORT.md`](nas-198/CANARY_REPORT.md)；
+第二轮：[`REPORT.md`](REPORT.md)；第一轮：[`REPORT-r1-889bca8.md`](REPORT-r1-889bca8.md)。
 分支 `feat/runtime-sub-idle-v1.2.0`（从 `origin/main` `d2f2cb6` 新建）。源码提交：第一轮 `6b3949e`，第二轮 `42bc897`（`on_demand_quote`、示例配置 443）；
-之后的提交只有文档与证据（`git diff 42bc897 HEAD -- crates Cargo.toml Cargo.lock config.yaml` 为空）。
+之后产品代码未改：`git diff 42bc897 HEAD -- crates Cargo.toml Cargo.lock config.yaml` 只有测试文件 `crates/md-gateway/tests/runtime_subs_gateway.rs`（`c790a68`，3 个测试）。
+
+## 换版前修正（2026-11-07，产物仍为 `cbc6b053…`）
+
+| 目录 / 文件 | 内容 | 复跑命令 |
+|---|---|---|
+| `nas-198/SWAP_TOOLS_REPORT.md` | 五段式报告：6 项修正、演练结果、现网消费者变化、需要业务方做的事 | — |
+| `nas-198/swap-tools-since-879cdd7.diff` | 本轮换版 / 回退工具的完整 diff | `git diff 879cdd7 HEAD -- evidence/1.2.0/tools` |
+| `nas-198/drill/` | 198 旁路演练：换版两次、一级回退 4 次、二级回退正常路径与「回退容器不存在 → 重建再切换」、清理与现网只读快照 | `python3 evidence/1.2.0/tools/drill_198.py`（需 `/tmp/pt_jwt`） |
+| `nas-198/drill-attempt1-toggle-bug/` | 第一次演练现场（第 3 个开关因工具正则 bug 失败，已修复） | — |
+| `positive-controls/swaplib/` | 离线测试的正对照（把 `swaplib.py` 改坏 3 种，测试都失败） | 见报告 §2.1 |
+| `positive-controls/r4-c790a68/` | 新增正对照 M17 / M18 与原样全量 293 个 | `ONLY="M17\|M18" bash evidence/1.2.0/tools/run_mutations.sh c790a68 <输出目录>` |
+| `tools/swaplib.py` 等 | `execute_swap.py`、`build_release_image.py`、`check_after_swap.py`、`runtime_toggle.py`、`rollback_to_111.py`、`drill_198.py`、`observe_24h.sh`、`analyze_24h.py` | 离线测试：`python3 evidence/1.2.0/tools/test_swaplib_offline.py` |
 
 ## 第二轮（当前，源码 `42bc897`，产物提交 `12192d9`）
 
@@ -22,7 +35,7 @@
 | `nas-198/canary/` | 第一次完整运行：第 1 部分字节对比（`gate-results.json`，原始抓取 `captures.tar.gz` + `raw-sha256.txt`）与第 2 部分 short / prod（判据误报，见报告）；docker stats、现网快照、容器日志、读回的二进制 sha 与配置 | `python3 evidence/1.2.0/tools/canary_198.py dist/md-server-1.2.0-12192d9-linux-x86_64 <sha256>` |
 | `nas-198/canary-rerun/` | 第 2 部分判据修正后的重跑（short、prod 同时运行，均 `pass: true`） | `python3 evidence/1.2.0/tools/canary_198.py --switch-on-only dist/md-server-1.2.0-12192d9-linux-x86_64 <sha256>` |
 | `nas-198/cleanup-check.txt` | 金丝雀结束后的 198 清理核对（旁路容器、镜像均无；现网未重启） | — |
-| `tools/` | 上述脚本，另有 `build_release_image.py`、`execute_swap.py`、`check_after_swap.py`、`observe_24h.sh`（换版用，须业务方批准） | — |
+| `tools/` | 上述脚本；换版 / 回退工具已在「换版前修正」中重写（见上节） | — |
 
 ## 不随轮次变化
 

@@ -1,0 +1,20 @@
+{
+  "mode": "drill",
+  "at_utc": "2026-11-06T17:18:49.498835+00:00",
+  "bak_status": "recreated",
+  "failed_container": "md-exp-120-drill-1793985523-failed",
+  "restored_container_id": "01cf523b5d370a9b1c979fdb7f653f6abcc7034887de4b4556a18c194f716313",
+  "health_ready_seconds": 0.0,
+  "outage_seconds": 5.6,
+  "process_start_time_before": 1793985514.0,
+  "process_start_time_after": 1793985528.0,
+  "subscriptions_after": 14,
+  "checks": {
+    "image_is_111": true,
+    "process_start_time_changed": true,
+    "runtime_metrics_gone": true,
+    "restore_subs_ok": true,
+    "healthy_now": true
+  },
+  "pass": true
+}

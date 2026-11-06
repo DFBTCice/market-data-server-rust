@@ -1,0 +1,25 @@
+{
+ "mode": "drill",
+ "container": "md-exp-120-drill",
+ "key": "idle_unsubscribe",
+ "value": "false",
+ "at_utc": "2026-11-06T17:17:11.188179+00:00",
+ "config_diff": [
+  "-  idle_unsubscribe: true",
+  "+  idle_unsubscribe: false"
+ ],
+ "md_runtime_subscriptions_enabled": 0.0,
+ "process_start_time_seconds": 1793985420.0,
+ "restart_count": 0,
+ "log_lines": [
+  "2026-11-06T17:17:07.901531273Z 2026-11-06T17:17:07.901388Z  INFO md_runtime_subs: runtime subscriptions: idle unsubscribe and on-demand subscribe DISABLED (current subscriptions are kept as they are)"
+ ],
+ "checks": {
+  "config_only_that_line_changed": true,
+  "process_not_restarted": true,
+  "enabled_metric_matches": true,
+  "module_log_confirms": true,
+  "settings_log_confirms": true
+ },
+ "pass": true
+}

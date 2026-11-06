@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
-"""在 198（endpoint 3）构建换版镜像 md-server:1.2.0：md-server:1.0.0-rollback + 最终产物 + config.release.yaml。
-不操作现网容器、不动 latest。用法：python3 evidence/1.2.0/tools/build_release_image.py <二进制> <sha256> <源码提交>"""
+"""在 198（endpoint 3）构建换版镜像：md-server:1.0.0-rollback + 最终产物 + config.release.yaml。不操作任何容器、不动 latest。
+产物与 sha 固定（swaplib.ARTIFACT / EXPECTED_SHA，并与 build-logs/dist-sha256.txt 交叉核对），不接受外部传入。
+用法：python3 evidence/1.2.0/tools/build_release_image.py            # 现网镜像 md-server:1.2.0 → nas-198/image-manifest.json
+      python3 evidence/1.2.0/tools/build_release_image.py --drill    # 演练镜像 md-server:exp-120-release → nas-198/drill/image-manifest.json"""
 import hashlib
 import io
 import json
-import pathlib
 import sys
 import tarfile
+import pathlib
 
-ROOT = pathlib.Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT / "evidence/1.1.1/tools"))
-from pt_exp import D, call, guard  # noqa: E402
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import swaplib as S  # noqa: E402
+from swaplib import D, call, guard  # noqa: E402
 
-OUT = ROOT / "evidence/1.2.0/nas-198"
-TAG = "md-server:1.2.0"
+DRILL = "--drill" in sys.argv
+OUT = S.ROOT / "evidence/1.2.0/nas-198" / ("drill" if DRILL else "")
+TAG = "md-server:exp-120-release" if DRILL else "md-server:1.2.0"
 BASE = "md-server:1.0.0-rollback"
-binary_path, sha, commit = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
-binary = binary_path.read_bytes()
-config = (OUT / "config.release.yaml").read_bytes()
-assert hashlib.sha256(binary).hexdigest() == sha, "产物 sha 不符"
+SOURCE_COMMIT = "42bc897e6b9180214cf50a5264a28131b8196b3e"  # 产物源码；产物从 12192d9 构建（源码相同）
+OUT.mkdir(parents=True, exist_ok=True)
+sha = S.expected_sha()
+binary = S.ARTIFACT.read_bytes()
+config = S.RELEASE_CONFIG.read_bytes()
+assert hashlib.sha256(binary).hexdigest() == sha, "本地产物不是固定期望的 cbc6b053…"
 for needle in (b'log_level: "warn"', b"idle_unsubscribe: true", b"idle_minutes: 10", b"check_interval_seconds: 60",
                b"startup_grace_minutes: 10", b"max_runtime_subscriptions: 200", b"on_demand_quote: false"):
     assert needle in config, f"config.release.yaml 缺少 {needle!r}"
@@ -30,7 +35,7 @@ assert base["Id"].startswith("sha256:06907bdf7fd8"), "回滚基础镜像与交�
 dockerfile = (f"FROM {BASE}\n"
               "COPY md-server /usr/local/bin/md-server\n"
               "COPY config.yaml /etc/md-server/config.yaml\n"
-              f'LABEL org.opencontainers.image.revision="{commit}" '
+              f'LABEL org.opencontainers.image.revision="{SOURCE_COMMIT}" '
               f'md-server.binary.sha256="{sha}" '
               f'md-server.config.sha256="{hashlib.sha256(config).hexdigest()}"\n').encode()
 (OUT / "Dockerfile.release").write_bytes(dockerfile)
@@ -48,7 +53,7 @@ rows = [json.loads(line) for line in raw.splitlines() if line.strip()]
 assert not any(row.get("error") for row in rows), raw.decode()[-1500:]
 image = call("GET", f"{D}/images/{TAG}/json")
 assert image["Config"]["Labels"]["md-server.binary.sha256"] == sha
-record = {"tag": TAG, "id": image["Id"], "base": BASE, "base_id": base["Id"], "source_commit": commit,
+record = {"tag": TAG, "id": image["Id"], "base": BASE, "base_id": base["Id"], "source_commit": SOURCE_COMMIT,
           "binary_sha256": sha, "config_sha256": hashlib.sha256(config).hexdigest(),
           "user": image["Config"].get("User"), "cmd": image["Config"].get("Cmd"),
           "healthcheck": image["Config"].get("Healthcheck")}

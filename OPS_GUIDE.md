@@ -441,6 +441,11 @@ PromQL：`md_runtime_subscriptions`（数量曲线）；`increase(md_runtime_sub
 
    只关报价补订（保留闲置退订与 tick/kline 补订）同理，把 `on_demand_quote` 改成 `false` 再发 SIGHUP。
 
+   NAS 198 没有 shell 时用 Portainer API 版（同样的步骤，外加核对）：
+   `APPROVED="<批准人 时间>" python3 evidence/1.2.0/tools/runtime_toggle.py <idle_unsubscribe|on_demand_quote> <true|false>`。
+   它只改这一个键并读回断言只有这一行变化（不符则原样写回、不发 SIGHUP），发 SIGHUP 后核对开关指标、`md_runtime_subs` 日志、
+   进程启动时间与重启次数不变，结果写 `toggle-result.json`。
+
    **注意**：容器重建或重启（含 `unless-stopped` 自动拉起）后回到镜像里的配置；临时关闭后要尽快出一个关闭开关的镜像。
    关闭后已经被退掉的订阅不会自动恢复（有接收方的话题需要 POST 或换版后 `restore_subs.mjs` 补回），按需补订加上的订阅也保持原样。
 
