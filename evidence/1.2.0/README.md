@@ -1,18 +1,28 @@
 # 1.2.0 证据索引：运行期订阅闲置退订与按需补订
 
 任务书：1stbotv3 主审 2026-11-06「闲置自动退订与按需补订」；第二轮：主审复核意见（2026-11-06，补改、金丝雀与换版）；换版前修正：主审复核意见（2026-11-07）。
-当前报告：[`nas-198/SWAP_TOOLS_REPORT.md`](nas-198/SWAP_TOOLS_REPORT.md)（换版前修正与 198 旁路演练）；金丝雀：[`nas-198/CANARY_REPORT.md`](nas-198/CANARY_REPORT.md)；
+当前报告：[`nas-198/SWAP_FINAL_FIX_REPORT.md`](nas-198/SWAP_FINAL_FIX_REPORT.md)（换版前最后一项，工具 `a08f8f3`，最终版本演练）；
+上一份：[`nas-198/SWAP_TOOLS_REPORT.md`](nas-198/SWAP_TOOLS_REPORT.md)（换版前修正，`67abacc`）；金丝雀：[`nas-198/CANARY_REPORT.md`](nas-198/CANARY_REPORT.md)；
 第二轮：[`REPORT.md`](REPORT.md)；第一轮：[`REPORT-r1-889bca8.md`](REPORT-r1-889bca8.md)。
 分支 `feat/runtime-sub-idle-v1.2.0`（从 `origin/main` `d2f2cb6` 新建）。源码提交：第一轮 `6b3949e`，第二轮 `42bc897`（`on_demand_quote`、示例配置 443）；
 之后产品代码未改：`git diff 42bc897 HEAD -- crates Cargo.toml Cargo.lock config.yaml` 只有测试文件 `crates/md-gateway/tests/runtime_subs_gateway.rs`（`c790a68`，3 个测试）。
 
-## 换版前修正（2026-11-07，产物仍为 `cbc6b053…`）
+## 换版前最后一项（2026-11-07，工具 `a08f8f3`，产物仍为 `cbc6b053…`）
+
+| 目录 / 文件 | 内容 | 复跑命令 |
+|---|---|---|
+| `nas-198/SWAP_FINAL_FIX_REPORT.md` | 五段式报告：10 分钟验收的 K 线待 botd 确认、回退失败分支加固、人工兜底、最终版本演练 | — |
+| `nas-198/swap-tools-since-67abacc.diff` | 本轮工具 diff | `git diff 67abacc a08f8f3 -- evidence/1.2.0/tools` |
+| `nas-198/drill/` | 最终版本演练：换版 3 次、一级回退 4 次、二级回退正常 / 重建 / 「1.1.1 起不来 → 放回 1.2.0」、清理与现网只读快照 | `python3 evidence/1.2.0/tools/drill_198.py`（需 `/tmp/pt_jwt`，工具须已提交） |
+| `positive-controls/offline-tools/` | 离线测试的正对照 14 种 + 原样代码 | `bash evidence/1.2.0/tools/run_offline_mutations.sh` |
+
+## 换版前修正（2026-11-07，`67abacc`）
 
 | 目录 / 文件 | 内容 | 复跑命令 |
 |---|---|---|
 | `nas-198/SWAP_TOOLS_REPORT.md` | 五段式报告：6 项修正、演练结果、现网消费者变化、需要业务方做的事 | — |
-| `nas-198/swap-tools-since-879cdd7.diff` | 本轮换版 / 回退工具的完整 diff | `git diff 879cdd7 HEAD -- evidence/1.2.0/tools` |
-| `nas-198/drill/` | 198 旁路演练：换版两次、一级回退 4 次、二级回退正常路径与「回退容器不存在 → 重建再切换」、清理与现网只读快照 | `python3 evidence/1.2.0/tools/drill_198.py`（需 `/tmp/pt_jwt`） |
+| `nas-198/swap-tools-since-879cdd7.diff` | 本轮换版 / 回退工具的完整 diff | `git diff 879cdd7 67abacc -- evidence/1.2.0/tools` |
+| `nas-198/drill-67abacc/` | 198 旁路演练：换版两次、一级回退 4 次、二级回退正常路径与「回退容器不存在 → 重建再切换」、清理与现网只读快照 | — |
 | `nas-198/drill-attempt1-toggle-bug/` | 第一次演练现场（第 3 个开关因工具正则 bug 失败，已修复） | — |
 | `positive-controls/swaplib/` | 离线测试的正对照（把 `swaplib.py` 改坏 3 种，测试都失败） | 见报告 §2.1 |
 | `positive-controls/r4-c790a68/` | 新增正对照 M17 / M18 与原样全量 293 个 | `ONLY="M17\|M18" bash evidence/1.2.0/tools/run_mutations.sh c790a68 <输出目录>` |

@@ -1,0 +1,110 @@
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 174, in rollback
+    bak_status = ensure_bak(target, inspect_path, log)
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 133, in ensure_bak
+    assert bak["Image"] == OLD_IMAGE_ID, f"{target.bak} 镜像 {bak['Image'][:19]} 不是 1.1.1"
+AssertionError: md-server-1.1.1-bak 镜像 sha256:111111111111 不是 1.1.1
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 148, in run
+    results[name] = bool(fn())
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 187, in _
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 163, in raises
+    fn()
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 187, in <lambda>
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 190, in rollback
+    raise RollbackFailed(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}",
+swaplib.RollbackFailed: rollback failed (md-server-1.1.1-bak 镜像 sha256:111111111111 不是 1.1.1); previous container restored, health 1.0
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 174, in rollback
+    bak_status = ensure_bak(target, inspect_path, log)
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 134, in ensure_bak
+    assert not bak["State"]["Running"], f"{target.bak} 正在运行"
+AssertionError: md-server-1.1.1-bak 正在运行
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 148, in run
+    results[name] = bool(fn())
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 187, in _
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 163, in raises
+    fn()
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 187, in <lambda>
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 190, in rollback
+    raise RollbackFailed(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}",
+swaplib.RollbackFailed: rollback failed (md-server-1.1.1-bak 正在运行); previous container restored, health 1.0
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 174, in rollback
+    bak_status = ensure_bak(target, inspect_path, log)
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 136, in ensure_bak
+    assert bak[section][field] == old[section][field], f"{target.bak} 的 {field} 与旧容器不一致，拒绝使用"
+AssertionError: md-server-1.1.1-bak 的 Cmd 与旧容器不一致，拒绝使用
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 148, in run
+    results[name] = bool(fn())
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 187, in _
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 163, in raises
+    fn()
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 187, in <lambda>
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 190, in rollback
+    raise RollbackFailed(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}",
+swaplib.RollbackFailed: rollback failed (md-server-1.1.1-bak 的 Cmd 与旧容器不一致，拒绝使用); previous container restored, health 1.0
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 174, in rollback
+    bak_status = ensure_bak(target, inspect_path, log)
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 149, in ensure_bak
+    assert bak[section][field] == old[section][field], field
+AssertionError: Env
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 148, in run
+    results[name] = bool(fn())
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 208, in _
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 163, in raises
+    fn()
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/test_swaplib_offline.py", line 208, in <lambda>
+    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
+  File "/private/tmp/md120-offline-mut/evidence/1.2.0/tools/swaplib.py", line 190, in rollback
+    raise RollbackFailed(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}",
+swaplib.RollbackFailed: rollback failed (Env); previous container restored, health 1.0
+{"real_canary_missing_runtime": [["binance", 1, "SNDKUSDT", ""], ["binance", 2, "BNBUSDT", "5m"], ["binance", 2, "BTCUSDT", "30m"], ["binance", 2, "SNDKUSDT", "30m"], ["binance", 2, "SNDKUSDT", "5m"]], "idle_unsubscribed_total": 6.0}
+{
+ "bak_present_normal_path": true,
+ "bak_wrong_image_aborts_before_touching_current": false,
+ "bak_running_aborts_before_touching_current": false,
+ "bak_wrong_cmd_aborts_before_touching_current": false,
+ "bak_missing_recreated_then_switched": false,
+ "recreated_bak_mismatch_is_deleted_and_current_untouched": false,
+ "unhealthy_111_puts_previous_back": true,
+ "start_of_111_fails_puts_previous_back": true,
+ "stop_call_errors_after_stopping_restarts_current": true,
+ "stop_call_errors_before_stopping_restores_restart_policy": true,
+ "put_back_failure_reports_manual_recovery": true,
+ "drill_mode_uses_only_drill_names": true,
+ "prod_refuses_drill_names": true,
+ "drill_refuses_prod_names": true,
+ "prod_allows_its_names": true,
+ "strip_image_labels": true,
+ "expected_sha_matches_dist_record": true,
+ "ten_minute_real_canary_data_passes": true,
+ "ten_minute_unexplained_tick_fails": true,
+ "ten_minute_unexplained_quote_fails": true,
+ "ten_minute_unexplained_runtime_kline_needs_botd_not_fail": true,
+ "ten_minute_counter_below_explained_fails": true,
+ "ten_minute_missing_config_kline_fails": true
+}

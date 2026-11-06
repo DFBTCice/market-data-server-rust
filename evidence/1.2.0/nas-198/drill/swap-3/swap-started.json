@@ -1,0 +1,9 @@
+{
+  "mode": "drill",
+  "started_at_utc": "2026-11-06T18:00:39.016158+00:00",
+  "approved": "drill",
+  "old_container_id": "4667483687a5408693393f7abf58ad82cfe5945a0122897ed146dea73c2693ff",
+  "old_image_id": "sha256:3250e021d152ad38b5b873325eae5f42364252881a1925b2a4ea6ca1b10cf010",
+  "old_restart_count": 0,
+  "subscriptions": 14
+}

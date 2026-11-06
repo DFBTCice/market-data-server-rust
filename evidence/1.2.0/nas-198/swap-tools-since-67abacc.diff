@@ -1,0 +1,832 @@
+diff --git a/evidence/1.2.0/tools/check_after_swap.py b/evidence/1.2.0/tools/check_after_swap.py
+index b3ce8b7..1228c94 100644
+--- a/evidence/1.2.0/tools/check_after_swap.py
++++ b/evidence/1.2.0/tools/check_after_swap.py
+@@ -1,8 +1,10 @@
+ #!/usr/bin/env python3
+ """换版后 10 分钟验收（只读：GET 现网接口 + Portainer 容器信息与日志）。
+ 判据：同一容器、健康、RestartCount=0、配置订阅（从 config.release.yaml 独立解析）全部还在、
+-缺失的运行期订阅都能对上 idle-unsubscribed 日志且 md_runtime_subscriptions_idle_unsubscribed_total 不小于缺失数、
++缺失的运行期 TICK / QUOTE 都能对上 idle-unsubscribed 日志且 md_runtime_subscriptions_idle_unsubscribed_total 不小于已解释数、
+ md_ws_active_clients >= 2、开关为 1、jemalloc 指标在。
++缺失且对不上日志的运行期 KLINE 不判失败，单列 needs_botd_confirmation（结论 pass_needs_botd_confirmation，不回退，交主审对照 botd 日志）。
++退出码：0 = pass / pass_needs_botd_confirmation，1 = fail。
+ 只记录不判失败：写超时（为 0 或附日志说明）、交易所重连增量（辅助）、消费者口径（post-swap-24h/prod.csv 前 10 分钟 ws_clients 最小值与变化次数）。
+ 用法：python3 evidence/1.2.0/tools/check_after_swap.py            # 现网
+       python3 evidence/1.2.0/tools/check_after_swap.py --drill <换版输出目录>"""
+@@ -58,22 +60,33 @@ def idle_unsubscribed_keys(log_lines):
+ 
+ 
+ def judge_subscriptions(before, now_subs, log_lines, metrics, config_path):
+-    """配置订阅必须全在；缺失的运行期订阅必须每个都有 idle-unsubscribed 日志，且退订计数不小于缺失数"""
++    """配置订阅必须全在。换前有、现在没有的运行期订阅：有 idle-unsubscribed 日志的算已解释（退订计数须不小于已解释数）；
++    没有日志的 TICK / QUOTE 判失败；没有日志的 KLINE 不判失败，单列 needs_botd_confirmation——REST DELETE 不打日志，
++    botd 在 K 线图关闭约 60 秒后会 DELETE 自己登记的 K 线，须由主审对照 botd 日志「已释放行情服务端 K 线订阅」确认。"""
+     now_keys = {key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) for s in now_subs}
+     expected_config = config_keys(config_path)
+     before_keys = {key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) for s in before}
+     missing_config = sorted(expected_config - now_keys)
+     missing_runtime = sorted(before_keys - now_keys - expected_config)
+-    unexplained = [k for k in missing_runtime if k not in idle_unsubscribed_keys(log_lines)]
++    logged = idle_unsubscribed_keys(log_lines)
++    explained = [k for k in missing_runtime if k in logged]
++    needs_botd = [k for k in missing_runtime if k not in logged and k[1] == 2]
++    unexplained = [k for k in missing_runtime if k not in logged and k[1] != 2]
+     idle_total = S.metric(metrics, "md_runtime_subscriptions_idle_unsubscribed_total") or 0
+     return {
+         "config_subscriptions_expected": len(expected_config), "missing_config": missing_config,
+-        "missing_runtime": missing_runtime, "missing_runtime_unexplained": unexplained, "idle_unsubscribed_total": idle_total,
++        "missing_runtime": missing_runtime, "missing_runtime_explained": explained,
++        "missing_runtime_unexplained": unexplained, "needs_botd_confirmation": needs_botd,
++        "idle_unsubscribed_total": idle_total,
+         "config_subscriptions_present": not missing_config,
+-        "missing_runtime_explained_by_idle_unsubscribe": not unexplained and idle_total >= len(missing_runtime),
++        "missing_tick_quote_explained_by_idle_unsubscribe": not unexplained and idle_total >= len(explained),
+     }
+ 
+ 
++def botd_note(needs_botd):
++    return [f"{TYPES[k[1]]} {k[0]} {k[2]} {k[3]}" for k in needs_botd]
++
++
+ def main():
+     guard()
+     result = json.loads((OUT / "swap-result.json").read_text())
+@@ -100,16 +113,20 @@ def main():
+         "healthy": c["State"].get("Health", {}).get("Status") == "healthy",
+         "restart_count_0": c["RestartCount"] == 0,
+         "config_subscriptions_present": subs["config_subscriptions_present"],
+-        "missing_runtime_explained_by_idle_unsubscribe": subs["missing_runtime_explained_by_idle_unsubscribe"],
++        "missing_tick_quote_explained_by_idle_unsubscribe": subs["missing_tick_quote_explained_by_idle_unsubscribe"],
+         "ws_active_clients_ok": clients >= MIN_CLIENTS,
+         "runtime_switch_on": S.metric(metrics, "md_runtime_subscriptions_enabled") == 1,
+         "jemalloc_metrics": "\nmd_jemalloc_allocated_bytes " in metrics,
+     }
++    passed = all(checks.values())
++    verdict = "fail" if not passed else ("pass_needs_botd_confirmation" if subs["needs_botd_confirmation"] else "pass")
+     record = {
+-        "mode": T.mode, "checked_at_utc": S.now(), "checks": checks, "pass": all(checks.values()),
++        "mode": T.mode, "checked_at_utc": S.now(), "verdict": verdict, "checks": checks, "pass": passed,
++        "needs_botd_confirmation": botd_note(subs["needs_botd_confirmation"]),
+         "config_subscriptions_expected": subs["config_subscriptions_expected"], "missing_config": subs["missing_config"],
+         "subscriptions_before": len(before), "subscriptions_now": len(now_subs),
+-        "missing_runtime": subs["missing_runtime"], "missing_runtime_unexplained": subs["missing_runtime_unexplained"],
++        "missing_runtime": subs["missing_runtime"], "missing_runtime_explained": subs["missing_runtime_explained"],
++        "missing_runtime_unexplained": subs["missing_runtime_unexplained"],
+         "idle_unsubscribed_total": subs["idle_unsubscribed_total"], "ws_active_clients": clients,
+         "recorded_only": {
+             "write_timeout_total": write_timeouts,
+@@ -120,8 +137,13 @@ def main():
+     }
+     (OUT / "ten-minute.json").write_text(json.dumps(record, indent=2) + "\n")
+     (OUT / "metrics.ten-minute.txt").write_text(metrics)
+-    print(json.dumps(record, indent=2))
+-    sys.exit(0 if record["pass"] else 1)
++    print(json.dumps(record, indent=2, ensure_ascii=False))
++    if verdict == "pass_needs_botd_confirmation":
++        print(f"VERDICT pass_needs_botd_confirmation: 不回退。以下运行期 K 线缺失、没有闲置退订日志，可能是 botd 释放了自己的订阅，"
++              f"请把清单交业务方转主审对照 botd 日志「已释放行情服务端 K 线订阅」核对：{record['needs_botd_confirmation']}")
++    else:
++        print(f"VERDICT {verdict}")
++    sys.exit(0 if passed else 1)
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/evidence/1.2.0/tools/drill_198.py b/evidence/1.2.0/tools/drill_198.py
+index 4bad709..709ea98 100644
+--- a/evidence/1.2.0/tools/drill_198.py
++++ b/evidence/1.2.0/tools/drill_198.py
+@@ -8,7 +8,9 @@
+   4 10 分钟验收逻辑（check_after_swap.py --drill，立即执行）
+   5 二级回退正常路径（rollback_to_111.py --drill，回退容器存在）
+   6 再换版 swap-2，删除回退容器，二级回退「回退容器不存在 → 先重建再切换」路径
+-  7 清理全部 md-exp-120-drill* 与演练镜像，核对现网未受影响
++  7 再换版 swap-3，把回退容器换成参数一致但内存只有 6 MiB 的 1.1.1（真实起不来），二级回退必须把 1.2.0 放回、补订阅、写结果
++  8 清理全部 md-exp-120-drill* 与演练镜像，核对现网未受影响
++只用已提交的工具版本：开跑前断言 evidence/1.2.0/tools 与 scripts/compat 没有未提交改动，并记录提交号。
+ 用法：python3 evidence/1.2.0/tools/drill_198.py"""
+ import json
+ import pathlib
+@@ -23,6 +25,10 @@ from swaplib import D, call, guard  # noqa: E402
+ 
+ T = S.DRILL
+ OUT = S.ROOT / "evidence/1.2.0/nas-198/drill"
++dirty = subprocess.run(["git", "status", "--porcelain", "--", "evidence/1.2.0/tools", "scripts/compat"], cwd=S.ROOT,
++                       capture_output=True, text=True, check=True).stdout.strip()
++assert not dirty, f"演练必须使用已提交的工具版本，先提交：\n{dirty}"
++TOOLS_COMMIT = subprocess.run(["git", "rev-parse", "HEAD"], cwd=S.ROOT, capture_output=True, text=True, check=True).stdout.strip()
+ OUT.mkdir(parents=True, exist_ok=True)
+ LABEL = "md-runtime-subs-1.2.0-drill"
+ IMAGE = "md-server:exp-120-release"
+@@ -96,6 +102,33 @@ try:
+                                   str(OUT / "swap-2/old-container.inspect.json")])
+     recreate = json.loads((OUT / "rollback-recreate/rollback-result.json").read_text())
+     assert recreate["bak_status"] == "recreated", recreate
++
++    step("7a-swap-3", ["python3", f"{TOOLS}/execute_swap.py", "--drill", str(OUT / "swap-3")])
++    old3 = json.loads((OUT / "swap-3/old-container.inspect.json").read_text())
++    call("DELETE", f"{D}/containers/{T.check_name(T.bak)}?force=1&v=1")
++    weak = S.spec_from_inspect(old3, S.OLD_IMAGE_TAG, labels={"purpose": LABEL}, restart={"Name": "no"})
++    weak["HostConfig"].update(Memory=6 * 2**20, MemorySwap=6 * 2**20)
++    weak_id = call("POST", f"{D}/containers/create?name={T.bak}", weak)["Id"]
++    log(f"step 7b: replaced {T.bak} with {weak_id[:12]} (md-server:1.1.1, same cmd/user/env/ports, memory 6 MiB) "
++        f"so the 1.1.1 container cannot become healthy")
++    steps.append({"step": "7b-weak-bak", "id": weak_id[:12], "memory_bytes": 6 * 2**20})
++    step("7c-rollback-put-back", ["python3", f"{TOOLS}/rollback_to_111.py", "--drill", str(OUT / "rollback-put-back"),
++                                  str(OUT / "swap-3/old-container.inspect.json")], expect=1)
++    put_back = json.loads((OUT / "rollback-put-back/rollback-result.json").read_text())
++    now = call("GET", f"{D}/containers/{T.current}/json")
++    archived = json.loads((OUT / "rollback-put-back/subscriptions.archived.json").read_text())
++    subs_now = json.loads(S.http_get(T, "/api/v1/subscriptions"))
++    weak_now = call("GET", f"{D}/containers/{weak_id}/json")
++    check = {"status_previous_restored": put_back["status"] == "rollback_failed_previous_restored",
++             "restore_subs_ok": put_back["restore_subs_exit"] == 0,
++             "current_is_new_image": now["Image"] == json.loads((OUT / "image-manifest.json").read_text())["id"],
++             "current_running_healthy": now["State"]["Running"] and S.wait_health(T, 30) is not None,
++             "process_restarted_by_put_back": put_back["process_start_time_after"] != put_back["process_start_time_before"],
++             "subscriptions_restored": len(subs_now) == len(archived),
++             "weak_bak_back_under_bak_name_and_stopped": weak_now["Name"] == f"/{T.bak}" and not weak_now["State"]["Running"]}
++    (OUT / "rollback-put-back/drill-check.json").write_text(json.dumps(check, indent=2) + "\n")
++    log(f"step 7 check: {check}")
++    assert all(check.values()), check
+ finally:
+     removed = []
+     for name, c in S.containers_by_name().items():
+@@ -111,7 +144,7 @@ finally:
+     left_c = [n for n in S.containers_by_name() if n.startswith("md-exp-120-drill")]
+     left_i = [t for i in call("GET", f"{D}/images/json") for t in (i.get("RepoTags") or []) if "exp-120" in t]
+     after = prod_snapshot("after")
+-    summary = {"steps": steps, "removed_containers": removed, "removed_image": IMAGE,
++    summary = {"tools_commit": TOOLS_COMMIT, "steps": steps, "removed_containers": removed, "removed_image": IMAGE,
+                "leftover_containers": left_c, "leftover_images": left_i, "prod_before": before,
+                "prod_after": after}
+     (OUT / "drill-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+diff --git a/evidence/1.2.0/tools/execute_swap.py b/evidence/1.2.0/tools/execute_swap.py
+index 78adc6a..65ec80b 100644
+--- a/evidence/1.2.0/tools/execute_swap.py
++++ b/evidence/1.2.0/tools/execute_swap.py
+@@ -144,9 +144,24 @@ try:
+     log(f"swap done: {json.dumps(result)}")
+ except BaseException as exc:
+     log(f"swap failed: {exc}; reverting")
+-    revert = S.revert_after_failed_swap(T, old["Id"], inspect_path, log)
+-    run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"), T.url(""), "--apply"],
+-        "rollback-restore.log", 60)
+-    (OUT / "swap-result.json").write_text(json.dumps({"status": "rolled_back", "error": str(exc), "revert": revert,
+-        "at_utc": S.now()}, indent=2) + "\n")
++    status = "rolled_back"
++    try:
++        revert = S.revert_after_failed_swap(T, old["Id"], inspect_path, log)
++    except S.RollbackFailed as rexc:
++        status = "revert_failed_new_container_restored" if rexc.restored else "revert_failed_manual_recovery_needed"
++        revert = {"error": str(rexc), "restored": rexc.restored}
++        log(f"revert failed: {rexc}")
++    except BaseException as rexc:
++        status, revert = "revert_failed_manual_recovery_needed", {"error": repr(rexc)}
++        log(f"revert failed: {rexc!r}")
++    try:
++        with (OUT / "rollback-restore.log").open("w") as f:
++            restore_code = subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.before.json"),
++                                           T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT,
++                                          timeout=60).returncode
++    except Exception as restore_exc:
++        restore_code = repr(restore_exc)
++    (OUT / "swap-result.json").write_text(json.dumps({"status": status, "error": str(exc), "revert": revert,
++        "restore_subs_exit": restore_code, "at_utc": S.now()}, indent=2, ensure_ascii=False) + "\n")
++    log(f"swap result: {status}; restore_subs exit {restore_code}")
+     raise
+diff --git a/evidence/1.2.0/tools/rollback_to_111.py b/evidence/1.2.0/tools/rollback_to_111.py
+index 43b91bd..62d34d3 100644
+--- a/evidence/1.2.0/tools/rollback_to_111.py
++++ b/evidence/1.2.0/tools/rollback_to_111.py
+@@ -42,10 +42,43 @@ subs = S.http_get(T, "/api/v1/subscriptions")
+ (OUT / "metrics.before.txt").write_text(before_metrics)
+ start_before = S.metric(before_metrics, "process_start_time_seconds")
+ log(f"archived {len(json.loads(subs))} subscriptions from {T.current}; process_start_time_seconds={start_before}")
+-result = S.rollback(T, INSPECT, log)
+-with open(OUT / "restore.log", "w") as f:
+-    restore_code = subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.archived.json"),
+-                                   T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=60).returncode
++
++
++def write_record(record):
++    (OUT / "rollback-result.json").write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
++    log(f"rollback result: {json.dumps(record, ensure_ascii=False)}")
++
++
++def restore_archived():
++    """把刚存档的订阅补到现在占着名字的容器上（回退成功是 1.1.1；回退失败、原容器放回时是放回的容器）"""
++    with open(OUT / "restore.log", "w") as f:
++        return subprocess.run(["node", "scripts/compat/restore_subs.mjs", str(OUT / "subscriptions.archived.json"),
++                               T.url(""), "--apply"], cwd=S.ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=60).returncode
++
++
++def safe(fn, default=None):
++    try:
++        return fn()
++    except Exception:
++        return default
++
++
++try:
++    result = S.rollback(T, INSPECT, log)
++except S.RollbackFailed as exc:
++    restore_code = safe(restore_archived, "error") if exc.restored else None
++    after_metrics = safe(lambda: S.http_get(T, "/metrics").decode(), "")
++    write_record({"mode": T.mode, "at_utc": S.now(), "status": "rollback_failed_previous_restored" if exc.restored
++                  else "rollback_failed_manual_recovery_needed", "error": str(exc),
++                  "restore_subs_exit": restore_code, "process_start_time_before": start_before,
++                  "process_start_time_after": S.metric(after_metrics, "process_start_time_seconds"),
++                  "healthy_now": safe(lambda: S.wait_health(T, 5)) is not None, "pass": False})
++    raise
++except BaseException as exc:
++    write_record({"mode": T.mode, "at_utc": S.now(), "status": "refused_before_touching_current", "error": repr(exc),
++                  "process_start_time_before": start_before, "pass": False})
++    raise
++restore_code = restore_archived()
+ after_metrics = S.http_get(T, "/metrics").decode()
+ (OUT / "metrics.after.txt").write_text(after_metrics)
+ current = call("GET", f"{D}/containers/{T.current}/json")
+@@ -56,10 +89,9 @@ checks = {
+     "restore_subs_ok": restore_code == 0,
+     "healthy_now": S.wait_health(T, 5) is not None,
+ }
+-record = {"mode": T.mode, "at_utc": S.now(), **result, "process_start_time_before": start_before,
++record = {"mode": T.mode, "at_utc": S.now(), "status": "rolled_back", **result, "process_start_time_before": start_before,
+           "process_start_time_after": S.metric(after_metrics, "process_start_time_seconds"),
+           "subscriptions_after": len(json.loads(S.http_get(T, "/api/v1/subscriptions"))), "checks": checks,
+           "pass": all(checks.values())}
+-(OUT / "rollback-result.json").write_text(json.dumps(record, indent=2) + "\n")
+-log(f"rollback result: {json.dumps(record)}")
++write_record(record)
+ sys.exit(0 if record["pass"] else 1)
+diff --git a/evidence/1.2.0/tools/run_offline_mutations.sh b/evidence/1.2.0/tools/run_offline_mutations.sh
+new file mode 100644
+index 0000000..0cef5f6
+--- /dev/null
++++ b/evidence/1.2.0/tools/run_offline_mutations.sh
+@@ -0,0 +1,75 @@
++#!/usr/bin/env bash
++# 离线测试的正对照：在临时目录里把 swaplib.py / check_after_swap.py 逐个改坏，test_swaplib_offline.py 必须失败，且失败项包含预期项；
++# 最后原样代码必须全过。临时目录镜像仓库结构（证据目录用软链接指回仓库，只读），不碰工作区。
++# 用法：bash evidence/1.2.0/tools/run_offline_mutations.sh [输出目录]
++set -uo pipefail
++ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
++OUT="${1:-$ROOT/evidence/1.2.0/positive-controls/offline-tools}"
++TMP="/tmp/md120-offline-mut"
++mkdir -p "$OUT"
++SUMMARY="$OUT/summary.txt"
++echo "tools_commit=$(git -C "$ROOT" rev-parse HEAD) tools_dirty=$(git -C "$ROOT" status --porcelain -- evidence/1.2.0/tools | wc -l | tr -d ' ')" | tee "$SUMMARY"
++
++# 名称 | 文件 | perl 替换（-0 整文件） | 必须为 false 的用例（空格分隔）
++MUTATIONS=(
++  'O1-no-bak-image-check|swaplib.py|s/\n\s*assert bak\["Image"\] == OLD_IMAGE_ID, f"\{target\.bak\} [^\n]*//|bak_wrong_image_aborts_before_touching_current'
++  'O2-no-bak-stopped-check|swaplib.py|s/\n\s*assert not bak\["State"\]\["Running"\][^\n]*//|bak_running_aborts_before_touching_current'
++  'O3-no-bak-params-check|swaplib.py|s/assert bak\[section\]\[field\] == old\[section\]\[field\], f"\{target\.bak\}[^\n]*/pass/|bak_wrong_cmd_aborts_before_touching_current'
++  'O4-mismatched-recreated-bak-kept|swaplib.py|s/\n\s*call\("DELETE", f"\{D\}\/containers\/\{created\[.Id.\]\}\?force=1"\)//|recreated_bak_mismatch_is_deleted_and_current_untouched'
++  'O5-ensure-bak-after-stop|swaplib.py|s/\n    bak_status = ensure_bak\(target, inspect_path, log\)//; s/(\n        call\("POST", f"\{D\}\/containers\/\{cur\[.Id.\]\}\/stop\?t=15"\)\n)/$1        bak_status = ensure_bak(target, inspect_path, log)\n/|bak_missing_recreated_then_switched bak_wrong_image_aborts_before_touching_current'
++  'O6-no-put-back|swaplib.py|s/\n            _put_back\(target, cur, cur_name\)\n/\n            pass\n/|unhealthy_111_puts_previous_back stop_call_errors_after_stopping_restarts_current'
++  'O7-put-back-stop-rejects-304|swaplib.py|s/(\/stop\?t=15", )ok=\(204, 304\)\)/$1)/|start_of_111_fails_puts_previous_back'
++  'O8-put-back-keeps-restart-policy-no|swaplib.py|s/\n    call\("POST", f"\{D\}\/containers\/\{cur\[.Id.\]\}\/update", \{"RestartPolicy": cur\["HostConfig"\]\["RestartPolicy"\]\}\)//|stop_call_errors_before_stopping_restores_restart_policy'
++  'O9-put-back-never-starts|swaplib.py|s/\n    if not call\("GET", f"\{D\}\/containers\/\{cur\[.Id.\]\}\/json"\)\["State"\]\["Running"\]:\n        call\([^\n]*//|stop_call_errors_after_stopping_restarts_current'
++  'O10-failed-put-back-reported-as-restored|swaplib.py|s/restored=False\)/restored=True)/|put_back_failure_reports_manual_recovery'
++  'C1-unexplained-tick-quote-excused|check_after_swap.py|s/ and k\[1\] != 2\]/ and False]/|ten_minute_unexplained_tick_fails ten_minute_unexplained_quote_fails'
++  'C2-unexplained-kline-counted-as-failure|check_after_swap.py|s/ and k\[1\] != 2\]/]/|ten_minute_unexplained_runtime_kline_needs_botd_not_fail'
++  'C3-idle-counter-not-checked|check_after_swap.py|s/ and idle_total >= len\(explained\)//|ten_minute_counter_below_explained_fails'
++  'C4-config-kline-excused|check_after_swap.py|s/missing_config = sorted\(expected_config - now_keys\)/missing_config = sorted(k for k in expected_config - now_keys if k[1] != 2)/|ten_minute_missing_config_kline_fails'
++)
++
++prepare() {
++  rm -rf "$TMP"
++  mkdir -p "$TMP/evidence/1.2.0"
++  cp -R "$ROOT/evidence/1.2.0/tools" "$TMP/evidence/1.2.0/tools"
++  rm -rf "$TMP/evidence/1.2.0/tools/__pycache__"
++  ln -s "$ROOT/evidence/1.2.0/build-logs" "$TMP/evidence/1.2.0/build-logs"
++  ln -s "$ROOT/evidence/1.2.0/nas-198" "$TMP/evidence/1.2.0/nas-198"
++}
++
++false_cases() {
++  python3 - "$1" <<'PY'
++import json, re, sys
++text = open(sys.argv[1]).read()
++m = re.search(r"^\{\n.*?^\}$", text, re.S | re.M)
++print(" ".join(k for k, v in json.loads(m.group(0)).items() if not v) if m else "NO-RESULTS")
++PY
++}
++
++overall=0
++for m in "${MUTATIONS[@]}"; do
++  IFS='|' read -r name file expr expect <<< "$m"
++  prepare
++  f="$TMP/evidence/1.2.0/tools/$file"
++  cp "$f" "$f.orig"
++  perl -0pi -e "$expr" "$f"
++  if cmp -s "$f" "$f.orig"; then
++    echo "$name: NOT APPLIED" | tee -a "$SUMMARY"; overall=1; continue
++  fi
++  (cd "$TMP" && python3 evidence/1.2.0/tools/test_swaplib_offline.py) > "$OUT/$name.log" 2>&1
++  code=$?
++  failed="$(false_cases "$OUT/$name.log")"
++  missing=""
++  for e in $expect; do [[ " $failed " == *" $e "* ]] || missing="$missing $e"; done
++  if [ $code -ne 0 ] && [ -z "$missing" ]; then verdict="CAUGHT"; else verdict="NOT CAUGHT (missing:$missing)"; overall=1; fi
++  echo "$name: $verdict; exit=$code; false=[$failed]" | tee -a "$SUMMARY"
++done
++
++prepare
++(cd "$TMP" && python3 evidence/1.2.0/tools/test_swaplib_offline.py) > "$OUT/unmutated.log" 2>&1
++code=$?
++echo "unmutated: exit=$code; false=[$(false_cases "$OUT/unmutated.log")]" | tee -a "$SUMMARY"
++[ $code -eq 0 ] || overall=1
++rm -rf "$TMP"
++echo "overall=$([ $overall -eq 0 ] && echo PASS || echo FAIL)" | tee -a "$SUMMARY"
++exit $overall
+diff --git a/evidence/1.2.0/tools/swaplib.py b/evidence/1.2.0/tools/swaplib.py
+index f96715a..0469528 100644
+--- a/evidence/1.2.0/tools/swaplib.py
++++ b/evidence/1.2.0/tools/swaplib.py
+@@ -112,36 +112,56 @@ def spec_from_inspect(inspect, image, env=None, labels=None, restart=None):
+             "Labels": {**strip_image_labels(cfg.get("Labels")), **(labels or {})}, "HostConfig": host}
+ 
+ 
++class RollbackFailed(SystemExit):
++    """回退在动了当前容器之后失败。restored=True：原容器已放回原位并启动（进程重启过，运行期订阅已丢，调用方要补订阅）；
++    restored=False：放回也失败，须按 SWAP_PLAN §4.3 人工兜底。"""
++
++    def __init__(self, message, restored):
++        super().__init__(message)
++        self.restored = restored
++
++
+ def ensure_bak(target, inspect_path, log):
+-    """二级回退前置检查：回退容器存在、是 1.1.1 镜像、处于停止状态；不存在则按旧容器 inspect 从 md-server:1.1.1 重建并核对。
++    """二级回退前置检查：回退容器存在 → 镜像是 1.1.1、处于停止状态、Cmd / User / Env / 端口与旧容器 inspect 一致；
++    不存在 → 按旧容器 inspect 从 md-server:1.1.1 重建并核对，核对不通过就删掉刚建的容器（不留下可能被误用的回退容器）。
+     任何检查不通过都抛异常——调用方此时还没有动当前容器。返回 'present' 或 'recreated'。"""
+     target.check_name(target.bak)
++    old = json.loads(pathlib.Path(inspect_path).read_text())
+     names = containers_by_name()
+     if target.bak in names:
+         bak = call("GET", f"{D}/containers/{target.bak}/json")
+         assert bak["Image"] == OLD_IMAGE_ID, f"{target.bak} 镜像 {bak['Image'][:19]} 不是 1.1.1"
+         assert not bak["State"]["Running"], f"{target.bak} 正在运行"
+-        log(f"rollback pre-check: {target.bak} present, image {OLD_IMAGE_ID[:19]}, stopped")
++        for section, field in (("Config", "Cmd"), ("Config", "User"), ("Config", "Env"), ("HostConfig", "PortBindings")):
++            assert bak[section][field] == old[section][field], f"{target.bak} 的 {field} 与旧容器不一致，拒绝使用"
++        log(f"rollback pre-check: {target.bak} present, image {OLD_IMAGE_ID[:19]}, stopped, cmd/user/env/ports match")
+         return "present"
+-    old = json.loads(pathlib.Path(inspect_path).read_text())
+     assert old["Image"] == OLD_IMAGE_ID, "旧容器 inspect 的镜像不是 1.1.1，拒绝据此重建"
+     image = call("GET", f"{D}/images/{OLD_IMAGE_TAG}/json")
+     assert image["Id"] == OLD_IMAGE_ID, f"{OLD_IMAGE_TAG} 镜像 ID {image['Id'][:19]} 不符"
+     spec = spec_from_inspect(old, OLD_IMAGE_TAG, labels={"md-server.recreated-from": old["Id"][:12]},
+                              restart={"Name": "no"})
+     created = call("POST", f"{D}/containers/create?name={target.bak}", spec)
+-    bak = call("GET", f"{D}/containers/{created['Id']}/json")
+-    assert bak["Image"] == OLD_IMAGE_ID and bak["Config"]["Env"] == old["Config"]["Env"]
+-    for field in ("PortBindings", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig"):
+-        assert bak["HostConfig"][field] == old["HostConfig"][field], field
++    try:
++        bak = call("GET", f"{D}/containers/{created['Id']}/json")
++        assert bak["Image"] == OLD_IMAGE_ID, "Image"
++        for section, field in (("Config", "Cmd"), ("Config", "User"), ("Config", "Env")):
++            assert bak[section][field] == old[section][field], field
++        for field in ("PortBindings", "Memory", "MemorySwap", "NanoCpus", "NetworkMode", "LogConfig"):
++            assert bak["HostConfig"][field] == old["HostConfig"][field], field
++    except BaseException as exc:
++        call("DELETE", f"{D}/containers/{created['Id']}?force=1")
++        log(f"rollback pre-check: recreated {target.bak} did not match the old container ({exc}); deleted it")
++        raise
+     log(f"rollback pre-check: {target.bak} was missing; recreated {created['Id'][:12]} from {OLD_IMAGE_TAG} "
+-        f"with the old container's parameters (verified image, env, ports, memory, cpu, network, logging)")
++        f"with the old container's parameters (verified image, cmd, user, env, ports, memory, cpu, network, logging)")
+     return "recreated"
+ 
+ 
+ def rollback(target, inspect_path, log):
+     """二级回退：先 ensure_bak（不通过则不动当前容器）→ 停并改名当前容器为 *-failed → 回退容器改名、恢复重启策略、启动 → 等健康。
+-    回退容器 60 秒内不健康时，把刚停掉的容器放回原位并重新启动，然后报错（不让服务空着）。"""
++    动了当前容器之后任何一步失败（含停容器的调用报错、回退容器 60 秒内不健康），都把当前容器放回原位、恢复重启策略、
++    没在运行就启动，然后抛 RollbackFailed（不让服务空着）。"""
+     guard()
+     cur_name = target.check_name(target.current)
+     cur = call("GET", f"{D}/containers/{cur_name}/json")
+@@ -149,11 +169,9 @@ def rollback(target, inspect_path, log):
+     restart = json.loads(pathlib.Path(inspect_path).read_text())["HostConfig"]["RestartPolicy"] or {"Name": "unless-stopped"}
+     failed = target.check_name(f"{target.current}-{int(time.time())}-failed")
+     t0 = time.time()
+-    stopped = False
+     try:
+         call("POST", f"{D}/containers/{cur['Id']}/update", {"RestartPolicy": {"Name": "no"}})
+         call("POST", f"{D}/containers/{cur['Id']}/stop?t=15")
+-        stopped = True
+         call("POST", f"{D}/containers/{cur['Id']}/rename?name={failed}")
+         call("POST", f"{D}/containers/{target.bak}/rename?name={cur_name}")
+         restored = call("GET", f"{D}/containers/{cur_name}/json")
+@@ -163,11 +181,14 @@ def rollback(target, inspect_path, log):
+         if up is None:
+             raise SystemExit("1.1.1 container not healthy within 60s")
+     except BaseException as exc:
+-        if stopped:
+-            log(f"rollback: {exc}; putting the previous container back")
++        log(f"rollback: {exc}; putting the previous container back")
++        try:
+             _put_back(target, cur, cur_name)
+-            raise SystemExit(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}")
+-        raise
++        except BaseException as put_exc:
++            raise RollbackFailed(f"rollback failed ({exc}); putting the previous container back ALSO failed ({put_exc}); "
++                                 f"recover by hand (SWAP_PLAN §4.3)", restored=False) from exc
++        raise RollbackFailed(f"rollback failed ({exc}); previous container restored, health {wait_health(target, 60)}",
++                             restored=True) from exc
+     result = {"bak_status": bak_status, "failed_container": failed, "restored_container_id": restored["Id"],
+               "health_ready_seconds": up, "outage_seconds": round(time.time() - t0, 1)}
+     log(f"rollback done: {result}")
+@@ -175,17 +196,18 @@ def rollback(target, inspect_path, log):
+ 
+ 
+ def _put_back(target, cur, cur_name):
+-    """回退失败时把原来的容器放回：占着名字的（回退容器）停掉、改回 *-bak，原容器改回原名、恢复重启策略并启动"""
+-    names = containers_by_name()
+-    holder = names.get(cur_name)
++    """把原来的容器放回：占着名字的另一个容器（回退容器）停掉、改回 *-bak；原容器改回原名、恢复重启策略，没在运行就启动。
++    任何中间状态都适用（停 / 启动已处于该状态的容器 Docker 返回 304，视为成功）。"""
++    holder = containers_by_name().get(cur_name)
+     if holder and holder["Id"] != cur["Id"]:
+         call("POST", f"{D}/containers/{holder['Id']}/update", {"RestartPolicy": {"Name": "no"}})
+-        call("POST", f"{D}/containers/{holder['Id']}/stop?t=15")
++        call("POST", f"{D}/containers/{holder['Id']}/stop?t=15", ok=(204, 304))
+         call("POST", f"{D}/containers/{holder['Id']}/rename?name={target.bak}")
+     if containers_by_name().get(cur_name, {}).get("Id") != cur["Id"]:
+         call("POST", f"{D}/containers/{cur['Id']}/rename?name={cur_name}")
+     call("POST", f"{D}/containers/{cur['Id']}/update", {"RestartPolicy": cur["HostConfig"]["RestartPolicy"]})
+-    call("POST", f"{D}/containers/{cur['Id']}/start")
++    if not call("GET", f"{D}/containers/{cur['Id']}/json")["State"]["Running"]:
++        call("POST", f"{D}/containers/{cur['Id']}/start", ok=(204, 304))
+ 
+ 
+ def revert_after_failed_swap(target, old_id, inspect_path, log):
+@@ -198,7 +220,7 @@ def revert_after_failed_swap(target, old_id, inspect_path, log):
+     restart = json.loads(pathlib.Path(inspect_path).read_text())["HostConfig"]["RestartPolicy"]
+     call("POST", f"{D}/containers/{old_id}/update", {"RestartPolicy": restart})
+     if not call("GET", f"{D}/containers/{old_id}/json")["State"]["Running"]:
+-        call("POST", f"{D}/containers/{old_id}/start")
++        call("POST", f"{D}/containers/{old_id}/start", ok=(204, 304))
+     up = wait_health(target, 60)
+     log(f"revert: old container back in place, health {up}")
+     return {"reverted_in_place": True, "health_ready_seconds": up}
+diff --git a/evidence/1.2.0/tools/test_swaplib_offline.py b/evidence/1.2.0/tools/test_swaplib_offline.py
+index 0c8bbae..da47c65 100644
+--- a/evidence/1.2.0/tools/test_swaplib_offline.py
++++ b/evidence/1.2.0/tools/test_swaplib_offline.py
+@@ -1,13 +1,17 @@
+ #!/usr/bin/env python3
+-"""swaplib 回退逻辑的离线测试（假 Portainer，不联网、不需要 JWT）。覆盖 198 演练不便制造的失败分支：
+-回退容器镜像不对 / 正在运行 → 不动当前容器；回退容器不存在 → 先重建再切换；回退后的 1.1.1 不健康 → 把原容器放回；
+-两种模式的名字互不越界；复制标签时去掉镜像来源标签；固定期望 sha 与 dist-sha256.txt 一致。
++"""swaplib 回退逻辑与 10 分钟验收判据的离线测试（假 Portainer，不联网、不需要 JWT）。覆盖 198 演练不便制造的失败分支：
++回退容器镜像 / 参数不对、正在运行 → 不动当前容器；回退容器不存在 → 先重建再切换，重建后核对不通过 → 删掉；
++停容器的调用报错（容器实际已停 / 未停）→ 恢复重启策略、需要时启动；回退后的 1.1.1 起不来或不健康 → 把原容器放回；
++放回也失败 → 报「须人工兜底」；两种模式的名字互不越界；复制标签时去掉镜像来源标签；固定期望 sha 与 dist-sha256.txt 一致；
++10 分钟验收：配置订阅缺失、无法解释的 TICK / QUOTE 缺失判失败，无法解释的运行期 KLINE 单列待 botd 日志确认。
++假 Docker 与真实 Docker + pt_exp 一致：停已停的容器、启动已在运行的容器返回 304，调用方不允许 304 时报错。
+ 用法：python3 evidence/1.2.0/tools/test_swaplib_offline.py"""
+ import copy
+ import json
+ import pathlib
+ import sys
+ import tempfile
++import traceback
+ import types
+ 
+ fake = types.ModuleType("pt_exp")
+@@ -28,6 +32,8 @@ class FakeDocker:
+         self.healthy_images = healthy_images
+         self.ops = []
+         self.seq = 0
++        self.failures = []  # [(操作, 当时的容器名, "before" | "after")]，按顺序各用一次
++        self.create_env = None  # 模拟重建出来的容器参数与请求不符
+ 
+     def find(self, ref):
+         for cid, v in self.c.items():
+@@ -38,11 +44,19 @@ class FakeDocker:
+     def inspect(self, v):
+         return {"Id": v["Id"], "Image": v["Image"], "RestartCount": 0,
+                 "State": {"Running": v["Running"]},
+-                "Config": {"Env": v["Env"], "Cmd": ["md-server"], "Entrypoint": None, "User": "md-user",
+-                           "ExposedPorts": {"8081/tcp": {}}, "Labels": copy.deepcopy(v["Labels"])},
++                "Config": {"Env": v["Env"], "Cmd": v.get("Cmd", ["md-server"]), "Entrypoint": None,
++                           "User": v.get("User", "md-user"), "ExposedPorts": {"8081/tcp": {}},
++                           "Labels": copy.deepcopy(v["Labels"])},
+                 "HostConfig": copy.deepcopy(v["HostConfig"])}
+ 
+-    def call(self, method, path, body=None, **kw):
++    def injected(self, op, name):
++        for i, (o, n, mode) in enumerate(self.failures):
++            if o == op and n == name:
++                del self.failures[i]
++                return mode
++        return None
++
++    def call(self, method, path, body=None, ok=(200, 201, 204), **kw):
+         p = path.replace(fake.D, "")
+         self.ops.append((method, p))
+         if method == "GET" and p.startswith("/containers/json"):
+@@ -55,26 +69,44 @@ class FakeDocker:
+             self.seq += 1
+             cid = f"new{self.seq}"
+             name = p.split("name=")[1]
++            assert all(o["Name"] != name for o in self.c.values()), f"name {name} taken"
+             image = OLD if body["Image"] == S.OLD_IMAGE_TAG else NEW
+-            self.c[cid] = {"Id": cid, "Name": name, "Image": image, "Running": False, "Env": body["Env"],
+-                           "Labels": body["Labels"], "HostConfig": body["HostConfig"]}
++            self.c[cid] = {"Id": cid, "Name": name, "Image": image, "Running": False,
++                           "Env": self.create_env or body["Env"], "Cmd": body["Cmd"], "User": body["User"],
++                           "Labels": body["Labels"], "HostConfig": copy.deepcopy(body["HostConfig"])}
+             return {"Id": cid}
+-        v = self.find(p.split("/")[2])
+-        if p.endswith("/start"):
++        v = self.find(p.split("/")[2].split("?")[0])
++        if method == "DELETE":
++            del self.c[v["Id"]]
++            return None
++        op = next(o for o in ("start", "stop", "rename", "update") if f"/{o}" in p)
++        mode = self.injected(op, v["Name"])
++        if mode == "before":
++            raise SystemExit(f"HTTP 500 {method} {p} (injected)")
++        if op == "start":
++            if v["Running"] and 304 not in ok:
++                raise SystemExit(f"HTTP 304 {method} {p}")
+             v["Running"] = True
+-        elif "/stop" in p:
++        elif op == "stop":
++            if not v["Running"] and 304 not in ok:
++                raise SystemExit(f"HTTP 304 {method} {p}")
+             v["Running"] = False
+-        elif "/rename" in p:
++        elif op == "rename":
+             new = p.split("name=")[1]
+             assert all(o["Name"] != new for o in self.c.values()), f"name {new} taken"
+             v["Name"] = new
+-        elif p.endswith("/update"):
++        elif op == "update":
+             v["HostConfig"]["RestartPolicy"] = body["RestartPolicy"]
++        if mode == "after":
++            raise SystemExit(f"HTTP 500 {method} {p} (injected after the change took effect)")
+         return None
+ 
+     def running(self, name):
+         return next((v for v in self.c.values() if v["Name"] == name and v["Running"]), None)
+ 
++    def touched_current(self):
++        return any(m == "POST" and ("/stop" in p or "/rename" in p) for m, p in self.ops)
++
+ 
+ def install(fd, target):
+     S.call = fd.call
+@@ -87,11 +119,12 @@ HC = {"PortBindings": {"8081/tcp": [{"HostPort": "8081"}]}, "RestartPolicy": {"N
+ ENV = ["RUST_LOG=warn", "TZ=Asia/Shanghai", "PATH=/usr/bin"]
+ 
+ 
+-def world(bak_image=OLD, bak_running=False, with_bak=True, names=("md-server", "md-server-1.1.1-bak")):
++def world(bak_image=OLD, bak_running=False, with_bak=True, names=("md-server", "md-server-1.1.1-bak"), bak_cmd=None):
+     cs = {"cur": {"Name": names[0], "Image": NEW, "Running": True, "Env": ENV, "Labels": {}, "HostConfig": copy.deepcopy(HC)}}
+     if with_bak:
+         cs["bak"] = {"Name": names[1], "Image": bak_image, "Running": bak_running, "Env": ENV,
+-                     "Labels": {}, "HostConfig": dict(copy.deepcopy(HC), RestartPolicy={"Name": "no"})}
++                     "Cmd": bak_cmd or ["md-server"], "Labels": {},
++                     "HostConfig": dict(copy.deepcopy(HC), RestartPolicy={"Name": "no"})}
+     return FakeDocker(cs)
+ 
+ 
+@@ -107,51 +140,122 @@ def inspect_file(tmp):
+ 
+ results = {}
+ logs = []
+-with tempfile.TemporaryDirectory() as tmp:
+-    insp = inspect_file(tmp)
+ 
++
++def case(name):
++    def run(fn):
++        try:
++            results[name] = bool(fn())
++        except BaseException:
++            traceback.print_exc(file=sys.stderr)
++            results[name] = False
++    return run
++
++
++def current_back_in_place(fd):
++    cur = fd.c["cur"]
++    return (cur["Running"] and cur["Name"] == "md-server"
++            and cur["HostConfig"]["RestartPolicy"] == {"Name": "unless-stopped"})
++
++
++def raises(exc_type, fn):
++    try:
++        fn()
++    except exc_type as exc:
++        return exc
++    return None
++
++
++tmp = tempfile.TemporaryDirectory()
++insp = inspect_file(tmp.name)
++
++
++@case("bak_present_normal_path")
++def _():
+     fd = world(); install(fd, S.PROD)
+     r = S.rollback(S.PROD, insp, logs.append)
+-    results["bak_present_normal_path"] = (r["bak_status"] == "present" and fd.running("md-server")["Image"] == OLD
+-                                          and any(v["Name"].endswith("-failed") and v["Image"] == NEW for v in fd.c.values()))
++    return (r["bak_status"] == "present" and fd.running("md-server")["Image"] == OLD
++            and any(v["Name"].endswith("-failed") and v["Image"] == NEW for v in fd.c.values()))
++
+ 
+-    for case, kwargs in {"bak_wrong_image_aborts_before_touching_current": {"bak_image": NEW},
+-                         "bak_running_aborts_before_touching_current": {"bak_running": True}}.items():
++for _name, _kwargs in {"bak_wrong_image_aborts_before_touching_current": {"bak_image": NEW},
++                       "bak_running_aborts_before_touching_current": {"bak_running": True},
++                       "bak_wrong_cmd_aborts_before_touching_current": {"bak_cmd": ["sh"]}}.items():
++    @case(_name)
++    def _(kwargs=_kwargs):
+         fd = world(**kwargs); install(fd, S.PROD)
+-        try:
+-            S.rollback(S.PROD, insp, logs.append)
+-            results[case] = False
+-        except AssertionError:
+-            results[case] = fd.c["cur"]["Running"] and fd.c["cur"]["Name"] == "md-server" and \
+-                not any(m == "POST" and ("/stop" in p or "/rename" in p) for m, p in fd.ops)
++        exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
++        return exc is not None and fd.c["cur"]["Running"] and fd.c["cur"]["Name"] == "md-server" and not fd.touched_current()
+ 
++
++@case("bak_missing_recreated_then_switched")
++def _():
+     fd = world(with_bak=False); install(fd, S.PROD)
+     r = S.rollback(S.PROD, insp, logs.append)
+     recreated = next(v for v in fd.c.values() if v["Id"].startswith("new"))
+-    results["bak_missing_recreated_then_switched"] = (
+-        r["bak_status"] == "recreated" and fd.running("md-server")["Id"] == recreated["Id"]
+-        and recreated["Image"] == OLD and recreated["Env"] == ENV
+-        and "md-server.binary.sha256" not in recreated["Labels"] and recreated["Labels"].get("keep") == "yes"
+-        and recreated["HostConfig"]["RestartPolicy"] == {"Name": "unless-stopped"})
+     create_idx = next(i for i, (m, p) in enumerate(fd.ops) if p.startswith("/containers/create"))
+     stop_idx = next(i for i, (m, p) in enumerate(fd.ops) if "/stop" in p)
+-    results["recreate_happens_before_current_is_stopped"] = create_idx < stop_idx
++    return (r["bak_status"] == "recreated" and fd.running("md-server")["Id"] == recreated["Id"]
++            and recreated["Image"] == OLD and recreated["Env"] == ENV
++            and "md-server.binary.sha256" not in recreated["Labels"] and recreated["Labels"].get("keep") == "yes"
++            and recreated["HostConfig"]["RestartPolicy"] == {"Name": "unless-stopped"}
++            and create_idx < stop_idx)
++
++
++@case("recreated_bak_mismatch_is_deleted_and_current_untouched")
++def _():
++    fd = world(with_bak=False); fd.create_env = ["RUST_LOG=debug"]; install(fd, S.PROD)
++    exc = raises(AssertionError, lambda: S.rollback(S.PROD, insp, logs.append))
++    return (exc is not None and not any(v["Name"] == "md-server-1.1.1-bak" for v in fd.c.values())
++            and ("DELETE", "/containers/new1?force=1") in fd.ops and fd.c["cur"]["Running"] and not fd.touched_current())
+ 
++
++@case("unhealthy_111_puts_previous_back")
++def _():
+     fd = world(); fd.healthy_images = (NEW,); install(fd, S.PROD)
+-    try:
+-        S.rollback(S.PROD, insp, logs.append)
+-        results["unhealthy_111_puts_previous_back"] = False
+-    except SystemExit:
+-        cur = fd.c["cur"]
+-        results["unhealthy_111_puts_previous_back"] = (cur["Running"] and cur["Name"] == "md-server"
+-                                                       and cur["HostConfig"]["RestartPolicy"] == {"Name": "unless-stopped"}
+-                                                       and fd.c["bak"]["Name"] == "md-server-1.1.1-bak"
+-                                                       and not fd.c["bak"]["Running"])
++    exc = raises(S.RollbackFailed, lambda: S.rollback(S.PROD, insp, logs.append))
++    return (exc is not None and exc.restored and current_back_in_place(fd)
++            and fd.c["bak"]["Name"] == "md-server-1.1.1-bak" and not fd.c["bak"]["Running"])
++
++
++@case("start_of_111_fails_puts_previous_back")
++def _():
++    fd = world(); fd.failures = [("start", "md-server", "before")]; install(fd, S.PROD)
++    exc = raises(S.RollbackFailed, lambda: S.rollback(S.PROD, insp, logs.append))
++    return (exc is not None and exc.restored and current_back_in_place(fd)
++            and fd.c["bak"]["Name"] == "md-server-1.1.1-bak" and not fd.c["bak"]["Running"])
++
++
++@case("stop_call_errors_after_stopping_restarts_current")
++def _():
++    fd = world(); fd.failures = [("stop", "md-server", "after")]; install(fd, S.PROD)
++    exc = raises(S.RollbackFailed, lambda: S.rollback(S.PROD, insp, logs.append))
++    return (exc is not None and exc.restored and current_back_in_place(fd)
++            and fd.c["bak"]["Name"] == "md-server-1.1.1-bak" and not fd.c["bak"]["Running"])
+ 
++
++@case("stop_call_errors_before_stopping_restores_restart_policy")
++def _():
++    fd = world(); fd.failures = [("stop", "md-server", "before")]; install(fd, S.PROD)
++    exc = raises(S.RollbackFailed, lambda: S.rollback(S.PROD, insp, logs.append))
++    return (exc is not None and exc.restored and current_back_in_place(fd)
++            and not any(m == "POST" and p == "/containers/cur/start" for m, p in fd.ops))
++
++
++@case("put_back_failure_reports_manual_recovery")
++def _():
++    fd = world(); fd.failures = [("start", "md-server", "before"), ("start", "md-server", "before")]; install(fd, S.PROD)
++    exc = raises(S.RollbackFailed, lambda: S.rollback(S.PROD, insp, logs.append))
++    return exc is not None and not exc.restored and "SWAP_PLAN §4.3" in str(exc)
++
++
++@case("drill_mode_uses_only_drill_names")
++def _():
+     fd = world(names=("md-exp-120-drill", "md-exp-120-drill-bak")); install(fd, S.DRILL)
+     r = S.rollback(S.DRILL, insp, logs.append)
+-    results["drill_mode_uses_only_drill_names"] = (r["failed_container"].startswith("md-exp-120-drill-")
+-                                                   and all(v["Name"].startswith("md-exp-120-drill") for v in fd.c.values()))
++    return (r["failed_container"].startswith("md-exp-120-drill-")
++            and all(v["Name"].startswith("md-exp-120-drill") for v in fd.c.values()))
++
+ 
+ def refused(target, name):
+     try:
+@@ -178,24 +282,61 @@ lines = (RERUN / "short.container.log").read_text().splitlines()
+ metrics = (RERUN / "short.metrics.final.txt").read_text()
+ cfg = RERUN / "short.config.yaml"
+ real = C.judge_subscriptions(before, final, lines, metrics, cfg)
+-results["ten_minute_real_canary_data_passes"] = (real["config_subscriptions_present"]
+-                                                 and real["missing_runtime_explained_by_idle_unsubscribe"]
+-                                                 and len(real["missing_runtime"]) > 0)
+-idle_lines = [l for l in lines if "idle-unsubscribed" in l]
+-dropped = C.judge_subscriptions(before, final, [l for l in lines if l != idle_lines[0]], metrics, cfg)
+-results["ten_minute_missing_log_line_fails"] = (not dropped["missing_runtime_explained_by_idle_unsubscribe"]
+-                                                and len(dropped["missing_runtime_unexplained"]) == 1)
+-low = C.judge_subscriptions(before, final, lines, metrics.replace(
+-    f"md_runtime_subscriptions_idle_unsubscribed_total {real['idle_unsubscribed_total']:g}",
+-    "md_runtime_subscriptions_idle_unsubscribed_total 0"), cfg)
+-results["ten_minute_counter_below_missing_fails"] = not low["missing_runtime_explained_by_idle_unsubscribe"]
+-cfg_keys = C.config_keys(cfg)
+-without_config = [s for s in final
+-                  if C.key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) != sorted(cfg_keys)[0]]
+-results["ten_minute_missing_config_subscription_fails"] = not C.judge_subscriptions(
+-    before, without_config, lines, metrics, cfg)["config_subscriptions_present"]
++TICK_SNDK, KLINE_BNB_5M = ("binance", 1, "SNDKUSDT", ""), ("binance", 2, "BNBUSDT", "5m")
++
++
++def without_idle_line(k):
++    return [l for l in lines if not ("idle-unsubscribed" in l and f"type={C.TYPES[k[1]]} symbol={k[2]} " in l
++                                    and f"interval={k[3] or '-'} " in l)]
++
++
++def ok(j):
++    return j["config_subscriptions_present"] and j["missing_tick_quote_explained_by_idle_unsubscribe"]
++
++
++@case("ten_minute_real_canary_data_passes")
++def _():
++    return (ok(real) and len(real["missing_runtime"]) == 5 and real["missing_runtime_explained"] == real["missing_runtime"]
++            and not real["needs_botd_confirmation"] and TICK_SNDK in real["missing_runtime"]
++            and KLINE_BNB_5M in real["missing_runtime"])
++
++
++@case("ten_minute_unexplained_tick_fails")
++def _():
++    j = C.judge_subscriptions(before, final, without_idle_line(TICK_SNDK), metrics, cfg)
++    return not ok(j) and j["missing_runtime_unexplained"] == [TICK_SNDK] and not j["needs_botd_confirmation"]
++
++
++@case("ten_minute_unexplained_quote_fails")
++def _():
++    quote = {"exchange": "binance", "data_type": 3, "symbol": "XRPUSDT", "kline_interval": None}
++    j = C.judge_subscriptions(before + [quote], final, lines, metrics, cfg)
++    return not ok(j) and j["missing_runtime_unexplained"] == [("binance", 3, "XRPUSDT", "")]
++
++
++@case("ten_minute_unexplained_runtime_kline_needs_botd_not_fail")
++def _():
++    j = C.judge_subscriptions(before, final, without_idle_line(KLINE_BNB_5M), metrics, cfg)
++    return ok(j) and j["needs_botd_confirmation"] == [KLINE_BNB_5M] and not j["missing_runtime_unexplained"]
++
++
++@case("ten_minute_counter_below_explained_fails")
++def _():
++    low = metrics.replace(f"md_runtime_subscriptions_idle_unsubscribed_total {real['idle_unsubscribed_total']:g}",
++                          "md_runtime_subscriptions_idle_unsubscribed_total 0")
++    return not ok(C.judge_subscriptions(before, final, lines, low, cfg))
++
++
++@case("ten_minute_missing_config_kline_fails")
++def _():
++    config_kline = sorted(k for k in C.config_keys(cfg) if k[1] == 2)[0]
++    now = [s for s in final if C.key(s["exchange"], s["data_type"], s["symbol"], s.get("kline_interval")) != config_kline]
++    j = C.judge_subscriptions(before, now, lines, metrics, cfg)
++    return not j["config_subscriptions_present"] and config_kline not in j["needs_botd_confirmation"]
++
++
+ print(json.dumps({"real_canary_missing_runtime": real["missing_runtime"],
+                   "idle_unsubscribed_total": real["idle_unsubscribed_total"]}), file=sys.stderr)
+-
++tmp.cleanup()
+ print(json.dumps(results, indent=1))
+ sys.exit(0 if all(results.values()) else 1)

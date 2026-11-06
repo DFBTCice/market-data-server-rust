@@ -1,0 +1,26 @@
+{"real_canary_missing_runtime": [["binance", 1, "SNDKUSDT", ""], ["binance", 2, "BNBUSDT", "5m"], ["binance", 2, "BTCUSDT", "30m"], ["binance", 2, "SNDKUSDT", "30m"], ["binance", 2, "SNDKUSDT", "5m"]], "idle_unsubscribed_total": 6.0}
+{
+ "bak_present_normal_path": true,
+ "bak_wrong_image_aborts_before_touching_current": true,
+ "bak_running_aborts_before_touching_current": true,
+ "bak_wrong_cmd_aborts_before_touching_current": true,
+ "bak_missing_recreated_then_switched": true,
+ "recreated_bak_mismatch_is_deleted_and_current_untouched": true,
+ "unhealthy_111_puts_previous_back": false,
+ "start_of_111_fails_puts_previous_back": false,
+ "stop_call_errors_after_stopping_restarts_current": false,
+ "stop_call_errors_before_stopping_restores_restart_policy": false,
+ "put_back_failure_reports_manual_recovery": false,
+ "drill_mode_uses_only_drill_names": true,
+ "prod_refuses_drill_names": true,
+ "drill_refuses_prod_names": true,
+ "prod_allows_its_names": true,
+ "strip_image_labels": true,
+ "expected_sha_matches_dist_record": true,
+ "ten_minute_real_canary_data_passes": true,
+ "ten_minute_unexplained_tick_fails": true,
+ "ten_minute_unexplained_quote_fails": true,
+ "ten_minute_unexplained_runtime_kline_needs_botd_not_fail": true,
+ "ten_minute_counter_below_explained_fails": true,
+ "ten_minute_missing_config_kline_fails": true
+}

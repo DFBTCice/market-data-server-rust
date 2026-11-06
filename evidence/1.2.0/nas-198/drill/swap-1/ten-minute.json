@@ -1,0 +1,38 @@
+{
+  "mode": "drill",
+  "checked_at_utc": "2026-11-06T18:00:15.007447+00:00",
+  "verdict": "pass",
+  "checks": {
+    "same_container": true,
+    "healthy": true,
+    "restart_count_0": true,
+    "config_subscriptions_present": true,
+    "missing_tick_quote_explained_by_idle_unsubscribe": true,
+    "ws_active_clients_ok": true,
+    "runtime_switch_on": true,
+    "jemalloc_metrics": true
+  },
+  "pass": true,
+  "needs_botd_confirmation": [],
+  "config_subscriptions_expected": 10,
+  "missing_config": [],
+  "subscriptions_before": 14,
+  "subscriptions_now": 14,
+  "missing_runtime": [],
+  "missing_runtime_explained": [],
+  "missing_runtime_unexplained": [],
+  "idle_unsubscribed_total": 0,
+  "ws_active_clients": 0,
+  "recorded_only": {
+    "write_timeout_total": 0,
+    "write_timeout_log_lines": [],
+    "exchange_reconnect_deltas_since_swap": {
+      "okx-kline": 0.0,
+      "binance": 0.0,
+      "okx": 0.0,
+      "binance-quote": 0.0,
+      "okx-quote": 0.0
+    },
+    "consumers_from_post_swap_csv": null
+  }
+}

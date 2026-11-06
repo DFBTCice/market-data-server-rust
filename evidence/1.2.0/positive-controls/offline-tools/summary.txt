@@ -1,0 +1,17 @@
+tools_commit=a08f8f3fffcfbc212a2848a1bb7210c9bcee67f8 tools_dirty=0
+O1-no-bak-image-check: CAUGHT; exit=1; false=[bak_wrong_image_aborts_before_touching_current]
+O2-no-bak-stopped-check: CAUGHT; exit=1; false=[bak_running_aborts_before_touching_current]
+O3-no-bak-params-check: CAUGHT; exit=1; false=[bak_wrong_cmd_aborts_before_touching_current]
+O4-mismatched-recreated-bak-kept: CAUGHT; exit=1; false=[recreated_bak_mismatch_is_deleted_and_current_untouched]
+O5-ensure-bak-after-stop: CAUGHT; exit=1; false=[bak_wrong_image_aborts_before_touching_current bak_running_aborts_before_touching_current bak_wrong_cmd_aborts_before_touching_current bak_missing_recreated_then_switched recreated_bak_mismatch_is_deleted_and_current_untouched]
+O6-no-put-back: CAUGHT; exit=1; false=[unhealthy_111_puts_previous_back start_of_111_fails_puts_previous_back stop_call_errors_after_stopping_restarts_current stop_call_errors_before_stopping_restores_restart_policy put_back_failure_reports_manual_recovery]
+O7-put-back-stop-rejects-304: CAUGHT; exit=1; false=[start_of_111_fails_puts_previous_back]
+O8-put-back-keeps-restart-policy-no: CAUGHT; exit=1; false=[unhealthy_111_puts_previous_back start_of_111_fails_puts_previous_back stop_call_errors_after_stopping_restarts_current stop_call_errors_before_stopping_restores_restart_policy]
+O9-put-back-never-starts: CAUGHT; exit=1; false=[unhealthy_111_puts_previous_back start_of_111_fails_puts_previous_back stop_call_errors_after_stopping_restarts_current put_back_failure_reports_manual_recovery]
+O10-failed-put-back-reported-as-restored: CAUGHT; exit=1; false=[put_back_failure_reports_manual_recovery]
+C1-unexplained-tick-quote-excused: CAUGHT; exit=1; false=[ten_minute_unexplained_tick_fails ten_minute_unexplained_quote_fails]
+C2-unexplained-kline-counted-as-failure: CAUGHT; exit=1; false=[ten_minute_unexplained_runtime_kline_needs_botd_not_fail]
+C3-idle-counter-not-checked: CAUGHT; exit=1; false=[ten_minute_counter_below_explained_fails]
+C4-config-kline-excused: CAUGHT; exit=1; false=[ten_minute_missing_config_kline_fails]
+unmutated: exit=0; false=[]
+overall=PASS
