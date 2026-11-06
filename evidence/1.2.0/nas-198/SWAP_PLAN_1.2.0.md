@@ -26,7 +26,7 @@
 6. 现网 `md_ws_active_clients >= 2`（消费者不齐时换版必然触发自动回退，先确认 botd 等都已连上）。
 7. 环境变量 `APPROVED` 写明业务方批准人与时间。
 
-## 3. 步骤（低峰；业务方开 Portainer 后，用临时账户登录换 JWT 写 `/tmp/pt_jwt`，权限 600，用完删除）
+## 3. 步骤（不限时段；须等 OMS 部署结束、稳定连上，开始前确认 `md_ws_active_clients` 为 2，开始时间先告诉业务方；业务方开 Portainer 后，用临时账户登录换 JWT 写 `/tmp/pt_jwt`，权限 600，用完删除）
 
 ```bash
 python3 evidence/1.2.0/tools/build_release_image.py                    # 构建 md-server:1.2.0，写 nas-198/image-manifest.json
@@ -38,6 +38,8 @@ APPROVED="<批准人 时间>" python3 evidence/1.2.0/tools/execute_swap.py
 bash evidence/1.2.0/tools/observe_24h.sh                                # 立即开始 24 小时每分钟采样（见第 5 节）
 sleep 600 && python3 evidence/1.2.0/tools/check_after_swap.py          # 10 分钟验收
 ```
+
+换版后交付：`swap/swap-result.json` 与 `swap/ten-minute.json`（含 `verdict`）交业务方转主审；`verdict` 为 `pass_needs_botd_confirmation` 时不回退，`needs_botd_confirmation` 清单一并转去。
 
 10 分钟验收判据（`check_after_swap.py`）：同一容器、健康、RestartCount = 0、**配置订阅（从 `config.release.yaml` 独立解析）全部还在**；
 换前有、现在没有的运行期订阅中，**TICK / QUOTE** 必须每个都有 `runtime subscription idle-unsubscribed:` 日志，
@@ -99,15 +101,23 @@ APPROVED="<批准人 时间>" python3 evidence/1.2.0/tools/rollback_to_111.py
 目标只有一个：**让一个名叫 `md-server` 的容器跑起来并健康**，优先 1.1.1。业务方在 Portainer 界面操作
 （`http://192.168.1.198:9000` → 环境 `local` → Containers；改名在容器详情页名字旁的编辑按钮，重启策略在详情页下方 Restart policies → Update）：
 
-1. **先看现状**：容器列表里搜 `md-server`，记下 `md-server`、`md-server-1.1.1-bak`、`md-server-<时间戳>-failed` 各自是否存在、是否在运行、镜像是什么。
-   `md-server` 在运行且 `curl -s http://192.168.1.198:8081/health` 返回 `{"status":"ok"…}` → 服务没空着，不用动，把现状告诉我。
-2. **`md-server` 不在运行**：
-   - 若存在名叫 `md-server` 但没在运行的容器 → 先把它改名为 `md-server-<当前时间>-failed`（腾出名字），不要删。
-   - (i) 有 `md-server-1.1.1-bak`（镜像 `md-server:1.1.1`）→ 改名为 `md-server` → 重启策略改为 `Unless stopped` → Start。
-   - (ii) 没有回退容器 → 把时间戳最新的 `md-server-<时间戳>-failed`（回退前在跑的 1.2.0，镜像 `md-server:1.2.0`）改回 `md-server`
-     → 重启策略改为 `Unless stopped` → Start，先保证服务不空着；之后由我用 `rollback_to_111.py` 重建回退容器再切 1.1.1。
-   - 两者都没有 → 告诉我，由我按 `swap/old-container.inspect.json` 用 `rollback_to_111.py` 重建（Portainer 恢复后）。
-   - 不要用 `md-server-1.1.0-quote-bnb-bak`（1.1.0 时代的旧回退容器，与本次无关）。
+**一律按镜像认容器，不按名字认**：容器列表的 Image 列，`md-server:1.1.1` 是 1.1.1，`md-server:1.2.0` 是 1.2.0。
+名字里的时间戳不能用来判断新旧：脚本改名用的是 Unix 秒数，人工改名用的是当前时间，两种格式没法比较；刚改名的 1.1.1 也可能是「最新」的。
+`md-server-1.1.0-quote-bnb-bak`（1.1.0 时代的旧回退容器）与本次无关，任何情况下都不要用。
+
+1. **先看现状**：容器列表里搜 `md-server`，记下每个容器的名字、镜像（Image 列）、状态（running / exited / restarting）。
+   名叫 `md-server` 的容器在运行，且 `curl -s http://192.168.1.198:8081/health` 返回 `{"status":"ok"…}` → 服务没空着，不用动，把现状告诉我。
+2. **按下面的顺序处理，直到有一个名叫 `md-server` 的容器在运行且健康**：
+   - (a) **腾出名字**：若名叫 `md-server` 的容器没在运行（exited / created），先把它改名，不要删：
+     镜像是 `md-server:1.1.1` → 改名为 `md-server-1.1.1-bak`（该名已被占用则用 `md-server-1.1.1-bak-<当前时间>`）；
+     镜像是 `md-server:1.2.0` → 改名为 `md-server-1.2.0-<当前时间>-failed`。
+   - (b) **先试 1.1.1**：若有镜像为 `md-server:1.1.1` 的停止容器（正常名叫 `md-server-1.1.1-bak`）→ 改名为 `md-server` → 重启策略改为 `Unless stopped` → Start → 等健康（第 3 步）。
+   - (c) **1.1.1 起不来**（Start 后状态是 exited / restarting，或 60 秒内 `/health` 不是 ok）→ 它的重启策略改为 `No` → Stop
+     → 改回 `md-server-1.1.1-bak`（该名已被占用则用 `md-server-1.1.1-bak-<当前时间>`）→ 接着做 (d)。
+   - (d) **放回 1.2.0**：找**镜像为 `md-server:1.2.0`** 的容器（不管它叫什么名字；正常只有一个，名字形如 `md-server-<数字>-failed`）
+     → 改名为 `md-server` → 重启策略改为 `Unless stopped` → Start，先保证服务不空着；之后由我用 `rollback_to_111.py` 重建回退容器再切 1.1.1。
+     镜像为 `md-server:1.2.0` 的容器有不止一个时，不要猜，先告诉我。
+   - (e) 1.1.1 和 1.2.0 的容器都没有 → 告诉我，由我按 `swap/old-container.inspect.json` 用 `rollback_to_111.py` 重建（Portainer 恢复后）。
 3. **等健康**：`curl -s http://192.168.1.198:8081/health`，30 秒内应为 ok。
 4. **补订阅**（这台 MacBook 上执行，不需要 Portainer）：
    `node scripts/compat/restore_subs.mjs evidence/1.2.0/nas-198/swap/subscriptions.before.json http://192.168.1.198:8081 --apply`
@@ -115,8 +125,9 @@ APPROVED="<批准人 时间>" python3 evidence/1.2.0/tools/rollback_to_111.py
 5. **核对**：`curl -s http://192.168.1.198:8081/metrics | grep -E '^(md_ws_active_clients|process_start_time_seconds|md_runtime_subscriptions_enabled) '`；
    消费者回到 2 个；1.1.1 没有 `md_runtime_subscriptions_enabled` 这一行。
 
-有 198 的 shell 时，等价命令：`docker ps -a --filter name=md-server`、`docker rename <旧名> <新名>`、`docker update --restart unless-stopped md-server`、
-`docker start md-server`。人工兜底后，把操作过程与时间告诉我，我补记到 `swap/` 并通知主审。
+有 198 的 shell 时，等价命令：`docker ps -a --filter name=md-server --format '{{.Names}} {{.Image}} {{.Status}}'`（按镜像认容器）、
+`docker ps -a --filter ancestor=md-server:1.2.0`、`docker update --restart no <名字>`、`docker stop <名字>`、`docker rename <旧名> <新名>`、
+`docker update --restart unless-stopped md-server`、`docker start md-server`。人工兜底后，把操作过程与时间告诉我，我补记到 `swap/` 并通知主审。
 
 ## 5. 24 小时采样（`post-swap-24h/prod.csv`，每分钟）
 
