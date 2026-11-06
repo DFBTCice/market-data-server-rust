@@ -1,0 +1,6 @@
+   old 样本 698, new 样本 704; 删除=0, 新增=6
+   old 指标族 34, new 指标族 40; TYPE 变更/删除=0, HELP 变更/删除=0
+   新增指标族: md_runtime_subscriptions_enabled, md_runtime_subscriptions, md_runtime_subscriptions_idle_unsubscribed_total, md_runtime_subscriptions_demand_subscribed_total, md_runtime_subscriptions_demand_failed_total, md_runtime_subscriptions_limit_rejected_total
+   新增样本(前 6 条): md_runtime_subscriptions_enabled ; md_runtime_subscriptions ; md_runtime_subscriptions_idle_unsubscribed_total ; md_runtime_subscriptions_demand_subscribed_total ; md_runtime_subscriptions_demand_failed_total ; md_runtime_subscriptions_limit_rejected_total
+
+RESULT: PASS

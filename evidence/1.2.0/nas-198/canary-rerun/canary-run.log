@@ -1,0 +1,10 @@
+2026-11-06T16:30:01.700011+00:00 prod (read-only): {'tag': 'before', 'at_utc': '2026-11-06T16:30:01.687681+00:00', 'process_start_time_seconds': '1792785202', 'process_resident_memory_bytes': '101515264', 'md_ws_active_clients': '2', 'md_quotes_processed': '75926010', 'md_ticks_processed': '82992510', 'subscriptions': 17}
+2026-11-06T16:30:16.114731+00:00 started md-exp-120-short 555a0809459a md-server:exp-120-short http=28122 env=['RUST_LOG=warn,md_runtime_subs=info']
+2026-11-06T16:30:22.861961+00:00 started md-exp-120-prod ca7b10f75fb5 md-server:exp-120-prod http=28123 env=['RUST_LOG=warn,md_runtime_subs=info']
+2026-11-06T16:37:31.732659+00:00 removed container md-exp-120-short
+2026-11-06T16:37:31.740423+00:00 switch-on short exit=0; see /Users/lihao/Desktop/web3/rust/rest重构/evidence/1.2.0/nas-198/canary-rerun/short/summary.json
+2026-11-06T16:45:35.159680+00:00 removed container md-exp-120-prod
+2026-11-06T16:45:35.160503+00:00 switch-on prod exit=0; see /Users/lihao/Desktop/web3/rust/rest重构/evidence/1.2.0/nas-198/canary-rerun/prod/summary.json
+2026-11-06T16:45:35.366567+00:00 prod (read-only) after: {'tag': 'after', 'at_utc': '2026-11-06T16:45:35.360426+00:00', 'process_start_time_seconds': '1792785202', 'process_resident_memory_bytes': '101908480', 'md_ws_active_clients': '2', 'md_quotes_processed': '76028558', 'md_ticks_processed': '83150720', 'subscriptions': 14}
+2026-11-06T16:45:35.425452+00:00 removed image md-server:exp-120-short
+2026-11-06T16:45:35.517216+00:00 removed image md-server:exp-120-prod

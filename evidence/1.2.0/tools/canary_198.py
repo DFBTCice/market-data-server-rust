@@ -12,6 +12,7 @@
 全程每 10 秒采样各旁路容器的 docker stats（内存、CPU）；前后读现网 /metrics 核对未受影响。
 
 用法：python3 evidence/1.2.0/tools/canary_198.py <1.2.0 二进制> <期望 sha256> [输出目录]
+      python3 evidence/1.2.0/tools/canary_198.py --switch-on-only <二进制> <sha256> [输出目录]   # 只重跑第 2 部分：short 与 prod 两个容器同时跑
 """
 import csv
 import datetime
@@ -54,8 +55,14 @@ runtime_subscriptions:
   on_demand_quote: false
 """
 
-binary, expected_sha = pathlib.Path(sys.argv[1]), sys.argv[2]
-OUT = pathlib.Path(sys.argv[3]) if len(sys.argv) > 3 else ROOT / "evidence/1.2.0/nas-198/canary"
+SWITCH_ON_ONLY = "--switch-on-only" in sys.argv
+ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
+binary, expected_sha = pathlib.Path(ARGS[0]), ARGS[1]
+OUT = pathlib.Path(ARGS[2]) if len(ARGS) > 2 else ROOT / (
+    "evidence/1.2.0/nas-198/canary-rerun" if SWITCH_ON_ONLY else "evidence/1.2.0/nas-198/canary")
+CONSUMER_FLAGS = {"short": ["--idle-sec=120", "--botd-hold-sec=90", "--total-sec=420"],
+                  "prod": ["--idle-sec=600", "--botd-hold-sec=60", "--total-sec=900"]}
+PORTS = {"short": 28122, "prod": 28123}
 OUT.mkdir(parents=True, exist_ok=True)
 created_containers, created_images, processes, handles = [], [], [], []
 active = {}  # side -> container name，供 stats 采样
@@ -159,6 +166,8 @@ def stats_sampler():
         for side, name in list(active.items()):
             try:
                 s = call("GET", f"{D}/containers/{name}/stats?stream=false", timeout=30)
+                if not s:  # 容器正在删除时返回空
+                    continue
                 mem = s.get("memory_stats", {})
                 stats = mem.get("stats", {})
                 cpu, pre = s.get("cpu_stats", {}), s.get("precpu_stats", {})
@@ -171,8 +180,23 @@ def stats_sampler():
                        round(pct, 2) if pct != "" else ""]
                 with open(path, "a", newline="") as f:
                     csv.writer(f).writerow(row)
-            except Exception as exc:  # 采样失败只记一行，不中断金丝雀
+            except (Exception, SystemExit) as exc:  # pt_exp.call 用 SystemExit 报 HTTP 错误；采样失败只记一行，不中断金丝雀
                 log(f"stats sample failed for {name}: {exc}")
+
+
+def run_consumers(side):
+    port = PORTS[side]
+    return spawn(["node", "evidence/1.2.0/tools/canary_consumers.mjs", f"http://{HOST}:{port}", str(OUT / side),
+                  *CONSUMER_FLAGS[side]], OUT / f"{side}.consumers.stdout.log")
+
+
+def collect_and_remove(side):
+    port, name = PORTS[side], f"md-exp-120-{side}"
+    (OUT / f"{side}.subscriptions.final.json").write_bytes(get(port, "/api/v1/subscriptions"))
+    (OUT / f"{side}.metrics.final.txt").write_bytes(get(port, "/metrics"))
+    raw = call("GET", f"{D}/containers/{name}/logs?stdout=1&stderr=1&timestamps=1&tail=5000", want_raw=True)
+    (OUT / f"{side}.container.log").write_text(demux(raw))
+    remove_container(side, name)
 
 
 def prod_snapshot(tag):
@@ -201,13 +225,26 @@ try:
 
     short_cfg = OUT / "config.short.yaml"
     short_cfg.write_text((ROOT / "evidence/1.1.1/final-artifact/config.final.yaml").read_text() + SHORT_SECTION)
-    for image, cfg in ((OFF_IMAGE, None), (SHORT_IMAGE, str(short_cfg)),
-                       (PROD_IMAGE, str(ROOT / "evidence/1.2.0/nas-198/config.release.yaml"))):
+    images = [(OFF_IMAGE, None), (SHORT_IMAGE, str(short_cfg)),
+              (PROD_IMAGE, str(ROOT / "evidence/1.2.0/nas-198/config.release.yaml"))]
+    for image, cfg in images[1:] if SWITCH_ON_ONLY else images:
         cmd_build(str(binary), image, BASE_IMAGE, cfg)
         created_images.append(image)
 
     sampler = threading.Thread(target=stats_sampler, daemon=True)
     sampler.start()
+
+    if SWITCH_ON_ONLY:
+        start_and_restore([s for s in PART1 if s[0] == "short"] + PART2, subs_file)
+        consumers = {side: run_consumers(side) for side in ("short", "prod")}
+        for side, proc in consumers.items():
+            code = proc.wait()
+            collect_and_remove(side)
+            log(f"switch-on {side} exit={code}; see {OUT / side / 'summary.json'}")
+        after = prod_snapshot("after")
+        assert after["process_start_time_seconds"] == before["process_start_time_seconds"], "现网进程被重启过"
+        log(f"prod (read-only) after: {after}")
+        raise SystemExit(0)
 
     # ---- 第 1 部分：old / off 字节对比 + short 试跑 ----
     start_and_restore(PART1, subs_file)

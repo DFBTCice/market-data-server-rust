@@ -1,0 +1,17 @@
+2026-11-06T16:06:00.512624+00:00 prod (read-only): {'tag': 'before', 'at_utc': '2026-11-06T16:06:00.498215+00:00', 'process_start_time_seconds': '1792785202', 'process_resident_memory_bytes': '101711872', 'md_ws_active_clients': '2', 'md_quotes_processed': '75740482', 'md_ticks_processed': '82699201', 'subscriptions': 14}
+2026-11-06T16:06:24.329625+00:00 started md-exp-120-old 51b28891c60b md-server:1.1.1 http=28120 env=['RUST_LOG=warn']
+2026-11-06T16:06:31.495868+00:00 started md-exp-120-off 738434474d97 md-server:exp-120-off http=28121 env=['RUST_LOG=warn']
+2026-11-06T16:06:38.344528+00:00 started md-exp-120-short ccf6025833cd md-server:exp-120-short http=28122 env=['RUST_LOG=warn,md_runtime_subs=info']
+2026-11-06T16:11:21.993797+00:00 part 1 switch-off compatibility: {'push-gateway': 0, 'push-legacy': 0, 'noquote-legacy': 0, 'subs': 0, 'metrics': 0, 'selftest': 0, 'quote_raw': 1}
+2026-11-06T16:11:23.540550+00:00 removed container md-exp-120-old
+2026-11-06T16:11:24.930732+00:00 removed container md-exp-120-off
+2026-11-06T16:14:20.558337+00:00 stats sample failed for md-exp-120-short: 'NoneType' object has no attribute 'get'
+2026-11-06T16:14:20.714006+00:00 removed container md-exp-120-short
+2026-11-06T16:14:20.715103+00:00 part 2a short trial exit=1; see /Users/lihao/Desktop/web3/rust/rest重构/evidence/1.2.0/nas-198/canary/short/summary.json
+2026-11-06T16:14:22.919676+00:00 started md-exp-120-prod d2b0b8503249 md-server:exp-120-prod http=28123 env=['RUST_LOG=warn,md_runtime_subs=info']
+2026-11-06T16:29:33.850600+00:00 removed container md-exp-120-prod
+2026-11-06T16:29:33.851816+00:00 part 2b production-parameter rerun exit=1; see /Users/lihao/Desktop/web3/rust/rest重构/evidence/1.2.0/nas-198/canary/prod/summary.json
+2026-11-06T16:29:33.912701+00:00 prod (read-only) after: {'tag': 'after', 'at_utc': '2026-11-06T16:29:33.906864+00:00', 'process_start_time_seconds': '1792785202', 'process_resident_memory_bytes': '101195776', 'md_ws_active_clients': '2', 'md_quotes_processed': '75922717', 'md_ticks_processed': '82988355', 'subscriptions': 16}
+2026-11-06T16:29:34.005790+00:00 removed image md-server:exp-120-off
+2026-11-06T16:29:34.088818+00:00 removed image md-server:exp-120-short
+2026-11-06T16:29:34.177127+00:00 removed image md-server:exp-120-prod

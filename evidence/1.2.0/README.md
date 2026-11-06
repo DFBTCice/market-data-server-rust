@@ -18,7 +18,10 @@
 | `canary-local-switch-on-prod/` | 现网参数复跑（本机，`nas-198/config.release.yaml`：闲置 10、保护 10、检查 60 秒），同三类消费者 | `MODE=prod bash evidence/1.2.0/tools/local_canary.sh 12192d9` |
 | `nas-198/config.release.yaml`、`config.release.diff` | 换版镜像配置（现网配置 + 开关打开、报价补订关闭）与相对现网配置的 diff | — |
 | `nas-198/SWAP_PLAN_1.2.0.md` | 换版计划（前置条件、步骤、两级回退、24 小时采样） | — |
-| `nas-198/canary/`（未做） | 198 旁路金丝雀两部分。需要业务方提供 Portainer 会话；脚本就绪 | `python3 evidence/1.2.0/tools/canary_198.py dist/md-server-1.2.0-12192d9-linux-x86_64 <sha256>` |
+| `nas-198/CANARY_REPORT.md` | **198 旁路金丝雀报告**（2026-11-06 16:05–16:46Z，未换版） | — |
+| `nas-198/canary/` | 第一次完整运行：第 1 部分字节对比（`gate-results.json`，原始抓取 `captures.tar.gz` + `raw-sha256.txt`）与第 2 部分 short / prod（判据误报，见报告）；docker stats、现网快照、容器日志、读回的二进制 sha 与配置 | `python3 evidence/1.2.0/tools/canary_198.py dist/md-server-1.2.0-12192d9-linux-x86_64 <sha256>` |
+| `nas-198/canary-rerun/` | 第 2 部分判据修正后的重跑（short、prod 同时运行，均 `pass: true`） | `python3 evidence/1.2.0/tools/canary_198.py --switch-on-only dist/md-server-1.2.0-12192d9-linux-x86_64 <sha256>` |
+| `nas-198/cleanup-check.txt` | 金丝雀结束后的 198 清理核对（旁路容器、镜像均无；现网未重启） | — |
 | `tools/` | 上述脚本，另有 `build_release_image.py`、`execute_swap.py`、`check_after_swap.py`、`observe_24h.sh`（换版用，须业务方批准） | — |
 
 ## 不随轮次变化

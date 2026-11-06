@@ -64,7 +64,8 @@ async function sample() {
     const subs = await (await fetch(`${base}/api/v1/subscriptions`)).json();
     const text = await (await fetch(`${base}/metrics`)).text();
     const metrics = Object.fromEntries(metricNames.map((n) => [n, Number((text.match(new RegExp(`^${n} (\\S+)$`, 'm')) ?? [])[1])]));
-    const row = { t: t(), at: new Date().toISOString(), subs: subs.map(key).sort(), metrics };
+    const row = { t: t(), at: new Date().toISOString(), subs: subs.map(key).sort(),
+      sources: Object.fromEntries(subs.map((s) => [key(s), s.source])), metrics };
     timeline.push(row);
     appendFileSync(join(outdir, 'timeline.jsonl'), JSON.stringify({ ...row, raw_subs: subs }) + '\n');
     return row;
@@ -132,7 +133,8 @@ const cpuPct = (rows) => rows.length < 2 ? null
 const rssMiB = (r) => r ? Math.round(r.metrics.process_resident_memory_bytes / 1048576 * 10) / 10 : null;
 const final = timeline.at(-1);
 const st = (k) => { const s = stats[k]; return s ? { count: s.count, dups: s.dups, first_at: s.first_at } : { count: 0, dups: 0 }; };
-const configKeys = (initial?.subs ?? []).filter((k) => !OMS_KEYS.includes(k) && k !== 'binance|1|SNDKUSDT|');
+// 配置订阅以服务端 GET 的 source 字段为准（开关打开时才有）；补入的现网运行期订阅（如 botd 登记的 K 线）本来就会被闲置退订
+const configKeys = (initial?.subs ?? []).filter((k) => initial.sources[k] === 'config');
 const quoteOutside = Object.fromEntries(QUOTE_OUTSIDE.map((q) => [q, st(`quote:${q}`)]));
 const quoteConfig = Object.fromEntries(QUOTE_CONFIG.map((q) => [q, st(`quote:${q}`)]));
 const summary = {
@@ -142,13 +144,15 @@ const summary = {
     oms_sol_binance_after_resubscribe: st('oms:tick.binance.SOLUSDT'), botd_sol_tick: st('botd:tick.binance.SOLUSDT'), botd_sol_kline: st('botd:kline.1m.binance.SOLUSDT'),
     quote_outside_config: quoteOutside, quote_in_config: quoteConfig,
   },
+  config_keys: configKeys,
+  initial_runtime_keys_gone: (initial?.subs ?? []).filter((k) => initial.sources[k] === 'runtime' && !has(final, k)),
   quote_rate_per_sec: { before_quote_consumer: quoteRatePre, after_quote_consumer: quoteRatePost,
     ratio: quoteRatePre ? Math.round(quoteRatePost / quoteRatePre * 100) / 100 : null },
   resources: { rss_mib_start: rssMiB(timeline[0]), rss_mib_end: rssMiB(final), cpu_pct_avg: cpuPct(timeline) },
   final_metrics: final?.metrics,
   checks: {
     oms_topics_never_unsubscribed: !ev.oms_key_missing && OMS_KEYS.every((k) => has(final, k)),
-    config_subscriptions_kept: configKeys.every((k) => timeline.every((r) => has(r, k))),
+    config_subscriptions_kept: configKeys.length > 0 && configKeys.every((k) => timeline.every((r) => has(r, k))),
     botd_kline_deleted_and_not_readded: ev.sol_kline_gone_at !== undefined && !ev.sol_kline_readded,
     botd_tick_unsubscribed_after_idle: ev.sol_tick_gone_at !== undefined && ev.sol_tick_gone_at - ev.botd_cancel_at >= IDLE,
     botd_tick_not_readded_before_resubscribe: !ev.sol_tick_readded_before_oms,
