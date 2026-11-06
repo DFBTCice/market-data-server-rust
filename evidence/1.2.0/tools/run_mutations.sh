@@ -35,6 +35,9 @@ MUTATIONS=(
   "M11-grpc-keeps-receiver-after-disconnect|crates/md-grpc/src/market_data.rs|s/_ = tx\.closed\(\) => break,/_ = std::future::pending::<()>() => break,/g|-p md-grpc --lib|grpc_stream_counts_as_receiver_and_releases_on_disconnect"
   "M12-okx-error-stream-not-parsed|crates/md-connector/src/okx.rs|s/stream_from_error_msg\(&message\)\.unwrap_or_default\(\)/String::new()/|-p md-connector --lib;${GW_TEST[*]}|subscribe_error_without_arg_carries_stream_from_msg upstream_rejected_symbol_is_not_retried"
   "M13-sighup-does-not-apply-runtime-section|crates/md-server/src/reload.rs|s/next\.runtime_subscriptions = file\.runtime_subscriptions\.clone\(\);/let _ = \&file;/|-p md-server|runtime_subscriptions_change_is_hot_applied_and_pushed"
+  "M14-quote-on-demand-ignores-off-switch|$RS|s/if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{/if false \&\& k.data_type == DataType::Quote {/|${GW_TEST[*]}|quote_topics_are_not_subscribed_on_demand_by_default"
+  "M15-quote-never-on-demand-even-when-on|$RS|s/if k\.data_type == DataType::Quote \&\& !s\.on_demand_quote \{/if k.data_type == DataType::Quote {/|${GW_TEST[*]}|quote_topics_are_subscribed_on_demand_when_enabled"
+  "M16-yaml-on-demand-quote-not-mapped|crates/md-server/src/runtime_subs.rs|s/on_demand_quote: rs\.on_demand_quote,/on_demand_quote: false,/|-p md-server|settings_follow_yaml"
 )
 
 overall=0

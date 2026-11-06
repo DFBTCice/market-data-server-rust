@@ -22,6 +22,7 @@
   | `check_interval_seconds` | `60` | 闲置检查周期（≥ 1） |
   | `startup_grace_minutes` | `10` | 启动（或运行中打开开关）后多少分钟内不退订，给消费者重连的时间 |
   | `max_runtime_subscriptions` | `200` | 运行期订阅数达到该值后不再按需补订（POST 不受限） |
+  | `on_demand_quote` | `false` | QUOTE 是否参与按需补订。关闭时订阅配置名单外的 `quote.*` 话题不补订 QUOTE（报价仍按"一次一个币对"改配置名单扩量）；POST 登记的 QUOTE 照常参与闲置退订。业务方 2026-11-06 决定现网关闭 |
 
 - **只管运行期订阅**：`POST /api/v1/subscriptions`、gRPC Admin 登记的，以及按需补订加的。配置名单（`subscribe_ticks` / `subscribe_klines` / `subscribe_quotes`）永不自动退订；
   同一目标同时在配置和运行期（含大小写不同的写法）按配置处理。SIGHUP 对配置订阅的语义不变。
@@ -30,7 +31,7 @@
 - **闲置退订**：每 `check_interval_seconds` 检查；连续 `idle_minutes` 没有接收方才退上游并从 `desired_subs` 移除。闲置起点取"首次观察到无接收端"的检查时刻，
   实际闲置时长只会 ≥ `idle_minutes`。
 - **按需补订**：有连接或 gRPC 订阅某话题而上游没有对应订阅时，约 200ms 内自动按运行期订阅补订（每次检查再兜底一次）。保护：
-  - 只接受已配置的交易所和类型（与 POST 同一路由；quote 需对应 quote 连接器在运行）；只认规范写法的话题（其它写法本来就收不到推送）。
+  - 只接受已配置的交易所和类型（与 POST 同一路由；quote 需对应 quote 连接器在运行，且 `on_demand_quote` 打开）；只认规范写法的话题（其它写法本来就收不到推送）。
   - 上游明确拒绝（OKX 60018/60012）的目标撤回、缓存失败并退避：5 分钟起、每次翻倍、封顶 1 小时。**币安对不存在的币对、错误的 K 线级别都应答成功（实测）**，
     无法识别为拒绝，所以币安 K 线只接受合约支持的 15 个级别；不存在的币对靠闲置退订与上限兜底。
   - 运行期订阅数达到 `max_runtime_subscriptions` 不再补订，记 WARN 并计数。
@@ -46,11 +47,13 @@
 - **OKX 订阅错误不带 `arg`**（2026-11-06 实测，`evidence/1.2.0/upstream-probe/`）：频道与合约只在 `msg` 里，以前解析出的 stream 为空串，
   连接器日志 `subscribe error: ... stream=` 为空、"从活跃订阅移除"不生效。现在从 `msg` 取 `channel:instId`。
 - **gRPC 订阅流在客户端断开后立即释放接收端**：以前要等下一条事件写失败才发现，没有成交的话题会被已断开的流一直占着。客户端可见行为不变。
+- **仓库示例配置的 OKX 地址改为 443**（`config.yaml`、DEPLOYMENT / RELEASE_WORKFLOW 配置样例、`deploy.sh` 模板）：OKX 已通知 8443 端口将停用；现网配置早已是 443，不受影响。
 
 ### 已知限制
 
 - 运行期订阅仍不持久化（另立项）：换版 / 重启后仍需 `restore_subs.mjs` 补回（DEPLOYMENT §12.3）。
 - 配置烧在镜像里：运行中开关需 root 进容器改文件后 SIGHUP；容器重建后回到镜像里的配置（OPS_GUIDE §8.6）。
+- 闲置退订后 REST latest 返回最后缓存的旧值，REST 查询不触发补订；SIGHUP 删掉但仍有人接收的配置目标会按运行期订阅补回（OPS_GUIDE §8.5）。
 
 ### 测试
 
